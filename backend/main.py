@@ -40,7 +40,7 @@ arboles_db = [
         "imagen": "https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=600&q=80",
         "productor": "Familia Morales"
     },
-    {
+{
         "id": 3,
         "nombre": "Limonero Eureka #12",
         "tipo_suscripcion": "Compartido",
@@ -49,7 +49,7 @@ arboles_db = [
         "cupos_ocupados": 1,
         "estimacion_cosecha": "35 kg anuales",
         "ubicacion": "Mallarauco, Región Metropolitana",
-        "imagen": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=600&q=80",
+        "imagen": "https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=600&q=80",
         "productor": "Cooperativa Agrícola Melipilla"
     }
 ]
