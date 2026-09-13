@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso | AgroColab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-stone-100 min-h-screen flex flex-col justify-between font-sans antialiased">
+
+  <!-- Navbar simple -->
+  <header class="bg-white border-b border-stone-200 py-4 px-6 shadow-sm">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <a href="index.html" class="flex items-center space-x-2 text-stone-900 hover:text-emerald-800 transition">
+        <span class="text-2xl">🌱</span>
+        <span class="text-lg font-black tracking-tight">AgroColab</span>
+      </a>
+      <a href="index.html" class="text-xs font-semibold text-stone-600 hover:text-emerald-800">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Volver a parcelas
+      </a>
+    </div>
+  </header>
+
+  <!-- Tarjeta de Login -->
+  <main class="flex-1 flex items-center justify-center p-4">
+    <div class="bg-white max-w-md w-full rounded-2xl border border-stone-200 shadow-xl overflow-hidden">
+      
+      <!-- Encabezado de la tarjeta -->
+      <div class="bg-emerald-900 p-6 text-white text-center relative">
+        <h2 class="text-2xl font-black">Iniciar Sesión</h2>
+        <p class="text-xs text-emerald-200 mt-1">Ingresa a tu panel de gestión colaborativa</p>
+      </div>
+
+      <div class="p-8">
+        <!-- Selector de Rol -->
+        <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
+          Tipo de Cuenta
+        </label>
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <button 
+            type="button" 
+            id="btn-comprador"
+            onclick="setRol('comprador')" 
+            class="py-3 px-4 rounded-xl border-2 text-xs font-bold transition flex flex-col items-center gap-1 border-emerald-700 bg-emerald-50 text-emerald-900">
+            <i class="fa-solid fa-basket-shopping text-base"></i>
+            <span>Comprador</span>
+          </button>
+          <button 
+            type="button" 
+            id="btn-agricultor"
+            onclick="setRol('agricultor')" 
+            class="py-3 px-4 rounded-xl border-2 text-xs font-bold transition flex flex-col items-center gap-1 border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100">
+            <i class="fa-solid fa-tractor text-base"></i>
+            <span>Agricultor</span>
+          </button>
+        </div>
+
+        <!-- Formulario -->
+        <form id="login-form" onsubmit="iniciarSesion(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
+                <i class="fa-regular fa-envelope"></i>
+              </span>
+              <input 
+                type="email" 
+                id="email" 
+                required 
+                placeholder="ejemplo@agrocolab.cl" 
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm"
+              >
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-stone-700 mb-1">Contraseña</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
+                <i class="fa-solid fa-lock"></i>
+              </span>
+              <input 
+                type="password" 
+                id="password" 
+                required 
+                placeholder="••••••••" 
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm"
+              >
+            </div>
+          </div>
+
+          <div id="alert-box" class="hidden text-xs p-3 rounded-lg border"></div>
+
+          <button 
+            type="submit" 
+            class="w-full py-3 bg-emerald-800 hover:bg-emerald-900 text-white font-bold rounded-xl text-sm transition shadow-sm mt-2">
+            Acceder al Sistema
+          </button>
+        </form>
+
+        <!-- Ayuda rápida para pruebas -->
+        <div class="mt-6 pt-4 border-t border-stone-100 bg-stone-50 p-3 rounded-lg text-[11px] text-stone-500 space-y-1">
+          <p class="font-bold text-stone-700">Cuentas de demostración:</p>
+          <p>• Comprador: <span class="font-mono text-emerald-800">comprador@agrocolab.cl</span> / <span class="font-mono">123</span></p>
+          <p>• Agricultor: <span class="font-mono text-emerald-800">agricultor@agrocolab.cl</span> / <span class="font-mono">123</span></p>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-center py-4 text-xs text-stone-400">
+    © 2026 AgroColab · Prototipo colaborativo
+  </footer>
+
+  <script>
+    let rolSeleccionado = 'comprador';
+
+    function setRol(rol) {
+      rolSeleccionado = rol;
+      const btnComprador = document.getElementById('btn-comprador');
+      const btnAgricultor = document.getElementById('btn-agricultor');
+
+      if (rol === 'comprador') {
+        btnComprador.className = "py-3 px-4 rounded-xl border-2 text-xs font-bold transition flex flex-col items-center gap-1 border-emerald-700 bg-emerald-50 text-emerald-900";
+        btnAgricultor.className = "py-3 px-4 rounded-xl border-2 text-xs font-bold transition flex flex-col items-center gap-1 border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100";
+      } else {
+        btnAgricultor.className = "py-3 px-4 rounded-xl border-2 text-xs font-bold transition flex flex-col items-center gap-1 border-emerald-700 bg-emerald-50 text-emerald-900";
+        btnComprador.className = "py-3 px-4 rounded-xl border-2 text-xs font-bold transition flex flex-col items-center gap-1 border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100";
+      }
+    }
+
+    async function iniciarSesion(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const alertBox = document.getElementById('alert-box');
+
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+            rol: rolSeleccionado
+          })
+        });
+
+        const data = await res.json();
+        alertBox.classList.remove('hidden');
+
+        if (data.status === "success") {
+          alertBox.className = "text-xs p-3 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-800 font-medium";
+          alertBox.innerText = `${data.mensaje} (Acceso como ${data.user.rol.toUpperCase()})`;
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 1500);
+        } else {
+          alertBox.className = "text-xs p-3 rounded-lg border bg-rose-50 border-rose-200 text-rose-700 font-medium";
+          alertBox.innerText = data.mensaje;
+        }
+      } catch (err) {
+        alertBox.classList.remove('hidden');
+        alertBox.className = "text-xs p-3 rounded-lg border bg-rose-50 border-rose-200 text-rose-700 font-medium";
+        alertBox.innerText = "Error de conexión con el backend (puerto 8000).";
+      }
+    }
+  </script>
+</body>
+</html>
+

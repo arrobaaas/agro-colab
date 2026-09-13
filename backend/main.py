@@ -75,3 +75,41 @@ def suscribir(data: SuscripcionRequest):
                 }
             return {"status": "error", "mensaje": "Cupos agotados para este árbol."}
     return {"status": "error", "mensaje": "Árbol no encontrado."}
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+    rol: str  # "comprador" o "agricultor"
+
+# Cuentas de prueba para el prototipo
+USUARIOS_TEST = [
+    {
+        "email": "comprador@agrocolab.cl",
+        "password": "123",
+        "nombre": "Camila Soto",
+        "rol": "comprador"
+    },
+    {
+        "email": "agricultor@agrocolab.cl",
+        "password": "123",
+        "nombre": "Hernán Silva",
+        "rol": "agricultor"
+    }
+]
+
+@app.post("/api/login")
+def login(data: LoginRequest):
+    for u in USUARIOS_TEST:
+        if u["email"] == data.email and u["password"] == data.password and u["rol"] == data.rol:
+            return {
+                "status": "success",
+                "mensaje": f"Bienvenido/a {u['nombre']}",
+                "user": {
+                    "nombre": u["nombre"],
+                    "email": u["email"],
+                    "rol": u["rol"]
+                }
+            }
+    return {
+        "status": "error",
+        "mensaje": "Credenciales inválidas o el rol seleccionado no coincide."
+    }
