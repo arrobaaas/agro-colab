@@ -1,12 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List, Optional
+from datetime import datetime
 
 app = FastAPI(
     title="AgroColab API",
-    description="Plataforma de Agricultura Colaborativa"
+    description="Plataforma de Agricultura Colaborativa y Trazabilidad Logística"
 )
 
+# Permitir peticiones desde el frontend local
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,6 +17,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ----------------- BASES DE DATOS SIMULADAS -----------------
 
 arboles_db = [
     {
@@ -40,7 +45,7 @@ arboles_db = [
         "imagen": "https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=600&q=80",
         "productor": "Familia Morales"
     },
-{
+    {
         "id": 3,
         "nombre": "Limonero Eureka #12",
         "tipo_suscripcion": "Compartido",
@@ -54,10 +59,50 @@ arboles_db = [
     }
 ]
 
+USUARIOS_TEST = [
+    {
+        "email": "comprador@agrocolab.cl",
+        "password": "123",
+        "nombre": "Camila Soto",
+        "rol": "comprador"
+    },
+    {
+        "email": "agricultor@agrocolab.cl",
+        "password": "123",
+        "nombre": "Hernán Silva",
+        "rol": "agricultor"
+    }
+]
+
+pedidos_db = []
+
+# ----------------- MODELOS DE DATOS (ESQUEMAS) -----------------
+
 class SuscripcionRequest(BaseModel):
     user_name: str
     tree_id: int
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+    rol: str
+
+class PedidoRequest(BaseModel):
+    plan_nombre: str
+    monto_clp: int
+    cliente_nombre: str
+    telefono: str
+    email: str
+    tipo_destino: str  # "particular" o "comercial"
+    razon_social: Optional[str] = None
+    rut: Optional[str] = None
+    direccion: str
+    comuna: str
+    frecuencia_entrega: str
+
+# ----------------- ENDPOINTS (RUTAS) -----------------
+
+# 1. Rutas de Árboles
 @app.get("/api/arboles")
 def listar_arboles():
     return arboles_db
@@ -75,27 +120,8 @@ def suscribir(data: SuscripcionRequest):
                 }
             return {"status": "error", "mensaje": "Cupos agotados para este árbol."}
     return {"status": "error", "mensaje": "Árbol no encontrado."}
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-    rol: str  # "comprador" o "agricultor"
 
-# Cuentas de prueba para el prototipo
-USUARIOS_TEST = [
-    {
-        "email": "comprador@agrocolab.cl",
-        "password": "123",
-        "nombre": "Camila Soto",
-        "rol": "comprador"
-    },
-    {
-        "email": "agricultor@agrocolab.cl",
-        "password": "123",
-        "nombre": "Hernán Silva",
-        "rol": "agricultor"
-    }
-]
-
+# 2. Rutas de Autenticación (Login)
 @app.post("/api/login")
 def login(data: LoginRequest):
     for u in USUARIOS_TEST:
@@ -113,3 +139,23 @@ def login(data: LoginRequest):
         "status": "error",
         "mensaje": "Credenciales inválidas o el rol seleccionado no coincide."
     }
+
+# 3. Rutas de Logística y Pedidos
+@app.post("/api/pedidos")
+def registrar_pedido(pedido: PedidoRequest):
+    nuevo_pedido = pedido.dict()
+    nuevo_pedido["id"] = len(pedidos_db) + 1
+    nuevo_pedido["codigo_seguimiento"] = f"AGRO-{nuevo_pedido['id']:04d}"
+    nuevo_pedido["fecha_registro"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+    nuevo_pedido["estado_logistica"] = "En coordinación con huerto de origen"
+    
+    pedidos_db.append(nuevo_pedido)
+    return {
+        "status": "success",
+        "mensaje": f"Plan contratado con éxito. Código de despacho: {nuevo_pedido['codigo_seguimiento']}",
+        "pedido": nuevo_pedido
+    }
+
+@app.get("/api/pedidos")
+def listar_pedidos():
+    return pedidos_db
