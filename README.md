@@ -47,4 +47,4 @@ agro-colab/
 ## 🧑‍💻 Equipo de Desarrollo
 *   *Joaquin Alveal Santos* - [@Joaquin-alveal](https://github.com/Joaquin-alveal)
 *   *Matias Gonzalez* - [@SKT1-Ctrl]()
-*   *Nicolas Reyes Orellana* - [@ ]()
+*   *Nicolas Reyes Orellana* - [@arrobaaas ]()
