@@ -5,8 +5,8 @@ from typing import List, Optional
 from datetime import datetime
 
 app = FastAPI(
-    title="AgroColab API",
-    description="Plataforma de Agricultura Colaborativa y Trazabilidad Logística"
+    title="Agro-Colab API",
+    description="Adopción de árboles frutales y abastecimiento directo con trazabilidad"
 )
 
 # Permitir peticiones desde el frontend local
@@ -19,11 +19,16 @@ app.add_middleware(
 )
 
 # ----------------- BASES DE DATOS SIMULADAS -----------------
+# Agro-Colab tiene dos líneas de producto:
+#   1. Adopción de árbol  -> se compra un cupo de un árbol (plan Básico/Intermedio/Premium).
+#   2. Abastecimiento     -> se contrata una canasta de cosecha (plan Dúo/Familiar/B2B).
+# Cada árbol declara su plan de adopción, y su stock es el número de cupos disponibles.
 
 arboles_db = [
     {
         "id": 1,
         "nombre": "Palto Hass #104",
+        "plan": "Básico",
         "tipo_suscripcion": "Compartido",
         "precio_mensual_clp": 12000,
         "cupos_totales": 5,
@@ -36,6 +41,7 @@ arboles_db = [
     {
         "id": 2,
         "nombre": "Naranjo Valencia #22",
+        "plan": "Premium",
         "tipo_suscripcion": "Exclusivo",
         "precio_mensual_clp": 35000,
         "cupos_totales": 1,
@@ -48,9 +54,10 @@ arboles_db = [
     {
         "id": 3,
         "nombre": "Limonero Eureka #12",
+        "plan": "Intermedio",
         "tipo_suscripcion": "Compartido",
         "precio_mensual_clp": 8000,
-        "cupos_totales": 4,
+        "cupos_totales": 3,
         "cupos_ocupados": 1,
         "estimacion_cosecha": "35 kg anuales",
         "ubicacion": "Mallarauco, Región Metropolitana",

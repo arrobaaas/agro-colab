@@ -3,485 +3,516 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AgroColab | Cosecha Colaborativa</title>
+  <title>Agro-Colab | Cosecha Colaborativa</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/ui.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/parcelas.js" defer></script>
+  <script src="js/views.js" defer></script>
+  <script src="js/login.js" defer></script>
+  <script src="js/app.js" defer></script>
 </head>
 <body class="bg-stone-100 text-stone-800 font-sans antialiased">
 
-  <!-- Navbar con acceso directo a Logística -->
-  <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-3">
-        <span class="text-3xl">🌱</span>
-        <div>
-          <h1 class="text-xl font-extrabold tracking-tight">AgroColab</h1>
-          <p class="text-[11px] text-emerald-200">Agricultura Colaborativa Directa</p>
+  <!-- ============================================================
+       VISTA 1: LOGIN - lo primero que ve cualquier persona
+       ============================================================ -->
+  <div id="vista-login" data-vista="login" class="min-h-screen flex flex-col justify-between">
+
+    <header class="bg-white border-b border-stone-200 py-4 px-6 shadow-sm">
+      <div class="max-w-6xl mx-auto flex justify-between items-center">
+        <div class="flex items-center space-x-2 text-stone-900">
+          <span class="text-2xl">🌱</span>
+          <span class="text-lg font-black tracking-tight">Agro-Colab</span>
+        </div>
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+          Trazabilidad directa del huerto a tu mesa
+        </span>
+      </div>
+    </header>
+
+    <main class="flex-1 flex items-center justify-center p-4">
+      <div class="bg-white max-w-md w-full rounded-2xl border border-stone-200 shadow-xl overflow-hidden">
+
+        <div class="bg-emerald-900 p-6 text-white text-center relative">
+          <h2 class="text-2xl font-black">Iniciar Sesión</h2>
+          <p class="text-xs text-emerald-200 mt-1">Ingresa a tu panel de gestión colaborativa</p>
+        </div>
+
+        <div class="p-8">
+          <!-- Selector de Rol -->
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
+            Tipo de Cuenta
+          </label>
+          <div class="grid grid-cols-2 gap-3 mb-6">
+            <button type="button" id="btn-comprador" class="rol-btn rol-btn--activo">
+              <i class="fa-solid fa-basket-shopping text-base"></i>
+              <span>Comprador</span>
+            </button>
+            <button type="button" id="btn-agricultor" class="rol-btn rol-btn--inactivo">
+              <i class="fa-solid fa-tractor text-base"></i>
+              <span>Agricultor</span>
+            </button>
+          </div>
+
+          <!-- Formulario -->
+          <form id="login-form" class="space-y-4">
+            <div>
+              <label for="email" class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
+                  <i class="fa-regular fa-envelope"></i>
+                </span>
+                <input
+                  type="email"
+                  id="email"
+                  required
+                  autocomplete="email"
+                  placeholder="ejemplo@agrocolab.cl"
+                  class="input input-con-icono"
+                >
+              </div>
+            </div>
+
+            <div>
+              <label for="password" class="block text-xs font-semibold text-stone-700 mb-1">Contraseña</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
+                  <i class="fa-solid fa-lock"></i>
+                </span>
+                <input
+                  type="password"
+                  id="password"
+                  required
+                  autocomplete="current-password"
+                  placeholder="••••••••"
+                  class="input input-con-icono"
+                >
+              </div>
+            </div>
+
+            <div id="alert-box" class="hidden"></div>
+
+            <button type="submit" class="btn-submit mt-2">Acceder al Sistema</button>
+          </form>
+
+          <!-- Ayuda rápida para pruebas -->
+          <div class="mt-6 pt-4 border-t border-stone-100 bg-stone-50 p-3 rounded-lg text-[11px] text-stone-500 space-y-1">
+            <p class="font-bold text-stone-700">Cuentas de demostración:</p>
+            <p>• Comprador: <span class="font-mono text-emerald-800">comprador@agrocolab.cl</span> / <span class="font-mono">123</span></p>
+            <p>• Agricultor: <span class="font-mono text-emerald-800">agricultor@agrocolab.cl</span> / <span class="font-mono">123</span></p>
+          </div>
+
         </div>
       </div>
-      <div class="flex items-center space-x-3">
-        <a href="#seccion-planes" class="text-xs font-semibold text-emerald-100 hover:text-white px-3 py-2 rounded-lg hover:bg-emerald-800 transition">
-          Planes
-        </a>
-        <a href="#seccion-logistica" class="text-xs font-bold text-amber-200 hover:text-amber-100 px-3 py-2 rounded-lg bg-emerald-800/80 border border-emerald-600 transition flex items-center gap-1.5">
-          <i class="fa-solid fa-truck-ramp-box"></i> Logística y Despacho
-        </a>
-        <a href="login.html" class="text-xs bg-emerald-700 hover:bg-emerald-600 border border-emerald-500 px-3.5 py-2 rounded-xl font-bold text-white transition flex items-center gap-1.5 shadow-sm">
-          <i class="fa-solid fa-user"></i> Acceso
-        </a>
+    </main>
+
+    <footer class="text-center py-4 text-xs text-stone-400">
+      © 2026 Agro-Colab · Prototipo colaborativo
+    </footer>
+  </div>
+
+  <!-- ============================================================
+       VISTA 2: PARCELAS - la que ve el usuario según su rol
+       ============================================================ -->
+  <div id="vista-parcelas" data-vista="parcelas" class="hidden">
+
+    <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
+        <div class="flex items-center space-x-3">
+          <span class="text-3xl">🌱</span>
+          <div>
+            <h1 class="text-xl font-extrabold tracking-tight">Agro-Colab</h1>
+            <p class="text-[11px] text-emerald-200">Trazabilidad directa del huerto a tu mesa</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="#seccion-adopcion" class="nav-link">Adopción</a>
+          <a href="#seccion-abastecimiento" class="nav-link">Abastecimiento</a>
+          <a href="#seccion-logistica" class="nav-link nav-link--destacado">
+            <i class="fa-solid fa-truck-ramp-box"></i> Logística y Despacho
+          </a>
+          <div id="nav-sesion" class="flex items-center gap-2"></div>
+          <button type="button" id="btn-cerrar-sesion" class="btn-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Salir
+          </button>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Hero con fondo de campo -->
-  <section class="relative bg-stone-900 text-white py-20 px-4 overflow-hidden">
-    <img 
-      src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1600&q=80" 
-      alt="Campos de cultivo" 
-      class="absolute inset-0 w-full h-full object-cover opacity-35"
-    />
-    <div class="relative max-w-4xl mx-auto text-center">
-      <span class="inline-block bg-emerald-600/90 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-        Modelo Directo Agricultor - Consumidor
-      </span>
-      <h2 class="text-3xl md:text-5xl font-black mb-4 leading-tight">
-        Financia la cosecha, asegura tu abastecimiento
-      </h2>
-      <p class="text-stone-200 text-base md:text-lg max-w-2xl mx-auto leading-relaxed drop-shadow">
-        Elimina intermediarios suscribiéndote directamente a un árbol frutal o a canastas periódicas con agricultores certificados. Elige reparto a tu hogar o abastecimiento mayorista para tu negocio.
-      </p>
-    </div>
-  </section>
-
-  <!-- SECCIÓN: Planes de Cosecha (Estilo El Menú) -->
-  <section id="seccion-planes" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
-    <div class="text-center max-w-2xl mx-auto mb-10">
-      <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
-        Abastecimiento Directo y Programado
-      </span>
-      <h3 class="text-3xl font-black text-stone-900 mt-3 mb-2 tracking-tight">
-        Tu cosecha semanal o mensual, sin vueltas
-      </h3>
-      <p class="text-xs md:text-sm text-stone-600 leading-relaxed">
-        Selecciona un plan según tu consumo. Al hacer clic serás llevado directamente al selector logístico para definir si el despacho es residencial o comercial.
-      </p>
-    </div>
-
-    <!-- Grid de Planes -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-      
-      <!-- PLAN 1: Dúo -->
-      <div class="bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-        <div>
-          <div class="flex justify-between items-center mb-4">
-            <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Plan Hogar Dúo</span>
-            <span class="text-[11px] bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full font-semibold">1 a 2 personas</span>
-          </div>
-          <h4 class="text-2xl font-black text-stone-900 mb-1">Canasta Huerto Esencial</h4>
-          <p class="text-xs text-stone-500 mb-6">Equilibrio de cítricos y paltas de temporada para consumo fresco.</p>
-          <div class="mb-6">
-            <span class="text-3xl font-black text-emerald-900">$19.900</span>
-            <span class="text-xs font-normal text-stone-500">/ entrega quincenal</span>
-          </div>
-          <div class="border-t border-stone-100 pt-5 space-y-3 text-xs text-stone-700 mb-8">
-            <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> <strong>2.5 kg</strong> Palta Hass certificada</p>
-            <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> <strong>3.0 kg</strong> Limón / Naranja fresca</p>
-            <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Reparto refrigerado incluido</p>
-          </div>
-        </div>
-        <button 
-          onclick="seleccionarPlanDirecto('Canasta Huerto Esencial', 19900, 'particular', 'quincenal')" 
-          class="w-full py-3.5 px-4 rounded-2xl font-bold text-xs bg-stone-100 text-stone-800 hover:bg-emerald-800 hover:text-white transition duration-200 shadow-sm cursor-pointer">
-          Seleccionar Plan Dúo
-        </button>
-      </div>
-
-      <!-- PLAN 2: Familiar -->
-      <div class="bg-emerald-950 text-white rounded-3xl border-2 border-emerald-600 p-7 shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between relative">
-        <div class="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-emerald-950 font-black text-[10px] tracking-wider uppercase px-4 py-1 rounded-full shadow">
-          El Más Recomendado
-        </div>
-        <div>
-          <div class="flex justify-between items-center mb-4 mt-1">
-            <span class="text-xs font-bold uppercase tracking-wider text-emerald-300">Plan Familiar</span>
-            <span class="text-[11px] bg-emerald-900 text-emerald-200 px-2.5 py-1 rounded-full font-semibold">3 a 5 personas</span>
-          </div>
-          <h4 class="text-2xl font-black text-white mb-1">Cosecha Completa Familiar</h4>
-          <p class="text-xs text-emerald-200/80 mb-6">Abastecimiento integral directo del huerto sin cámaras frigoríficas intermedias.</p>
-          <div class="mb-6">
-            <span class="text-3xl font-black text-emerald-300">$34.900</span>
-            <span class="text-xs font-normal text-emerald-200/70">/ entrega quincenal</span>
-          </div>
-          <div class="border-t border-emerald-800/80 pt-5 space-y-3 text-xs text-emerald-100 mb-8">
-            <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> <strong>5.0 kg</strong> Palta Hass calibre primera</p>
-            <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> <strong>6.0 kg</strong> Fruta de temporada variada</p>
-            <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Participación en 2 árboles frutales</p>
-          </div>
-        </div>
-        <button 
-          onclick="seleccionarPlanDirecto('Cosecha Completa Familiar', 34900, 'particular', 'quincenal')" 
-          class="w-full py-3.5 px-4 rounded-2xl font-bold text-xs bg-emerald-400 hover:bg-emerald-300 text-emerald-950 transition duration-200 shadow-md cursor-pointer">
-          Seleccionar Plan Familiar
-        </button>
-      </div>
-
-      <!-- PLAN 3: B2B / Restaurantes -->
-      <div class="bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-        <div>
-          <div class="flex justify-between items-center mb-4">
-            <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Hostelería & Locales</span>
-            <span class="text-[11px] bg-amber-50 text-amber-800 px-2.5 py-1 rounded-full font-semibold">Uso Comercial</span>
-          </div>
-          <h4 class="text-2xl font-black text-stone-900 mb-1">Lote Gastronómico B2B</h4>
-          <p class="text-xs text-stone-500 mb-6">Para cafeterías y cocinas que buscan precio mayorista blindado y facturación.</p>
-          <div class="mb-6">
-            <span class="text-3xl font-black text-emerald-900">$89.000</span>
-            <span class="text-xs font-normal text-stone-500">/ mes (facturable)</span>
-          </div>
-          <div class="border-t border-stone-100 pt-5 space-y-3 text-xs text-stone-700 mb-8">
-            <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> <strong>25 kg</strong> entregados por lotes semanales</p>
-            <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Calibre adaptado a cocina o barra</p>
-            <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Certificado de origen para la carta</p>
-          </div>
-        </div>
-        <button 
-          onclick="seleccionarPlanDirecto('Lote Gastronómico B2B', 89000, 'comercial', 'semanal')" 
-          class="w-full py-3.5 px-4 rounded-2xl font-bold text-xs bg-stone-900 text-white hover:bg-emerald-800 transition duration-200 shadow-sm cursor-pointer">
-          Configurar Destino B2B
-        </button>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- SECCIÓN LOGÍSTICA DIRECTA: Destino Casa o Negocio -->
-  <section id="seccion-logistica" class="max-w-4xl mx-auto my-14 px-4 scroll-mt-24">
-    <div class="bg-white rounded-3xl border border-stone-200 shadow-xl overflow-hidden">
-      
-      <div class="bg-emerald-900 text-white p-6 sm:p-8">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-widest text-emerald-300">
-            <i class="fa-solid fa-truck-fast mr-1"></i> Módulo de Logística y Reparto
-          </span>
-          <span class="text-xs bg-emerald-800 px-3 py-1 rounded-full border border-emerald-600 text-emerald-200">
-            Trazabilidad Directa
-          </span>
-        </div>
-        <h3 class="text-2xl sm:text-3xl font-black mt-2">¿Dónde deseas recibir los productos?</h3>
-        <p class="text-xs sm:text-sm text-emerald-200 mt-1">
-          Configura si el destino es tu hogar o tu establecimiento gastronómico / negocio.
+    <!-- Banner de la vista -->
+    <section class="relative bg-stone-900 text-white py-14 px-4 overflow-hidden">
+      <img
+        src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1600&q=80"
+        alt="Campos de cultivo"
+        class="absolute inset-0 w-full h-full object-cover opacity-35"
+      >
+      <div class="relative max-w-4xl mx-auto text-center">
+        <span class="inline-block bg-emerald-600/90 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+          Dos formas de financiar la cosecha
+        </span>
+        <h2 class="text-3xl md:text-4xl font-black mb-3 leading-tight">
+          Financia la cosecha, asegura tu abastecimiento
+        </h2>
+        <p class="text-stone-200 text-sm md:text-base max-w-2xl mx-auto leading-relaxed drop-shadow">
+          Adopta un árbol frutal y sé dueño de su producción, o contrata un plan de
+          abastecimiento con entrega programada. En ambos casos, trazabilidad directa
+          del huerto a tu mesa.
         </p>
+      </div>
+    </section>
 
-        <!-- Indicador del plan activo -->
-        <div class="mt-4 inline-flex items-center gap-3 bg-emerald-950/80 border border-emerald-700 px-4 py-2 rounded-xl text-xs">
-          <span class="text-stone-300">Plan en configuración:</span>
-          <span id="log-plan-nombre" class="font-bold text-emerald-300">Canasta Huerto Esencial</span>
-          <span class="text-stone-400">|</span>
-          <span id="log-plan-precio" class="font-black text-white">$19.900 CLP</span>
-        </div>
+    <!-- SECCIÓN 1: PLANES DE ADOPCIÓN (línea de producto 1) -->
+    <section id="seccion-adopcion" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+          Línea 1 · Adopción de Árboles
+        </span>
+        <h3 class="text-3xl font-black text-stone-900 mt-3 mb-2 tracking-tight">
+          Elige tu plan de adopción
+        </h3>
+        <p class="text-xs md:text-sm text-stone-600 leading-relaxed">
+          En la adopción compras un <strong>cupo</strong> sobre un árbol concreto: el
+          plan define cuántos copartícipes comparte su producción. Al elegir un plan
+          verás los árboles disponibles de ese plan.
+        </p>
       </div>
 
-      <form id="form-logistica-principal" onsubmit="enviarLogistica(event)" class="p-6 sm:p-8 space-y-6">
-        
-        <!-- Selector Radio: Domicilio vs Comercial -->
-        <div>
-          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
-            1. Selecciona el Tipo de Destino
-          </label>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
-            <label id="card-part" onclick="cambiarDestino('particular')" class="cursor-pointer border-2 border-emerald-700 bg-emerald-50/50 p-4 rounded-2xl flex items-start gap-3 transition">
-              <input type="radio" name="tipo_dest" id="radio-part" value="particular" checked class="mt-1 text-emerald-700">
-              <div>
-                <span class="block font-bold text-sm text-stone-900 flex items-center gap-1.5">
-                  <i class="fa-solid fa-house-chimney text-emerald-700"></i> Domicilio Particular
-                </span>
-                <p class="text-xs text-stone-500 mt-1">Entrega residencial para familias en casas o departamentos particulares.</p>
-              </div>
-            </label>
+      <div id="grid-planes-adopcion" class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
 
-            <label id="card-com" onclick="cambiarDestino('comercial')" class="cursor-pointer border-2 border-stone-200 bg-stone-50 p-4 rounded-2xl flex items-start gap-3 transition hover:bg-stone-100">
-              <input type="radio" name="tipo_dest" id="radio-com" value="comercial" class="mt-1 text-emerald-700">
-              <div>
-                <span class="block font-bold text-sm text-stone-900 flex items-center gap-1.5">
-                  <i class="fa-solid fa-store text-amber-700"></i> Negocio / Local Comercial
-                </span>
-                <p class="text-xs text-stone-500 mt-1">Para cafeterías, hoteles o restaurantes que requieren factura y horario diurno.</p>
-              </div>
-            </label>
-
+        <!-- PLAN BÁSICO: 5 copartícipes -->
+        <div class="plan-adopcion-card">
+          <div>
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Plan Básico</span>
+              <span class="plan-chip">5 copartícipes</span>
+            </div>
+            <h4 class="text-2xl font-black text-stone-900 mb-1">Cosecha Compartida</h4>
+            <p class="text-xs text-stone-500 mb-6">Comparte el árbol y su producción de temporada con 5 personas.</p>
+            <div class="border-t border-stone-100 pt-5 space-y-3 text-xs text-stone-700">
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> 1 de cada 5 partes de la cosecha</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Cupo más bajo, menor inversión</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Ideal para consumo ocasional</p>
+            </div>
           </div>
+          <button type="button" class="btn-plan btn-plan--neutro" data-plan-adopcion="Básico">
+            Ver árboles Plan Básico
+          </button>
         </div>
 
-        <!-- Campos de Facturación Comercial (Dinámico) -->
-        <div id="bloque-comercial" class="hidden bg-amber-50/70 border border-amber-200 p-5 rounded-2xl space-y-4">
-          <p class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-            <i class="fa-solid fa-receipt text-amber-700"></i> Información comercial para facturación y despacho B2B
+        <!-- PLAN INTERMEDIO: 3 copartícipes -->
+        <div class="plan-adopcion-card plan-adopcion-card--destacado">
+          <span class="plan-adopcion-ribbon">Más Equilibrado</span>
+          <div>
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-300">Plan Intermedio</span>
+              <span class="plan-chip plan-chip--dark">3 copartícipes</span>
+            </div>
+            <h4 class="text-2xl font-black text-white mb-1">Cosecha en Común</h4>
+            <p class="text-xs text-emerald-200/80 mb-6">Una porción más grande de la producción, manteniendo el árbol en manos de varios.</p>
+            <div class="border-t border-emerald-800/80 pt-5 space-y-3 text-xs text-emerald-100">
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> 1 de cada 3 partes de la cosecha</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Mejor rendimiento por cupo</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Ideal para consumo familiar mensual</p>
+            </div>
+          </div>
+          <button type="button" class="btn-plan btn-plan--destacado" data-plan-adopcion="Intermedio">
+            Ver árboles Plan Intermedio
+          </button>
+        </div>
+
+        <!-- PLAN PREMIUM: exclusivo -->
+        <div class="plan-adopcion-card">
+          <div>
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Plan Premium</span>
+              <span class="plan-chip">Exclusivo</span>
+            </div>
+            <h4 class="text-2xl font-black text-stone-900 mb-1">Dueño Exclusivo</h4>
+            <p class="text-xs text-stone-500 mb-6">Eres el único dueño del 100% de lo que produzca el árbol en la temporada.</p>
+            <div class="border-t border-stone-100 pt-5 space-y-3 text-xs text-stone-700">
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> 100% de la producción del árbol</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Cupo único, sin copartícipes</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Mayor inversión, máximo rendimiento</p>
+            </div>
+          </div>
+          <button type="button" class="btn-plan btn-plan--oscuro" data-plan-adopcion="Premium">
+            Ver árboles Plan Premium
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: CATÁLOGO DE ÁRBOLES ADOPTABLE -->
+    <section id="seccion-parcelas" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-2 border-b border-stone-200">
+        <div>
+          <h3 class="text-2xl font-bold text-stone-900">Árboles Disponibles para Adopción</h3>
+          <p class="text-xs text-stone-500" id="filtro-activo-texto">Mostrando los 3 planes de adopción. Selecciona un plan arriba para filtrar.</p>
+        </div>
+        <button type="button" id="btn-actualizar-arboles" class="mt-2 sm:mt-0 text-xs text-emerald-800 hover:text-emerald-950 font-bold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-arrows-rotate"></i> Actualizar disponibilidad
+        </button>
+      </div>
+      <div id="tree-container" class="grid grid-cols-1 md:grid-cols-3 gap-7">
+        <p class="text-stone-500 text-sm">Cargando parcelas disponibles...</p>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: PLANES DE ABASTECIMIENTO (línea de producto 2) -->
+    <section id="seccion-abastecimiento" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+          Línea 2 · Abastecimiento
+        </span>
+        <h3 class="text-3xl font-black text-stone-900 mt-3 mb-2 tracking-tight">
+          Tu cosecha semanal o mensual, sin vueltas
+        </h3>
+        <p class="text-xs md:text-sm text-stone-600 leading-relaxed">
+          En vez de un cupo sobre un árbol, aquí contratas una <strong>canasta de
+          cosecha</strong> ya definida, con entrega programada y despacho a domicilio o
+          al local. Al hacer clic serás llevado directamente al selector logístico.
+        </p>
+      </div>
+
+      <div id="grid-planes" class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+
+        <!-- PLAN 1: Dúo -->
+        <div class="bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Plan Dúo</span>
+              <span class="text-[11px] bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full font-semibold">1 a 2 personas</span>
+            </div>
+            <h4 class="text-2xl font-black text-stone-900 mb-1">Canasta Huerto Esencial</h4>
+            <p class="text-xs text-stone-500 mb-6">Equilibrio de cítricos y paltas de temporada para consumo fresco.</p>
+            <div class="mb-6">
+              <span class="text-3xl font-black text-emerald-900">$19.900</span>
+              <span class="text-xs font-normal text-stone-500">/ entrega quincenal</span>
+            </div>
+            <div class="border-t border-stone-100 pt-5 space-y-3 text-xs text-stone-700 mb-8">
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> <strong>2.5 kg</strong> Palta Hass certificada</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> <strong>3.0 kg</strong> Limón / Naranja fresca</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Reparto refrigerado incluido</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn-plan btn-plan--neutro"
+            data-plan-nombre="Canasta Huerto Esencial"
+            data-plan-precio="19900"
+            data-plan-destino="particular"
+            data-plan-frecuencia="quincenal"
+          >
+            Seleccionar Plan Dúo
+          </button>
+        </div>
+
+        <!-- PLAN 2: Familiar -->
+        <div class="bg-emerald-950 text-white rounded-3xl border-2 border-emerald-600 p-7 shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between relative">
+          <div class="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-emerald-950 font-black text-[10px] tracking-wider uppercase px-4 py-1 rounded-full shadow">
+            El Más Recomendado
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-4 mt-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-300">Plan Familiar</span>
+              <span class="text-[11px] bg-emerald-900 text-emerald-200 px-2.5 py-1 rounded-full font-semibold">3 a 5 personas</span>
+            </div>
+            <h4 class="text-2xl font-black text-white mb-1">Cosecha Completa Familiar</h4>
+            <p class="text-xs text-emerald-200/80 mb-6">Abastecimiento integral directo del huerto sin cámaras frigoríficas intermedias.</p>
+            <div class="mb-6">
+              <span class="text-3xl font-black text-emerald-300">$34.900</span>
+              <span class="text-xs font-normal text-emerald-200/70">/ entrega quincenal</span>
+            </div>
+            <div class="border-t border-emerald-800/80 pt-5 space-y-3 text-xs text-emerald-100 mb-8">
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> <strong>5.0 kg</strong> Palta Hass calibre primera</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> <strong>6.0 kg</strong> Fruta de temporada variada</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Participación en 2 árboles frutales</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn-plan btn-plan--destacado"
+            data-plan-nombre="Cosecha Completa Familiar"
+            data-plan-precio="34900"
+            data-plan-destino="particular"
+            data-plan-frecuencia="quincenal"
+          >
+            Seleccionar Plan Familiar
+          </button>
+        </div>
+
+        <!-- PLAN 3: B2B / Restaurantes -->
+        <div class="bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Plan B2B</span>
+              <span class="text-[11px] bg-amber-50 text-amber-800 px-2.5 py-1 rounded-full font-semibold">Uso Comercial</span>
+            </div>
+            <h4 class="text-2xl font-black text-stone-900 mb-1">Lote Gastronómico B2B</h4>
+            <p class="text-xs text-stone-500 mb-6">Para cafeterías y cocinas que buscan precio mayorista blindado y facturación.</p>
+            <div class="mb-6">
+              <span class="text-3xl font-black text-emerald-900">$89.000</span>
+              <span class="text-xs font-normal text-stone-500">/ mes (facturable)</span>
+            </div>
+            <div class="border-t border-stone-100 pt-5 space-y-3 text-xs text-stone-700 mb-8">
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> <strong>25 kg</strong> entregados por lotes semanales</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Calibre adaptado a cocina o barra</p>
+              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Certificado de origen para la carta</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn-plan btn-plan--oscuro"
+            data-plan-nombre="Lote Gastronómico B2B"
+            data-plan-precio="89000"
+            data-plan-destino="comercial"
+            data-plan-frecuencia="semanal"
+          >
+            Configurar Destino B2B
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: LOGÍSTICA Y DESPACHO (solo línea 2) -->
+    <section id="seccion-logistica" class="max-w-4xl mx-auto my-14 px-4 scroll-mt-24">
+      <div class="bg-white rounded-3xl border border-stone-200 shadow-xl overflow-hidden">
+
+        <div class="bg-emerald-900 text-white p-6 sm:p-8">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-widest text-emerald-300">
+              <i class="fa-solid fa-truck-fast mr-1"></i> Módulo de Logística y Reparto
+            </span>
+            <span class="text-xs bg-emerald-800 px-3 py-1 rounded-full border border-emerald-600 text-emerald-200">
+              Trazabilidad Directa
+            </span>
+          </div>
+          <h3 class="text-2xl sm:text-3xl font-black mt-2">¿Dónde deseas recibir los productos?</h3>
+          <p class="text-xs sm:text-sm text-emerald-200 mt-1">
+            Configura si el destino es tu hogar o tu establecimiento gastronómico / negocio.
           </p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-stone-700 mb-1">Razón Social o Nombre del Local</label>
-              <input type="text" id="com-razon" placeholder="Cafetería El Huerto SpA" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm bg-white outline-none focus:ring-2 focus:ring-emerald-600">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-stone-700 mb-1">RUT Empresa</label>
-              <input type="text" id="com-rut" placeholder="76.123.456-7" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm bg-white outline-none focus:ring-2 focus:ring-emerald-600">
-            </div>
+
+          <div class="mt-4 inline-flex items-center gap-3 bg-emerald-950/80 border border-emerald-700 px-4 py-2 rounded-xl text-xs">
+            <span class="text-stone-300">Plan en configuración:</span>
+            <span id="log-plan-nombre" class="font-bold text-emerald-300">Canasta Huerto Esencial</span>
+            <span class="text-stone-400">|</span>
+            <span id="log-plan-precio" class="font-black text-white">$19.900 CLP</span>
           </div>
         </div>
 
-        <!-- Datos del Destinatario -->
-        <div>
-          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
-            2. Contacto de Entrega
-          </label>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-stone-700 mb-1">Nombre y Apellido</label>
-              <input type="text" id="dest-nombre" required placeholder="Tu nombre" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm outline-none focus:ring-2 focus:ring-emerald-600">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-stone-700 mb-1">Teléfono / WhatsApp</label>
-              <input type="tel" id="dest-tel" required placeholder="+56 9 1234 5678" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm outline-none focus:ring-2 focus:ring-emerald-600">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
-              <input type="email" id="dest-email" required placeholder="correo@ejemplo.cl" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm outline-none focus:ring-2 focus:ring-emerald-600">
+        <form id="form-logistica-principal" class="p-6 sm:p-8 space-y-6">
+
+          <div>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
+              1. Selecciona el Tipo de Destino
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+              <label id="card-part" class="destino-card destino-card--activo-particular">
+                <input type="radio" name="tipo_dest" id="radio-part" value="particular" checked class="mt-1 text-emerald-700">
+                <span>
+                  <span class="block font-bold text-sm text-stone-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-house-chimney text-emerald-700"></i> Domicilio Particular
+                  </span>
+                  <span class="block text-xs text-stone-500 mt-1">Entrega residencial para familias en casas o departamentos particulares.</span>
+                </span>
+              </label>
+
+              <label id="card-com" class="destino-card destino-card--inactivo">
+                <input type="radio" name="tipo_dest" id="radio-com" value="comercial" class="mt-1 text-emerald-700">
+                <span>
+                  <span class="block font-bold text-sm text-stone-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-store text-amber-700"></i> Negocio / Local Comercial
+                  </span>
+                  <span class="block text-xs text-stone-500 mt-1">Para cafeterías, hoteles o restaurantes que requieren factura y horario diurno.</span>
+                </span>
+              </label>
+
             </div>
           </div>
-        </div>
 
-        <!-- Dirección y Frecuencia -->
-        <div>
-          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
-            3. Dirección Física y Frecuencia de Despacho
-          </label>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-semibold text-stone-700 mb-1">Dirección (Calle, Número, Depto/Oficina)</label>
-              <input type="text" id="dest-direccion" required placeholder="Av. Los Aromos 1234" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm outline-none focus:ring-2 focus:ring-emerald-600">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-stone-700 mb-1">Comuna / Ciudad</label>
-              <input type="text" id="dest-comuna" required placeholder="Maipú, Curicó, etc." class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm outline-none focus:ring-2 focus:ring-emerald-600">
+          <div id="bloque-comercial" class="hidden bg-amber-50/70 border border-amber-200 p-5 rounded-2xl space-y-4">
+            <p class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-receipt text-amber-700"></i> Información comercial para facturación y despacho B2B
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="com-razon" class="block text-xs font-semibold text-stone-700 mb-1">Razón Social o Nombre del Local</label>
+                <input type="text" id="com-razon" placeholder="Cafetería El Huerto SpA" class="input">
+              </div>
+              <div>
+                <label for="com-rut" class="block text-xs font-semibold text-stone-700 mb-1">RUT Empresa</label>
+                <input type="text" id="com-rut" placeholder="76.123.456-7" class="input">
+              </div>
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-stone-700 mb-1">Frecuencia del Despacho</label>
-            <select id="dest-frecuencia" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm bg-white outline-none focus:ring-2 focus:ring-emerald-600">
-              <option value="quincenal">Despacho Quincenal (Cada 15 días)</option>
-              <option value="semanal">Despacho Semanal (Cosecha fresca cada 7 días)</option>
-              <option value="mensual">Despacho Mensual (Lote agrupado)</option>
-            </select>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
+              2. Contacto de Entrega
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label for="dest-nombre" class="block text-xs font-semibold text-stone-700 mb-1">Nombre y Apellido</label>
+                <input type="text" id="dest-nombre" required placeholder="Tu nombre" class="input">
+              </div>
+              <div>
+                <label for="dest-tel" class="block text-xs font-semibold text-stone-700 mb-1">Teléfono / WhatsApp</label>
+                <input type="tel" id="dest-tel" required placeholder="+56 9 1234 5678" class="input">
+              </div>
+              <div>
+                <label for="dest-email" class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
+                <input type="email" id="dest-email" required placeholder="correo@ejemplo.cl" class="input">
+              </div>
+            </div>
           </div>
-        </div>
 
-        <!-- Mensaje de Alerta/Estado -->
-        <div id="alerta-logistica" class="hidden p-4 rounded-2xl text-xs font-semibold border"></div>
-
-        <button type="submit" class="w-full py-4 bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm rounded-2xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer">
-          <i class="fa-solid fa-paper-plane"></i> Confirmar Destino y Registrar Pedido
-        </button>
-
-      </form>
-    </div>
-  </section>
-
-  <!-- Parcelas y Árboles Disponibles -->
-  <section class="max-w-6xl mx-auto my-14 px-4">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-2 border-b border-stone-200">
-      <div>
-        <h3 class="text-2xl font-bold text-stone-900">Parcelas y Árboles para Patrocinio</h3>
-        <p class="text-xs text-stone-500">Patrocina un árbol completo o comparte cuotas (1 a 5 personas) directamente con el productor.</p>
-      </div>
-      <button onclick="cargarArboles()" class="mt-2 sm:mt-0 text-xs text-emerald-800 hover:text-emerald-950 font-bold flex items-center gap-1.5 transition">
-        <i class="fa-solid fa-arrows-rotate"></i> Actualizar disponibilidad
-      </button>
-    </div>
-    <div id="tree-container" class="grid grid-cols-1 md:grid-cols-3 gap-7 mb-14">
-      <p class="text-stone-500 text-sm">Cargando parcelas disponibles...</p>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="bg-stone-900 text-stone-400 text-xs py-8 border-t border-stone-800 text-center">
-    <p>© 2026 AgroColab - Modelo de Agricultura Colaborativa y Trazabilidad Directa.</p>
-  </footer>
-
-  <!-- Scripts -->
-  <script>
-    const API_URL = "http://127.0.0.1:8000/api";
-    let planActual = "Canasta Huerto Esencial";
-    let precioActual = 19900;
-    let destinoSeleccionado = "particular";
-
-    function seleccionarPlanDirecto(nombre, precio, tipoDest, frecuencia) {
-      planActual = nombre;
-      precioActual = precio;
-      document.getElementById('log-plan-nombre').innerText = nombre;
-      document.getElementById('log-plan-precio').innerText = `$${precio.toLocaleString('es-CL')} CLP`;
-      
-      // Auto seleccionar tipo de destino y frecuencia
-      cambiarDestino(tipoDest);
-      document.getElementById('dest-frecuencia').value = frecuencia;
-
-      // Desplazar la vista suavemente hasta la sección logística
-      document.getElementById('seccion-logistica').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function cambiarDestino(tipo) {
-      destinoSeleccionado = tipo;
-      const cardPart = document.getElementById('card-part');
-      const cardCom = document.getElementById('card-com');
-      const bloqueCom = document.getElementById('bloque-comercial');
-
-      if (tipo === 'particular') {
-        document.getElementById('radio-part').checked = true;
-        cardPart.className = "cursor-pointer border-2 border-emerald-700 bg-emerald-50/50 p-4 rounded-2xl flex items-start gap-3 transition";
-        cardCom.className = "cursor-pointer border-2 border-stone-200 bg-stone-50 p-4 rounded-2xl flex items-start gap-3 transition hover:bg-stone-100";
-        bloqueCom.classList.add('hidden');
-      } else {
-        document.getElementById('radio-com').checked = true;
-        cardCom.className = "cursor-pointer border-2 border-amber-600 bg-amber-50/50 p-4 rounded-2xl flex items-start gap-3 transition";
-        cardPart.className = "cursor-pointer border-2 border-stone-200 bg-stone-50 p-4 rounded-2xl flex items-start gap-3 transition hover:bg-stone-100";
-        bloqueCom.classList.remove('hidden');
-      }
-    }
-
-    async function enviarLogistica(e) {
-      e.preventDefault();
-      const alerta = document.getElementById('alerta-logistica');
-
-      const bodyData = {
-        plan_nombre: planActual,
-        monto_clp: precioActual,
-        cliente_nombre: document.getElementById('dest-nombre').value.trim(),
-        telefono: document.getElementById('dest-tel').value.trim(),
-        email: document.getElementById('dest-email').value.trim(),
-        tipo_destino: destinoSeleccionado,
-        razon_social: destinoSeleccionado === 'comercial' ? document.getElementById('com-razon').value.trim() : null,
-        rut: destinoSeleccionado === 'comercial' ? document.getElementById('com-rut').value.trim() : null,
-        direccion: document.getElementById('dest-direccion').value.trim(),
-        comuna: document.getElementById('dest-comuna').value.trim(),
-        frecuencia_entrega: document.getElementById('dest-frecuencia').value
-      };
-
-      try {
-        const res = await fetch(`${API_URL}/pedidos`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(bodyData)
-        });
-        const data = await res.json();
-        alerta.classList.remove('hidden');
-
-        if (data.status === "success") {
-          alerta.className = "p-4 rounded-2xl text-xs font-semibold border bg-emerald-50 border-emerald-200 text-emerald-900";
-          alerta.innerHTML = `
-            <div class="flex items-center gap-2 mb-1">
-              <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-              <span class="text-sm font-bold">${data.mensaje}</span>
+          <div>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
+              3. Dirección Física y Frecuencia de Despacho
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+              <div class="sm:col-span-2">
+                <label for="dest-direccion" class="block text-xs font-semibold text-stone-700 mb-1">Dirección (Calle, Número, Depto/Oficina)</label>
+                <input type="text" id="dest-direccion" required placeholder="Av. Los Aromos 1234" class="input">
+              </div>
+              <div>
+                <label for="dest-comuna" class="block text-xs font-semibold text-stone-700 mb-1">Comuna / Ciudad</label>
+                <input type="text" id="dest-comuna" required placeholder="Maipú, Curicó, etc." class="input">
+              </div>
             </div>
-            <p class="text-stone-600">Destino: <strong>${bodyData.direccion}, ${bodyData.comuna}</strong> (${bodyData.tipo_destino.toUpperCase()}) | Frecuencia: <strong>${bodyData.frecuencia_entrega}</strong>.</p>
-          `;
-          document.getElementById('form-logistica-principal').reset();
-          cambiarDestino(destinoSeleccionado);
-        } else {
-          alerta.className = "p-4 rounded-2xl text-xs font-semibold border bg-rose-50 border-rose-200 text-rose-800";
-          alerta.innerText = "No se pudo registrar la solicitud logística.";
-        }
-      } catch (err) {
-        alerta.classList.remove('hidden');
-        alerta.className = "p-4 rounded-2xl text-xs font-semibold border bg-rose-50 border-rose-200 text-rose-800";
-        alerta.innerText = "Error: backend inaccesible en http://127.0.0.1:8000. Revisa que Uvicorn esté activo.";
-      }
-    }
 
-    async function cargarArboles() {
-      const container = document.getElementById("tree-container");
-      try {
-        const res = await fetch(`${API_URL}/arboles`);
-        const arboles = await res.json();
-        container.innerHTML = "";
-
-        arboles.forEach(arbol => {
-          const cuposLibres = arbol.cupos_totales - arbol.cupos_ocupados;
-          const porcentaje = (arbol.cupos_ocupados / arbol.cupos_totales) * 100;
-          const card = document.createElement("div");
-          card.className = "bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-lg transition duration-200";
-
-          card.innerHTML = `
             <div>
-              <div class="relative h-44 w-full overflow-hidden bg-stone-200">
-                <img src="${arbol.imagen}" alt="${arbol.nombre}" class="w-full h-full object-cover">
-                <span class="absolute top-3 right-3 text-[11px] font-semibold px-2.5 py-1 rounded-full ${arbol.tipo_suscripcion === 'Exclusivo' ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white'}">
-                  ${arbol.tipo_suscripcion}
-                </span>
-                <span class="absolute bottom-3 left-3 text-[11px] font-medium px-2.5 py-1 rounded-md bg-stone-900/70 text-white backdrop-blur-sm">
-                  👨‍🌾 ${arbol.productor}
-                </span>
-              </div>
-              <div class="p-5">
-                <h4 class="font-black text-lg text-stone-900 mb-1">${arbol.nombre}</h4>
-                <p class="text-xs text-stone-500 mb-4 flex items-center gap-1">
-                  <i class="fa-solid fa-location-dot text-rose-500"></i> ${arbol.ubicacion}
-                </p>
-                <div class="space-y-2 text-xs text-stone-600 mb-4">
-                  <div class="flex justify-between pb-1 border-b border-stone-100">
-                    <span class="text-stone-500">Cosecha proyectada:</span>
-                    <span class="font-bold text-stone-800">${arbol.estimacion_cosecha}</span>
-                  </div>
-                  <div class="flex justify-between pb-1 border-b border-stone-100">
-                    <span class="text-stone-500">Participación:</span>
-                    <span class="font-bold text-stone-800">${arbol.cupos_ocupados} / ${arbol.cupos_totales} suscriptores</span>
-                  </div>
-                  <div class="pt-1">
-                    <div class="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
-                      <div class="bg-emerald-600 h-2 rounded-full" style="width: ${porcentaje}%"></div>
-                    </div>
-                  </div>
-                </div>
-                <p class="text-2xl font-black text-stone-900">
-                  $${arbol.precio_mensual_clp.toLocaleString("es-CL")} <span class="text-xs font-normal text-stone-500">/ mes</span>
-                </p>
-              </div>
+              <label for="dest-frecuencia" class="block text-xs font-semibold text-stone-700 mb-1">Frecuencia del Despacho</label>
+              <select id="dest-frecuencia" class="input">
+                <option value="quincenal">Despacho Quincenal (Cada 15 días)</option>
+                <option value="semanal">Despacho Semanal (Cosecha fresca cada 7 días)</option>
+                <option value="mensual">Despacho Mensual (Lote agrupado)</option>
+              </select>
             </div>
-            <div class="p-5 pt-0">
-              <button 
-                onclick="suscribirse(${arbol.id})" 
-                class="w-full py-3 px-4 rounded-xl font-bold text-xs transition ${cuposLibres > 0 ? 'bg-emerald-800 hover:bg-emerald-900 text-white cursor-pointer' : 'bg-stone-200 text-stone-400 cursor-not-allowed'}"
-                ${cuposLibres === 0 ? 'disabled' : ''}>
-                ${cuposLibres > 0 ? 'Suscribirse al cultivo' : 'Capacidad Completa'}
-              </button>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      } catch (err) {
-        container.innerHTML = `<div class="col-span-3 p-4 bg-red-50 text-red-700 text-xs rounded-xl">Error al conectar con la API (http://127.0.0.1:8000).</div>`;
-      }
-    }
+          </div>
 
-    async function suscribirse(treeId) {
-      const nombre = prompt("Ingresa tu nombre para formalizar la suscripción al árbol:");
-      if (!nombre || nombre.trim() === "") return;
+          <div id="alerta-logistica" class="hidden"></div>
 
-      try {
-        const res = await fetch(`${API_URL}/suscribir`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_name: nombre.trim(), tree_id: treeId })
-        });
-        const data = await res.json();
-        alert(data.mensaje);
-        cargarArboles();
-      } catch (err) {
-        alert("Error de comunicación con el backend");
-      }
-    }
+          <button type="submit" class="btn-submit btn-submit--lg flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i> Confirmar Destino y Registrar Pedido
+          </button>
 
-    cargarArboles();
-  </script>
+        </form>
+      </div>
+    </section>
+
+    <footer class="bg-stone-900 text-stone-400 text-xs py-8 border-t border-stone-800 text-center">
+      <p>© 2026 Agro-Colab - Financia la cosecha, asegura tu abastecimiento.</p>
+    </footer>
+  </div>
+
 </body>
 </html>

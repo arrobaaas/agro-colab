@@ -1,0 +1,455 @@
+:root {
+  --emerald-50: #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-200: #a7f3d0;
+  --emerald-300: #6ee7b7;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-800: #065f46;
+  --emerald-900: #064e3b;
+  --emerald-950: #022c22;
+  --stone-50: #fafaf9;
+  --stone-100: #f5f5f4;
+  --stone-200: #e7e5e4;
+  --stone-300: #d6d3d1;
+  --stone-400: #a8a29e;
+  --stone-500: #78716c;
+  --stone-600: #57534e;
+  --stone-700: #44403c;
+  --stone-800: #292524;
+  --stone-900: #1c1917;
+  --amber-50: #fffbeb;
+  --amber-200: #fde68a;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --rose-50: #fff1f2;
+  --rose-200: #fecdd3;
+  --rose-700: #be123c;
+  --rose-800: #9f1239;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Formularios ---------- */
+.input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--stone-300);
+  background-color: #fff;
+  font-size: 0.875rem;
+  color: var(--stone-800);
+  outline: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.input:focus {
+  border-color: var(--emerald-600);
+  box-shadow: 0 0 0 2px var(--emerald-600);
+}
+
+.input-con-icono {
+  padding-left: 2.5rem;
+}
+
+/* ---------- Botones ---------- */
+.btn-submit {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background-color: var(--emerald-800);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s ease;
+}
+
+.btn-submit:hover {
+  background-color: var(--emerald-900);
+}
+
+.btn-submit--lg {
+  padding: 1rem;
+  font-weight: 900;
+}
+
+.btn-plan {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 1rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-plan--neutro {
+  background-color: var(--stone-100);
+  color: var(--stone-800);
+}
+
+.btn-plan--neutro:hover {
+  background-color: var(--emerald-800);
+  color: #fff;
+}
+
+.btn-plan--destacado {
+  background-color: var(--emerald-400);
+  color: var(--emerald-950);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-plan--destacado:hover {
+  background-color: var(--emerald-300);
+}
+
+.btn-plan--oscuro {
+  background-color: var(--stone-900);
+  color: #fff;
+}
+
+.btn-plan--oscuro:hover {
+  background-color: var(--emerald-800);
+}
+
+.btn-suscribir {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-suscribir--activo {
+  background-color: var(--emerald-800);
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn-suscribir--activo:hover {
+  background-color: var(--emerald-900);
+}
+
+.btn-suscribir--bloqueado {
+  background-color: var(--stone-200);
+  color: var(--stone-400);
+  cursor: not-allowed;
+}
+
+/* ---------- Tarjetas de plan de adopción (línea 1) ---------- */
+
+.plan-adopcion-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.75rem;
+  border-radius: 1.5rem;
+  border: 1px solid var(--stone-200);
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+}
+
+.plan-adopcion-card:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.plan-adopcion-card--destacado {
+  border: 2px solid var(--emerald-600);
+  background-color: var(--emerald-950);
+  color: #fff;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.plan-adopcion-card--destacado:hover {
+  transform: scale(1.02);
+}
+
+/* Estado del plan que está filtrando el catálogo. */
+.plan-adopcion-card--activo {
+  border-color: var(--emerald-600);
+  box-shadow: 0 0 0 2px var(--emerald-500);
+}
+
+.plan-adopcion-ribbon {
+  position: absolute;
+  top: -0.875rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 1rem;
+  border-radius: 9999px;
+  background-color: var(--emerald-500);
+  color: var(--emerald-950);
+  font-size: 0.625rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.plan-chip {
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  background-color: var(--stone-100);
+  color: var(--stone-600);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.plan-chip--dark {
+  background-color: var(--emerald-900);
+  color: var(--emerald-200);
+}
+
+/* ---------- Selector de rol (login) ---------- */
+.rol-btn {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border-width: 2px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.rol-btn--activo {
+  border-color: var(--emerald-700);
+  background-color: var(--emerald-50);
+  color: var(--emerald-900);
+}
+
+.rol-btn--inactivo {
+  border-color: var(--stone-200);
+  background-color: var(--stone-50);
+  color: var(--stone-600);
+}
+
+.rol-btn--inactivo:hover {
+  background-color: var(--stone-100);
+}
+
+/* ---------- Alertas ---------- */
+.alerta {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border-width: 1px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.alerta--exito {
+  background-color: var(--emerald-50);
+  border-color: var(--emerald-200);
+  color: var(--emerald-800);
+}
+
+.alerta--error {
+  background-color: var(--rose-50);
+  border-color: var(--rose-200);
+  color: var(--rose-700);
+}
+
+.alerta--info {
+  background-color: var(--stone-50);
+  border-color: var(--stone-200);
+  color: var(--stone-600);
+}
+
+.alerta--exito-lg {
+  background-color: var(--emerald-50);
+  border-color: var(--emerald-200);
+  color: var(--emerald-900);
+  padding: 1rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-width: 1px;
+}
+
+.alerta--error-lg {
+  background-color: var(--rose-50);
+  border-color: var(--rose-200);
+  color: var(--rose-800);
+  padding: 1rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-width: 1px;
+}
+
+.alerta--info-lg {
+  background-color: var(--stone-50);
+  border-color: var(--stone-200);
+  color: var(--stone-600);
+  padding: 1rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-width: 1px;
+}
+
+/* ---------- Navegación ---------- */
+.nav-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--emerald-100);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.nav-link:hover {
+  background-color: var(--emerald-800);
+  color: #fff;
+}
+
+.nav-link--destacado {
+  color: var(--amber-200);
+  background-color: rgba(6, 95, 70, 0.8);
+  border: 1px solid var(--emerald-600);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.nav-link--destacado:hover {
+  color: var(--amber-100);
+  background-color: var(--emerald-800);
+}
+
+.nav-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--emerald-950);
+  border: 1px solid var(--emerald-600);
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--emerald-200);
+}
+
+/* ---------- Tarjetas de destino (logística) ---------- */
+.destino-card {
+  cursor: pointer;
+  border-width: 2px;
+  padding: 1rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.destino-card--inactivo {
+  border-color: var(--stone-200);
+  background-color: var(--stone-50);
+}
+
+.destino-card--inactivo:hover {
+  background-color: var(--stone-100);
+}
+
+.destino-card--activo-particular {
+  border-color: var(--emerald-700);
+  background-color: rgba(236, 253, 245, 0.5);
+}
+
+.destino-card--activo-comercial {
+  border-color: var(--amber-600);
+  background-color: rgba(255, 251, 235, 0.5);
+}
+
+/* ---------- Tarjetas de árbol ---------- */
+.arbol-card {
+  background-color: #fff;
+  border-radius: 1rem;
+  border: 1px solid var(--stone-200);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: box-shadow 0.2s ease;
+}
+
+.arbol-card:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.badge-suscripcion {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  color: #fff;
+}
+
+.badge-suscripcion--exclusivo {
+  background-color: var(--amber-500);
+}
+
+.badge-suscripcion--compartido {
+  background-color: var(--emerald-600);
+}
+
+.badge-productor {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  background-color: rgba(28, 25, 23, 0.7);
+  color: #fff;
+  backdrop-filter: blur(4px);
+}
+
+.dato-arbol {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--stone-100);
+}
+
+/* ---------- Sesión ---------- */
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: transparent;
+  border: 1px solid var(--emerald-500);
+  color: var(--emerald-200);
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-logout:hover {
+  background-color: var(--emerald-800);
+  color: #fff;
+}
