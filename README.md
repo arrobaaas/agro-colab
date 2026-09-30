@@ -153,5 +153,4 @@ Estos puntos están fuera del alcance del prototipo actual y aún no existen en 
 
 - Joaquin Alveal Santos
 - Matias Gonzalez Paredes
-- Nicolas Reyes Orellana @arrobaaas
-  
+- Nicolas Reyes Orellana - [@arrobaaas](https://github.com/arrobaaas)
