@@ -424,9 +424,7 @@
       if (item.tipo === "arbol") {
         try {
           const sesion = auth.leerSesion();
-          console.log("Cancelando suscripción:", { user_name: sesion.nombre, tree_id: item.id });
           const data = await api.cancelarSuscripcion(sesion.nombre, item.id);
-          console.log("Respuesta del backend:", data);
           if (data.status === "success") {
             window.alert(data.mensaje);
             cargarArboles();

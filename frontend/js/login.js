@@ -42,14 +42,10 @@
       const data = await api.login(email, password, rolSeleccionado);
 
       if (data.status === "success") {
-        console.log("Login OK:", data.user);
         auth.guardarSesion(data.user);
         views.pintarNavbar();
-        console.log("Mostrando vista para rol:", data.user.rol);
-        const resultado = views.mostrarVistaPorRol(data.user.rol);
-        console.log("Resultado mostrarVista:", resultado);
+        views.mostrarVistaPorRol(data.user.rol);
       } else {
-        console.log("Login falló:", data.mensaje);
         ui.mostrarAlerta(alertBox, "error", data.mensaje);
       }
     } catch (error) {
