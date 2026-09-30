@@ -22,7 +22,10 @@
   }
 
   async function iniciarSesion(evento) {
-    evento.preventDefault();
+    if (evento) {
+      evento.preventDefault();
+      if (evento.stopPropagation) evento.stopPropagation();
+    }
 
     const alertBox = document.getElementById("alert-box");
     const email = document.getElementById("email").value.trim();
@@ -39,10 +42,14 @@
       const data = await api.login(email, password, rolSeleccionado);
 
       if (data.status === "success") {
+        console.log("Login OK:", data.user);
         auth.guardarSesion(data.user);
         views.pintarNavbar();
-        views.mostrarVistaPorRol(data.user.rol);
+        console.log("Mostrando vista para rol:", data.user.rol);
+        const resultado = views.mostrarVistaPorRol(data.user.rol);
+        console.log("Resultado mostrarVista:", resultado);
       } else {
+        console.log("Login falló:", data.mensaje);
         ui.mostrarAlerta(alertBox, "error", data.mensaje);
       }
     } catch (error) {
@@ -52,6 +59,7 @@
         `Error de conexión con el backend (${config.API_URL}). Revisa que Uvicorn esté activo.`
       );
     }
+    return false;
   }
 
   function init() {

@@ -31,12 +31,27 @@
       });
     },
 
+    cancelarSuscripcion(userName, treeId) {
+      return apiFetch("/cancelar-suscripcion", {
+        method: "POST",
+        body: JSON.stringify({ user_name: userName, tree_id: treeId })
+      });
+    },
+
     crearPedido(pedido) {
       return apiFetch("/pedidos", { method: "POST", body: JSON.stringify(pedido) });
     },
 
     obtenerPedidos() {
       return apiFetch("/pedidos");
+    },
+
+    subirArbol(arbol) {
+      return apiFetch("/arboles", { method: "POST", body: JSON.stringify(arbol) });
+    },
+
+    actualizarPerfil(cambios) {
+      return apiFetch("/perfil", { method: "PUT", body: JSON.stringify(cambios) });
     }
   };
 })();

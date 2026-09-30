@@ -107,12 +107,35 @@ class PedidoRequest(BaseModel):
     comuna: str
     frecuencia_entrega: str
 
+class ArbolRequest(BaseModel):
+    nombre: str
+    ubicacion: str
+    plan: str
+    tipo_suscripcion: str
+    cupos_totales: int
+    precio_mensual_clp: int
+    estimacion_cosecha: str
+    imagen: str
+    productor: str
+
 # ----------------- ENDPOINTS (RUTAS) -----------------
 
 # 1. Rutas de Árboles
 @app.get("/api/arboles")
 def listar_arboles():
     return arboles_db
+
+@app.post("/api/arboles")
+def crear_arbol(data: ArbolRequest):
+    nuevo_arbol = data.dict()
+    nuevo_arbol["id"] = max([a["id"] for a in arboles_db], default=0) + 1
+    nuevo_arbol["cupos_ocupados"] = 0
+    arboles_db.append(nuevo_arbol)
+    return {
+        "status": "success",
+        "mensaje": f"Árbol '{nuevo_arbol['nombre']}' publicado correctamente.",
+        "arbol": nuevo_arbol
+    }
 
 @app.post("/api/suscribir")
 def suscribir(data: SuscripcionRequest):
@@ -126,6 +149,20 @@ def suscribir(data: SuscripcionRequest):
                     "arbol": arbol
                 }
             return {"status": "error", "mensaje": "Cupos agotados para este árbol."}
+    return {"status": "error", "mensaje": "Árbol no encontrado."}
+
+@app.post("/api/cancelar-suscripcion")
+def cancelar_suscripcion(data: SuscripcionRequest):
+    for arbol in arboles_db:
+        if arbol["id"] == data.tree_id:
+            if arbol["cupos_ocupados"] > 0:
+                arbol["cupos_ocupados"] -= 1
+                return {
+                    "status": "success",
+                    "mensaje": f"Suscripción cancelada para {data.user_name} en {arbol['nombre']}.",
+                    "arbol": arbol
+                }
+            return {"status": "error", "mensaje": "No hay suscriptores que cancelar."}
     return {"status": "error", "mensaje": "Árbol no encontrado."}
 
 # 2. Rutas de Autenticación (Login)
@@ -166,3 +203,29 @@ def registrar_pedido(pedido: PedidoRequest):
 @app.get("/api/pedidos")
 def listar_pedidos():
     return pedidos_db
+
+# 4. Rutas de Perfil de Usuario
+class PerfilRequest(BaseModel):
+    nombre: str
+    email: str
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+    password: Optional[str] = None
+
+@app.put("/api/perfil")
+def actualizar_perfil(data: PerfilRequest):
+    cambios = data.dict(exclude_unset=True)
+    # En un sistema real, aquí se actualizaría el usuario en la base de datos
+    # Por ahora, retornamos el usuario actualizado simulado
+    usuario_actualizado = {
+        "nombre": cambios.get("nombre", "Usuario"),
+        "email": cambios.get("email", "usuario@agrocolab.cl"),
+        "rol": "comprador",
+        "telefono": cambios.get("telefono", "+56 9 1234 5678"),
+        "direccion": cambios.get("direccion", "Av. Los Aromos 1234")
+    }
+    return {
+        "status": "success",
+        "mensaje": "Perfil actualizado correctamente.",
+        "user": usuario_actualizado
+    }

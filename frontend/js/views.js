@@ -15,8 +15,14 @@
     parcelas: {
       selector: "#vista-parcelas",
       requiereSesion: true,
-      roles: ["comprador", "agricultor"],
+      roles: ["comprador"],
       alMostrar: () => AgroColab.parcelas.cargar()
+    },
+    agricultor: {
+      selector: "#vista-agricultor",
+      requiereSesion: true,
+      roles: ["agricultor"],
+      alMostrar: () => AgroColab.agricultor.cargar()
     }
   };
 
@@ -71,9 +77,9 @@
     const contenedor = document.getElementById("nav-sesion");
     if (!contenedor || !sesion) return;
 
-    const icono = sesion.rol === "agricultor" ? "fa-solid fa-tractor" : "fa-solid fa-basket-shopping";
+    const icono = sesion.rol === "agricultor" ? "fa-solid fa-tractor" : "fa-solid fa-user";
     contenedor.innerHTML = `
-      <span class="nav-chip">
+      <span class="nav-chip nav-chip--clickeable" onclick="AgroColab.perfil.abrir()" title="Ver mi perfil">
         <span class="hidden sm:inline font-bold text-white">${sesion.nombre}</span>
         <span class="text-emerald-400 font-black uppercase">${sesion.rol}</span>
         <i class="${icono}"></i>

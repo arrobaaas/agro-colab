@@ -33,7 +33,17 @@
     mostrarPlanActual();
     auth.guardarPlan(planActual);
 
-    document.getElementById("seccion-logistica").scrollIntoView({ behavior: "smooth" });
+    // Agregar al carrito con estado "comprado"
+    agregarAlCarrito({
+      id: planActual.nombre,
+      nombre: planActual.nombre,
+      descripcion: `Plan de abastecimiento - ${boton.dataset.planFrecuencia}`,
+      precio: planActual.precio,
+      estado: "comprado",
+      tipo: "plan"
+    });
+
+    abrirLogistica();
   }
 
   function cambiarDestino(tipo) {
@@ -54,6 +64,31 @@
       cardPart.className = "destino-card destino-card--inactivo";
       bloqueCom.classList.remove("hidden");
     }
+  }
+
+  /* ---------- Selector de línea: Adopción vs Abastecimiento ---------- */
+
+  let lineaActiva = "adopcion";
+
+  function establecerLinea(linea, scrollTo) {
+    if (linea !== "adopcion" && linea !== "abastecimiento") return;
+    lineaActiva = linea;
+
+    const esAdopcion = linea === "adopcion";
+
+    document.getElementById("seccion-adopcion").classList.toggle("hidden", !esAdopcion);
+    document.getElementById("seccion-parcelas").classList.toggle("hidden", !esAdopcion);
+    document.getElementById("seccion-abastecimiento").classList.toggle("hidden", esAdopcion);
+    document.getElementById("seccion-logistica").classList.toggle("hidden", esAdopcion);
+
+    document.querySelectorAll("[data-linea]").forEach(function (boton) {
+      const activo = boton.dataset.linea === linea;
+      boton.classList.toggle("nav-link--activo", activo);
+      boton.setAttribute("aria-selected", activo ? "true" : "false");
+    });
+
+    const destino = scrollTo || (esAdopcion ? "seccion-adopcion" : "seccion-abastecimiento");
+    document.getElementById(destino).scrollIntoView({ behavior: "smooth" });
   }
 
   /* ---------- Envío del pedido logístico ---------- */
@@ -246,6 +281,21 @@
       const data = await api.suscribirArbol(sesion.nombre, treeId);
       window.alert(data.mensaje);
       cargarArboles();
+
+      // Agregar al carrito con estado "comprado"
+      const arbol = data.arbol;
+      if (arbol) {
+        agregarAlCarrito({
+          id: arbol.id,
+          nombre: arbol.nombre,
+          descripcion: `Árbol adoptado - Plan ${arbol.plan}`,
+          precio: arbol.precio_mensual_clp,
+          estado: "comprado",
+          tipo: "arbol"
+        });
+      }
+
+      abrirLogistica();
     } catch (error) {
       window.alert("Error de comunicación con el backend");
     }
@@ -287,10 +337,175 @@
     });
 
     document.getElementById("btn-actualizar-arboles").addEventListener("click", cargarArboles);
+    document.getElementById("form-modal-logistica").addEventListener("submit", enviarLogisticaModal);
 
     mostrarPlanActual();
     cambiarDestino(destinoSeleccionado);
     actualizarFiltroActivo();
+  }
+
+  /* ---------- Canasta / Mis compras ---------- */
+
+  let carrito = [];
+
+  function abrirCanasta() {
+    const modal = document.getElementById("modal-canasta");
+    modal.classList.remove("hidden");
+    renderizarCanasta();
+  }
+
+  function cerrarCanasta() {
+    document.getElementById("modal-canasta").classList.add("hidden");
+  }
+
+  function agregarAlCarrito(item) {
+    carrito.push(item);
+    actualizarContadorCanasta();
+    renderizarCanasta();
+  }
+
+  function actualizarContadorCanasta() {
+    const contador = document.getElementById("canasta-contador");
+    if (!contador) return;
+    if (carrito.length > 0) {
+      contador.textContent = carrito.length;
+      contador.classList.remove("hidden");
+    } else {
+      contador.classList.add("hidden");
+    }
+  }
+
+  function renderizarCanasta() {
+    const contenido = document.getElementById("canasta-contenido");
+
+    if (carrito.length === 0) {
+      contenido.innerHTML = '<p class="text-stone-500 text-sm text-center py-8">Tu canasta está vacía</p>';
+      return;
+    }
+
+    let html = '<div class="space-y-4">';
+    carrito.forEach(function (item, index) {
+      const esComprado = item.estado === "comprado";
+      html += `
+        <div class="flex justify-between items-center p-4 bg-stone-50 rounded-xl border ${esComprado ? 'border-emerald-200 bg-emerald-50/50' : 'border-stone-200'}">
+          <div>
+            <div class="flex items-center gap-2">
+              <p class="font-bold text-sm text-stone-900">${item.nombre}</p>
+              ${esComprado ? '<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Comprado</span>' : ''}
+            </div>
+            <p class="text-xs text-stone-500">${item.descripcion}</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="font-black text-emerald-900">${ui.formatearMonto(item.precio)} CLP</span>
+            ${esComprado
+              ? `<button type="button" onclick="AgroColab.parcelas.cancelarCompra(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">Cancelar</button>`
+              : `<button type="button" onclick="AgroColab.parcelas.quitarDelCarrito(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">Quitar</button>`
+            }
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    contenido.innerHTML = html;
+  }
+
+  function quitarDelCarrito(index) {
+    carrito.splice(index, 1);
+    actualizarContadorCanasta();
+    renderizarCanasta();
+  }
+
+  async function cancelarCompra(index) {
+    const item = carrito[index];
+    if (!item) return;
+
+    if (window.confirm(`¿Estás seguro de cancelar "${item.nombre}"?`)) {
+      // Si es un árbol, cancelar la suscripción en el backend
+      if (item.tipo === "arbol") {
+        try {
+          const sesion = auth.leerSesion();
+          console.log("Cancelando suscripción:", { user_name: sesion.nombre, tree_id: item.id });
+          const data = await api.cancelarSuscripcion(sesion.nombre, item.id);
+          console.log("Respuesta del backend:", data);
+          if (data.status === "success") {
+            window.alert(data.mensaje);
+            cargarArboles();
+          } else {
+            window.alert(data.mensaje || "No se pudo cancelar la suscripción.");
+            return;
+          }
+        } catch (error) {
+          console.error("Error al cancelar:", error);
+          window.alert("Error de comunicación con el backend");
+          return;
+        }
+      }
+
+      carrito.splice(index, 1);
+      actualizarContadorCanasta();
+      renderizarCanasta();
+    }
+  }
+
+  /* ---------- Modal de Logística (al suscribirse) ---------- */
+
+  function abrirLogistica() {
+    const modal = document.getElementById("modal-logistica");
+    modal.classList.remove("hidden");
+  }
+
+  function cerrarLogistica() {
+    document.getElementById("modal-logistica").classList.add("hidden");
+  }
+
+  async function enviarLogisticaModal(evento) {
+    evento.preventDefault();
+
+    const alerta = document.getElementById("modal-alerta-logistica");
+    const formulario = document.getElementById("form-modal-logistica");
+    const esComercial = document.querySelector('input[name="modal_tipo_dest"]:checked').value === "comercial";
+
+    const bodyData = {
+      plan_nombre: planActual.nombre,
+      monto_clp: planActual.precio,
+      cliente_nombre: document.getElementById("modal-dest-nombre").value.trim(),
+      telefono: document.getElementById("modal-dest-tel").value.trim(),
+      email: document.getElementById("modal-dest-email").value.trim(),
+      tipo_destino: esComercial ? "comercial" : "particular",
+      razon_social: esComercial ? document.getElementById("modal-com-razon").value.trim() : null,
+      rut: esComercial ? document.getElementById("modal-com-rut").value.trim() : null,
+      direccion: document.getElementById("modal-dest-direccion").value.trim(),
+      comuna: document.getElementById("modal-dest-comuna").value.trim(),
+      frecuencia_entrega: document.getElementById("modal-dest-frecuencia").value
+    };
+
+    if (esComercial && (!bodyData.razon_social || !bodyData.rut)) {
+      ui.mostrarAlerta(alerta, "error", "Completa la razón social y el RUT para el despacho comercial.");
+      return;
+    }
+
+    ui.mostrarAlerta(alerta, "info", "Registrando tu pedido...");
+
+    try {
+      const data = await api.crearPedido(bodyData);
+
+      if (data.status === "success") {
+        alerta.className = "alerta alerta--exito-lg";
+        alerta.innerHTML = `
+          <div class="flex items-center gap-2 mb-1">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+            <span class="text-sm font-bold">${data.mensaje}</span>
+          </div>
+          <p class="text-stone-600">Destino: <strong>${bodyData.direccion}, ${bodyData.comuna}</strong> (${bodyData.tipo_destino.toUpperCase()}) | Frecuencia: <strong>${bodyData.frecuencia_entrega}</strong>.</p>
+        `;
+        formulario.reset();
+        setTimeout(cerrarLogistica, 2000);
+      } else {
+        ui.mostrarAlerta(alerta, "error", data.mensaje || "No se pudo registrar la solicitud logística.");
+      }
+    } catch (error) {
+      ui.mostrarAlerta(alerta, "error", "Error de comunicación con el backend.");
+    }
   }
 
   /* Se ejecuta cada vez que la vista entra en pantalla. */
@@ -298,5 +513,5 @@
     return cargarArboles();
   }
 
-  AgroColab.parcelas = { init, cargar };
+  AgroColab.parcelas = { init, cargar, establecerLinea, abrirCanasta, cerrarCanasta, agregarAlCarrito, quitarDelCarrito, cancelarCompra, abrirLogistica, cerrarLogistica };
 })();

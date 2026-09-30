@@ -19,7 +19,7 @@
          agricultor: "mis-parcelas" */
     VISTAS_POR_ROL: {
       comprador: "parcelas",
-      agricultor: "parcelas"
+      agricultor: "agricultor"
     }
   };
 })();

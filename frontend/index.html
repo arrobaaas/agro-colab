@@ -12,6 +12,8 @@
   <script src="js/api.js" defer></script>
   <script src="js/auth.js" defer></script>
   <script src="js/parcelas.js" defer></script>
+  <script src="js/agricultor.js" defer></script>
+  <script src="js/perfil.js" defer></script>
   <script src="js/views.js" defer></script>
   <script src="js/login.js" defer></script>
   <script src="js/app.js" defer></script>
@@ -60,7 +62,7 @@
           </div>
 
           <!-- Formulario -->
-          <form id="login-form" class="space-y-4">
+          <form id="login-form" class="space-y-4" onsubmit="return false;">
             <div>
               <label for="email" class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
               <div class="relative">
@@ -131,11 +133,11 @@
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <a href="#seccion-adopcion" class="nav-link">Adopción</a>
-          <a href="#seccion-abastecimiento" class="nav-link">Abastecimiento</a>
-          <a href="#seccion-logistica" class="nav-link nav-link--destacado">
-            <i class="fa-solid fa-truck-ramp-box"></i> Logística y Despacho
-          </a>
+          <button type="button" class="nav-link" data-linea="adopcion" onclick="AgroColab.parcelas.establecerLinea('adopcion')">Adopción</button>
+          <button type="button" class="nav-link" data-linea="abastecimiento" onclick="AgroColab.parcelas.establecerLinea('abastecimiento')">Abastecimiento</button>
+          <button type="button" class="nav-link" onclick="AgroColab.parcelas.abrirCanasta()">
+            <i class="fa-solid fa-basket-shopping"></i> Compras
+          </button>
           <div id="nav-sesion" class="flex items-center gap-2"></div>
           <button type="button" id="btn-cerrar-sesion" class="btn-logout">
             <i class="fa-solid fa-right-from-bracket"></i> Salir
@@ -158,7 +160,7 @@
         <h2 class="text-3xl md:text-4xl font-black mb-3 leading-tight">
           Financia la cosecha, asegura tu abastecimiento
         </h2>
-        <p class="text-stone-200 text-sm md:text-base max-w-2xl mx-auto leading-relaxed drop-shadow">
+        <p class="text-stone-200 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
           Adopta un árbol frutal y sé dueño de su producción, o contrata un plan de
           abastecimiento con entrega programada. En ambos casos, trazabilidad directa
           del huerto a tu mesa.
@@ -265,7 +267,7 @@
     </section>
 
     <!-- SECCIÓN 3: PLANES DE ABASTECIMIENTO (línea de producto 2) -->
-    <section id="seccion-abastecimiento" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
+    <section id="seccion-abastecimiento" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24 hidden">
       <div class="text-center max-w-2xl mx-auto mb-10">
         <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
           Línea 2 · Abastecimiento
@@ -381,8 +383,8 @@
       </div>
     </section>
 
-    <!-- SECCIÓN 4: LOGÍSTICA Y DESPACHO (solo línea 2) -->
-    <section id="seccion-logistica" class="max-w-4xl mx-auto my-14 px-4 scroll-mt-24">
+    <!-- SECCIÓN 4: LOGÍSTICA Y DESPACHO (oculta - solo se abre como modal al suscribirse) -->
+    <section id="seccion-logistica" class="max-w-4xl mx-auto my-14 px-4 scroll-mt-24 hidden" style="display: none !important;">
       <div class="bg-white rounded-3xl border border-stone-200 shadow-xl overflow-hidden">
 
         <div class="bg-emerald-900 text-white p-6 sm:p-8">
@@ -509,8 +511,339 @@
       </div>
     </section>
 
+    <!-- MODAL: CANASTA / MIS COMPRAS -->
+    <div id="modal-canasta" class="fixed inset-0 z-[100] hidden">
+      <div class="absolute inset-0 bg-black/60" onclick="AgroColab.parcelas.cerrarCanasta()"></div>
+      <div class="relative max-w-2xl mx-auto mt-20 bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div class="bg-emerald-900 text-white p-6 flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-black">Mi Canasta</h3>
+            <p class="text-xs text-emerald-200">Tus compras y productos en el carrito</p>
+          </div>
+          <button type="button" onclick="AgroColab.parcelas.cerrarCanasta()" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-6 max-h-[60vh] overflow-y-auto">
+          <div id="canasta-contenido">
+            <p class="text-stone-500 text-sm text-center py-8">Tu canasta está vacía</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: LOGÍSTICA Y DESPACHO (al suscribirse) -->
+    <div id="modal-logistica" class="fixed inset-0 z-[100] hidden">
+      <div class="absolute inset-0 bg-black/60" onclick="AgroColab.parcelas.cerrarLogistica()"></div>
+      <div class="relative max-w-2xl mx-auto mt-10 bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div class="bg-emerald-900 text-white p-6">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-widest text-emerald-300">
+              <i class="fa-solid fa-truck-fast mr-1"></i> Módulo de Logística y Reparto
+            </span>
+            <span class="text-xs bg-emerald-800 px-3 py-1 rounded-full border border-emerald-600 text-emerald-200">
+              Trazabilidad Directa
+            </span>
+          </div>
+          <h3 class="text-2xl sm:text-3xl font-black mt-2">¿Dónde deseas recibir los productos?</h3>
+          <p class="text-xs sm:text-sm text-emerald-200 mt-1">
+            Configura si el destino es tu hogar o tu establecimiento gastronómico / negocio.
+          </p>
+          <div class="mt-4 inline-flex items-center gap-3 bg-emerald-950/80 border border-emerald-700 px-4 py-2 rounded-xl text-xs">
+            <span class="text-stone-300">Plan en configuración:</span>
+            <span id="modal-log-plan-nombre" class="font-bold text-emerald-300">Canasta Huerto Esencial</span>
+            <span class="text-stone-400">|</span>
+            <span id="modal-log-plan-precio" class="font-black text-white">$19.900 CLP</span>
+          </div>
+        </div>
+        <form id="form-modal-logistica" class="p-6 space-y-6">
+          <div>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">1. Selecciona el Tipo de Destino</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <label id="modal-card-part" class="destino-card destino-card--activo-particular">
+                <input type="radio" name="modal_tipo_dest" value="particular" checked class="mt-1 text-emerald-700">
+                <span>
+                  <span class="block font-bold text-sm text-stone-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-house-chimney text-emerald-700"></i> Domicilio Particular
+                  </span>
+                  <span class="block text-xs text-stone-500 mt-1">Entrega residencial para familias en casas o departamentos particulares.</span>
+                </span>
+              </label>
+              <label id="modal-card-com" class="destino-card destino-card--inactivo">
+                <input type="radio" name="modal_tipo_dest" value="comercial" class="mt-1 text-emerald-700">
+                <span>
+                  <span class="block font-bold text-sm text-stone-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-store text-amber-700"></i> Negocio / Local Comercial
+                  </span>
+                  <span class="block text-xs text-stone-500 mt-1">Para cafeterías, hoteles o restaurantes que requieren factura y horario diurno.</span>
+                </span>
+              </label>
+            </div>
+          </div>
+          <div id="modal-bloque-comercial" class="hidden bg-amber-50/70 border border-amber-200 p-5 rounded-2xl space-y-4">
+            <p class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-receipt text-amber-700"></i> Información comercial para facturación y despacho B2B
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="modal-com-razon" class="block text-xs font-semibold text-stone-700 mb-1">Razón Social o Nombre del Local</label>
+                <input type="text" id="modal-com-razon" placeholder="Cafetería El Huerto SpA" class="input">
+              </div>
+              <div>
+                <label for="modal-com-rut" class="block text-xs font-semibold text-stone-700 mb-1">RUT Empresa</label>
+                <input type="text" id="modal-com-rut" placeholder="76.123.456-7" class="input">
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">2. Contacto de Entrega</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label for="modal-dest-nombre" class="block text-xs font-semibold text-stone-700 mb-1">Nombre y Apellido</label>
+                <input type="text" id="modal-dest-nombre" required placeholder="Tu nombre" class="input">
+              </div>
+              <div>
+                <label for="modal-dest-tel" class="block text-xs font-semibold text-stone-700 mb-1">Teléfono / WhatsApp</label>
+                <input type="tel" id="modal-dest-tel" required placeholder="+56 9 1234 5678" class="input">
+              </div>
+              <div>
+                <label for="modal-dest-email" class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
+                <input type="email" id="modal-dest-email" required placeholder="correo@ejemplo.cl" class="input">
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">3. Dirección Física y Frecuencia de Despacho</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+              <div class="sm:col-span-2">
+                <label for="modal-dest-direccion" class="block text-xs font-semibold text-stone-700 mb-1">Dirección (Calle, Número, Depto/Oficina)</label>
+                <input type="text" id="modal-dest-direccion" required placeholder="Av. Los Aromos 1234" class="input">
+              </div>
+              <div>
+                <label for="modal-dest-comuna" class="block text-xs font-semibold text-stone-700 mb-1">Comuna / Ciudad</label>
+                <input type="text" id="modal-dest-comuna" required placeholder="Maipú, Curicó, etc." class="input">
+              </div>
+            </div>
+            <div>
+              <label for="modal-dest-frecuencia" class="block text-xs font-semibold text-stone-700 mb-1">Frecuencia del Despacho</label>
+              <select id="modal-dest-frecuencia" class="input">
+                <option value="quincenal">Despacho Quincenal (Cada 15 días)</option>
+                <option value="semanal">Despacho Semanal (Cosecha fresca cada 7 días)</option>
+                <option value="mensual">Despacho Mensual (Lote agrupado)</option>
+              </select>
+            </div>
+          </div>
+          <div id="modal-alerta-logistica" class="hidden"></div>
+          <button type="submit" class="btn-submit btn-submit--lg flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i> Confirmar Destino y Registrar Pedido
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: PERFIL DE USUARIO -->
+    <div id="modal-perfil" class="fixed inset-0 z-[100] hidden">
+      <div class="absolute inset-0 bg-black/60" onclick="AgroColab.perfil.cerrar()"></div>
+      <div class="relative max-w-lg mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div class="bg-emerald-900 text-white p-6 flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-black">Mi Perfil</h3>
+            <p class="text-xs text-emerald-200">Gestiona tu información personal</p>
+          </div>
+          <button type="button" onclick="AgroColab.perfil.cerrar()" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-6 max-h-[70vh] overflow-y-auto">
+          <div class="flex items-center gap-4 mb-6 pb-6 border-b border-stone-100">
+            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
+              <i class="fa-solid fa-user text-emerald-700 text-2xl"></i>
+            </div>
+            <div>
+              <p id="perfil-nombre" class="font-black text-lg text-stone-900">--</p>
+              <p id="perfil-rol" class="text-xs text-emerald-700 font-bold uppercase">--</p>
+            </div>
+          </div>
+          <form id="form-perfil" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nombre completo</label>
+              <input type="text" id="perfil-input-nombre" class="input">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Correo electrónico</label>
+              <input type="email" id="perfil-input-email" class="input">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Teléfono</label>
+              <input type="tel" id="perfil-input-telefono" placeholder="+56 9 1234 5678" class="input">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Dirección</label>
+              <input type="text" id="perfil-input-direccion" placeholder="Av. Los Aromos 1234" class="input">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nueva contraseña (dejar vacío para no cambiar)</label>
+              <input type="password" id="perfil-input-password" placeholder="••••••••" class="input">
+            </div>
+            <div id="alerta-perfil" class="hidden"></div>
+            <button type="submit" class="btn-submit w-full">Guardar cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <footer class="bg-stone-900 text-stone-400 text-xs py-8 border-t border-stone-800 text-center">
       <p>© 2026 Agro-Colab - Financia la cosecha, asegura tu abastecimiento.</p>
+    </footer>
+  </div>
+
+  <!-- ============================================================
+       VISTA 3: AGRICULTOR - Dashboard y subida de árboles
+       ============================================================ -->
+  <div id="vista-agricultor" data-vista="agricultor" class="hidden">
+
+    <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
+        <div class="flex items-center space-x-3">
+          <span class="text-3xl">🌱</span>
+          <div>
+            <h1 class="text-xl font-extrabold tracking-tight">Agro-Colab</h1>
+            <p class="text-[11px] text-emerald-200">Panel del Agricultor</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div id="nav-sesion-agricultor" class="flex items-center gap-2"></div>
+          <button type="button" id="btn-cerrar-sesion-agricultor" class="btn-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Salir
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-10">
+
+      <!-- Dashboard del agricultor -->
+      <section id="dashboard-agricultor">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+          <div>
+            <h2 class="text-3xl font-black text-stone-900">Mi Dashboard</h2>
+            <p class="text-sm text-stone-500 mt-1">Gestiona tus árboles y revisa el estado de tus publicaciones</p>
+          </div>
+          <button type="button" id="btn-subir-arbol" class="mt-4 sm:mt-0 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm px-6 py-3 rounded-xl transition">
+            <i class="fa-solid fa-plus mr-2"></i>Subir Árbol
+          </button>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+          <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-tree text-emerald-700 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-2xl font-black text-stone-900" id="stat-total-arboles">0</p>
+                <p class="text-xs text-stone-500">Árboles publicados</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-users text-amber-700 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-2xl font-black text-stone-900" id="stat-suscriptores">0</p>
+                <p class="text-xs text-stone-500">Suscriptores totales</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-dollar-sign text-emerald-700 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-2xl font-black text-stone-900" id="stat-ingresos">$0</p>
+                <p class="text-xs text-stone-500">Ingresos estimados</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de árboles del agricultor -->
+        <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+          <div class="p-6 border-b border-stone-100">
+            <h3 class="text-lg font-bold text-stone-900">Mis Árboles</h3>
+          </div>
+          <div id="lista-arboles-agricultor" class="divide-y divide-stone-100">
+            <p class="text-stone-500 text-sm text-center py-8">Cargando tus árboles...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Formulario para subir árbol -->
+      <section id="formulario-arbol" class="hidden">
+        <div class="max-w-2xl mx-auto">
+          <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+            <div class="bg-emerald-900 text-white p-6">
+              <h3 class="text-xl font-black">Subir Nuevo Árbol</h3>
+              <p class="text-xs text-emerald-200 mt-1">Completa la información del árbol para publicarlo</p>
+            </div>
+            <form id="form-subir-arbol" class="p-6 space-y-5">
+              <div>
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Nombre del Árbol</label>
+                <input type="text" id="arbol-nombre" required placeholder="Ej: Palta Hass, Limonero, Naranjo" class="input">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Ubicación</label>
+                <input type="text" id="arbol-ubicacion" required placeholder="Ej: Curicó, Maule" class="input">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Plan de Adopción</label>
+                <select id="arbol-plan" class="input">
+                  <option value="Básico">Básico (5 copartícipes)</option>
+                  <option value="Intermedio">Intermedio (3 copartícipes)</option>
+                  <option value="Premium">Premium (Exclusivo)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Tipo de Suscripción</label>
+                <select id="arbol-tipo" class="input">
+                  <option value="Compartido">Compartido</option>
+                  <option value="Exclusivo">Exclusivo</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Cupos Totales</label>
+                <input type="number" id="arbol-cupos" required min="1" value="5" class="input">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Precio Mensual (CLP)</label>
+                <input type="number" id="arbol-precio" required min="0" placeholder="Ej: 15000" class="input">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Estimación de Cosecha</label>
+                <input type="text" id="arbol-cosecha" required placeholder="Ej: 50 kg por temporada" class="input">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">URL de Imagen</label>
+                <input type="url" id="arbol-imagen" placeholder="https://ejemplo.com/imagen.jpg" class="input">
+              </div>
+              <div id="alerta-subir-arbol" class="hidden"></div>
+              <div class="flex gap-3">
+                <button type="button" id="btn-cancelar-arbol" class="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm py-3 rounded-xl transition">
+                  Cancelar
+                </button>
+                <button type="submit" class="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm py-3 rounded-xl transition">
+                  Publicar Árbol
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="bg-stone-900 text-stone-400 text-xs py-8 border-t border-stone-800 text-center">
+      <p>© 2026 Agro-Colab - Panel del Agricultor</p>
     </footer>
   </div>
 
