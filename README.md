@@ -151,6 +151,6 @@ Estos puntos están fuera del alcance del prototipo actual y aún no existen en 
 
 ## Equipo de Desarrollo
 
-- Joaquin Alveal Santos
+- Joaquin Alveal Santos - [@Joaquin-alveal](https://github.com/Joaquin-Alveal)
 - Matias Gonzalez Paredes - [@Skt1-Ctrl](https://github.com/SKT1-Ctrl)
 - Nicolas Reyes Orellana - [@arrobaaas](https://github.com/arrobaaas)
