@@ -42,6 +42,7 @@
       const data = await api.login(email, password, rolSeleccionado);
 
       if (data.status === "success") {
+        auth.eliminarSesion();
         auth.guardarSesion(data.user);
         views.pintarNavbar();
         views.mostrarVistaPorRol(data.user.rol);

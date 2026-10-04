@@ -639,55 +639,6 @@
       </div>
     </div>
 
-    <!-- MODAL: PERFIL DE USUARIO -->
-    <div id="modal-perfil" class="fixed inset-0 z-[100] hidden">
-      <div class="absolute inset-0 bg-black/60" onclick="AgroColab.perfil.cerrar()"></div>
-      <div class="relative max-w-lg mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <div class="bg-emerald-900 text-white p-6 flex justify-between items-center">
-          <div>
-            <h3 class="text-xl font-black">Mi Perfil</h3>
-            <p class="text-xs text-emerald-200">Gestiona tu información personal</p>
-          </div>
-          <button type="button" onclick="AgroColab.perfil.cerrar()" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
-        </div>
-        <div class="p-6 max-h-[70vh] overflow-y-auto">
-          <div class="flex items-center gap-4 mb-6 pb-6 border-b border-stone-100">
-            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
-              <i class="fa-solid fa-user text-emerald-700 text-2xl"></i>
-            </div>
-            <div>
-              <p id="perfil-nombre" class="font-black text-lg text-stone-900">--</p>
-              <p id="perfil-rol" class="text-xs text-emerald-700 font-bold uppercase">--</p>
-            </div>
-          </div>
-          <form id="form-perfil" class="space-y-4">
-            <div>
-              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nombre completo</label>
-              <input type="text" id="perfil-input-nombre" class="input">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Correo electrónico</label>
-              <input type="email" id="perfil-input-email" class="input">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Teléfono</label>
-              <input type="tel" id="perfil-input-telefono" placeholder="+56 9 1234 5678" class="input">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Dirección</label>
-              <input type="text" id="perfil-input-direccion" placeholder="Av. Los Aromos 1234" class="input">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nueva contraseña (dejar vacío para no cambiar)</label>
-              <input type="password" id="perfil-input-password" placeholder="••••••••" class="input">
-            </div>
-            <div id="alerta-perfil" class="hidden"></div>
-            <button type="submit" class="btn-submit w-full">Guardar cambios</button>
-          </form>
-        </div>
-      </div>
-    </div>
-
     <footer class="bg-stone-900 text-stone-400 text-xs py-8 border-t border-stone-800 text-center">
       <p>© 2026 Agro-Colab - Financia la cosecha, asegura tu abastecimiento.</p>
     </footer>
@@ -845,6 +796,55 @@
     <footer class="bg-stone-900 text-stone-400 text-xs py-8 border-t border-stone-800 text-center">
       <p>© 2026 Agro-Colab - Panel del Agricultor</p>
     </footer>
+  </div>
+
+  <!-- MODAL: PERFIL DE USUARIO (fuera de las vistas para funcionar en ambas) -->
+  <div id="modal-perfil" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-black/60" onclick="AgroColab.perfil.cerrar()"></div>
+    <div class="relative max-w-lg mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <div class="bg-emerald-900 text-white p-6 flex justify-between items-center">
+        <div>
+          <h3 class="text-xl font-black">Mi Perfil</h3>
+          <p class="text-xs text-emerald-200">Gestiona tu información personal</p>
+        </div>
+        <button type="button" onclick="AgroColab.perfil.cerrar()" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+      <div class="p-6 max-h-[70vh] overflow-y-auto">
+        <div class="flex items-center gap-4 mb-6 pb-6 border-b border-stone-100">
+          <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
+            <i class="fa-solid fa-user text-emerald-700 text-2xl"></i>
+          </div>
+          <div>
+            <p id="perfil-nombre" class="font-black text-lg text-stone-900">--</p>
+            <p id="perfil-rol" class="text-xs text-emerald-700 font-bold uppercase">--</p>
+          </div>
+        </div>
+        <form id="form-perfil" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nombre completo</label>
+            <input type="text" id="perfil-input-nombre" class="input">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Correo electrónico</label>
+            <input type="email" id="perfil-input-email" class="input">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Teléfono</label>
+            <input type="tel" id="perfil-input-telefono" placeholder="+56 9 1234 5678" class="input">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Dirección</label>
+            <input type="text" id="perfil-input-direccion" placeholder="Av. Los Aromos 1234" class="input">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nueva contraseña (dejar vacío para no cambiar)</label>
+            <input type="password" id="perfil-input-password" placeholder="••••••••" class="input">
+          </div>
+          <div id="alerta-perfil" class="hidden"></div>
+          <button type="submit" class="btn-submit w-full">Guardar cambios</button>
+        </form>
+      </div>
+    </div>
   </div>
 
 </body>
