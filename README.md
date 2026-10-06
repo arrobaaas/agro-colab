@@ -149,6 +149,52 @@ Estos puntos están fuera del alcance del prototipo actual y aún no existen en 
 
 ---
 
+## Licencias y Fuentes
+
+### Licencia del Proyecto
+
+Este proyecto se distribuye bajo la **MIT License**. Puedes usar, modificar y distribuir el código libremente, siempre que incluyas la licencia original.
+
+### Dependencias y sus Licencias
+
+| Dependencia | Licencia | Fuente |
+|---|---|---|
+| FastAPI | MIT | https://github.com/tiangolo/fastapi |
+| Pydantic | MIT | https://github.com/pydantic/pydantic |
+| Uvicorn | BSD-3-Clause | https://github.com/encode/uvicorn |
+| SQLAlchemy | MIT | https://github.com/sqlalchemy/sqlalchemy |
+| Tailwind CSS | MIT | https://github.com/tailwindlabs/tailwindcss |
+| Font Awesome | CC BY 4.0 / MIT | https://github.com/FortAwesome/Font-Awesome |
+
+### Recursos Externos
+
+| Recurso | Fuente | Licencia |
+|---|---|---|
+| Imágenes de árboles | Unsplash | https://unsplash.com/license |
+| Íconos | Font Awesome | CC BY 4.0 / MIT |
+| Framework CSS | Tailwind CSS | MIT |
+
+### Declaración de Uso de Inteligencia Artificial
+
+Durante el desarrollo de este proyecto, el equipo utilizó herramientas de Inteligencia Artificial como apoyo en la fase de investigación, redacción y generación de código.
+
+**Herramientas utilizadas:**
+- Gemini (Google)
+- ChatGPT (OpenAI)
+
+**Fases en las que se aplicó:**
+- Estructuración de la redacción de los argumentos comerciales
+- Ordenamiento de la estructura del documento
+- Contraste de las desventajas técnicas de los lenguajes evaluados (Node.js vs Python)
+- Apoyo en la generación de código del prototipo inicial
+
+**Método de verificación:**
+Las cifras y problemáticas sugeridas por la IA respecto al abandono del campo y las tendencias de consumo en Chile fueron validadas y contrastadas manualmente leyendo las fuentes primarias del Ministerio de Agricultura y revistas sectoriales citadas en la bibliografía.
+
+**Fecha de uso:** Septiembre de 2026
+
+---
+
 ## Equipo de Desarrollo
 
 - Joaquin Alveal Santos - [@Joaquin-alveal](https://github.com/Joaquin-Alveal)
