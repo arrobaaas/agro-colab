@@ -41,8 +41,8 @@
       <div class="bg-white max-w-md w-full rounded-2xl border border-stone-200 shadow-xl overflow-hidden">
 
         <div class="bg-emerald-900 p-6 text-white text-center relative">
-          <h2 class="text-2xl font-black">Iniciar Sesión</h2>
-          <p class="text-xs text-emerald-200 mt-1">Ingresa a tu panel de gestión colaborativa</p>
+          <h2 class="text-2xl font-black" id="login-titulo">Iniciar Sesión</h2>
+          <p class="text-xs text-emerald-200 mt-1" id="login-subtitulo">Ingresa a tu panel de gestión colaborativa</p>
         </div>
 
         <div class="p-8">
@@ -61,7 +61,7 @@
             </button>
           </div>
 
-          <!-- Formulario -->
+          <!-- Formulario de Login -->
           <form id="login-form" class="space-y-4" onsubmit="return false;">
             <div>
               <label for="email" class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
@@ -94,6 +94,9 @@
                   placeholder="••••••••"
                   class="input input-con-icono"
                 >
+                <button type="button" onclick="AgroColab.login.togglePassword('password', this)" class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-600">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
               </div>
             </div>
 
@@ -101,6 +104,101 @@
 
             <button type="submit" class="btn-submit mt-2">Acceder al Sistema</button>
           </form>
+
+          <!-- Formulario de Registro -->
+          <form id="register-form" class="space-y-4 hidden" onsubmit="return false;">
+            <div>
+              <label for="reg-nombre" class="block text-xs font-semibold text-stone-700 mb-1">Nombre completo</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
+                  <i class="fa-regular fa-user"></i>
+                </span>
+                <input
+                  type="text"
+                  id="reg-nombre"
+                  required
+                  autocomplete="name"
+                  placeholder="Tu nombre completo"
+                  class="input input-con-icono"
+                >
+              </div>
+            </div>
+
+            <div>
+              <label for="reg-email" class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
+                  <i class="fa-regular fa-envelope"></i>
+                </span>
+                <input
+                  type="email"
+                  id="reg-email"
+                  required
+                  autocomplete="email"
+                  placeholder="tu@correo.com"
+                  class="input input-con-icono"
+                >
+              </div>
+            </div>
+
+            <div>
+              <label for="reg-password" class="block text-xs font-semibold text-stone-700 mb-1">Contraseña</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
+                  <i class="fa-solid fa-lock"></i>
+                </span>
+                <input
+                  type="password"
+                  id="reg-password"
+                  required
+                  autocomplete="new-password"
+                  placeholder="••••••••"
+                  class="input input-con-icono"
+                >
+                <button type="button" onclick="AgroColab.login.togglePassword('reg-password', this)" class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-600">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label for="reg-telefono" class="block text-xs font-semibold text-stone-700 mb-1">Teléfono (opcional)</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
+                  <i class="fa-solid fa-phone"></i>
+                </span>
+                <input
+                  type="tel"
+                  id="reg-telefono"
+                  autocomplete="tel"
+                  placeholder="+56 9 1234 5678"
+                  class="input input-con-icono"
+                >
+              </div>
+            </div>
+
+            <div>
+              <label for="reg-direccion" class="block text-xs font-semibold text-stone-700 mb-1">Dirección (opcional)</label>
+              <input
+                type="text"
+                id="reg-direccion"
+                autocomplete="street-address"
+                placeholder="Av. Los Aromos 1234"
+                class="input"
+              >
+            </div>
+
+            <div id="alerta-registro" class="hidden"></div>
+
+            <button type="submit" class="btn-submit mt-2">Crear Cuenta</button>
+          </form>
+
+          <!-- Botón para alternar entre login y registro -->
+          <div class="mt-4 text-center">
+            <button type="button" id="btn-alternar" class="text-xs text-emerald-700 hover:text-emerald-900 font-semibold">
+              ¿No tienes cuenta? Regístrate
+            </button>
+          </div>
 
           <!-- Ayuda rápida para pruebas -->
           <div class="mt-6 pt-4 border-t border-stone-100 bg-stone-50 p-3 rounded-lg text-[11px] text-stone-500 space-y-1">
@@ -774,8 +872,9 @@
                 <input type="text" id="arbol-cosecha" required placeholder="Ej: 50 kg por temporada" class="input">
               </div>
               <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">URL de Imagen</label>
-                <input type="url" id="arbol-imagen" placeholder="https://ejemplo.com/imagen.jpg" class="input">
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Imagen del Árbol (PNG)</label>
+                <input type="file" id="arbol-imagen" accept="image/png,image/jpeg,image/webp" class="input file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                <p class="text-[10px] text-stone-400 mt-1">Selecciona una imagen PNG, JPG o WebP (máx. 2MB)</p>
               </div>
               <div id="alerta-subir-arbol" class="hidden"></div>
               <div class="flex gap-3">
@@ -796,6 +895,104 @@
     <footer class="bg-stone-900 text-stone-400 text-xs py-8 border-t border-stone-800 text-center">
       <p>© 2026 Agro-Colab - Panel del Agricultor</p>
     </footer>
+  </div>
+
+  <!-- MODAL: VERIFICACIÓN DE CUENTA -->
+  <div id="modal-verificacion" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-black/60" onclick="AgroColab.login.cerrarVerificacion()"></div>
+    <div class="relative max-w-md mx-auto mt-20 bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <div class="bg-emerald-900 text-white p-6 text-center">
+        <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fa-solid fa-envelope text-emerald-700 text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-black">Verifica tu Cuenta</h3>
+        <p class="text-xs text-emerald-200 mt-1">Te enviamos un código de 6 dígitos a tu correo</p>
+      </div>
+      <div class="p-6">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4 text-center">
+          <p class="text-xs text-emerald-700 mb-1">Código de verificación (simulado):</p>
+          <p id="codigo-simulado" class="text-2xl font-black text-emerald-900 tracking-widest">------</p>
+        </div>
+        <form id="form-verificacion" class="space-y-4" onsubmit="return false;">
+          <div>
+            <label for="codigo-verificacion" class="block text-xs font-semibold text-stone-700 mb-1">Ingresa el código de 6 dígitos</label>
+            <input
+              type="text"
+              id="codigo-verificacion"
+              required
+              maxlength="6"
+              placeholder="123456"
+              class="input text-center text-2xl tracking-widest"
+            >
+          </div>
+          <div id="alerta-verificacion" class="hidden"></div>
+          <button type="submit" class="btn-submit w-full">Verificar Cuenta</button>
+        </form>
+        <div class="mt-4 text-center">
+          <button type="button" onclick="AgroColab.login.reenviarCodigo()" class="text-xs text-emerald-700 hover:text-emerald-900 font-semibold">
+            Reenviar código
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR ÁRBOL -->
+  <div id="modal-editar-arbol" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-black/60" onclick="AgroColab.agricultor.cerrarEdicion()"></div>
+    <div class="relative max-w-lg mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <div class="bg-emerald-900 text-white p-6 flex justify-between items-center">
+        <div>
+          <h3 class="text-xl font-black">Editar Árbol</h3>
+          <p class="text-xs text-emerald-200">Modifica la información del árbol</p>
+        </div>
+        <button type="button" onclick="AgroColab.agricultor.cerrarEdicion()" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+      <form id="form-editar-arbol" class="p-6 space-y-4">
+        <input type="hidden" id="editar-arbol-id">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nombre del Árbol</label>
+          <input type="text" id="editar-nombre" required class="input">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Ubicación</label>
+          <input type="text" id="editar-ubicacion" required class="input">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Plan de Adopción</label>
+          <select id="editar-plan" class="input">
+            <option value="Básico">Básico (5 copartícipes)</option>
+            <option value="Intermedio">Intermedio (3 copartícipes)</option>
+            <option value="Premium">Premium (Exclusivo)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Tipo de Suscripción</label>
+          <select id="editar-tipo" class="input">
+            <option value="Compartido">Compartido</option>
+            <option value="Exclusivo">Exclusivo</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Cupos Totales</label>
+          <input type="number" id="editar-cupos" required min="1" class="input">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Precio Mensual (CLP)</label>
+          <input type="number" id="editar-precio" required min="0" class="input">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Estimación de Cosecha</label>
+          <input type="text" id="editar-cosecha" required class="input">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">URL de Imagen</label>
+          <input type="url" id="editar-imagen" class="input">
+        </div>
+        <div id="alerta-editar-arbol" class="hidden"></div>
+        <button type="submit" class="btn-submit w-full">Guardar cambios</button>
+      </form>
+    </div>
   </div>
 
   <!-- MODAL: PERFIL DE USUARIO (fuera de las vistas para funcionar en ambas) -->

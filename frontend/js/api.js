@@ -50,8 +50,27 @@
       return apiFetch("/arboles", { method: "POST", body: JSON.stringify(arbol) });
     },
 
+    eliminarArbol(arbolId) {
+      return apiFetch(`/arboles/${arbolId}`, { method: "DELETE" });
+    },
+
+    actualizarArbol(arbolId, arbol) {
+      return apiFetch(`/arboles/${arbolId}`, { method: "PUT", body: JSON.stringify(arbol) });
+    },
+
     actualizarPerfil(cambios) {
       return apiFetch("/perfil", { method: "PUT", body: JSON.stringify(cambios) });
+    },
+
+    registrarUsuario(datos) {
+      return apiFetch("/register", { method: "POST", body: JSON.stringify(datos) });
+    },
+
+    verificarCuenta(email, codigo) {
+      return apiFetch("/verificar-cuenta", {
+        method: "POST",
+        body: JSON.stringify({ email, codigo })
+      });
     }
   };
 })();
