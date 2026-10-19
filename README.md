@@ -121,11 +121,12 @@ La aplicación muestra primero el login. Al entrar, cada rol ve la vista que le 
 
 ## Ver en vivo
 
-Puedes ver la página activada sin necesidad de encender nada local:
+La página está disponible en línea:
 
-**Frontend:** [https://arrobaaas.github.io/agro-colab/](https://arrobaaas.github.io/agro-colab/)
+**URL:** [https://arrobaaas.github.io/agro-colab/](https://arrobaaas.github.io/agro-colab/)
 
-> **Nota:** El backend corre en tu máquina local (puerto 8000). Para que las interacciones funcionen (login, suscripciones, etc.), necesitas encender el backend. El frontend se ve completo pero las llamadas a la API no responderán sin el backend.
+- **Frontend:** GitHub Pages (hosting estático, siempre activo)
+- **Backend:** Render (API REST, siempre activo)
 
 ---
 
@@ -145,34 +146,6 @@ python3 -m http.server 3000
 ```
 
 Abre en el navegador: `http://localhost:3000`
-
----
-
-## Despliegue (para tener la página 100% funcional en línea)
-
-### Opción 1: GitHub Pages (gratis, solo frontend)
-
-1. Ve a **Settings → Pages** en el repositorio de GitHub
-2. En **Source**, selecciona la rama `main` y la carpeta `/frontend`
-3. GitHub te dará la URL: `https://arrobaaas.github.io/agro-colab/`
-
-### Opción 2: Backend en Render (gratis)
-
-1. Crea una cuenta en [render.com](https://render.com)
-2. Conecta tu repositorio de GitHub
-3. Crea un **New Web Service** con:
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `uvicorn main:app --host 0.0.0.0 --port 10000`
-4. Render te dará una URL como `https://agro-colab.onrender.com`
-
-### Opción 3: Ambos en línea
-
-1. Sube el frontend a GitHub Pages (Opción 1)
-2. Sube el backend a Render (Opción 2)
-3. Actualiza `frontend/js/config.js`:
-   ```js
-   API_URL: "https://tu-backend.onrender.com/api"
-   ```
 
 ---
 
@@ -211,6 +184,8 @@ Este proyecto se distribuye bajo la **MIT License**. Puedes usar, modificar y di
 | Imágenes de árboles | Unsplash | https://unsplash.com/license |
 | Íconos | Font Awesome | CC BY 4.0 / MIT |
 | Framework CSS | Tailwind CSS | MIT |
+| Hosting frontend | GitHub Pages | https://docs.github.com/en/site-policy/github-terms/github-terms-of-service |
+| Hosting backend | Render | https://render.com/legal/terms |
 
 ### Declaración de Uso de Inteligencia Artificial
 
