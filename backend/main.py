@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-from database import engine, SessionLocal, Base, Usuario, Arbol, Suscripcion, Pedido
+from database import engine, SessionLocal, Base, Usuario, Arbol, Suscripcion, Pedido, hash_password, verify_password
 
 app = FastAPI(
     title="Agro-Colab API",
@@ -328,12 +328,15 @@ def registrar_usuario(data: RegistroRequest, db: SessionLocal = Depends(get_db))
     nuevo_usuario = Usuario(
         nombre=data.nombre,
         email=data.email,
-        password=data.password,
+        password=hash_password(data.password),
         rol=data.rol,
         telefono=data.telefono,
         direccion=data.direccion,
         verificado=0,
-        codigo_verificacion=codigo
+        codigo_verificacion=codigo,
+        consentimiento_datos=1,
+        fecha_consentimiento=datetime.now(),
+        acepta_terminos=1
     )
     db.add(nuevo_usuario)
     db.commit()
@@ -385,9 +388,11 @@ def verificar_cuenta(data: VerificacionRequest, db: SessionLocal = Depends(get_d
 def login(data: LoginRequest, db: SessionLocal = Depends(get_db)):
     usuario = db.query(Usuario).filter(
         Usuario.email == data.email,
-        Usuario.password == data.password,
         Usuario.rol == data.rol
     ).first()
+
+    if usuario and not verify_password(data.password, usuario.password):
+        usuario = None
 
     if usuario:
         return {
@@ -404,6 +409,32 @@ def login(data: LoginRequest, db: SessionLocal = Depends(get_db)):
     return {
         "status": "error",
         "mensaje": "Credenciales inválidas o el rol seleccionado no coincide."
+    }
+
+# 5. Rutas de Derechos de Usuarios (Ley 21.719)
+@app.delete("/api/usuario/{email}")
+def eliminar_usuario(email: str, db: SessionLocal = Depends(get_db)):
+    """Derecho a la eliminación de datos (Art. 20 Ley 21.719)"""
+    usuario = db.query(Usuario).filter(Usuario.email == email).first()
+    if not usuario:
+        return {"status": "error", "mensaje": "Usuario no encontrado."}
+
+    # Eliminar suscripciones del usuario
+    db.query(Suscripcion).filter(Suscripcion.usuario_id == usuario.id).delete()
+
+    # Eliminar pedidos del usuario
+    db.query(Pedido).filter(Pedido.cliente_id == usuario.id).delete()
+
+    # Eliminar árbolos publicados por el usuario (si es agricultor)
+    db.query(Arbol).filter(Arbol.productor_id == usuario.id).delete()
+
+    # Finalmente eliminar el usuario
+    db.delete(usuario)
+    db.commit()
+
+    return {
+        "status": "success",
+        "mensaje": "Todos tus datos han sido eliminados correctamente."
     }
 
 # 3. Rutas de Logística y Pedidos

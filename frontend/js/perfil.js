@@ -24,6 +24,29 @@
     document.getElementById("modal-perfil").classList.add("hidden");
   }
 
+  async function eliminarCuenta() {
+    const sesion = auth.leerSesion();
+    if (!sesion) return;
+
+    if (!window.confirm("¿Estás seguro de eliminar tu cuenta? Esta acción es IRREVERSIBLE y borrará todos tus datos personales, suscripciones y pedidos.")) {
+      return;
+    }
+
+    try {
+      const data = await AgroColab.api.eliminarCuenta(sesion.email);
+      if (data.status === "success") {
+        window.alert(data.mensaje);
+        auth.eliminarSesion();
+        cerrar();
+        window.AgroColab.views.mostrarVista("login");
+      } else {
+        window.alert(data.mensaje || "No se pudo eliminar la cuenta.");
+      }
+    } catch (error) {
+      window.alert("Error de comunicación con el backend.");
+    }
+  }
+
   async function guardar(evento) {
     evento.preventDefault();
 
@@ -69,5 +92,5 @@
     document.getElementById("form-perfil").addEventListener("submit", guardar);
   }
 
-  AgroColab.perfil = { init, abrir, cerrar };
+  AgroColab.perfil = { init, abrir, cerrar, eliminarCuenta };
 })();

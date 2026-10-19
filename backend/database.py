@@ -1,6 +1,7 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Float
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Text
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
+import bcrypt
 
 # Conexión a SQLite (para desarrollo local)
 SQLALCHEMY_DATABASE_URL = "sqlite:///./agrocolab.db"
@@ -10,6 +11,14 @@ engine = create_engine(
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+def hash_password(password: str) -> str:
+    """Hash de contraseña usando bcrypt"""
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def verify_password(password: str, hashed: str) -> bool:
+    """Verificar contraseña contra hash"""
+    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
 class Usuario(Base):
     __tablename__ = "usuarios"
@@ -23,6 +32,10 @@ class Usuario(Base):
     direccion = Column(String, nullable=True)
     verificado = Column(Integer, default=0) # 0 = no verificado, 1 = verificado
     codigo_verificacion = Column(String, nullable=True)
+    consentimiento_datos = Column(Integer, default=0) # 0 = no aceptado, 1 = aceptado
+    fecha_consentimiento = Column(DateTime, nullable=True)
+    acepta_terminos = Column(Integer, default=0) # 0 = no aceptado, 1 = aceptado
+    politica_privacidad = Column(Text, nullable=True) # Versión de política aceptada
 
     # Relaciones
     arboles_publicados = relationship("Arbol", back_populates="productor")

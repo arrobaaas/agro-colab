@@ -160,6 +160,45 @@ Estos puntos están fuera del alcance del prototipo actual y aún no existen en 
 
 ---
 
+## Protección de Datos (Ley 21.719)
+
+Agro-Colab cumple con la Ley N° 21.719 de Protección de Datos Personales de Chile (vigente desde el 1 de diciembre de 2026).
+
+### Delegado de Protección de Datos (DPO)
+
+- **Nombre:** Nicolas Reyes Orellana
+- **Contacto:** [@arrobaaas](https://github.com/arrobaaas)
+
+### Registro de Actividades de Tratamiento
+
+| Dato | Finalidad | Base legal | Plazo |
+|---|---|---|---|
+| Nombre | Identificar al usuario | Consentimiento | Hasta eliminación |
+| Email | Autenticación y comunicaciones | Consentimiento | Hasta eliminación |
+| Contraseña (hash) | Autenticación | Consentimiento | Hasta eliminación |
+| Teléfono | Contacto de entrega | Consentimiento | Hasta eliminación |
+| Dirección | Despacho de productos | Consentimiento | Hasta eliminación |
+| Suscripciones | Gestión de adopciones | Contrato | Hasta eliminación |
+| Pedidos | Gestión logística | Contrato | Hasta eliminación |
+
+### Medidas de seguridad implementadas
+
+- **Contraseñas hasheadas** con bcrypt (nunca se guardan en texto plano)
+- **Consentimiento explícito** obligatorio antes de registrar datos
+- **Derecho a la eliminación:** puedes borrar tu cuenta y todos tus datos desde el perfil
+- **Acceso restringido:** solo el usuario puede ver y modificar sus datos
+
+### Tus derechos (Art. 20 Ley 21.719)
+
+| Derecho | Cómo ejercerlo |
+|---|---|
+| **Acceso** | Perfil de usuario |
+| **Rectificación** | Perfil de usuario |
+| **Eliminación** | Botón "Eliminar mi cuenta" en el perfil |
+| **Oponerte** | Contactar al DPO |
+
+---
+
 ## Licencias y Fuentes
 
 ### Licencia del Proyecto

@@ -71,6 +71,10 @@
         method: "POST",
         body: JSON.stringify({ email, codigo })
       });
+    },
+
+    eliminarCuenta(email) {
+      return apiFetch(`/usuario/${encodeURIComponent(email)}`, { method: "DELETE" });
     }
   };
 })();
