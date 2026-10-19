@@ -164,6 +164,8 @@ Estos puntos están fuera del alcance del prototipo actual y aún no existen en 
 
 Agro-Colab cumple con la Ley N° 21.719 de Protección de Datos Personales de Chile (vigente desde el 1 de diciembre de 2026).
 
+**Página de privacidad:** [https://arrobaaas.github.io/agro-colab/privacidad.html](https://arrobaaas.github.io/agro-colab/privacidad.html)
+
 ### Delegado de Protección de Datos (DPO)
 
 - **Nombre:** Nicolas Reyes Orellana
@@ -175,7 +177,7 @@ Agro-Colab cumple con la Ley N° 21.719 de Protección de Datos Personales de Ch
 |---|---|---|---|
 | Nombre | Identificar al usuario | Consentimiento | Hasta eliminación |
 | Email | Autenticación y comunicaciones | Consentimiento | Hasta eliminación |
-| Contraseña (hash) | Autenticación | Consentimiento | Hasta eliminación |
+| Contraseña (hash bcrypt) | Autenticación | Consentimiento | Hasta eliminación |
 | Teléfono | Contacto de entrega | Consentimiento | Hasta eliminación |
 | Dirección | Despacho de productos | Consentimiento | Hasta eliminación |
 | Suscripciones | Gestión de adopciones | Contrato | Hasta eliminación |
@@ -187,6 +189,29 @@ Agro-Colab cumple con la Ley N° 21.719 de Protección de Datos Personales de Ch
 - **Consentimiento explícito** obligatorio antes de registrar datos
 - **Derecho a la eliminación:** puedes borrar tu cuenta y todos tus datos desde el perfil
 - **Acceso restringido:** solo el usuario puede ver y modificar sus datos
+- **HTTPS:** Todas las comunicaciones van cifradas en producción
+
+### Protocolo de Notificación de Brechas (Art. 22)
+
+- Notificación a la **Agencia de Protección de Datos** dentro de **72 horas**
+- Información directa al usuario afectado
+- Documentación del incidente y medidas correctivas
+- Contacto del DPO para reportar incidentes
+
+### Evaluación de Impacto (DPIA)
+
+Realizada para tratamientos de alto riesgo:
+- **Riesgo:** Bajo
+- **Datos sensibles:** No se tratan datos de salud, origen étnico, etc.
+- **Volumen:** Pequeño (prototipo académico)
+- **Medidas mitigantes:** Hash de contraseñas, consentimiento, derecho a eliminación
+
+### Acuerdos de Tratamiento de Datos (DPA)
+
+| Proveedor | Tipo | DPA |
+|---|---|---|
+| GitHub Pages | Hosting estático | [GitHub Terms](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service) |
+| Render | Hosting backend | [Render Terms](https://render.com/legal/terms) |
 
 ### Tus derechos (Art. 20 Ley 21.719)
 

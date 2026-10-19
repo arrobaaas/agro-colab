@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notificación de Brechas y Privacidad - Agro-Colab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-stone-100 text-stone-800 font-sans antialiased">
+
+  <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <span class="text-3xl">🌱</span>
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight">Agro-Colab</h1>
+          <p class="text-[11px] text-emerald-200">Notificación de Brechas y Privacidad</p>
+        </div>
+      </div>
+      <a href="index.html" class="text-emerald-200 hover:text-white text-sm font-semibold">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Volver
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-10">
+
+    <!-- Notificación de Brechas -->
+    <section class="bg-white rounded-2xl border border-stone-200 shadow-sm p-8 mb-8">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+          <i class="fa-solid fa-shield-halved text-red-600 text-xl"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-black text-stone-900">Notificación de Brechas de Seguridad</h2>
+          <p class="text-xs text-stone-500">Protocolo según Ley 21.719, Art. 22</p>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-sm text-stone-700 leading-relaxed">
+        <p><strong>¿Qué es una brecha de seguridad?</strong></p>
+        <p>Una brecha de seguridad es cualquier incidente que comprometa la confidencialidad, integridad o disponibilidad de tus datos personales, como accesos no autorizados, pérdida de datos o filtraciones.</p>
+
+        <p><strong>¿Qué hacemos si ocurre una brecha?</strong></p>
+        <ul class="list-disc pl-5 space-y-2">
+          <li>Notificaremos a la <strong>Agencia de Protección de Datos</strong> dentro de <strong>72 horas</strong> de detectado el incidente.</li>
+          <li>Te informaremos directamente si tus datos pudieron verse comprometidos.</li>
+          <li>Tomaremos medidas inmediatas para contener y mitigar el daño.</li>
+          <li>Documentaremos el incidente para mejorar nuestras medidas de seguridad.</li>
+        </ul>
+
+        <p><strong>¿Qué datos NO se ven afectados?</strong></p>
+        <ul class="list-disc pl-5 space-y-2">
+          <li><strong>Contraseñas:</strong> Nunca se guardan en texto plano. Se almacenan con hash bcrypt.</li>
+          <li><strong>Datos de pago:</strong> No se almacenan en nuestros servidores.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Privacidad y Tratamiento de Datos -->
+    <section class="bg-white rounded-2xl border border-stone-200 shadow-sm p-8 mb-8">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+          <i class="fa-solid fa-lock text-emerald-600 text-xl"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-black text-stone-900">Privacidad y Tratamiento de Datos</h2>
+          <p class="text-xs text-stone-500">Registro de actividades según Ley 21.719, Art. 16</p>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-sm text-stone-700 leading-relaxed">
+        <p><strong>¿Qué datos recopilamos?</strong></p>
+        <ul class="list-disc pl-5 space-y-2">
+          <li><strong>Nombre completo:</strong> Para identificarte en la plataforma.</li>
+          <li><strong>Correo electrónico:</strong> Para autenticación y comunicaciones.</li>
+          <li><strong>Contraseña:</strong> Almacenada con hash bcrypt (nunca en texto plano).</li>
+          <li><strong>Teléfono y dirección:</strong> Para entregas y contacto.</li>
+        </ul>
+
+        <p><strong>¿Cómo usamos tus datos?</strong></p>
+        <ul class="list-disc pl-5 space-y-2">
+          <li>Gestionar tu cuenta y autenticación.</li>
+          <li>Procesar suscripciones a árboles y pedidos de abastecimiento.</li>
+          <li>Coordinar entregas logísticas.</li>
+          <li>Enviar comunicaciones sobre tus pedidos.</li>
+        </ul>
+
+        <p><strong>¿Compartimos tus datos?</strong></p>
+        <ul class="list-disc pl-5 space-y-2">
+          <li><strong>No compartimos</strong> tus datos personales con terceros.</li>
+          <li>Los datos se almacenan únicamente en nuestra base de datos.</li>
+          <li>No vendemos ni alquilamos tus datos a nadie.</li>
+        </ul>
+
+        <p><strong>¿Dónde se guardan tus datos?</strong></p>
+        <ul class="list-disc pl-5 space-y-2">
+          <li>Base de datos en el servidor backend (Render).</li>
+          <li>Tu sesión se guarda solo en tu navegador (localStorage).</li>
+          <li>No se guardan datos en texto plano.</li>
+        </ul>
+
+        <p><strong>¿Cuánto tiempo guardamos tus datos?</strong></p>
+        <p>Hasta que decidas eliminar tu cuenta. Todos tus datos se borran permanentemente cuando lo solicitas.</p>
+      </div>
+    </section>
+
+    <!-- Tus Derechos -->
+    <section class="bg-white rounded-2xl border border-stone-200 shadow-sm p-8 mb-8">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+          <i class="fa-solid fa-user-shield text-amber-600 text-xl"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-black text-stone-900">Tus Derechos (Ley 21.719, Art. 20)</h2>
+          <p class="text-xs text-stone-500">Cómo ejercerlos</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-stone-50 rounded-xl p-4">
+          <h3 class="font-bold text-stone-900 mb-2"><i class="fa-solid fa-eye text-emerald-600 mr-2"></i>Acceso</h3>
+          <p class="text-xs text-stone-600">Puedes ver todos tus datos guardados en tu perfil de usuario.</p>
+        </div>
+        <div class="bg-stone-50 rounded-xl p-4">
+          <h3 class="font-bold text-stone-900 mb-2"><i class="fa-solid fa-pen text-emerald-600 mr-2"></i>Rectificación</h3>
+          <p class="text-xs text-stone-600">Puedes actualizar tu nombre, correo, teléfono y dirección en el perfil.</p>
+        </div>
+        <div class="bg-stone-50 rounded-xl p-4">
+          <h3 class="font-bold text-stone-900 mb-2"><i class="fa-solid fa-trash text-red-600 mr-2"></i>Eliminación</h3>
+          <p class="text-xs text-stone-600">Puedes borrar tu cuenta y todos tus datos desde el perfil.</p>
+        </div>
+        <div class="bg-stone-50 rounded-xl p-4">
+          <h3 class="font-bold text-stone-900 mb-2"><i class="fa-solid fa-ban text-amber-600 mr-2"></i>Oposición</h3>
+          <p class="text-xs text-stone-600">Puedes contactar al DPO para oponerte a algún tratamiento.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DPO -->
+    <section class="bg-white rounded-2xl border border-stone-200 shadow-sm p-8">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+          <i class="fa-solid fa-user-tie text-emerald-600 text-xl"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-black text-stone-900">Delegado de Protección de Datos</h2>
+          <p class="text-xs text-stone-500">Contacto directo</p>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-sm text-stone-700 leading-relaxed">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+          <p class="font-bold text-stone-900">DPO: Nicolas Reyes Orellana</p>
+          <p class="text-xs text-stone-600 mt-1">GitHub: <a href="https://github.com/arrobaaas" class="text-emerald-700 hover:underline">@arrobaaas</a></p>
+        </div>
+        <p>Para cualquier consulta sobre privacidad, tratamiento de datos o ejercer tus derechos, contacta al DPO.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-stone-900 text-stone-400 text-xs py-8 text-center">
+    <p>© 2026 Agro-Colab - Cumplimiento Ley 21.719 de Protección de Datos Personales</p>
+  </footer>
+
+</body>
+</html>
