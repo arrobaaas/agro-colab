@@ -363,6 +363,41 @@ class VerificacionRequest(BaseModel):
     email: str
     codigo: str
 
+@app.post("/api/admin/reiniciar-bd")
+def reiniciar_bd():
+    """Reinicia la base de datos con los datos iniciales (para desarrollo)"""
+    db = SessionLocal()
+    try:
+        # Eliminar datos existentes
+        db.query(Suscripcion).delete()
+        db.query(Pedido).delete()
+        db.query(Arbol).delete()
+        db.query(Usuario).delete()
+        db.commit()
+
+        # Crear usuarios de prueba con contraseñas hasheadas
+        usuarios = [
+            Usuario(nombre="Camila Soto", email="comprador@agrocolab.cl", password=hash_password("123"), rol="comprador", verificado=1, consentimiento_datos=1, fecha_consentimiento=datetime.now(), acepta_terminos=1),
+            Usuario(nombre="Hernán Silva", email="agricultor@agrocolab.cl", password=hash_password("123"), rol="agricultor", verificado=1, consentimiento_datos=1, fecha_consentimiento=datetime.now(), acepta_terminos=1)
+        ]
+        db.add_all(usuarios)
+        db.commit()
+
+        # Crear árboles de prueba
+        arboles = [
+            Arbol(nombre="Palto Hass #104", plan="Básico", tipo_suscripcion="Compartido", precio_mensual_clp=12000, cupos_totales=5, cupos_ocupados=3, estimacion_cosecha="45 kg anuales", ubicacion="Valle del Aconcagua, Región de Valparaíso", imagen="https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=600&q=80", productor_id=2),
+            Arbol(nombre="Naranjo Valencia #22", plan="Premium", tipo_suscripcion="Exclusivo", precio_mensual_clp=35000, cupos_totales=1, cupos_ocupados=0, estimacion_cosecha="80 kg anuales", ubicacion="Curicó, Región del Maule", imagen="https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=600&q=80", productor_id=2),
+            Arbol(nombre="Limonero Eureka #12", plan="Intermedio", tipo_suscripcion="Compartido", precio_mensual_clp=8000, cupos_totales=3, cupos_ocupados=1, estimacion_cosecha="35 kg anuales", ubicacion="Mallarauco, Región Metropolitana", imagen="https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=600&q=80", productor_id=2)
+        ]
+        db.add_all(arboles)
+        db.commit()
+
+        return {"status": "success", "mensaje": "Base de datos reiniciada correctamente."}
+    except Exception as e:
+        return {"status": "error", "mensaje": str(e)}
+    finally:
+        db.close()
+
 @app.post("/api/verificar-cuenta")
 def verificar_cuenta(data: VerificacionRequest, db: SessionLocal = Depends(get_db)):
     usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
