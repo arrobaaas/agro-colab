@@ -363,7 +363,7 @@ class VerificacionRequest(BaseModel):
     email: str
     codigo: str
 
-@app.post("/api/admin/reiniciar-bd")
+@app.get("/api/admin/reiniciar-bd")
 def reiniciar_bd():
     """Reinicia la base de datos con los datos iniciales (para desarrollo)"""
     db = SessionLocal()
