@@ -14,6 +14,7 @@
   <script src="js/parcelas.js" defer></script>
   <script src="js/agricultor.js" defer></script>
   <script src="js/perfil.js" defer></script>
+  <script src="js/autocomplete.js" defer></script>
   <script src="js/views.js" defer></script>
   <script src="js/login.js" defer></script>
   <script src="js/app.js" defer></script>
@@ -599,7 +600,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
               <div class="sm:col-span-2">
                 <label for="dest-direccion" class="block text-xs font-semibold text-stone-700 mb-1">Dirección (Calle, Número, Depto/Oficina)</label>
-                <input type="text" id="dest-direccion" required placeholder="Av. Los Aromos 1234" class="input">
+                <div class="relative">
+                  <input type="text" id="dest-direccion" required placeholder="Av. Los Aromos 1234" autocomplete="off" class="input" oninput="AgroColab.autocomplete.buscarDireccion(this)">
+                  <div id="sugerencias-direccion" class="sugerencias-lista hidden absolute left-0 right-0 z-20"></div>
+                </div>
+                <p class="text-[10px] text-stone-400 mt-1">Empieza a escribir y selecciona una dirección sugerida</p>
               </div>
               <div>
                 <label for="dest-comuna" class="block text-xs font-semibold text-stone-700 mb-1">Comuna / Ciudad</label>
@@ -731,7 +736,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
               <div class="sm:col-span-2">
                 <label for="modal-dest-direccion" class="block text-xs font-semibold text-stone-700 mb-1">Dirección (Calle, Número, Depto/Oficina)</label>
-                <input type="text" id="modal-dest-direccion" required placeholder="Av. Los Aromos 1234" class="input">
+                <div class="relative">
+                  <input type="text" id="modal-dest-direccion" required placeholder="Av. Los Aromos 1234" autocomplete="off" class="input" oninput="AgroColab.autocomplete.buscarDireccion(this)">
+                  <div id="sugerencias-modal-direccion" class="sugerencias-lista hidden absolute left-0 right-0 z-20"></div>
+                </div>
+                <p class="text-[10px] text-stone-400 mt-1">Empieza a escribir y selecciona una dirección sugerida</p>
               </div>
               <div>
                 <label for="modal-dest-comuna" class="block text-xs font-semibold text-stone-700 mb-1">Comuna / Ciudad</label>

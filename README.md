@@ -250,6 +250,22 @@ Este proyecto se distribuye bajo la **MIT License**. Puedes usar, modificar y di
 | Framework CSS | Tailwind CSS | MIT |
 | Hosting frontend | GitHub Pages | https://docs.github.com/en/site-policy/github-terms/github-terms-of-service |
 | Hosting backend | Render | https://render.com/legal/terms |
+| Autocompletado de direcciones | Photon (Komoot) | [OpenStreetMap ODbL](https://www.openstreetmap.org/copyright) |
+| Datos de direcciones | OpenStreetMap | [ODbL](https://opendatacommons.org/licenses/odbl/) |
+
+### Autocompletado de Direcciones
+
+El formulario de logística usa **Photon** (https://photon.komoot.io/) para sugerir direcciones reales mientras el usuario escribe. Photon es un geocodificador open source basado en **OpenStreetMap**.
+
+- **Sin API key** requerida
+- **Sin geolocalización** del dispositivo
+- **Gratuito** y open source
+- Los datos de direcciones están bajo licencia **ODbL** de OpenStreetMap
+
+El repositorio `react-google-maps-api` fue evaluado pero descartado porque:
+- Es para React (el proyecto usa JavaScript vanilla)
+- Requiere API key de Google Maps con costo
+- La versión 3.x es software comercial
 
 ### Declaración de Uso de Inteligencia Artificial
 
