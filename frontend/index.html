@@ -1058,6 +1058,15 @@
           <div id="alerta-perfil" class="hidden"></div>
           <button type="submit" class="btn-submit w-full">Guardar cambios</button>
         </form>
+
+        <!-- Zona de peligro: eliminar cuenta (Ley 21.719) -->
+        <div class="pt-5 border-t border-stone-200">
+          <p class="text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Zona de peligro</p>
+          <button type="button" onclick="AgroColab.perfil.eliminarCuenta()" class="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 font-bold text-sm py-3 rounded-xl transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-trash"></i> Eliminar mi cuenta y todos mis datos
+          </button>
+          <p class="text-[10px] text-stone-400 text-center mt-2">Esta acción es irreversible. Derechos de eliminación (Ley 21.719, Art. 20).</p>
+        </div>
       </div>
     </div>
   </div>
