@@ -7,6 +7,7 @@
 
   function guardarSesion(usuario) {
     const sesion = {
+      id: usuario.id,
       nombre: usuario.nombre,
       email: usuario.email,
       rol: usuario.rol,

@@ -75,6 +75,18 @@
 
     eliminarCuenta(email) {
       return apiFetch(`/usuario/${encodeURIComponent(email)}`, { method: "DELETE" });
+    },
+
+    obtenerSuscriptores(productorId) {
+      return apiFetch(`/mis-arboles/${productorId}/suscriptores`);
+    },
+
+    expulsarSuscriptor(suscripcionId) {
+      return apiFetch(`/suscripciones/${suscripcionId}`, { method: "DELETE" });
+    },
+
+    obtenerUsuario(usuarioId) {
+      return apiFetch(`/usuario/${usuarioId}`);
     }
   };
 })();

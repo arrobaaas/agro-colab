@@ -202,10 +202,15 @@ def suscribir(data: SuscripcionRequest, db: SessionLocal = Depends(get_db)):
         return {"status": "error", "mensaje": "Árbol no encontrado."}
 
     if arbol.cupos_ocupados < arbol.cupos_totales:
+        # Buscar el usuario real por su nombre
+        usuario = db.query(Usuario).filter(Usuario.nombre == data.user_name).first()
+        if not usuario:
+            return {"status": "error", "mensaje": "Usuario no encontrado."}
+
         arbol.cupos_ocupados += 1
 
-        # Crear registro de suscripción
-        suscripcion = Suscripcion(usuario_id=1, arbol_id=data.tree_id)  # usuario_id temporal
+        # Crear registro de suscripción con el usuario real
+        suscripcion = Suscripcion(usuario_id=usuario.id, arbol_id=data.tree_id)
         db.add(suscripcion)
         db.commit()
 
@@ -227,6 +232,73 @@ def suscribir(data: SuscripcionRequest, db: SessionLocal = Depends(get_db)):
             }
         }
     return {"status": "error", "mensaje": "Cupos agotados para este árbol."}
+
+# 6. Gestión de suscriptores (para el agricultor)
+@app.get("/api/mis-arboles/{productor_id}/suscriptores")
+def listar_suscriptores(productor_id: int, db: SessionLocal = Depends(get_db)):
+    """Lista los usuarios suscritos a los árboles de un productor."""
+    arboles = db.query(Arbol).filter(Arbol.productor_id == productor_id).all()
+
+    resultado = []
+    for arbol in arboles:
+        suscripciones = db.query(Suscripcion).filter(Suscripcion.arbol_id == arbol.id).all()
+        suscriptores = []
+        for s in suscripciones:
+            u = db.query(Usuario).filter(Usuario.id == s.usuario_id).first()
+            if u:
+                suscriptores.append({
+                    "suscripcion_id": s.id,
+                    "usuario_id": u.id,
+                    "nombre": u.nombre,
+                    "email": u.email,
+                    "telefono": u.telefono,
+                    "direccion": u.direccion,
+                    "rol": u.rol,
+                    "fecha_suscripcion": s.fecha_suscripcion.strftime("%d/%m/%Y") if s.fecha_suscripcion else None
+                })
+
+        resultado.append({
+            "arbol_id": arbol.id,
+            "arbol_nombre": arbol.nombre,
+            "cupos_totales": arbol.cupos_totales,
+            "cupos_ocupados": arbol.cupos_ocupados,
+            "suscriptores": suscriptores
+        })
+
+    return resultado
+
+@app.delete("/api/suscripciones/{suscripcion_id}")
+def expulsar_suscriptor(suscripcion_id: int, db: SessionLocal = Depends(get_db)):
+    """Expulsa a un suscriptor de un árbol y libera su cupo."""
+    suscripcion = db.query(Suscripcion).filter(Suscripcion.id == suscripcion_id).first()
+    if not suscripcion:
+        return {"status": "error", "mensaje": "Suscripción no encontrada."}
+
+    arbol = db.query(Arbol).filter(Arbol.id == suscripcion.arbol_id).first()
+
+    db.delete(suscripcion)
+    if arbol and arbol.cupos_ocupados > 0:
+        arbol.cupos_ocupados -= 1
+    db.commit()
+
+    return {"status": "success", "mensaje": "Suscriptor expulsado y cupo liberado."}
+
+@app.get("/api/usuario/{usuario_id}")
+def obtener_usuario(usuario_id: int, db: SessionLocal = Depends(get_db)):
+    """Obtiene el perfil público de un usuario (para que el agricultor lo vea)."""
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        return {"status": "error", "mensaje": "Usuario no encontrado."}
+
+    return {
+        "id": usuario.id,
+        "nombre": usuario.nombre,
+        "email": usuario.email,
+        "telefono": usuario.telefono,
+        "direccion": usuario.direccion,
+        "rol": usuario.rol,
+        "verificado": usuario.verificado
+    }
 
 @app.put("/api/arboles/{arbol_id}")
 def actualizar_arbol(arbol_id: int, data: ArbolRequest, db: SessionLocal = Depends(get_db)):
@@ -352,6 +424,7 @@ def registrar_usuario(data: RegistroRequest, db: SessionLocal = Depends(get_db))
         "status": "success",
         "mensaje": f"Usuario {nuevo_usuario.nombre} registrado correctamente. Revisa tu correo para verificar tu cuenta.",
         "user": {
+            "id": nuevo_usuario.id,
             "nombre": nuevo_usuario.nombre,
             "email": nuevo_usuario.email,
             "rol": nuevo_usuario.rol
@@ -391,6 +464,16 @@ def reiniciar_bd():
         ]
         db.add_all(arboles)
         db.commit()
+
+        # Crear suscripciones de prueba (comprador -> árboles)
+        comprador = db.query(Usuario).filter(Usuario.email == "comprador@agrocolab.cl").first()
+        if comprador:
+            suscripciones = [
+                Suscripcion(usuario_id=comprador.id, arbol_id=1),  # Palto Hass
+                Suscripcion(usuario_id=comprador.id, arbol_id=3)   # Limonero
+            ]
+            db.add_all(suscripciones)
+            db.commit()
 
         return {"status": "success", "mensaje": "Base de datos reiniciada correctamente."}
     except Exception as e:
@@ -434,6 +517,7 @@ def login(data: LoginRequest, db: SessionLocal = Depends(get_db)):
             "status": "success",
             "mensaje": f"Bienvenido/a {usuario.nombre}",
             "user": {
+                "id": usuario.id,
                 "nombre": usuario.nombre,
                 "email": usuario.email,
                 "rol": usuario.rol,

@@ -36,7 +36,10 @@
           <div class="text-right">
             <p class="font-black text-emerald-900">${ui.formatearMonto(arbol.precio_mensual_clp)}</p>
             <p class="text-[10px] text-stone-400">CLP / mes</p>
-            <div class="mt-2 flex gap-2 justify-end">
+            <div class="mt-2 flex gap-2 justify-end flex-wrap">
+              <button type="button" onclick="AgroColab.agricultor.abrirSuscriptores(${arbol.id})" class="text-emerald-600 hover:text-emerald-800 text-xs font-bold flex items-center gap-1">
+                <i class="fa-solid fa-users"></i> Ver suscriptores (${arbol.cupos_ocupados})
+              </button>
               <button type="button" onclick="AgroColab.agricultor.abrirEdicion(${arbol.id})" class="text-emerald-600 hover:text-emerald-800 text-xs font-bold flex items-center gap-1">
                 <i class="fa-solid fa-pen"></i> Editar
               </button>
@@ -171,6 +174,111 @@
     }
   }
 
+  /* ---------- Gestión de suscriptores ---------- */
+
+  let arbolSuscriptoresActual = null;
+
+  async function abrirSuscriptores(arbolId) {
+    const arbol = arbolesAgricultor.find(a => a.id === arbolId);
+    if (!arbol) return;
+
+    arbolSuscriptoresActual = arbol;
+    document.getElementById("suscriptores-arbol-nombre").textContent = arbol.nombre;
+    document.getElementById("suscriptores-arbol-id").value = arbol.id;
+    document.getElementById("modal-suscriptores").classList.remove("hidden");
+
+    await cargarSuscriptores(arbol.id);
+  }
+
+  function cerrarSuscriptores() {
+    document.getElementById("modal-suscriptores").classList.add("hidden");
+    arbolSuscriptoresActual = null;
+  }
+
+  async function cargarSuscriptores(arbolId) {
+    const contenedor = document.getElementById("lista-suscriptores");
+    contenedor.innerHTML = '<p class="text-stone-500 text-sm text-center py-8">Cargando suscriptores...</p>';
+
+    try {
+      const sesion = auth.leerSesion();
+      const datos = await api.obtenerSuscriptores(sesion.id);
+      const arbol = datos.find(a => a.arbol_id === arbolId);
+
+      if (!arbol || !arbol.suscriptores.length) {
+        contenedor.innerHTML = '<p class="text-stone-500 text-sm text-center py-8">No hay suscriptores en este árbol</p>';
+        return;
+      }
+
+      contenedor.innerHTML = arbol.suscriptores
+        .map(function (s) {
+          return `
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-stone-50 rounded-xl border border-stone-200">
+              <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-user text-emerald-700"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-bold text-sm text-stone-900">${s.nombre}</p>
+                <p class="text-xs text-stone-500"><i class="fa-solid fa-envelope text-stone-400 mr-1"></i>${s.email}</p>
+                <p class="text-xs text-stone-500">${s.telefono ? '<i class="fa-solid fa-phone text-stone-400 mr-1"></i>' + s.telefono : ''} ${s.direccion ? '<i class="fa-solid fa-location-dot text-stone-400 mr-1"></i>' + s.direccion : ''}</p>
+                <p class="text-[10px] text-stone-400 mt-1">Suscrito el ${s.fecha_suscripcion}</p>
+              </div>
+              <div class="flex gap-2">
+                <button type="button" onclick="AgroColab.agricultor.verPerfilUsuario(${s.usuario_id})" class="text-emerald-600 hover:text-emerald-800 text-xs font-bold flex items-center gap-1">
+                  <i class="fa-solid fa-id-card"></i> Ver perfil
+                </button>
+                <button type="button" onclick="AgroColab.agricultor.expulsarSuscriptor(${s.suscripcion_id})" class="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1">
+                  <i class="fa-solid fa-user-minus"></i> Expulsar
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    } catch (error) {
+      contenedor.innerHTML = '<p class="text-red-500 text-sm text-center py-8">Error al cargar suscriptores</p>';
+    }
+  }
+
+  async function verPerfilUsuario(usuarioId) {
+    try {
+      const usuario = await api.obtenerUsuario(usuarioId);
+      if (usuario && usuario.id) {
+        window.alert(
+          `Perfil del usuario:\n\n` +
+          `Nombre: ${usuario.nombre}\n` +
+          `Email: ${usuario.email}\n` +
+          `Teléfono: ${usuario.telefono || 'No registrado'}\n` +
+          `Dirección: ${usuario.direccion || 'No registrada'}\n` +
+          `Rol: ${usuario.rol}\n` +
+          `Cuenta verificada: ${usuario.verificado ? 'Sí' : 'No'}`
+        );
+      }
+    } catch (error) {
+      window.alert("Error al cargar el perfil del usuario.");
+    }
+  }
+
+  async function expulsarSuscriptor(suscripcionId) {
+    if (!window.confirm("¿Estás seguro de expulsar a este suscriptor? Se liberará su cupo.")) {
+      return;
+    }
+
+    try {
+      const data = await api.expulsarSuscriptor(suscripcionId);
+      if (data.status === "success") {
+        window.alert(data.mensaje);
+        if (arbolSuscriptoresActual) {
+          await cargarSuscriptores(arbolSuscriptoresActual.id);
+        }
+        cargarArbolesAgricultor();
+      } else {
+        window.alert(data.mensaje || "No se pudo expulsar al suscriptor.");
+      }
+    } catch (error) {
+      window.alert("Error de comunicación con el backend.");
+    }
+  }
+
   /* ---------- Formulario de subida de árbol ---------- */
 
   function mostrarFormulario() {
@@ -291,5 +399,5 @@
     return cargarArbolesAgricultor();
   }
 
-  AgroColab.agricultor = { init, cargar, eliminarArbol, abrirEdicion, cerrarEdicion };
+  AgroColab.agricultor = { init, cargar, eliminarArbol, abrirEdicion, cerrarEdicion, abrirSuscriptores, cerrarSuscriptores, verPerfilUsuario, expulsarSuscriptor };
 })();
