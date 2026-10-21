@@ -6,7 +6,8 @@ from datetime import datetime
 
 from database import (
     engine, SessionLocal, Base, Usuario, Arbol, Suscripcion, Pedido,
-    hash_password, verify_password, asegurar_columnas,
+    hash_password, verify_password, asegurar_columnas, es_hash_bcrypt,
+    migrar_cuentas_antiguas,
 )
 from catalogo import (
     CATALOGO_ESPECIES, listar_especies, buscar_especie,
@@ -30,6 +31,7 @@ app.add_middleware(
 # Crear tablas y datos iniciales
 Base.metadata.create_all(bind=engine)
 asegurar_columnas()
+migrar_cuentas_antiguas()
 
 def get_db():
     db = SessionLocal()
@@ -43,10 +45,22 @@ def datos_iniciales():
     try:
         # Verificar si ya hay datos
         if db.query(Usuario).count() == 0:
-            # Crear usuarios de prueba
+            # Crear usuarios de prueba (contraseña hasheada con bcrypt).
+            # Van verificados y con los consentimientos aceptados para que
+            # sirvan de inmediato en las cuentas de demostración.
             usuarios = [
-                Usuario(nombre="Camila Soto", email="comprador@agrocolab.cl", password="123", rol="comprador"),
-                Usuario(nombre="Hernán Silva", email="agricultor@agrocolab.cl", password="123", rol="agricultor")
+                Usuario(
+                    nombre="Camila Soto", email="comprador@agrocolab.cl",
+                    password=hash_password("123"), rol="comprador", verificado=1,
+                    consentimiento_datos=1, fecha_consentimiento=datetime.now(),
+                    acepta_terminos=1,
+                ),
+                Usuario(
+                    nombre="Hernán Silva", email="agricultor@agrocolab.cl",
+                    password=hash_password("123"), rol="agricultor", verificado=1,
+                    consentimiento_datos=1, fecha_consentimiento=datetime.now(),
+                    acepta_terminos=1,
+                )
             ]
             db.add_all(usuarios)
             db.commit()
@@ -566,25 +580,31 @@ def login(data: LoginRequest, db: SessionLocal = Depends(get_db)):
         Usuario.rol == data.rol
     ).first()
 
-    if usuario and not verify_password(data.password, usuario.password):
-        usuario = None
-
-    if usuario:
+    if not usuario or not verify_password(data.password, usuario.password):
         return {
-            "status": "success",
-            "mensaje": f"Bienvenido/a {usuario.nombre}",
-            "user": {
-                "id": usuario.id,
-                "nombre": usuario.nombre,
-                "email": usuario.email,
-                "rol": usuario.rol,
-                "verificado": usuario.verificado,
-                "codigo_verificacion": usuario.codigo_verificacion
-            }
+            "status": "error",
+            "mensaje": "Credenciales inválidas o el rol seleccionado no coincide."
         }
+
+    # La cuenta todavía guardaba la contraseña en texto plano: se re-hashea
+    # en el primer inicio de sesión correcto.
+    if not es_hash_bcrypt(usuario.password):
+        usuario.password = hash_password(usuario.password)
+        db.commit()
+        db.refresh(usuario)
+        print(f"[migracion] contrasena re-hasheada para {usuario.email}")
+
     return {
-        "status": "error",
-        "mensaje": "Credenciales inválidas o el rol seleccionado no coincide."
+        "status": "success",
+        "mensaje": f"Bienvenido/a {usuario.nombre}",
+        "user": {
+            "id": usuario.id,
+            "nombre": usuario.nombre,
+            "email": usuario.email,
+            "rol": usuario.rol,
+            "verificado": usuario.verificado,
+            "codigo_verificacion": usuario.codigo_verificacion
+        }
     }
 
 # 5. Rutas de Derechos de Usuarios (Ley 21.719)

@@ -61,7 +61,8 @@
       ui.mostrarAlerta(
         alertBox,
         "error",
-        `Error de conexión con el backend (${config.API_URL}). Revisa que Uvicorn esté activo.`
+        error.message ||
+          `Error de conexión con el backend (${config.API_URL}). Revisa que Uvicorn esté activo.`
       );
     }
     return false;
@@ -127,7 +128,7 @@
         ui.mostrarAlerta(alerta, "error", data.mensaje);
       }
     } catch (error) {
-      ui.mostrarAlerta(alerta, "error", "Error de conexión con el backend.");
+      ui.mostrarAlerta(alerta, "error", error.message || "Error de comunicación con el backend.");
     }
     return false;
   }
@@ -175,7 +176,7 @@
         ui.mostrarAlerta(alerta, "error", data.mensaje);
       }
     } catch (error) {
-      ui.mostrarAlerta(alerta, "error", "Error de conexión con el backend.");
+      ui.mostrarAlerta(alerta, "error", error.message || "Error de comunicación con el backend.");
     }
     return false;
   }

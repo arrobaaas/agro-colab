@@ -9,7 +9,29 @@
       headers: { "Content-Type": "application/json" },
       ...opciones
     });
-    return respuesta.json();
+
+    let cuerpo = null;
+    try {
+      cuerpo = await respuesta.json();
+    } catch (error) {
+      cuerpo = null;
+    }
+
+    /* Si la respuesta no es JSON (un 500 del servidor, una página de
+       mantenimiento, etc.) se avisa con el código real en vez de un
+       genérico "error de conexión". */
+    if (cuerpo === null) {
+      if (respuesta.ok) {
+        throw new Error("El servidor devolvió una respuesta inesperada.");
+      }
+      throw new Error(
+        `El servidor respondió ${respuesta.status}` +
+        `${respuesta.statusText ? " " + respuesta.statusText : ""}. ` +
+        "Espera un momento e inténtalo de nuevo."
+      );
+    }
+
+    return cuerpo;
   }
 
   AgroColab.api = {

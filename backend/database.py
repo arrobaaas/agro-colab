@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateT
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
 import bcrypt
+import hmac
 
 # Conexión a SQLite (para desarrollo local)
 SQLALCHEMY_DATABASE_URL = "sqlite:///./agrocolab.db"
@@ -12,13 +13,34 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+# Cuentas de demostración que el README documenta como cuentas de prueba
+CUENTAS_DEMO = ("comprador@agrocolab.cl", "agricultor@agrocolab.cl")
+
 def hash_password(password: str) -> str:
     """Hash de contraseña usando bcrypt"""
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 def verify_password(password: str, hashed: str) -> bool:
-    """Verificar contraseña contra hash"""
-    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    """Verificar contraseña contra hash bcrypt.
+
+    Las bases de datos creadas antes del cambio a bcrypt guardaban la contraseña
+    en texto plano. Para esos casos se compara directamente (y el login se
+    encarga de re-hashear el dato), en vez de terminar en un error 500.
+    """
+    if not hashed:
+        return False
+
+    if not es_hash_bcrypt(hashed):
+        return hmac.compare_digest(password, hashed)
+
+    try:
+        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    except (ValueError, TypeError):
+        return False
+
+def es_hash_bcrypt(valor: str) -> bool:
+    """True si el valor es un hash bcrypt válido."""
+    return bool(valor) and valor.startswith(("$2a$", "$2b$", "$2y$"))
 
 class Usuario(Base):
     __tablename__ = "usuarios"
@@ -128,3 +150,28 @@ def asegurar_columnas():
                     text(f"ALTER TABLE {nombre_tabla} ADD COLUMN {columna.name} {tipo}{default}")
                 )
             print(f"[migracion] columna '{columna.name}' agregada a '{nombre_tabla}'")
+
+
+def migrar_cuentas_antiguas():
+    """Repara las cuentas que quedaron con datos de versiones anteriores.
+
+    - Contraseñas en texto plano -> se re-hashean con bcrypt.
+      Sin esto, bcrypt.checkpw() lanza 'Invalid salt' y el login responde 500.
+    - Cuentas de demostración sin verificar -> se verifican, para que las
+      cuentas de ejemplo funcionen apenas se crea la base.
+    """
+    db = SessionLocal()
+    try:
+        for usuario in db.query(Usuario).all():
+            if usuario.password and not es_hash_bcrypt(usuario.password):
+                usuario.password = hash_password(usuario.password)
+                print(f"[migracion] contrasena re-hasheada para {usuario.email}")
+
+            if usuario.email in CUENTAS_DEMO and not usuario.verificado:
+                usuario.verificado = 1
+                usuario.codigo_verificacion = None
+                print(f"[migracion] cuenta de demostracion verificada: {usuario.email}")
+
+        db.commit()
+    finally:
+        db.close()
