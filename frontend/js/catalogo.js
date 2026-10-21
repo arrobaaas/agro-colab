@@ -8,20 +8,40 @@
 
 (function () {
   const AgroColab = (window.AgroColab = window.AgroColab || {});
-  const { api } = AgroColab;
+  const { config } = AgroColab;
 
   let especies = [];
   let cargado = false;
+  let errorCarga = null;
 
   /* ---------- Carga del catálogo ---------- */
+
+  /* Pide el catálogo a la API. Se usa api.obtenerEspecies() cuando existe, y si
+     el navegador tiene cacheada una versión anterior de api.js (que no lo tenía)
+     se hace el request directo, para que un archivo viejo en caché no deje el
+     formulario sin opciones. */
+  async function pedirCatalogo() {
+    if (AgroColab.api && typeof AgroColab.api.obtenerEspecies === "function") {
+      return AgroColab.api.obtenerEspecies();
+    }
+
+    const respuesta = await fetch(`${config.API_URL}/especies`, {
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!respuesta.ok) throw new Error("HTTP " + respuesta.status);
+    return respuesta.json();
+  }
 
   async function cargar() {
     if (cargado) return especies;
     try {
-      const datos = await api.obtenerEspecies();
+      const datos = await pedirCatalogo();
       especies = Array.isArray(datos) ? datos : [];
+      errorCarga = null;
     } catch (error) {
       especies = [];
+      errorCarga = error;
+      console.error("[Agro-Colab] No se pudo cargar el catálogo de especies:", error);
     }
     cargado = true;
     return especies;
@@ -43,6 +63,12 @@
     if (!select) return;
 
     const valorActual = select.value;
+
+    if (errorCarga) {
+      select.innerHTML = '<option value="">No se pudo cargar el catálogo</option>';
+      return;
+    }
+
     select.innerHTML = '<option value="">Selecciona una especie...</option>';
 
     especies.forEach(function (especie) {
@@ -67,7 +93,9 @@
     if (!especie) {
       contenedor.innerHTML =
         '<p class="text-stone-400 text-xs text-center py-6 col-span-3">' +
-        "Elige una especie para ver sus fotos disponibles." +
+        (errorCarga
+          ? "No se pudo cargar el catálogo. Revisa tu conexión y recarga la página."
+          : "Elige una especie para ver sus fotos disponibles.") +
         "</p>";
       return;
     }
