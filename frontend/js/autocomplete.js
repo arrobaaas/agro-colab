@@ -25,7 +25,7 @@
     if (!texto || texto.length < 3) return [];
 
     try {
-      const url = `${PHOTON_URL}?q=${encodeURIComponent(texto)}&limit=5&lang=es`;
+      const url = `${PHOTON_URL}?q=${encodeURIComponent(texto)}&limit=5`;
       const respuesta = await fetch(url);
       const datos = await respuesta.json();
       return datos.features || [];
