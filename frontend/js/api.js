@@ -24,6 +24,10 @@
       return apiFetch("/arboles");
     },
 
+    obtenerEspecies() {
+      return apiFetch("/especies");
+    },
+
     suscribirArbol(userName, treeId) {
       return apiFetch("/suscribir", {
         method: "POST",

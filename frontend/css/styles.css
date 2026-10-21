@@ -418,6 +418,53 @@ body {
   background-color: var(--emerald-50);
 }
 
+/* ---------- Galería de fotos del catálogo de especies ---------- */
+.galeria-fotos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.foto-opcion {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 2px solid var(--stone-200);
+  background-color: var(--stone-100);
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.foto-opcion:hover {
+  border-color: var(--emerald-300);
+  transform: translateY(-2px);
+}
+
+.foto-opcion--activa {
+  border-color: var(--emerald-700);
+  box-shadow: 0 0 0 3px rgba(6, 95, 70, 0.15);
+}
+
+.foto-opcion--activa::after {
+  content: "\f00c";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: var(--emerald-700);
+  color: #fff;
+  font-size: 0.7rem;
+}
+
 /* ---------- Nav chip clickeable (perfil) ---------- */
 .nav-chip--clickeable {
   cursor: pointer;

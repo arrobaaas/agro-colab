@@ -1,11 +1,29 @@
 /* Agro-Colab - Vista del Agricultor: dashboard de árboles y formulario
-   para publicar nuevos árboles. */
+   para publicar nuevos árboles.
+
+   El nombre y la foto del árbol no se escriben libremente: la especie se
+   elige de un catálogo cerrado y la foto se toma de la galería curada de esa
+   especie, de modo que el catálogo nunca muestre imágenes ajenas al árbol. */
 
 (function () {
   const AgroColab = (window.AgroColab = window.AgroColab || {});
-  const { api, ui, auth, config } = AgroColab;
+  const { api, ui, auth, config, catalogo } = AgroColab;
 
   let arbolesAgricultor = [];
+
+  /* ---------- Estado de los formularios ---------- */
+
+  const formulario = {
+    especie: "",
+    identificador: "",
+    foto: null
+  };
+
+  const edicion = {
+    especie: "",
+    identificador: "",
+    foto: null
+  };
 
   /* ---------- Renderizar lista de árboles ---------- */
 
@@ -61,16 +79,44 @@
     if (!arbol) return;
 
     document.getElementById("editar-arbol-id").value = arbol.id;
-    document.getElementById("editar-nombre").value = arbol.nombre;
     document.getElementById("editar-ubicacion").value = arbol.ubicacion;
     document.getElementById("editar-plan").value = arbol.plan;
     document.getElementById("editar-tipo").value = arbol.tipo_suscripcion;
     document.getElementById("editar-cupos").value = arbol.cupos_totales;
     document.getElementById("editar-precio").value = arbol.precio_mensual_clp;
     document.getElementById("editar-cosecha").value = arbol.estimacion_cosecha;
-    document.getElementById("editar-imagen").value = arbol.imagen || "";
+
+    edicion.especie = arbol.especie || "";
+    edicion.identificador = arbol.identificador || "";
+    edicion.foto = null;
+
+    const selectorEspecie = document.getElementById("editar-especie");
+    catalogo.pintarSelect(selectorEspecie);
+    selectorEspecie.value = edicion.especie;
+
+    const especie = catalogo.porId(edicion.especie);
+    edicion.foto = especie
+      ? especie.fotos.find(foto => foto.url === arbol.imagen) || null
+      : null;
+
+    document.getElementById("editar-identificador").value = edicion.identificador;
+
+    pintarGaleriaEdicion();
+    actualizarResumenNombre("editar");
 
     document.getElementById("modal-editar-arbol").classList.remove("hidden");
+  }
+
+  function pintarGaleriaEdicion() {
+    catalogo.pintarGaleria(
+      document.getElementById("galeria-editar"),
+      edicion.especie,
+      function (foto) {
+        edicion.foto = foto;
+        catalogo.pintarCredito(document.getElementById("credito-editar"), foto);
+      },
+      edicion.foto ? edicion.foto.url : null
+    );
   }
 
   function cerrarEdicion() {
@@ -83,19 +129,30 @@
     const alerta = document.getElementById("alerta-editar-arbol");
     const arbolId = Number(document.getElementById("editar-arbol-id").value);
 
+    if (!edicion.especie) {
+      ui.mostrarAlerta(alerta, "error", "Selecciona la especie del árbol.");
+      return;
+    }
+
+    if (!edicion.foto) {
+      ui.mostrarAlerta(alerta, "error", "Elige la foto del árbol en la galería.");
+      return;
+    }
+
     const bodyData = {
-      nombre: document.getElementById("editar-nombre").value.trim(),
+      especie: edicion.especie,
+      identificador: edicion.identificador,
       ubicacion: document.getElementById("editar-ubicacion").value.trim(),
       plan: document.getElementById("editar-plan").value,
       tipo_suscripcion: document.getElementById("editar-tipo").value,
       cupos_totales: Number(document.getElementById("editar-cupos").value),
       precio_mensual_clp: Number(document.getElementById("editar-precio").value),
       estimacion_cosecha: document.getElementById("editar-cosecha").value.trim(),
-      imagen: document.getElementById("editar-imagen").value.trim() || "https://via.placeholder.com/150?text=Árbol",
+      imagen: edicion.foto.url,
       productor: auth.leerSesion().nombre
     };
 
-    if (!bodyData.nombre || !bodyData.ubicacion || !bodyData.estimacion_cosecha) {
+    if (!bodyData.ubicacion || !bodyData.estimacion_cosecha) {
       ui.mostrarAlerta(alerta, "error", "Completa todos los campos obligatorios.");
       return;
     }
@@ -291,17 +348,57 @@
     document.getElementById("dashboard-agricultor").classList.remove("hidden");
   }
 
-  function leerImagenBase64(archivo) {
-    return new Promise(function(resolve, reject) {
-      const lector = new FileReader();
-      lector.onload = function(e) {
-        resolve(e.target.result);
-      };
-      lector.onerror = function(e) {
-        reject(e);
-      };
-      lector.readAsDataURL(archivo);
-    });
+  /* Muestra cómo se verá el nombre del árbol con la especie y el identificador elegidos. */
+  function actualizarResumenNombre(contexto) {
+    const destino = document.getElementById(
+      contexto === "editar" ? "resumen-nombre-editar" : "resumen-nombre"
+    );
+    if (!destino) return;
+
+    const especie = catalogo.porId(contexto === "editar" ? edicion.especie : formulario.especie);
+    const identificador = document.getElementById(
+      contexto === "editar" ? "editar-identificador" : "arbol-identificador"
+    ).value.trim();
+
+    if (!especie) {
+      destino.innerHTML = '<span class="text-stone-400">El nombre se arma con la especie y el número del árbol.</span>';
+      return;
+    }
+
+    const numero = identificador
+      ? (identificador.startsWith("#") ? identificador : "#" + identificador)
+      : "";
+
+    destino.innerHTML =
+      '<span class="text-emerald-800 font-bold">' + especie.nombre + "</span>" +
+      (numero ? ' <span class="text-stone-600">' + numero + "</span>" : "") +
+      '<span class="text-stone-400"> · se mostrará así en el catálogo</span>';
+  }
+
+  function pintarGaleriaFormulario() {
+    catalogo.pintarGaleria(
+      document.getElementById("galeria-arbol"),
+      formulario.especie,
+      function (foto) {
+        formulario.foto = foto;
+        catalogo.pintarCredito(document.getElementById("credito-arbol"), foto);
+      },
+      formulario.foto ? formulario.foto.url : null
+    );
+  }
+
+  function alCambiarEspecie() {
+    const selector = document.getElementById("arbol-especie");
+    formulario.especie = selector.value;
+    formulario.foto = null;
+
+    const descripcion = document.getElementById("arbol-especie-descripcion");
+    const especie = catalogo.porId(formulario.especie);
+    descripcion.textContent = especie ? especie.descripcion : "";
+
+    pintarGaleriaFormulario();
+    catalogo.pintarCredito(document.getElementById("credito-arbol"), null);
+    actualizarResumenNombre("formulario");
   }
 
   async function subirArbol(evento) {
@@ -315,35 +412,30 @@
       return;
     }
 
-    const archivoImagen = document.getElementById("arbol-imagen").files[0];
-    let imagenBase64 = "https://via.placeholder.com/150?text=Árbol";
+    if (!formulario.especie) {
+      ui.mostrarAlerta(alerta, "error", "Selecciona la especie del árbol.");
+      return;
+    }
 
-    if (archivoImagen) {
-      if (archivoImagen.size > 2 * 1024 * 1024) {
-        ui.mostrarAlerta(alerta, "error", "La imagen no puede superar 2MB.");
-        return;
-      }
-      try {
-        imagenBase64 = await leerImagenBase64(archivoImagen);
-      } catch (error) {
-        ui.mostrarAlerta(alerta, "error", "No se pudo leer la imagen.");
-        return;
-      }
+    if (!formulario.foto) {
+      ui.mostrarAlerta(alerta, "error", "Elige la foto del árbol en la galería.");
+      return;
     }
 
     const bodyData = {
-      nombre: document.getElementById("arbol-nombre").value.trim(),
+      especie: formulario.especie,
+      identificador: document.getElementById("arbol-identificador").value.trim(),
       ubicacion: document.getElementById("arbol-ubicacion").value.trim(),
       plan: document.getElementById("arbol-plan").value,
       tipo_suscripcion: document.getElementById("arbol-tipo").value,
       cupos_totales: Number(document.getElementById("arbol-cupos").value),
       precio_mensual_clp: Number(document.getElementById("arbol-precio").value),
       estimacion_cosecha: document.getElementById("arbol-cosecha").value.trim(),
-      imagen: imagenBase64,
+      imagen: formulario.foto.url,
       productor: sesion.nombre
     };
 
-    if (!bodyData.nombre || !bodyData.ubicacion || !bodyData.estimacion_cosecha) {
+    if (!bodyData.ubicacion || !bodyData.estimacion_cosecha) {
       ui.mostrarAlerta(alerta, "error", "Completa todos los campos obligatorios.");
       return;
     }
@@ -356,6 +448,13 @@
       if (data.status === "success") {
         ui.mostrarAlerta(alerta, "exito", data.mensaje || "Árbol publicado correctamente.");
         document.getElementById("form-subir-arbol").reset();
+        formulario.especie = "";
+        formulario.identificador = "";
+        formulario.foto = null;
+        document.getElementById("arbol-especie-descripcion").textContent = "";
+        document.getElementById("credito-arbol").innerHTML = "";
+        pintarGaleriaFormulario();
+        actualizarResumenNombre("formulario");
         setTimeout(function () {
           mostrarDashboard();
           cargarArbolesAgricultor();
@@ -388,6 +487,33 @@
     document.getElementById("btn-cancelar-arbol").addEventListener("click", mostrarDashboard);
     document.getElementById("form-subir-arbol").addEventListener("submit", subirArbol);
     document.getElementById("form-editar-arbol").addEventListener("submit", guardarEdicion);
+
+    /* Catálogo de especies: selector + galería de fotos */
+    document.getElementById("arbol-especie").addEventListener("change", alCambiarEspecie);
+    document.getElementById("arbol-identificador").addEventListener("input", function () {
+      actualizarResumenNombre("formulario");
+    });
+
+    const selectorEdicion = document.getElementById("editar-especie");
+    selectorEdicion.addEventListener("change", function () {
+      edicion.especie = selectorEdicion.value;
+      edicion.foto = null;
+      pintarGaleriaEdicion();
+      catalogo.pintarCredito(document.getElementById("credito-editar"), null);
+      actualizarResumenNombre("editar");
+    });
+    document.getElementById("editar-identificador").addEventListener("input", function () {
+      actualizarResumenNombre("editar");
+    });
+
+    /* El catálogo se carga una vez y se pinta en los dos formularios */
+    catalogo.cargar().then(function () {
+      catalogo.pintarSelect(document.getElementById("arbol-especie"));
+      catalogo.pintarSelect(selectorEdicion);
+      pintarGaleriaFormulario();
+      actualizarResumenNombre("formulario");
+    });
+
     document.getElementById("btn-cerrar-sesion-agricultor").addEventListener("click", function () {
       auth.eliminarSesion();
       window.AgroColab.views.mostrarVista(config.VISTA_SIN_SESION);

@@ -12,6 +12,7 @@
   <script src="js/api.js" defer></script>
   <script src="js/auth.js" defer></script>
   <script src="js/parcelas.js" defer></script>
+  <script src="js/catalogo.js" defer></script>
   <script src="js/agricultor.js" defer></script>
   <script src="js/perfil.js" defer></script>
   <script src="js/autocomplete.js" defer></script>
@@ -864,8 +865,18 @@
             </div>
             <form id="form-subir-arbol" class="p-6 space-y-5">
               <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Nombre del Árbol</label>
-                <input type="text" id="arbol-nombre" required placeholder="Ej: Palta Hass, Limonero, Naranjo" class="input">
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Especie del Árbol</label>
+                <select id="arbol-especie" required class="input">
+                  <option value="">Cargando catálogo...</option>
+                </select>
+                <p class="text-[10px] text-stone-400 mt-1" id="arbol-especie-descripcion"></p>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Número del Árbol en el Huerto (opcional)</label>
+                <input type="text" id="arbol-identificador" maxlength="12" placeholder="Ej: 104" class="input">
+                <p class="text-[10px] text-stone-400 mt-1" id="resumen-nombre">
+                  <span class="text-stone-400">El nombre se arma con la especie y el número del árbol.</span>
+                </p>
               </div>
               <div>
                 <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Ubicación</label>
@@ -899,9 +910,13 @@
                 <input type="text" id="arbol-cosecha" required placeholder="Ej: 50 kg por temporada" class="input">
               </div>
               <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Imagen del Árbol (PNG)</label>
-                <input type="file" id="arbol-imagen" accept="image/png,image/jpeg,image/webp" class="input file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
-                <p class="text-[10px] text-stone-400 mt-1">Selecciona una imagen PNG, JPG o WebP (máx. 2MB)</p>
+                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Foto del Árbol</label>
+                <div id="galeria-arbol" class="galeria-fotos"></div>
+                <p class="text-[10px] text-stone-400 mt-2" id="credito-arbol"></p>
+                <p class="text-[10px] text-stone-400 mt-1">
+                  <i class="fa-solid fa-circle-info text-emerald-600 mr-1"></i>
+                  Solo se pueden usar fotos del catálogo de la especie elegida, para que nunca se publique un árbol con la imagen de otra fruta.
+                </p>
               </div>
               <div id="alerta-subir-arbol" class="hidden"></div>
               <div class="flex gap-3">
@@ -1002,8 +1017,17 @@
       <form id="form-editar-arbol" class="p-6 space-y-4">
         <input type="hidden" id="editar-arbol-id">
         <div>
-          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nombre del Árbol</label>
-          <input type="text" id="editar-nombre" required class="input">
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Especie del Árbol</label>
+          <select id="editar-especie" required class="input">
+            <option value="">Cargando catálogo...</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Número del Árbol en el Huerto (opcional)</label>
+          <input type="text" id="editar-identificador" maxlength="12" placeholder="Ej: 104" class="input">
+          <p class="text-[10px] text-stone-400 mt-1" id="resumen-nombre-editar">
+            <span class="text-stone-400">El nombre se arma con la especie y el número del árbol.</span>
+          </p>
         </div>
         <div>
           <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Ubicación</label>
@@ -1037,8 +1061,9 @@
           <input type="text" id="editar-cosecha" required class="input">
         </div>
         <div>
-          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">URL de Imagen</label>
-          <input type="url" id="editar-imagen" class="input">
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Foto del Árbol</label>
+          <div id="galeria-editar" class="galeria-fotos"></div>
+          <p class="text-[10px] text-stone-400 mt-2" id="credito-editar"></p>
         </div>
         <div id="alerta-editar-arbol" class="hidden"></div>
         <button type="submit" class="btn-submit w-full">Guardar cambios</button>

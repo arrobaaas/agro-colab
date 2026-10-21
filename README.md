@@ -28,6 +28,33 @@ Se aplican sobre un árbol del catálogo. La unidad es el cupo y el stock es el 
 
 En el prototipo, cada árbol del catálogo declara su plan, y seleccionar un plan filtra el catálogo para mostrar solo los árboles disponibles de ese plan.
 
+### Catálogo de Especies e Imágenes
+
+El nombre y la foto de un árbol publicado no son texto libre. El backend mantiene un **catálogo cerrado de 12 especies frutales** (`backend/catalogo.py`), cada una con tres fotografías verificadas de la fruta y del árbol:
+
+| Especie | Identificador | Fotos |
+|---|---|---|
+| 🥑 Palto Hass | `palto_hass` | 3 |
+| 🍊 Naranjo Valencia | `naranjo_valencia` | 3 |
+| 🍋 Limonero Eureka | `limonero_eureka` | 3 |
+| 🟠 Mandarino | `mandarino` | 3 |
+| 🌳 Ciruelo | `ciruelo` | 3 |
+| 🍒 Cerezo | `cerezo` | 3 |
+| 🍏 Manzano | `manzano` | 3 |
+| 🍑 Duraznero | `duraznero` | 3 |
+| 🍐 Membrillo | `membrillo` | 3 |
+| 🥝 Kiwi | `kiwi` | 3 |
+| 🍓 Frutilla | `frutilla` | 3 |
+| 🫒 Olivo | `olivo` | 3 |
+
+El flujo de publicación funciona así:
+
+1. El agricultor elige la **especie** en un selector. El formulario muestra su descripción y arma el nombre en vivo: "Palto Hass" + "#104" = **"Palto Hass #104"**.
+2. Se despliega la **galería** con las tres fotos de esa especie. El Agricultor marca una y se muestra el crédito (autor, licencia y enlace a Wikimedia Commons).
+3. Al enviar, el **servidor vuelve a validar**: la especie debe existir en el catálogo y la URL de la imagen debe pertenecer a esa especie. Un `POST` hecho a mano con la foto de otra fruta también es rechazado.
+
+La columna `especie` del modelo `Arbol` guarda el identificador del catálogo, `identificador` el número del árbol en el huerto y `imagen_origen` el origen de la foto (`galeria` / `propia`, reservado para el flujo de revisión). Los árboles publicados antes de este cambio siguen funcionando: su especie se deduce del nombre y al editarlos se les vuelve a ofrecer la galería.
+
 ---
 
 ## Línea 2: Planes de Abastecimiento
@@ -55,6 +82,8 @@ Siguiendo los lineamientos del curso (Unidad 1), el proyecto se estructura bajo 
 ## Funcionalidades Principales
 
 - **Catálogo Interactivo:** Exploración de árboles frutales disponibles, con filtro por plan de adopción (Básico, Intermedio, Premium) y estado de cupos ocupados en tiempo real.
+- **Catálogo Cerrado de Especies:** El productor no escribe libremente el nombre del árbol ni sube cualquier foto. Escoge la especie de una lista curada (Palto Hass, Naranjo Valencia, Limonero Eureka, Mandarino, Ciruelo, Cerezo, Manzano, Duraznero, Membrillo, Kiwi, Frutilla y Olivo) y el sistema arma el nombre combinando la especie con el número del árbol en el huerto (por ejemplo, "Palto Hass #104").
+- **Galería de Imágenes Verificadas:** Junto a cada especie hay un set curado de fotos de la fruta y del árbol. El productor elige una de ellas y no se puede publicar con una imagen ajena a la especie, lo que garantiza que el catálogo nunca muestre, por ejemplo, un limonero con foto de palto. La validación ocurre en el servidor, no solo en el formulario.
 - **Flujo de Suscripción:** Selección de plan de adopción sobre un árbol, con validación de cupos disponibles en el servidor.
 - **Flujo de Abastecimiento:** Selección de plan de canasta (Dúo, Familiar, B2B) y configuración del destino logístico, particular o comercial, con generación de código de seguimiento.
 - **Carrito de Compras:** Los productos adquiridos se agreguen al carrito con estado "Comprado" y opción de cancelar.
@@ -80,11 +109,14 @@ agro-colab/
 │       ├── views.js        # Router de vistas y navbar
 │       ├── login.js        # Formulario de acceso
 │       ├── parcelas.js     # Vista de comprador: adopción, abastecimiento y logística
+│       ├── catalogo.js     # Catálogo de especies y galería de imágenes
 │       ├── agricultor.js   # Vista de agricultor: dashboard y subida de árboles
 │       ├── perfil.js       # Modal de perfil de usuario
 │       └── app.js          # Arranque: decide la vista inicial
 ├── backend/                # Lógica del servidor, API y controladores
 │   ├── main.py             # API FastAPI con endpoints REST
+│   ├── catalogo.py         # Catálogo cerrado de especies con sus fotos verificadas
+│   ├── database.py         # Modelos SQLAlchemy y migraciones de esquema
 │   └── requirements.txt    # Dependencias Python (FastAPI, Uvicorn, Pydantic)
 ├── docs/                   # Documentación del proyecto
 ├── db/                     # Modelo de datos y scripts (Próximamente Hito 2)
@@ -99,7 +131,9 @@ agro-colab/
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
 | GET | `/api/arboles` | Obtiene el catálogo completo de árboles disponibles para adopción. |
-| POST | `/api/arboles` | Crea un nuevo árbol en el catálogo (solo agricultores). |
+| GET | `/api/especies` | Devuelve el catálogo cerrado de especies con las fotos verificadas que el agricultor puede usar. |
+| POST | `/api/arboles` | Crea un nuevo árbol en el catálogo (solo agricultores). Valida que la especie exista y que la imagen pertenezca a esa especie. |
+| PUT | `/api/arboles/{id}` | Actualiza un árbol publicado, con las mismas validaciones de especie e imagen. |
 | POST | `/api/suscribir` | Registra una suscripción de un usuario a un árbol. |
 | POST | `/api/cancelar-suscripcion` | Cancela una suscripción y descuenta el cupo del árbol. |
 | POST | `/api/login` | Autentica a un usuario (comprador o agricultor). |
@@ -157,6 +191,7 @@ Estos puntos están fuera del alcance del prototipo actual y aún no existen en 
 - Dashboard de Usuario con el estado del árbol adoptado, el avance de la cosecha y la gestión de suscripciones.
 - Capa de datos persistente: hoy el backend usa bases simuladas en memoria.
 - Autenticación en los endpoints protegidos: hoy solo el login valida credenciales.
+- **Fotos propias del productor:** hoy la imagen sale siempre de la galería curada. Permitir que el agricultor suba la foto de su árbol requiere un flujo de moderación (estado `pendiente` en la tabla, revisión antes de publicarla y reemplazo por la foto del catálogo mientras tanto), para no perder la garantía de que la imagen corresponde a la especie.
 
 ---
 
@@ -245,13 +280,32 @@ Este proyecto se distribuye bajo la **MIT License**. Puedes usar, modificar y di
 
 | Recurso | Fuente | Licencia |
 |---|---|---|
-| Imágenes de árboles | Unsplash | https://unsplash.com/license |
+| Imágenes de árboles y frutas | Wikimedia Commons | CC BY / CC BY-SA / dominio público (atribución por foto en la galería) |
 | Íconos | Font Awesome | CC BY 4.0 / MIT |
 | Framework CSS | Tailwind CSS | MIT |
 | Hosting frontend | GitHub Pages | https://docs.github.com/en/site-policy/github-terms/github-terms-of-service |
 | Hosting backend | Render | https://render.com/legal/terms |
 | Autocompletado de direcciones | Photon (Komoot) | [OpenStreetMap ODbL](https://www.openstreetmap.org/copyright) |
 | Datos de direcciones | OpenStreetMap | [ODbL](https://opendatacommons.org/licenses/odbl/) |
+
+### Créditos de las fotos del catálogo
+
+Las 36 imágenes del catálogo de especies provienen de Wikimedia Commons y se eligieron revisando una por una que correspondieran a la fruta o al árbol de la especie. Cada foto guarda su atribución (autor, licencia y enlace al archivo original), que se muestra bajo la galería en el formulario del agricultor. Se evitaron las licencias GFDL y "sin restricciones" por exigir o no permitir el uso previsto.
+
+| Especie | Autores |
+|---|---|
+| Palto Hass | Treysam, B.navez, USDAgov |
+| Naranjo Valencia | Auli Raha, Ivar Leidus, Zeynel Cebeci |
+| Limonero Eureka | Vyacheslav Argenberg, André Karwath, *fiedler* |
+| Mandarino | Joe Ravi, Ivar Leidus, David J. Stang |
+| Ciruelo | Jonathan Billinger, Franca, Xosema |
+| Cerezo | Netol, Schueler-Design, Chris Light |
+| Manzano | Dinnye, Ashish Gupta, Noah Wulf |
+| Duraznero | Takkk, Jack Dykinga (USDA), Allagash Brewing |
+| Membrillo | Lazaregagnidze, SAplants |
+| Kiwi | Luc Viatour, Pseudopanax, André Karwath |
+| Frutilla | Incnis Mrsi, Thomas Wolf, Ivar Leidus |
+| Olivo | David Perez, Dietmar Rabich |
 
 ### Autocompletado de Direcciones
 

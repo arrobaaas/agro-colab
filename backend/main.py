@@ -4,7 +4,14 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-from database import engine, SessionLocal, Base, Usuario, Arbol, Suscripcion, Pedido, hash_password, verify_password
+from database import (
+    engine, SessionLocal, Base, Usuario, Arbol, Suscripcion, Pedido,
+    hash_password, verify_password, asegurar_columnas,
+)
+from catalogo import (
+    CATALOGO_ESPECIES, listar_especies, buscar_especie,
+    fotos_permitidas, componer_nombre, normalizar_identificador, foto_de,
+)
 
 app = FastAPI(
     title="Agro-Colab API",
@@ -22,6 +29,7 @@ app.add_middleware(
 
 # Crear tablas y datos iniciales
 Base.metadata.create_all(bind=engine)
+asegurar_columnas()
 
 def get_db():
     db = SessionLocal()
@@ -44,10 +52,12 @@ def datos_iniciales():
             db.commit()
 
         if db.query(Arbol).count() == 0:
-            # Crear árboles de prueba
+            # Crear árboles de prueba (con fotos del catálogo de especies)
             arboles = [
                 Arbol(
                     nombre="Palto Hass #104",
+                    especie="palto_hass",
+                    identificador="#104",
                     plan="Básico",
                     tipo_suscripcion="Compartido",
                     precio_mensual_clp=12000,
@@ -55,11 +65,14 @@ def datos_iniciales():
                     cupos_ocupados=3,
                     estimacion_cosecha="45 kg anuales",
                     ubicacion="Valle del Aconcagua, Región de Valparaíso",
-                    imagen="https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=600&q=80",
+                    imagen=foto_de("palto_hass", 0),
+                    imagen_origen="galeria",
                     productor_id=2
                 ),
                 Arbol(
                     nombre="Naranjo Valencia #22",
+                    especie="naranjo_valencia",
+                    identificador="#22",
                     plan="Premium",
                     tipo_suscripcion="Exclusivo",
                     precio_mensual_clp=35000,
@@ -67,11 +80,14 @@ def datos_iniciales():
                     cupos_ocupados=0,
                     estimacion_cosecha="80 kg anuales",
                     ubicacion="Curicó, Región del Maule",
-                    imagen="https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=600&q=80",
+                    imagen=foto_de("naranjo_valencia", 0),
+                    imagen_origen="galeria",
                     productor_id=2
                 ),
                 Arbol(
                     nombre="Limonero Eureka #12",
+                    especie="limonero_eureka",
+                    identificador="#12",
                     plan="Intermedio",
                     tipo_suscripcion="Compartido",
                     precio_mensual_clp=8000,
@@ -79,7 +95,8 @@ def datos_iniciales():
                     cupos_ocupados=1,
                     estimacion_cosecha="35 kg anuales",
                     ubicacion="Mallarauco, Región Metropolitana",
-                    imagen="https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=600&q=80",
+                    imagen=foto_de("limonero_eureka", 0),
+                    imagen_origen="galeria",
                     productor_id=2
                 )
             ]
@@ -115,7 +132,9 @@ class PedidoRequest(BaseModel):
     frecuencia_entrega: str
 
 class ArbolRequest(BaseModel):
-    nombre: str
+    nombre: Optional[str] = None  # se compone desde especie + identificador
+    especie: str
+    identificador: Optional[str] = None
     ubicacion: str
     plan: str
     tipo_suscripcion: str
@@ -124,6 +143,76 @@ class ArbolRequest(BaseModel):
     estimacion_cosecha: str
     imagen: str
     productor: str
+
+
+# ----------------- VALIDACION DE ESPECIE E IMAGEN -----------------
+
+def validar_imagen(imagen: str, especie_id: str):
+    """Revisa la imagen enviada por el agricultor.
+
+    El catálogo curado es la única fuente de imágenes: así el comprador nunca ve
+    una foto que no corresponda al árbol que está adoptando. La validación se
+    hace en el servidor, no solo en el formulario.
+
+    Devuelve (imagen, origen, error).
+    """
+    if not imagen or not imagen.strip():
+        return None, None, "Debes elegir una imagen del árbol."
+
+    valor = imagen.strip()
+
+    if valor.startswith("data:"):
+        return None, None, "Por ahora las fotos deben elegirse del catálogo de la especie."
+
+    if valor in fotos_permitidas(especie_id):
+        return valor, "galeria", None
+
+    return None, None, "La imagen elegida no corresponde a la especie seleccionada."
+
+
+def especie_de_arbol(arbol) -> Optional[str]:
+    """Especie de un árbol. Los árboles antiguos se deducen del nombre."""
+    if arbol.especie:
+        return arbol.especie
+    nombre = (arbol.nombre or "").lower()
+    for especie in CATALOGO_ESPECIES:
+        if nombre.startswith(especie["nombre"].lower()):
+            return especie["id"]
+    return None
+
+
+def identificador_de_arbol(arbol) -> Optional[str]:
+    """Identificador del árbol dentro del huerto (ej: '#104')."""
+    if arbol.identificador:
+        return arbol.identificador
+    especie = buscar_especie(especie_de_arbol(arbol))
+    if not especie:
+        return None
+    nombre = arbol.nombre or ""
+    return nombre[len(especie["nombre"]):].strip() or None
+
+
+def serializar_arbol(arbol) -> dict:
+    """Representación uniforme de un árbol para la API."""
+    especie_id = especie_de_arbol(arbol)
+    especie = buscar_especie(especie_id)
+    return {
+        "id": arbol.id,
+        "nombre": arbol.nombre,
+        "especie": especie_id,
+        "especie_nombre": especie["nombre"] if especie else None,
+        "identificador": identificador_de_arbol(arbol),
+        "plan": arbol.plan,
+        "tipo_suscripcion": arbol.tipo_suscripcion,
+        "precio_mensual_clp": arbol.precio_mensual_clp,
+        "cupos_totales": arbol.cupos_totales,
+        "cupos_ocupados": arbol.cupos_ocupados,
+        "estimacion_cosecha": arbol.estimacion_cosecha,
+        "ubicacion": arbol.ubicacion,
+        "imagen": arbol.imagen,
+        "imagen_origen": arbol.imagen_origen or "galeria",
+        "productor": arbol.productor.nombre if arbol.productor else None,
+    }
 
 class PerfilRequest(BaseModel):
     nombre: str
@@ -135,35 +224,39 @@ class PerfilRequest(BaseModel):
 # ----------------- ENDPOINTS (RUTAS) -----------------
 
 # 1. Rutas de Árboles
+@app.get("/api/especies")
+def listar_catalogo_especies():
+    """Catálogo cerrado de especies con las fotos que el agricultor puede usar."""
+    return listar_especies()
+
+
 @app.get("/api/arboles")
 def listar_arboles(db: SessionLocal = Depends(get_db)):
     arboles = db.query(Arbol).all()
-    return [
-        {
-            "id": a.id,
-            "nombre": a.nombre,
-            "plan": a.plan,
-            "tipo_suscripcion": a.tipo_suscripcion,
-            "precio_mensual_clp": a.precio_mensual_clp,
-            "cupos_totales": a.cupos_totales,
-            "cupos_ocupados": a.cupos_ocupados,
-            "estimacion_cosecha": a.estimacion_cosecha,
-            "ubicacion": a.ubicacion,
-            "imagen": a.imagen,
-            "productor": a.productor.nombre if a.productor else None
-        }
-        for a in arboles
-    ]
+    return [serializar_arbol(a) for a in arboles]
+
 
 @app.post("/api/arboles")
 def crear_arbol(data: ArbolRequest, db: SessionLocal = Depends(get_db)):
+    # La especie debe existir en el catálogo: no se aceptan nombres libres
+    especie = buscar_especie(data.especie)
+    if not especie:
+        return {"status": "error", "mensaje": "La especie seleccionada no está en el catálogo."}
+
     # Buscar al productor por nombre
     productor = db.query(Usuario).filter(Usuario.nombre == data.productor).first()
     if not productor:
         return {"status": "error", "mensaje": "Productor no encontrado."}
 
+    # La imagen debe ser del catálogo de la especie o una foto propia válida
+    imagen, origen, error = validar_imagen(data.imagen, data.especie)
+    if error:
+        return {"status": "error", "mensaje": error}
+
     nuevo_arbol = Arbol(
-        nombre=data.nombre,
+        nombre=componer_nombre(data.especie, data.identificador),
+        especie=data.especie,
+        identificador=normalizar_identificador(data.identificador) or None,
         ubicacion=data.ubicacion,
         plan=data.plan,
         tipo_suscripcion=data.tipo_suscripcion,
@@ -171,7 +264,8 @@ def crear_arbol(data: ArbolRequest, db: SessionLocal = Depends(get_db)):
         cupos_ocupados=0,
         precio_mensual_clp=data.precio_mensual_clp,
         estimacion_cosecha=data.estimacion_cosecha,
-        imagen=data.imagen,
+        imagen=imagen,
+        imagen_origen=origen,
         productor_id=productor.id
     )
     db.add(nuevo_arbol)
@@ -180,19 +274,7 @@ def crear_arbol(data: ArbolRequest, db: SessionLocal = Depends(get_db)):
     return {
         "status": "success",
         "mensaje": f"Árbol '{nuevo_arbol.nombre}' publicado correctamente.",
-        "arbol": {
-            "id": nuevo_arbol.id,
-            "nombre": nuevo_arbol.nombre,
-            "plan": nuevo_arbol.plan,
-            "tipo_suscripcion": nuevo_arbol.tipo_suscripcion,
-            "precio_mensual_clp": nuevo_arbol.precio_mensual_clp,
-            "cupos_totales": nuevo_arbol.cupos_totales,
-            "cupos_ocupados": nuevo_arbol.cupos_ocupados,
-            "estimacion_cosecha": nuevo_arbol.estimacion_cosecha,
-            "ubicacion": nuevo_arbol.ubicacion,
-            "imagen": nuevo_arbol.imagen,
-            "productor": productor.nombre
-        }
+        "arbol": serializar_arbol(nuevo_arbol)
     }
 
 @app.post("/api/suscribir")
@@ -217,19 +299,7 @@ def suscribir(data: SuscripcionRequest, db: SessionLocal = Depends(get_db)):
         return {
             "status": "success",
             "mensaje": f"¡Suscripción confirmada para {data.user_name} en {arbol.nombre}!",
-            "arbol": {
-                "id": arbol.id,
-                "nombre": arbol.nombre,
-                "plan": arbol.plan,
-                "tipo_suscripcion": arbol.tipo_suscripcion,
-                "precio_mensual_clp": arbol.precio_mensual_clp,
-                "cupos_totales": arbol.cupos_totales,
-                "cupos_ocupados": arbol.cupos_ocupados,
-                "estimacion_cosecha": arbol.estimacion_cosecha,
-                "ubicacion": arbol.ubicacion,
-                "imagen": arbol.imagen,
-                "productor": arbol.productor.nombre if arbol.productor else None
-            }
+            "arbol": serializar_arbol(arbol)
         }
     return {"status": "error", "mensaje": "Cupos agotados para este árbol."}
 
@@ -306,14 +376,25 @@ def actualizar_arbol(arbol_id: int, data: ArbolRequest, db: SessionLocal = Depen
     if not arbol:
         return {"status": "error", "mensaje": "Árbol no encontrado."}
 
-    arbol.nombre = data.nombre
+    especie = buscar_especie(data.especie)
+    if not especie:
+        return {"status": "error", "mensaje": "La especie seleccionada no está en el catálogo."}
+
+    imagen, origen, error = validar_imagen(data.imagen, data.especie)
+    if error:
+        return {"status": "error", "mensaje": error}
+
+    arbol.nombre = componer_nombre(data.especie, data.identificador)
+    arbol.especie = data.especie
+    arbol.identificador = normalizar_identificador(data.identificador) or None
     arbol.ubicacion = data.ubicacion
     arbol.plan = data.plan
     arbol.tipo_suscripcion = data.tipo_suscripcion
     arbol.cupos_totales = data.cupos_totales
     arbol.precio_mensual_clp = data.precio_mensual_clp
     arbol.estimacion_cosecha = data.estimacion_cosecha
-    arbol.imagen = data.imagen
+    arbol.imagen = imagen
+    arbol.imagen_origen = origen
 
     db.commit()
     db.refresh(arbol)
@@ -321,19 +402,7 @@ def actualizar_arbol(arbol_id: int, data: ArbolRequest, db: SessionLocal = Depen
     return {
         "status": "success",
         "mensaje": f"Árbol '{arbol.nombre}' actualizado correctamente.",
-        "arbol": {
-            "id": arbol.id,
-            "nombre": arbol.nombre,
-            "plan": arbol.plan,
-            "tipo_suscripcion": arbol.tipo_suscripcion,
-            "precio_mensual_clp": arbol.precio_mensual_clp,
-            "cupos_totales": arbol.cupos_totales,
-            "cupos_ocupados": arbol.cupos_ocupados,
-            "estimacion_cosecha": arbol.estimacion_cosecha,
-            "ubicacion": arbol.ubicacion,
-            "imagen": arbol.imagen,
-            "productor": arbol.productor.nombre if arbol.productor else None
-        }
+        "arbol": serializar_arbol(arbol)
     }
 
 @app.delete("/api/arboles/{arbol_id}")
@@ -359,19 +428,7 @@ def cancelar_suscripcion(data: SuscripcionRequest, db: SessionLocal = Depends(ge
         return {
             "status": "success",
             "mensaje": f"Suscripción cancelada para {data.user_name} en {arbol.nombre}.",
-            "arbol": {
-                "id": arbol.id,
-                "nombre": arbol.nombre,
-                "plan": arbol.plan,
-                "tipo_suscripcion": arbol.tipo_suscripcion,
-                "precio_mensual_clp": arbol.precio_mensual_clp,
-                "cupos_totales": arbol.cupos_totales,
-                "cupos_ocupados": arbol.cupos_ocupados,
-                "estimacion_cosecha": arbol.estimacion_cosecha,
-                "ubicacion": arbol.ubicacion,
-                "imagen": arbol.imagen,
-                "productor": arbol.productor.nombre if arbol.productor else None
-            }
+            "arbol": serializar_arbol(arbol)
         }
     return {"status": "error", "mensaje": "No hay suscriptores que cancelar."}
 
@@ -458,9 +515,9 @@ def reiniciar_bd():
 
         # Crear árboles de prueba
         arboles = [
-            Arbol(nombre="Palto Hass #104", plan="Básico", tipo_suscripcion="Compartido", precio_mensual_clp=12000, cupos_totales=5, cupos_ocupados=3, estimacion_cosecha="45 kg anuales", ubicacion="Valle del Aconcagua, Región de Valparaíso", imagen="https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=600&q=80", productor_id=2),
-            Arbol(nombre="Naranjo Valencia #22", plan="Premium", tipo_suscripcion="Exclusivo", precio_mensual_clp=35000, cupos_totales=1, cupos_ocupados=0, estimacion_cosecha="80 kg anuales", ubicacion="Curicó, Región del Maule", imagen="https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=600&q=80", productor_id=2),
-            Arbol(nombre="Limonero Eureka #12", plan="Intermedio", tipo_suscripcion="Compartido", precio_mensual_clp=8000, cupos_totales=3, cupos_ocupados=1, estimacion_cosecha="35 kg anuales", ubicacion="Mallarauco, Región Metropolitana", imagen="https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=600&q=80", productor_id=2)
+            Arbol(nombre="Palto Hass #104", especie="palto_hass", identificador="#104", plan="Básico", tipo_suscripcion="Compartido", precio_mensual_clp=12000, cupos_totales=5, cupos_ocupados=3, estimacion_cosecha="45 kg anuales", ubicacion="Valle del Aconcagua, Región de Valparaíso", imagen=foto_de("palto_hass", 0), imagen_origen="galeria", productor_id=2),
+            Arbol(nombre="Naranjo Valencia #22", especie="naranjo_valencia", identificador="#22", plan="Premium", tipo_suscripcion="Exclusivo", precio_mensual_clp=35000, cupos_totales=1, cupos_ocupados=0, estimacion_cosecha="80 kg anuales", ubicacion="Curicó, Región del Maule", imagen=foto_de("naranjo_valencia", 0), imagen_origen="galeria", productor_id=2),
+            Arbol(nombre="Limonero Eureka #12", especie="limonero_eureka", identificador="#12", plan="Intermedio", tipo_suscripcion="Compartido", precio_mensual_clp=8000, cupos_totales=3, cupos_ocupados=1, estimacion_cosecha="35 kg anuales", ubicacion="Mallarauco, Región Metropolitana", imagen=foto_de("limonero_eureka", 0), imagen_origen="galeria", productor_id=2)
         ]
         db.add_all(arboles)
         db.commit()

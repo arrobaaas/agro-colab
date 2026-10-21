@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Text
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Text, inspect, text
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
 import bcrypt
@@ -55,7 +55,14 @@ class Arbol(Base):
     precio_mensual_clp = Column(Integer)
     estimacion_cosecha = Column(String)
     imagen = Column(String)
-    
+
+    # Especie del catalogo (id) e identificador opcional del árbol en el huerto.
+    # Together con "nombre" permiten saber de qué fruta es el árbol publicado.
+    especie = Column(String, nullable=True)
+    identificador = Column(String, nullable=True)
+    # "galeria" = foto curada del catalogo | "propia" = foto subida por el agricultor
+    imagen_origen = Column(String, nullable=True, default="galeria")
+
     productor_id = Column(Integer, ForeignKey("usuarios.id"))
     productor = relationship("Usuario", back_populates="arboles_publicados")
     suscriptores = relationship("Suscripcion", back_populates="arbol")
@@ -89,3 +96,35 @@ class Pedido(Base):
     estado_logistica = Column(String)
 
     cliente = relationship("Usuario", back_populates="pedidos")
+
+
+# ----------------- MIGRACIONES LIGERAS -----------------
+# create_all() no modifica las tablas que ya existen en el archivo SQLite, por eso
+# se comparan los modelos con el esquema real y se completan las columnas faltantes.
+
+def asegurar_columnas():
+    """Agrega a las tablas existentes las columnas que los modelosecesitan."""
+    inspector = inspect(engine)
+    tablas_existentes = inspector.get_table_names()
+
+    for nombre_tabla, tabla in Base.metadata.tables.items():
+        if nombre_tabla not in tablas_existentes:
+            continue
+
+        existentes = {col["name"] for col in inspector.get_columns(nombre_tabla)}
+
+        for columna in tabla.columns:
+            if columna.name in existentes:
+                continue
+
+            tipo = columna.type.compile(dialect=engine.dialect)
+            default = ""
+            valor_default = getattr(columna.default, "arg", None)
+            if valor_default is not None and not callable(valor_default):
+                default = f" DEFAULT {valor_default!r}"
+
+            with engine.begin() as conexion:
+                conexion.execute(
+                    text(f"ALTER TABLE {nombre_tabla} ADD COLUMN {columna.name} {tipo}{default}")
+                )
+            print(f"[migracion] columna '{columna.name}' agregada a '{nombre_tabla}'")
