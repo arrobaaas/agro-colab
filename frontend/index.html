@@ -880,7 +880,11 @@
               </div>
               <div>
                 <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Ubicación</label>
-                <input type="text" id="arbol-ubicacion" required placeholder="Ej: Curicó, Maule" class="input">
+                <div class="relative">
+                  <input type="text" id="arbol-ubicacion" required placeholder="Ej: Curicó, Maule" autocomplete="off" class="input" oninput="AgroColab.autocomplete.buscarDireccion(this)">
+                  <div id="sugerencias-arbol-ubicacion" class="sugerencias-lista hidden absolute left-0 right-0 z-20"></div>
+                </div>
+                <p class="text-[10px] text-stone-400 mt-1">Empieza a escribir y selecciona el lugar del huerto entre las sugerencias</p>
               </div>
               <div>
                 <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Plan de Adopción</label>
@@ -1031,7 +1035,10 @@
         </div>
         <div>
           <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Ubicación</label>
-          <input type="text" id="editar-ubicacion" required class="input">
+          <div class="relative">
+            <input type="text" id="editar-ubicacion" required autocomplete="off" class="input" oninput="AgroColab.autocomplete.buscarDireccion(this)">
+            <div id="sugerencias-editar-ubicacion" class="sugerencias-lista hidden absolute left-0 right-0 z-20"></div>
+          </div>
         </div>
         <div>
           <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Plan de Adopción</label>

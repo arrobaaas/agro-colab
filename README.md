@@ -311,6 +311,8 @@ Las 36 imágenes del catálogo de especies provienen de Wikimedia Commons y se e
 
 El formulario de logística usa **Photon** (https://photon.komoot.io/) para sugerir direcciones reales mientras el usuario escribe. Photon es un geocodificador open source basado en **OpenStreetMap**.
 
+El mismo autocompletado se usa en el **panel del agricultor**, en el campo "Ubicación" tanto del formulario de publicación como del modal de edición: el productor escribe el lugar del huerto y elige entre las sugerencias, en vez de describirlo a mano. Así la ubicación queda en un formato uniforme ("Curicó, Región del Maule") y comparable entre los árboles del catálogo.
+
 - **Sin API key** requerida
 - **Sin geolocalización** del dispositivo
 - **Gratuito** y open source
