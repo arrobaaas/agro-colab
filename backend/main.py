@@ -76,7 +76,7 @@ def datos_iniciales():
                     tipo_suscripcion="Compartido",
                     precio_mensual_clp=12000,
                     cupos_totales=5,
-                    cupos_ocupados=3,
+                    cupos_ocupados=0,
                     estimacion_cosecha="45 kg anuales",
                     ubicacion="Valle del Aconcagua, Región de Valparaíso",
                     imagen=foto_de("palto_hass", 0),
@@ -106,7 +106,7 @@ def datos_iniciales():
                     tipo_suscripcion="Compartido",
                     precio_mensual_clp=8000,
                     cupos_totales=3,
-                    cupos_ocupados=1,
+                    cupos_ocupados=0,
                     estimacion_cosecha="35 kg anuales",
                     ubicacion="Mallarauco, Región Metropolitana",
                     imagen=foto_de("limonero_eureka", 0),
@@ -124,7 +124,9 @@ datos_iniciales()
 # ----------------- MODELOS DE DATOS (ESQUEMAS) -----------------
 
 class SuscripcionRequest(BaseModel):
-    user_name: str
+    user_name: Optional[str] = None
+    user_id: Optional[int] = None
+    email: Optional[str] = None
     tree_id: int
 
 class LoginRequest(BaseModel):
@@ -138,6 +140,7 @@ class PedidoRequest(BaseModel):
     cliente_nombre: str
     telefono: str
     email: str
+    cliente_id: Optional[int] = None
     tipo_destino: str  # "particular" o "comercial"
     razon_social: Optional[str] = None
     rut: Optional[str] = None
@@ -206,7 +209,39 @@ def identificador_de_arbol(arbol) -> Optional[str]:
     return nombre[len(especie["nombre"]):].strip() or None
 
 
-def serializar_arbol(arbol) -> dict:
+def cupos_ocupados_de(arbol, db) -> int:
+    """Cupos realmente ocupados: cuenta las suscripciones registradas.
+
+    El contador guardado en la tabla se puede desincronizar (por ejemplo, si la
+    base se creó con contadores fijos y sin suscripciones reales), y ahí el
+    panel del agricultor anuncia suscriptores que no existen. La fuente de
+    verdad son siempre las filas de la tabla suscripciones.
+    """
+    return db.query(Suscripcion).filter(Suscripcion.arbol_id == arbol.id).count()
+
+
+def resolver_usuario(db, user_id: Optional[int] = None, user_name: Optional[str] = None, email: Optional[str] = None):
+    """Busca al usuario real de una suscripción.
+
+    Se acepta el id, el correo o el nombre para no depender de un solo campo
+    (el nombre puede cambiar al editar el perfil).
+    """
+    if user_id is not None:
+        usuario = db.query(Usuario).filter(Usuario.id == user_id).first()
+        if usuario:
+            return usuario
+    if email:
+        usuario = db.query(Usuario).filter(Usuario.email == email).first()
+        if usuario:
+            return usuario
+    if user_name:
+        usuario = db.query(Usuario).filter(Usuario.nombre == user_name).first()
+        if usuario:
+            return usuario
+    return None
+
+
+def serializar_arbol(arbol, db) -> dict:
     """Representación uniforme de un árbol para la API."""
     especie_id = especie_de_arbol(arbol)
     especie = buscar_especie(especie_id)
@@ -220,7 +255,7 @@ def serializar_arbol(arbol) -> dict:
         "tipo_suscripcion": arbol.tipo_suscripcion,
         "precio_mensual_clp": arbol.precio_mensual_clp,
         "cupos_totales": arbol.cupos_totales,
-        "cupos_ocupados": arbol.cupos_ocupados,
+        "cupos_ocupados": cupos_ocupados_de(arbol, db),
         "estimacion_cosecha": arbol.estimacion_cosecha,
         "ubicacion": arbol.ubicacion,
         "imagen": arbol.imagen,
@@ -247,7 +282,7 @@ def listar_catalogo_especies():
 @app.get("/api/arboles")
 def listar_arboles(db: SessionLocal = Depends(get_db)):
     arboles = db.query(Arbol).all()
-    return [serializar_arbol(a) for a in arboles]
+    return [serializar_arbol(a, db) for a in arboles]
 
 
 @app.post("/api/arboles")
@@ -288,7 +323,7 @@ def crear_arbol(data: ArbolRequest, db: SessionLocal = Depends(get_db)):
     return {
         "status": "success",
         "mensaje": f"Árbol '{nuevo_arbol.nombre}' publicado correctamente.",
-        "arbol": serializar_arbol(nuevo_arbol)
+        "arbol": serializar_arbol(nuevo_arbol, db)
     }
 
 @app.post("/api/suscribir")
@@ -297,25 +332,40 @@ def suscribir(data: SuscripcionRequest, db: SessionLocal = Depends(get_db)):
     if not arbol:
         return {"status": "error", "mensaje": "Árbol no encontrado."}
 
-    if arbol.cupos_ocupados < arbol.cupos_totales:
-        # Buscar el usuario real por su nombre
-        usuario = db.query(Usuario).filter(Usuario.nombre == data.user_name).first()
-        if not usuario:
-            return {"status": "error", "mensaje": "Usuario no encontrado."}
+    # Buscar al usuario real (por id, correo o nombre)
+    usuario = resolver_usuario(db, data.user_id, data.user_name, data.email)
+    if not usuario:
+        return {"status": "error", "mensaje": "Usuario no encontrado."}
 
-        arbol.cupos_ocupados += 1
+    # El cupo disponible se calcula sobre las suscripciones reales
+    ocupados = cupos_ocupados_de(arbol, db)
+    if ocupados >= arbol.cupos_totales:
+        return {"status": "error", "mensaje": "Cupos agotados para este árbol."}
 
-        # Crear registro de suscripción con el usuario real
-        suscripcion = Suscripcion(usuario_id=usuario.id, arbol_id=data.tree_id)
-        db.add(suscripcion)
-        db.commit()
-
+    # Un mismo usuario no puede ocupar dos cupos del mismo árbol
+    ya_suscrito = db.query(Suscripcion).filter(
+        Suscripcion.arbol_id == arbol.id,
+        Suscripcion.usuario_id == usuario.id
+    ).first()
+    if ya_suscrito:
         return {
-            "status": "success",
-            "mensaje": f"¡Suscripción confirmada para {data.user_name} en {arbol.nombre}!",
-            "arbol": serializar_arbol(arbol)
+            "status": "error",
+            "mensaje": f"Ya estás suscrito a {arbol.nombre}. No puedes ocupar dos cupos del mismo árbol."
         }
-    return {"status": "error", "mensaje": "Cupos agotados para este árbol."}
+
+    # Crear registro de suscripción con el usuario real
+    suscripcion = Suscripcion(usuario_id=usuario.id, arbol_id=data.tree_id)
+    db.add(suscripcion)
+    db.flush()
+
+    arbol.cupos_ocupados = cupos_ocupados_de(arbol, db)
+    db.commit()
+
+    return {
+        "status": "success",
+        "mensaje": f"¡Suscripción confirmada para {usuario.nombre} en {arbol.nombre}!",
+        "arbol": serializar_arbol(arbol, db)
+    }
 
 # 6. Gestión de suscriptores (para el agricultor)
 @app.get("/api/mis-arboles/{productor_id}/suscriptores")
@@ -345,11 +395,47 @@ def listar_suscriptores(productor_id: int, db: SessionLocal = Depends(get_db)):
             "arbol_id": arbol.id,
             "arbol_nombre": arbol.nombre,
             "cupos_totales": arbol.cupos_totales,
-            "cupos_ocupados": arbol.cupos_ocupados,
+            "cupos_ocupados": len(suscriptores),
             "suscriptores": suscriptores
         })
 
     return resultado
+
+
+@app.get("/api/suscripciones/usuario/{usuario_id}")
+def listar_suscripciones_usuario(usuario_id: int, db: SessionLocal = Depends(get_db)):
+    """Árboles que un usuario tiene adoptados, para su panel de perfil."""
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        return {"status": "error", "mensaje": "Usuario no encontrado."}
+
+    suscripciones = db.query(Suscripcion).filter(Suscripcion.usuario_id == usuario_id).all()
+
+    arboles = []
+    for suscripcion in suscripciones:
+        arbol = db.query(Arbol).filter(Arbol.id == suscripcion.arbol_id).first()
+        if not arbol:
+            continue
+        arboles.append({
+            "suscripcion_id": suscripcion.id,
+            "arbol_id": arbol.id,
+            "nombre": arbol.nombre,
+            "especie": especie_de_arbol(arbol),
+            "especie_nombre": (buscar_especie(especie_de_arbol(arbol)) or {}).get("nombre"),
+            "plan": arbol.plan,
+            "tipo_suscripcion": arbol.tipo_suscripcion,
+            "precio_mensual_clp": arbol.precio_mensual_clp,
+            "imagen": arbol.imagen,
+            "ubicacion": arbol.ubicacion,
+            "estimacion_cosecha": arbol.estimacion_cosecha,
+            "cupos_totales": arbol.cupos_totales,
+            "cupos_ocupados": cupos_ocupados_de(arbol, db),
+            "productor": arbol.productor.nombre if arbol.productor else None,
+            "fecha_suscripcion": suscripcion.fecha_suscripcion.strftime("%d/%m/%Y") if suscripcion.fecha_suscripcion else None,
+        })
+
+    return {"status": "success", "arboles": arboles}
+
 
 @app.delete("/api/suscripciones/{suscripcion_id}")
 def expulsar_suscriptor(suscripcion_id: int, db: SessionLocal = Depends(get_db)):
@@ -361,8 +447,9 @@ def expulsar_suscriptor(suscripcion_id: int, db: SessionLocal = Depends(get_db))
     arbol = db.query(Arbol).filter(Arbol.id == suscripcion.arbol_id).first()
 
     db.delete(suscripcion)
-    if arbol and arbol.cupos_ocupados > 0:
-        arbol.cupos_ocupados -= 1
+    db.flush()
+    if arbol:
+        arbol.cupos_ocupados = cupos_ocupados_de(arbol, db)
     db.commit()
 
     return {"status": "success", "mensaje": "Suscriptor expulsado y cupo liberado."}
@@ -416,7 +503,7 @@ def actualizar_arbol(arbol_id: int, data: ArbolRequest, db: SessionLocal = Depen
     return {
         "status": "success",
         "mensaje": f"Árbol '{arbol.nombre}' actualizado correctamente.",
-        "arbol": serializar_arbol(arbol)
+        "arbol": serializar_arbol(arbol, db)
     }
 
 @app.delete("/api/arboles/{arbol_id}")
@@ -435,16 +522,31 @@ def cancelar_suscripcion(data: SuscripcionRequest, db: SessionLocal = Depends(ge
     if not arbol:
         return {"status": "error", "mensaje": "Árbol no encontrado."}
 
-    if arbol.cupos_ocupados > 0:
-        arbol.cupos_ocupados -= 1
-        db.commit()
+    usuario = resolver_usuario(db, data.user_id, data.user_name, data.email)
+    if not usuario:
+        return {"status": "error", "mensaje": "Usuario no encontrado."}
 
-        return {
-            "status": "success",
-            "mensaje": f"Suscripción cancelada para {data.user_name} en {arbol.nombre}.",
-            "arbol": serializar_arbol(arbol)
-        }
-    return {"status": "error", "mensaje": "No hay suscriptores que cancelar."}
+    # Se busca la suscripción real del usuario: sin esto, cancelar solo
+    # baixaba el contador y el usuario seguía suscrito.
+    suscripcion = db.query(Suscripcion).filter(
+        Suscripcion.arbol_id == arbol.id,
+        Suscripcion.usuario_id == usuario.id
+    ).first()
+
+    if not suscripcion:
+        return {"status": "error", "mensaje": "No hay suscriptores que cancelar."}
+
+    db.delete(suscripcion)
+    db.flush()
+
+    arbol.cupos_ocupados = cupos_ocupados_de(arbol, db)
+    db.commit()
+
+    return {
+        "status": "success",
+        "mensaje": f"Suscripción cancelada para {usuario.nombre} en {arbol.nombre}.",
+        "arbol": serializar_arbol(arbol, db)
+    }
 
 # 2. Rutas de Autenticación (Login y Registro)
 class RegistroRequest(BaseModel):
@@ -529,22 +631,15 @@ def reiniciar_bd():
 
         # Crear árboles de prueba
         arboles = [
-            Arbol(nombre="Palto Hass #104", especie="palto_hass", identificador="#104", plan="Básico", tipo_suscripcion="Compartido", precio_mensual_clp=12000, cupos_totales=5, cupos_ocupados=3, estimacion_cosecha="45 kg anuales", ubicacion="Valle del Aconcagua, Región de Valparaíso", imagen=foto_de("palto_hass", 0), imagen_origen="galeria", productor_id=2),
+            Arbol(nombre="Palto Hass #104", especie="palto_hass", identificador="#104", plan="Básico", tipo_suscripcion="Compartido", precio_mensual_clp=12000, cupos_totales=5, cupos_ocupados=0, estimacion_cosecha="45 kg anuales", ubicacion="Valle del Aconcagua, Región de Valparaíso", imagen=foto_de("palto_hass", 0), imagen_origen="galeria", productor_id=2),
             Arbol(nombre="Naranjo Valencia #22", especie="naranjo_valencia", identificador="#22", plan="Premium", tipo_suscripcion="Exclusivo", precio_mensual_clp=35000, cupos_totales=1, cupos_ocupados=0, estimacion_cosecha="80 kg anuales", ubicacion="Curicó, Región del Maule", imagen=foto_de("naranjo_valencia", 0), imagen_origen="galeria", productor_id=2),
-            Arbol(nombre="Limonero Eureka #12", especie="limonero_eureka", identificador="#12", plan="Intermedio", tipo_suscripcion="Compartido", precio_mensual_clp=8000, cupos_totales=3, cupos_ocupados=1, estimacion_cosecha="35 kg anuales", ubicacion="Mallarauco, Región Metropolitana", imagen=foto_de("limonero_eureka", 0), imagen_origen="galeria", productor_id=2)
+            Arbol(nombre="Limonero Eureka #12", especie="limonero_eureka", identificador="#12", plan="Intermedio", tipo_suscripcion="Compartido", precio_mensual_clp=8000, cupos_totales=3, cupos_ocupados=0, estimacion_cosecha="35 kg anuales", ubicacion="Mallarauco, Región Metropolitana", imagen=foto_de("limonero_eureka", 0), imagen_origen="galeria", productor_id=2)
         ]
         db.add_all(arboles)
         db.commit()
 
-        # Crear suscripciones de prueba (comprador -> árboles)
-        comprador = db.query(Usuario).filter(Usuario.email == "comprador@agrocolab.cl").first()
-        if comprador:
-            suscripciones = [
-                Suscripcion(usuario_id=comprador.id, arbol_id=1),  # Palto Hass
-                Suscripcion(usuario_id=comprador.id, arbol_id=3)   # Limonero
-            ]
-            db.add_all(suscripciones)
-            db.commit()
+        # Sin suscripciones de prueba: los cupos arrancan en 0 y se llenan
+        # cuando alguien adopta un árbol de verdad desde el catálogo.
 
         return {"status": "success", "mensaje": "Base de datos reiniciada correctamente."}
     except Exception as e:
@@ -636,8 +731,17 @@ def eliminar_usuario(email: str, db: SessionLocal = Depends(get_db)):
 # 3. Rutas de Logística y Pedidos
 @app.post("/api/pedidos")
 def registrar_pedido(pedido: PedidoRequest, db: SessionLocal = Depends(get_db)):
+    # El cliente puede venir identificado por sesión (id) o por correo
+    cliente = None
+    if pedido.cliente_id is not None:
+        cliente = db.query(Usuario).filter(Usuario.id == pedido.cliente_id).first()
+    if not cliente:
+        cliente = db.query(Usuario).filter(Usuario.email == pedido.email).first()
+    if not cliente:
+        return {"status": "error", "mensaje": "Cliente no encontrado."}
+
     nuevo_pedido = Pedido(
-        cliente_id=1,  # temporal
+        cliente_id=cliente.id,  # identificado con el usuario autenticado
         plan_nombre=pedido.plan_nombre,
         monto_clp=pedido.monto_clp,
         tipo_destino=pedido.tipo_destino,
@@ -707,7 +811,7 @@ def actualizar_perfil(data: PerfilRequest, db: SessionLocal = Depends(get_db)):
     if "direccion" in cambios:
         usuario.direccion = cambios["direccion"]
     if "password" in cambios and cambios["password"]:
-        usuario.password = cambios["password"]
+        usuario.password = hash_password(cambios["password"])
 
     db.commit()
     db.refresh(usuario)

@@ -153,12 +153,15 @@ def asegurar_columnas():
 
 
 def migrar_cuentas_antiguas():
-    """Repara las cuentas que quedaron con datos de versiones anteriores.
+    """Repara las cuentas y los árboles que quedaron con datos de versiones anteriores.
 
     - Contraseñas en texto plano -> se re-hashean con bcrypt.
       Sin esto, bcrypt.checkpw() lanza 'Invalid salt' y el login responde 500.
     - Cuentas de demostración sin verificar -> se verifican, para que las
       cuentas de ejemplo funcionen apenas se crea la base.
+    - Contadores de cupos que no cuadran con las suscripciones reales -> se
+      recalculan. Con un contador inflado, el panel del agricultor anuncia
+      suscriptores que no existen.
     """
     db = SessionLocal()
     try:
@@ -171,6 +174,31 @@ def migrar_cuentas_antiguas():
                 usuario.verificado = 1
                 usuario.codigo_verificacion = None
                 print(f"[migracion] cuenta de demostracion verificada: {usuario.email}")
+
+        # Un usuario no puede tener dos suscripciones al mismo árbol: se
+        # conserva la más antigua y se borran las repetidas. Va antes del
+        # recálculo de cupos para que el contador refleje la realidad.
+        vistas = set()
+        for suscripcion in db.query(Suscripcion).order_by(Suscripcion.id).all():
+            clave = (suscripcion.arbol_id, suscripcion.usuario_id)
+            if clave in vistas:
+                db.delete(suscripcion)
+                print(
+                    f"[migracion] suscripcion duplicada eliminada "
+                    f"(arbol {clave[0]}, usuario {clave[1]})"
+                )
+            else:
+                vistas.add(clave)
+        db.flush()
+
+        for arbol in db.query(Arbol).all():
+            reales = db.query(Suscripcion).filter(Suscripcion.arbol_id == arbol.id).count()
+            if (arbol.cupos_ocupados or 0) != reales:
+                print(
+                    f"[migracion] cupos de '{arbol.nombre}': "
+                    f"{arbol.cupos_ocupados} -> {reales} (suscripciones reales)"
+                )
+                arbol.cupos_ocupados = reales
 
         db.commit()
     finally:

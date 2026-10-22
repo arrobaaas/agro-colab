@@ -99,10 +99,12 @@
     const alerta = document.getElementById("alerta-logistica");
     const formulario = document.getElementById("form-logistica-principal");
     const esComercial = destinoSeleccionado === "comercial";
+    const sesion = auth.leerSesion();
 
     const bodyData = {
       plan_nombre: planActual.nombre,
       monto_clp: planActual.precio,
+      cliente_id: sesion ? sesion.id : null,
       cliente_nombre: document.getElementById("dest-nombre").value.trim(),
       telefono: document.getElementById("dest-tel").value.trim(),
       email: document.getElementById("dest-email").value.trim(),
@@ -278,7 +280,7 @@
     if (!sesion) return;
 
     try {
-      const data = await api.suscribirArbol(sesion.nombre, treeId);
+      const data = await api.suscribirArbol(sesion, treeId);
       window.alert(data.mensaje);
       cargarArboles();
 
@@ -424,7 +426,7 @@
       if (item.tipo === "arbol") {
         try {
           const sesion = auth.leerSesion();
-          const data = await api.cancelarSuscripcion(sesion.nombre, item.id);
+          const data = await api.cancelarSuscripcion(sesion, item.id);
           if (data.status === "success") {
             window.alert(data.mensaje);
             cargarArboles();
@@ -462,10 +464,12 @@
     const alerta = document.getElementById("modal-alerta-logistica");
     const formulario = document.getElementById("form-modal-logistica");
     const esComercial = document.querySelector('input[name="modal_tipo_dest"]:checked').value === "comercial";
+    const sesion = auth.leerSesion();
 
     const bodyData = {
       plan_nombre: planActual.nombre,
       monto_clp: planActual.precio,
+      cliente_id: sesion ? sesion.id : null,
       cliente_nombre: document.getElementById("modal-dest-nombre").value.trim(),
       telefono: document.getElementById("modal-dest-tel").value.trim(),
       email: document.getElementById("modal-dest-email").value.trim(),

@@ -951,6 +951,7 @@
         <div>
           <h3 class="text-xl font-black">Suscriptores</h3>
           <p class="text-xs text-emerald-200" id="suscriptores-arbol-nombre">Árbol</p>
+          <p class="text-[11px] text-emerald-100 mt-1" id="suscriptores-contador">0 suscriptores</p>
         </div>
         <button type="button" onclick="AgroColab.agricultor.cerrarSuscriptores()" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
       </div>
@@ -1099,7 +1100,14 @@
             <p id="perfil-rol" class="text-xs text-emerald-700 font-bold uppercase">--</p>
           </div>
         </div>
-        <form id="form-perfil" class="space-y-4">
+        <div>
+          <p class="text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Mis árboles adoptados</p>
+          <div id="perfil-mis-arboles" class="space-y-2">
+            <p class="text-stone-500 text-xs text-center py-6">Cargando tus árboles...</p>
+          </div>
+        </div>
+
+        <form id="form-perfil" class="space-y-4 mt-5">
           <div>
             <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nombre completo</label>
             <input type="text" id="perfil-input-nombre" class="input">

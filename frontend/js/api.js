@@ -50,17 +50,26 @@
       return apiFetch("/especies");
     },
 
-    suscribirArbol(userName, treeId) {
+    suscribirArbol(sesion, treeId) {
       return apiFetch("/suscribir", {
         method: "POST",
-        body: JSON.stringify({ user_name: userName, tree_id: treeId })
+        body: JSON.stringify({
+          user_id: sesion ? sesion.id : null,
+          user_name: sesion ? sesion.nombre : null,
+          email: sesion ? sesion.email : null,
+          tree_id: treeId
+        })
       });
     },
 
-    cancelarSuscripcion(userName, treeId) {
+    cancelarSuscripcion(sesion, treeId) {
       return apiFetch("/cancelar-suscripcion", {
         method: "POST",
-        body: JSON.stringify({ user_name: userName, tree_id: treeId })
+        body: JSON.stringify({
+          user_id: sesion ? sesion.id : null,
+          user_name: sesion ? sesion.nombre : null,
+          tree_id: treeId
+        })
       });
     },
 
@@ -105,6 +114,10 @@
 
     obtenerSuscriptores(productorId) {
       return apiFetch(`/mis-arboles/${productorId}/suscriptores`);
+    },
+
+    obtenerMisArboles(usuarioId) {
+      return apiFetch(`/suscripciones/usuario/${usuarioId}`);
     },
 
     expulsarSuscriptor(suscripcionId) {

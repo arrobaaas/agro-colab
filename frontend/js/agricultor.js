@@ -38,6 +38,10 @@
     container.innerHTML = arbolesAgricultor
       .map(function (arbol) {
         const cuposLibres = arbol.cupos_totales - arbol.cupos_ocupados;
+        const porcentaje = arbol.cupos_totales
+          ? Math.round((arbol.cupos_ocupados / arbol.cupos_totales) * 100)
+          : 0;
+        const claseBarra = cuposLibres > 0 ? "bg-emerald-600" : "bg-amber-500";
         return `
         <div class="p-5 flex flex-col sm:flex-row sm:items-center gap-4">
           <div class="w-16 h-16 rounded-xl overflow-hidden bg-stone-200 flex-shrink-0">
@@ -50,6 +54,9 @@
             </div>
             <p class="text-xs text-stone-500 mb-1"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${arbol.ubicacion}</p>
             <p class="text-xs text-stone-500">Plan: <strong>${arbol.plan}</strong> · Cupos: <strong>${arbol.cupos_ocupados}/${arbol.cupos_totales}</strong> · <span class="${cuposLibres > 0 ? "text-emerald-600" : "text-red-500"}">${cuposLibres > 0 ? cuposLibres + " libres" : "Completo"}</span></p>
+            <div class="w-full bg-stone-100 h-2 rounded-full overflow-hidden mt-2">
+              <div class="${claseBarra} h-2 rounded-full" style="width: ${porcentaje}%"></div>
+            </div>
           </div>
           <div class="text-right">
             <p class="font-black text-emerald-900">${ui.formatearMonto(arbol.precio_mensual_clp)}</p>
@@ -242,8 +249,8 @@
     arbolSuscriptoresActual = arbol;
     document.getElementById("suscriptores-arbol-nombre").textContent = arbol.nombre;
     document.getElementById("suscriptores-arbol-id").value = arbol.id;
+    document.getElementById("suscriptores-contador").textContent = `${arbol.cupos_ocupados ?? 0} suscriptor${arbol.cupos_ocupados === 1 ? "" : "es"}`;
     document.getElementById("modal-suscriptores").classList.remove("hidden");
-
     await cargarSuscriptores(arbol.id);
   }
 
@@ -259,19 +266,40 @@
     try {
       const sesion = auth.leerSesion();
       const datos = await api.obtenerSuscriptores(sesion.id);
-      const arbol = datos.find(a => a.arbol_id === arbolId);
+      const arbol = Array.isArray(datos) ? datos.find(a => a.arbol_id === arbolId) : null;
 
-      if (!arbol || !arbol.suscriptores.length) {
-        contenedor.innerHTML = '<p class="text-stone-500 text-sm text-center py-8">No hay suscriptores en este árbol</p>';
+      if (!arbol) {
+        contenedor.innerHTML = '<p class="text-red-500 text-sm text-center py-8">No se encontró el árbol en tu panel.</p>';
         return;
       }
 
-      contenedor.innerHTML = arbol.suscriptores
+      const suscriptores = arbol.suscriptores || [];
+
+      if (!suscriptores.length) {
+        contenedor.innerHTML = `
+          <div class="text-center py-10">
+            <div class="w-14 h-14 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i class="fa-solid fa-users text-stone-400 text-xl"></i>
+            </div>
+            <p class="text-sm font-bold text-stone-700">Todavía no hay suscriptores para este árbol</p>
+            <p class="text-xs text-stone-500 mt-1">Cuando un comprador adopte este árbol aparecerá aquí.</p>
+          </div>
+        `;
+        return;
+      }
+
+      contenedor.innerHTML = suscriptores
         .map(function (s) {
+          const iniciales = (s.nombre || "?")
+            .split(" ")
+            .map(function (parte) { return parte.charAt(0); })
+            .slice(0, 2)
+            .join("")
+            .toUpperCase();
           return `
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-stone-50 rounded-xl border border-stone-200">
               <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <i class="fa-solid fa-user text-emerald-700"></i>
+                <span class="text-xs font-black text-emerald-700">${iniciales}</span>
               </div>
               <div class="flex-1">
                 <p class="font-bold text-sm text-stone-900">${s.nombre}</p>
