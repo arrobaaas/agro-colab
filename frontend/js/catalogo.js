@@ -47,10 +47,6 @@
     return especies;
   }
 
-  function listar() {
-    return especies;
-  }
-
   function porId(especieId) {
     return especies.find(function (especie) {
       return especie.id === especieId;
@@ -146,7 +142,6 @@
 
   AgroColab.catalogo = {
     cargar,
-    listar,
     porId,
     pintarSelect,
     pintarGaleria,

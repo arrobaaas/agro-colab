@@ -39,9 +39,6 @@
 
     contenedor.innerHTML = arboles
       .map(function (arbol) {
-        const progreso = arbol.cupos_totales
-          ? Math.round((arbol.cupos_ocupados / arbol.cupos_totales) * 100)
-          : 0;
         return `
           <div class="flex items-center gap-3 p-3 bg-stone-50 rounded-xl border border-stone-200">
             <div class="w-14 h-14 rounded-lg overflow-hidden bg-stone-200 flex-shrink-0">
@@ -57,7 +54,7 @@
               </p>
             </div>
             <div class="text-right flex-shrink-0">
-              <p class="font-black text-emerald-900 text-sm">$${AgroColab.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
+              <p class="font-black text-emerald-900 text-sm">${AgroColab.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
               <p class="text-[10px] text-stone-400">CLP / mes</p>
               <p class="text-[10px] text-stone-500 mt-1">${arbol.cupos_ocupados}/${arbol.cupos_totales} copartícipes</p>
             </div>

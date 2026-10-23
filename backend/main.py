@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+from sqlalchemy.orm import joinedload
 
 from database import (
     engine, SessionLocal, Base, Usuario, Arbol, Suscripcion, Pedido,
@@ -371,14 +372,24 @@ def suscribir(data: SuscripcionRequest, db: SessionLocal = Depends(get_db)):
 @app.get("/api/mis-arboles/{productor_id}/suscriptores")
 def listar_suscriptores(productor_id: int, db: SessionLocal = Depends(get_db)):
     """Lista los usuarios suscritos a los árboles de un productor."""
-    arboles = db.query(Arbol).filter(Arbol.productor_id == productor_id).all()
+    arboles = (
+        db.query(Arbol)
+        .options(joinedload(Arbol.productor))
+        .filter(Arbol.productor_id == productor_id)
+        .all()
+    )
 
     resultado = []
     for arbol in arboles:
-        suscripciones = db.query(Suscripcion).filter(Suscripcion.arbol_id == arbol.id).all()
+        suscripciones = (
+            db.query(Suscripcion)
+            .options(joinedload(Suscripcion.usuario))
+            .filter(Suscripcion.arbol_id == arbol.id)
+            .all()
+        )
         suscriptores = []
         for s in suscripciones:
-            u = db.query(Usuario).filter(Usuario.id == s.usuario_id).first()
+            u = s.usuario
             if u:
                 suscriptores.append({
                     "suscripcion_id": s.id,
@@ -409,11 +420,16 @@ def listar_suscripciones_usuario(usuario_id: int, db: SessionLocal = Depends(get
     if not usuario:
         return {"status": "error", "mensaje": "Usuario no encontrado."}
 
-    suscripciones = db.query(Suscripcion).filter(Suscripcion.usuario_id == usuario_id).all()
+    suscripciones = (
+        db.query(Suscripcion)
+        .options(joinedload(Suscripcion.arbol).joinedload(Arbol.productor))
+        .filter(Suscripcion.usuario_id == usuario_id)
+        .all()
+    )
 
     arboles = []
     for suscripcion in suscripciones:
-        arbol = db.query(Arbol).filter(Arbol.id == suscripcion.arbol_id).first()
+        arbol = suscripcion.arbol
         if not arbol:
             continue
         arboles.append({
@@ -820,6 +836,7 @@ def actualizar_perfil(data: PerfilRequest, db: SessionLocal = Depends(get_db)):
         "status": "success",
         "mensaje": "Perfil actualizado correctamente.",
         "user": {
+            "id": usuario.id,
             "nombre": usuario.nombre,
             "email": usuario.email,
             "rol": usuario.rol,

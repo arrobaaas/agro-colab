@@ -125,7 +125,7 @@ class Pedido(Base):
 # se comparan los modelos con el esquema real y se completan las columnas faltantes.
 
 def asegurar_columnas():
-    """Agrega a las tablas existentes las columnas que los modelosecesitan."""
+    """Agrega a las tablas existentes las columnas que los modelos necesitan."""
     inspector = inspect(engine)
     tablas_existentes = inspector.get_table_names()
 

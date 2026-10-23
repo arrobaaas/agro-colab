@@ -68,11 +68,8 @@
 
   /* ---------- Selector de línea: Adopción vs Abastecimiento ---------- */
 
-  let lineaActiva = "adopcion";
-
   function establecerLinea(linea, scrollTo) {
     if (linea !== "adopcion" && linea !== "abastecimiento") return;
-    lineaActiva = linea;
 
     const esAdopcion = linea === "adopcion";
 

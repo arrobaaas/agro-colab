@@ -77,10 +77,6 @@
       return apiFetch("/pedidos", { method: "POST", body: JSON.stringify(pedido) });
     },
 
-    obtenerPedidos() {
-      return apiFetch("/pedidos");
-    },
-
     subirArbol(arbol) {
       return apiFetch("/arboles", { method: "POST", body: JSON.stringify(arbol) });
     },
