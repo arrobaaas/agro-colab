@@ -253,6 +253,9 @@
           <button type="button" class="nav-link" onclick="AgroColab.parcelas.abrirCanasta()">
             <i class="fa-solid fa-basket-shopping"></i> Compras
           </button>
+          <button type="button" class="nav-link" onclick="AgroColab.views.mostrarVista('dashboard-comprador')">
+            <i class="fa-solid fa-gauge-high"></i> Mi Panel
+          </button>
           <a href="privacidad.html" class="nav-link">
             <i class="fa-solid fa-shield-halved"></i> Privacidad
           </a>
@@ -768,6 +771,53 @@
     <footer class="bg-stone-900 text-stone-400 text-xs py-8 border-t border-stone-800 text-center">
       <p>© 2026 Agro-Colab - Financia la cosecha, asegura tu abastecimiento.</p>
     </footer>
+  </div>
+
+  <!-- ============================================================
+       VISTA DASHBOARD COMPRADOR: estado del árbol adoptado
+       ============================================================ -->
+  <div id="vista-dashboard-comprador" data-vista="dashboard-comprador" class="hidden">
+    <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
+        <div class="flex items-center space-x-3">
+          <span class="text-3xl">🌱</span>
+          <div>
+            <h1 class="text-xl font-extrabold tracking-tight">Agro-Colab</h1>
+            <p class="text-[11px] text-emerald-200">Trazabilidad directa del huerto a tu mesa</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button type="button" class="nav-link" onclick="AgroColab.views.mostrarVista('parcelas')">
+            <i class="fa-solid fa-leaf"></i> Catálogo
+          </button>
+          <a href="privacidad.html" class="nav-link">
+            <i class="fa-solid fa-shield-halved"></i> Privacidad
+          </a>
+          <div id="nav-sesion" class="flex items-center gap-2"></div>
+          <button type="button" id="btn-cerrar-sesion" class="btn-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Salir
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-14">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <span class="inline-block bg-emerald-600/90 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+          Panel del Comprador
+        </span>
+        <h2 class="text-3xl md:text-4xl font-black mb-3 leading-tight">
+          Tu adopción al árbol
+        </h2>
+        <p class="text-stone-200 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+          Estado de tu árbol adoptado, avance de coparticipación y cosecha estimada.
+        </p>
+      </div>
+
+      <div id="dashboard-comprador">
+        <p class="text-stone-500 text-sm text-center py-8">Cargando tu panel de adopción...</p>
+      </div>
+    </main>
   </div>
 
   <!-- ============================================================

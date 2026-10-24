@@ -18,6 +18,12 @@
       roles: ["comprador"],
       alMostrar: () => AgroColab.parcelas.cargar()
     },
+    dashboardComprador: {
+      selector: "#vista-dashboard-comprador",
+      requiereSesion: true,
+      roles: ["comprador"],
+      alMostrar: () => AgroColab.dashboard.cargar()
+    },
     agricultor: {
       selector: "#vista-agricultor",
       requiereSesion: true,
