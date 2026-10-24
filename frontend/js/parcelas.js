@@ -14,6 +14,7 @@
   let planActual = { ...PLAN_ABASTECIMIENTO_INICIAL };
   let destinoSeleccionado = "particular";
   let planAdopcionSeleccionado = "todos";
+  let itemLogisticaActual = null;
 
   /* ---------- Plan y destino de despacho ---------- */
 
@@ -34,14 +35,16 @@
     auth.guardarPlan(planActual);
 
     // Agregar al carrito con estado "comprado"
-    agregarAlCarrito({
+    const item = {
       id: planActual.nombre,
       nombre: planActual.nombre,
       descripcion: `Plan de abastecimiento - ${boton.dataset.planFrecuencia}`,
       precio: planActual.precio,
       estado: "comprado",
       tipo: "plan"
-    });
+    };
+    agregarAlCarrito(item);
+    itemLogisticaActual = item;
 
     abrirLogistica();
   }
@@ -278,20 +281,28 @@
 
     try {
       const data = await api.suscribirArbol(sesion, treeId);
+      if (data.status !== "success") {
+        /* Si la suscripción fue rechazada (por ejemplo, ya estaba suscrito al
+           mismo árbol) no se abre la logística ni se agrega al carrito. */
+        window.alert(data.mensaje || "No se pudo completar la suscripción.");
+        return;
+      }
       window.alert(data.mensaje);
       cargarArboles();
 
       // Agregar al carrito con estado "comprado"
       const arbol = data.arbol;
       if (arbol) {
-        agregarAlCarrito({
+        const item = {
           id: arbol.id,
           nombre: arbol.nombre,
           descripcion: `Árbol adoptado - Plan ${arbol.plan}`,
           precio: arbol.precio_mensual_clp,
           estado: "comprado",
           tipo: "arbol"
-        });
+        };
+        agregarAlCarrito(item);
+        itemLogisticaActual = item;
       }
 
       abrirLogistica();
@@ -397,7 +408,10 @@
           <div class="flex items-center gap-3">
             <span class="font-black text-emerald-900">${ui.formatearMonto(item.precio)} CLP</span>
             ${esComprado
-              ? `<button type="button" onclick="AgroColab.parcelas.cancelarCompra(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">Cancelar</button>`
+              ? `
+                <button type="button" onclick="AgroColab.parcelas.cancelarCompra(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">Cancelar</button>
+                <button type="button" onclick="AgroColab.parcelas.editarLogistica(${index})" class="text-amber-600 hover:text-amber-800 text-sm font-bold">Modificar logística</button>
+              `
               : `<button type="button" onclick="AgroColab.parcelas.quitarDelCarrito(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">Quitar</button>`
             }
           </div>
@@ -455,6 +469,53 @@
     document.getElementById("modal-logistica").classList.add("hidden");
   }
 
+  /* ---------- Modificar la logística desde la canasta ---------- */
+
+  function editarLogistica(index) {
+    const item = carrito[index];
+    if (!item) return;
+
+    abrirLogistica();
+
+    const sesion = auth.leerSesion();
+
+    const radioPart = document.querySelector('input[name="modal_tipo_dest"][value="particular"]');
+    const radioCom = document.querySelector('input[name="modal_tipo_dest"][value="comercial"]');
+    const cardPart = document.getElementById("modal-card-part");
+    const cardCom = document.getElementById("modal-card-com");
+    const bloqueCom = document.getElementById("modal-bloque-comercial");
+
+    const esComercial = item.tipoDestino === "comercial";
+    if (esComercial) {
+      if (radioCom) radioCom.checked = true;
+      if (radioPart) radioPart.checked = false;
+      cardCom.className = "destino-card destino-card--activo-comercial";
+      cardPart.className = "destino-card destino-card--inactivo";
+      bloqueCom.classList.remove("hidden");
+    } else {
+      if (radioPart) radioPart.checked = true;
+      if (radioCom) radioCom.checked = false;
+      cardPart.className = "destino-card destino-card--activo-particular";
+      cardCom.className = "destino-card destino-card--inactivo";
+      bloqueCom.classList.add("hidden");
+    }
+
+    document.getElementById("modal-dest-nombre").value =
+      (item.contacto && item.contacto.nombre) || (sesion && sesion.nombre) || "";
+    document.getElementById("modal-dest-tel").value =
+      (item.contacto && item.contacto.tel) || (sesion && sesion.telefono) || "";
+    document.getElementById("modal-dest-email").value =
+      (item.contacto && item.contacto.email) || (sesion && sesion.email) || "";
+    document.getElementById("modal-dest-direccion").value = item.direccion || "";
+    document.getElementById("modal-dest-comuna").value = item.comuna || "";
+    document.getElementById("modal-dest-frecuencia").value = item.frecuencia || "quincenal";
+
+    if (esComercial) {
+      document.getElementById("modal-com-razon").value = item.razonSocial || "";
+      document.getElementById("modal-com-rut").value = item.rut || "";
+    }
+  }
+
   async function enviarLogisticaModal(evento) {
     evento.preventDefault();
 
@@ -498,6 +559,21 @@
           <p class="text-stone-600">Destino: <strong>${bodyData.direccion}, ${bodyData.comuna}</strong> (${bodyData.tipo_destino.toUpperCase()}) | Frecuencia: <strong>${bodyData.frecuencia_entrega}</strong>.</p>
         `;
         formulario.reset();
+
+        // Guardar los datos de entrega en el item del carrito para poder
+        // reutilizarlos al modificar la logística.
+        if (itemLogisticaActual) {
+          itemLogisticaActual.direccion = bodyData.direccion;
+          itemLogisticaActual.comuna = bodyData.comuna;
+          itemLogisticaActual.frecuencia = bodyData.frecuencia_entrega;
+          itemLogisticaActual.tipoDestino = bodyData.tipo_destino;
+          itemLogisticaActual.contacto = {
+            nombre: bodyData.cliente_nombre,
+            tel: bodyData.telefono,
+            email: bodyData.email
+          };
+        }
+
         setTimeout(cerrarLogistica, 2000);
       } else {
         ui.mostrarAlerta(alerta, "error", data.mensaje || "No se pudo registrar la solicitud logística.");
@@ -512,5 +588,5 @@
     return cargarArboles();
   }
 
-  AgroColab.parcelas = { init, cargar, establecerLinea, abrirCanasta, cerrarCanasta, agregarAlCarrito, quitarDelCarrito, cancelarCompra, abrirLogistica, cerrarLogistica };
+  AgroColab.parcelas = { init, cargar, establecerLinea, abrirCanasta, cerrarCanasta, agregarAlCarrito, quitarDelCarrito, cancelarCompra, editarLogistica, abrirLogistica, cerrarLogistica };
 })();
