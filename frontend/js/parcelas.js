@@ -427,7 +427,6 @@
             ${esComprado
               ? `
                 <button type="button" onclick="AgroColab.parcelas.cancelarCompra(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">Cancelar</button>
-                <button type="button" onclick="AgroColab.parcelas.editarLogistica(${index})" class="text-amber-600 hover:text-amber-800 text-sm font-bold">Modificar logística</button>
               `
               : `<button type="button" onclick="AgroColab.parcelas.quitarDelCarrito(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">Quitar</button>`
             }

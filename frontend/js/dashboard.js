@@ -79,6 +79,9 @@
               <button type="button" class="btn-submit" onclick="AgroColab.dashboard.cancelarSuscripcionArbol(${arbol.arbol_id})">
                 <i class="fa-solid fa-user-x"></i> Cancelar suscripción
               </button>
+              <button type="button" class="px-4 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-sm" onclick="AgroColab.dashboard.editarLogisticaArbol(${arbol.arbol_id})">
+                <i class="fa-solid fa-truck-fast"></i> Modificar logística
+              </button>
               <button type="button" class="px-4 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-sm" onclick="AgroColab.views.mostrarVista('parcelas')">
                 <i class="fa-solid fa-leaf"></i> Ver catálogo
               </button>
@@ -114,7 +117,49 @@
     return data;
   }
 
+  /* Modificar la logística del árbol adoptado desde el panel. */
+  function editarLogisticaArbol(arbolId) {
+    const arbol = arboles.find(function (a) { return String(a.arbol_id) === String(arbolId); });
+    if (!arbol) return;
+
+    AgroColab.parcelas.abrirLogistica();
+
+    const sesion = auth.leerSesion();
+    const radioPart = document.querySelector('input[name="modal_tipo_dest"][value="particular"]');
+    const radioCom = document.querySelector('input[name="modal_tipo_dest"][value="comercial"]');
+    const cardPart = document.getElementById("modal-card-part");
+    const cardCom = document.getElementById("modal-card-com");
+    const bloqueCom = document.getElementById("modal-bloque-comercial");
+
+    const esComercial = false;
+    if (esComercial) {
+      if (radioCom) radioCom.checked = true;
+      if (radioPart) radioPart.checked = false;
+      cardCom.className = "destino-card destino-card--activo-comercial";
+      cardPart.className = "destino-card destino-card--inactivo";
+      bloqueCom.classList.remove("hidden");
+    } else {
+      if (radioPart) radioPart.checked = true;
+      if (radioCom) radioCom.checked = false;
+      cardPart.className = "destino-card destino-card--activo-particular";
+      cardCom.className = "destino-card destino-card--inactivo";
+      bloqueCom.classList.add("hidden");
+    }
+
+    document.getElementById("modal-dest-nombre").value = (sesion && sesion.nombre) || arbol.nombre || "";
+    document.getElementById("modal-dest-tel").value = (sesion && sesion.telefono) || "";
+    document.getElementById("modal-dest-email").value = (sesion && sesion.email) || "";
+    document.getElementById("modal-dest-direccion").value = (sesion && sesion.direccion) || arbol.ubicacion || "";
+    document.getElementById("modal-dest-comuna").value = "";
+    document.getElementById("modal-dest-frecuencia").value = "quincenal";
+
+    if (esComercial) {
+      document.getElementById("modal-com-razon").value = "";
+      document.getElementById("modal-com-rut").value = "";
+    }
+  }
+
   function init() {}
 
-  AgroColab.dashboard = { init, cargar, pintar, cancelarSuscripcionArbol };
+  AgroColab.dashboard = { init, cargar, pintar, cancelarSuscripcionArbol, editarLogisticaArbol };
 })();
