@@ -18,7 +18,7 @@
       roles: ["comprador"],
       alMostrar: () => AgroColab.parcelas.cargar()
     },
-    dashboardComprador: {
+    "dashboard-comprador": {
       selector: "#vista-dashboard-comprador",
       requiereSesion: true,
       roles: ["comprador"],
