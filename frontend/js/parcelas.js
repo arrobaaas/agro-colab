@@ -207,7 +207,7 @@
             data-suscribir-id="${arbol.id}"
             ${cuposLibres === 0 ? "disabled" : ""}
           >
-            ${cuposLibres > 0 ? "Suscribirse al cultivo" : "Capacidad Completa"}
+            ${cuposLibres > 0 ? "Agregar al carro" : "Capacidad Completa"}
           </button>
         </div>
       </div>
@@ -274,36 +274,53 @@
     }
   }
 
-  /* Dentro de esta vista siempre hay sesión, así que no se pide el nombre. */
-  async function suscribirse(treeId) {
+  /* Dentro de esta vista siempre hay sesión, así que no se pide el nombre.
+     El clic en el botón del árbol solo suma el cupo a la canasta como pendiente
+     de pago. La suscripción real se ejecuta cuando el comprador presiona
+     "Pagar" desde la canasta (ver pagos... ver pagarSuscripcion). */
+  async function agregarAlCarritoArbol(treeId) {
     const sesion = auth.leerSesion();
     if (!sesion) return;
 
     try {
-      const data = await api.suscribirArbol(sesion, treeId);
+      const datos = await api.obtenerArboles();
+      const arbol = (datos || []).find(function (a) { return a.id === treeId; });
+      if (!arbol) { window.alert("No se encontró el árbol."); return; }
+
+      const item = {
+        id: arbol.id,
+        nombre: arbol.nombre,
+        descripcion: `Árbol adoptado - Plan ${arbol.plan}`,
+        precio: arbol.precio_mensual_clp,
+        estado: "pendiente",
+        tipo: "arbol"
+      };
+      agregarAlCarrito(item);
+      itemLogisticaActual = item;
+      cargarArboles();
+    } catch (error) {
+      window.alert("Error de comunicación con el backend");
+    }
+  }
+
+  /* Pago desde la canasta: ejecuta la suscripción del árbol y abre la logística. */
+  async function pagarSuscripcion(index) {
+    const item = carrito[index];
+    if (!item) return;
+
+    const sesion = auth.leerSesion();
+    if (!sesion) return;
+
+    try {
+      const data = await api.suscribirArbol(sesion, item.id);
       if (data.status !== "success") {
-        /* Si la suscripción fue rechazada (por ejemplo, ya estaba suscrito al
-           mismo árbol) no se abre la logística ni se agrega al carrito. */
-        window.alert(data.mensaje || "No se pudo completar la suscripción.");
+        window.alert(data.mensaje || "No se pudo completar el pago.");
         return;
       }
-      window.alert(data.mensaje);
-      cargarArboles();
 
-      // Agregar al carrito con estado "comprado"
-      const arbol = data.arbol;
-      if (arbol) {
-        const item = {
-          id: arbol.id,
-          nombre: arbol.nombre,
-          descripcion: `Árbol adoptado - Plan ${arbol.plan}`,
-          precio: arbol.precio_mensual_clp,
-          estado: "comprado",
-          tipo: "arbol"
-        };
-        agregarAlCarrito(item);
-        itemLogisticaActual = item;
-      }
+      item.estado = "comprado";
+      actualizarContadorCanasta();
+      renderizarCanasta();
 
       abrirLogistica();
     } catch (error) {
@@ -342,7 +359,7 @@
     document.getElementById("tree-container").addEventListener("click", function (evento) {
       const boton = evento.target.closest("[data-suscribir-id]");
       if (boton && !boton.disabled) {
-        suscribirse(Number(boton.dataset.suscribirId));
+        AgroColab.parcelas.agregarAlCarritoArbol(Number(boton.dataset.suscribirId));
       }
     });
 
@@ -414,6 +431,9 @@
               `
               : `<button type="button" onclick="AgroColab.parcelas.quitarDelCarrito(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">Quitar</button>`
             }
+            ${!esComprado && item.tipo === "arbol" ? `
+              <button type="button" onclick="AgroColab.parcelas.pagarSuscripcion(${index})" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-sm">Pagar</button>
+            ` : ""}
           </div>
         </div>
       `;
@@ -588,5 +608,5 @@
     return cargarArboles();
   }
 
-  AgroColab.parcelas = { init, cargar, establecerLinea, abrirCanasta, cerrarCanasta, agregarAlCarrito, quitarDelCarrito, cancelarCompra, editarLogistica, abrirLogistica, cerrarLogistica };
+  AgroColab.parcelas = { init, cargar, establecerLinea, abrirCanasta, cerrarCanasta, agregarAlCarrito, quitarDelCarrito, cancelarCompra, editarLogistica, agregarAlCarritoArbol, pagarSuscripcion, abrirLogistica, cerrarLogistica };
 })();
