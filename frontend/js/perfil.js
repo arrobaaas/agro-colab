@@ -39,26 +39,49 @@
 
     contenedor.innerHTML = arboles
       .map(function (arbol) {
+        const cuposTotales = arbol.cupos_totales || 0;
+        const cuposOcupados = arbol.cupos_ocupados || 0;
+        const activa = cuposOcupados < cuposTotales;
+        const porcentaje = cuposTotales ? Math.round((cuposOcupados / cuposTotales) * 100) : 0;
+        const estado = activa ? "Activo" : "Completo";
+        const claseBadge = activa ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800";
+        const claseEstado = activa ? "text-emerald-700" : "text-amber-700";
+        const etiqueta = activa ? "Suscripción activa" : "Suscripción completa";
         return `
-          <div class="flex items-center gap-3 p-3 bg-stone-50 rounded-xl border border-stone-200">
-            <div class="w-14 h-14 rounded-lg overflow-hidden bg-stone-200 flex-shrink-0">
-              <img src="${arbol.imagen}" alt="${arbol.nombre}" class="w-full h-full object-cover">
+          <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
+            <div class="flex items-center gap-3">
+              <div class="w-14 h-14 rounded-lg overflow-hidden bg-stone-200 flex-shrink-0">
+                <img src="${arbol.imagen}" alt="${arbol.nombre}" class="w-full h-full object-cover">
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-sm text-stone-900 truncate">${arbol.nombre}</p>
+                <p class="text-[11px] text-stone-500 truncate">
+                  <i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${arbol.ubicacion}
+                </p>
+                <p class="text-[11px] text-stone-500">
+                  Plan <strong>${arbol.plan}</strong> · Cosecha <strong>${arbol.estimacion_cosecha}</strong>
+                </p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="font-black text-emerald-900 text-sm">${AgroColab.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
+                <p class="text-[10px] text-stone-400">CLP / mes</p>
+              </div>
             </div>
-            <div class="flex-1 min-w-0">
-              <p class="font-bold text-sm text-stone-900 truncate">${arbol.nombre}</p>
-              <p class="text-[11px] text-stone-500 truncate">
-                <i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${arbol.ubicacion}
-              </p>
-              <p class="text-[11px] text-stone-500">
-                Plan <strong>${arbol.plan}</strong> · Cosecha <strong>${arbol.estimacion_cosecha}</strong>
-              </p>
+
+            <div class="mt-2 flex items-center justify-between gap-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${claseBadge}">${etiqueta}</span>
+              <span class="text-[10px] text-stone-500">${cuposOcupados}/${cuposTotales} coparticipantes</span>
             </div>
-            <div class="text-right flex-shrink-0">
-              <p class="font-black text-emerald-900 text-sm">${AgroColab.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
-              <p class="text-[10px] text-stone-400">CLP / mes</p>
-              <p class="text-[10px] text-stone-500 mt-1">${arbol.cupos_ocupados}/${arbol.cupos_totales} copartícipes</p>
+
+            <div class="w-full bg-stone-100 h-2 rounded-full overflow-hidden mt-2">
+              <div class="bg-emerald-600 h-2 rounded-full" style="width: ${porcentaje}%"></div>
             </div>
-          </div>`;
+
+            <p class="text-[10px] text-stone-500 mt-2">
+              Estado: <strong class="${claseEstado}">${estado}</strong> · Cosecha estimada: <strong>${arbol.estimacion_cosecha}</strong>
+            </p>
+          </div>
+        `;
       })
       .join("");
   }
