@@ -34,19 +34,19 @@
     mostrarPlanActual();
     auth.guardarPlan(planActual);
 
-    // Agregar al carrito con estado "comprado"
+    // Agregar al carrito como pendiente de pago (flujo canasta -> Pagar -> Logistica)
     const item = {
       id: planActual.nombre,
       nombre: planActual.nombre,
       descripcion: `Plan de abastecimiento - ${boton.dataset.planFrecuencia}`,
       precio: planActual.precio,
-      estado: "comprado",
+      estado: "pendiente",
       tipo: "plan"
     };
     agregarAlCarrito(item);
     itemLogisticaActual = item;
 
-    abrirLogistica();
+    abrirCanasta();
   }
 
   function cambiarDestino(tipo) {
@@ -363,10 +363,12 @@
     if (!sesion) return;
 
     try {
-      const data = await api.suscribirArbol(sesion, item.id);
-      if (data.status !== "success") {
-        window.alert(data.mensaje || "No se pudo completar el pago.");
-        return;
+      if (item.tipo !== "plan") {
+        const data = await api.suscribirArbol(sesion, item.id);
+        if (data.status !== "success") {
+          window.alert(data.mensaje || "No se pudo completar el pago.");
+          return;
+        }
       }
 
       // El producto comprado se elimina de la canasta y la canasta vuelve a estar vacía.
@@ -480,7 +482,7 @@
               `
               : `<button type="button" onclick="AgroColab.parcelas.quitarDelCarrito(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">Quitar</button>`
             }
-            ${!esComprado && item.tipo === "arbol" ? `
+            ${!esComprado && (item.tipo === "arbol" || item.tipo === "plan") ? `
               <button type="button" onclick="AgroColab.parcelas.pagarSuscripcion(${index})" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-sm">Pagar</button>
             ` : ""}
           </div>
