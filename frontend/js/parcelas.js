@@ -645,7 +645,10 @@
           };
         }
 
-        setTimeout(cerrarLogistica, 2000);
+        setTimeout(function () {
+          cerrarLogistica();
+          AgroColab.views.mostrarVista("dashboard-comprador");
+        }, 2000);
       } else {
         ui.mostrarAlerta(alerta, "error", data.mensaje || "No se pudo registrar la solicitud logística.");
       }
