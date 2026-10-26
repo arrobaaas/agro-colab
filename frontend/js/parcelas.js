@@ -306,25 +306,52 @@
         return;
       }
 
-      const confirmado = window.confirm(
-        `¿Estás seguro de que quieres adoptar el árbol "${arbol.nombre}"?\n\nEsto abrirá la canasta para completar el pago de la suscripción.`
-      );
-      if (!confirmado) return;
-
-      const item = {
-        id: arbol.id,
-        nombre: arbol.nombre,
-        descripcion: `Árbol adoptado - Plan ${arbol.plan}`,
-        precio: arbol.precio_mensual_clp,
-        estado: "pendiente",
-        tipo: "arbol"
-      };
-      agregarAlCarrito(item);
-      itemLogisticaActual = item;
-      cargarArboles();
+      abrirModalConfirmacionArbol(arbol);
     } catch (error) {
       window.alert("Error de comunicación con el backend");
     }
+  }
+
+  /* Agregar un árbol ya validado a la canasta (estado pendiente de pago). */
+  function agregarItemAlArbol(arbol) {
+    const item = {
+      id: arbol.id,
+      nombre: arbol.nombre,
+      descripcion: `Árbol adoptado - Plan ${arbol.plan}`,
+      precio: arbol.precio_mensual_clp,
+      estado: "pendiente",
+      tipo: "arbol"
+    };
+    agregarAlCarrito(item);
+    itemLogisticaActual = item;
+    cargarArboles();
+  }
+
+  /* Respuesta del modal de confirmación de adopción ("Sí" -> agregar / "No" -> cerrar). */
+  function confirmarAdopcion() {
+    const arbol = arbolParaAdoptar;
+    cerrarModalConfirmacionArbol();
+    if (!arbol) return;
+    agregarItemAlArbol(arbol);
+  }
+
+  /* ---------- Modal de confirmación de adopción ---------- */
+  let arbolParaAdoptar = null;
+
+  function abrirModalConfirmacionArbol(arbol) {
+    arbolParaAdoptar = arbol;
+    const modal = document.getElementById("modal-confirmacion-adopcion");
+    const titulo = document.getElementById("modal-confirmacion-titulo");
+    const texto = document.getElementById("modal-confirmacion-texto");
+    if (titulo) titulo.textContent = "¿Estás seguro de adoptar este árbol?";
+    if (texto) texto.textContent = `¿Estás seguro de que quieres adoptar el árbol "${arbol ? arbol.nombre : ""}"?`;
+    if (modal) modal.classList.remove("hidden");
+  }
+
+  function cerrarModalConfirmacionArbol() {
+    const modal = document.getElementById("modal-confirmacion-adopcion");
+    if (modal) modal.classList.add("hidden");
+    arbolParaAdoptar = null;
   }
 
   /* Pago desde la canasta: ejecuta la suscripción del árbol y abre la logística. */
@@ -631,5 +658,5 @@
     return cargarArboles();
   }
 
-  AgroColab.parcelas = { init, cargar, establecerLinea, abrirCanasta, cerrarCanasta, agregarAlCarrito, quitarDelCarrito, cancelarCompra, editarLogistica, agregarAlCarritoArbol, pagarSuscripcion, abrirLogistica, cerrarLogistica };
+  AgroColab.parcelas = { init, cargar, establecerLinea, abrirCanasta, cerrarCanasta, agregarAlCarrito, quitarDelCarrito, cancelarCompra, editarLogistica, agregarAlCarritoArbol, agregarItemAlArbol, pagarSuscripcion, abrirLogistica, cerrarLogistica, abrirModalConfirmacionArbol, cerrarModalConfirmacionArbol, confirmarAdopcion };
 })();
