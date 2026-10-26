@@ -369,9 +369,8 @@
         return;
       }
 
-      item.estado = "comprado";
-      actualizarContadorCanasta();
-      renderizarCanasta();
+      // El producto comprado se elimina de la canasta y la canasta vuelve a estar vacía.
+      quitarDelCarrito(index);
 
       abrirLogistica();
     } catch (error) {
