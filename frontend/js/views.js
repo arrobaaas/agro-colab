@@ -61,6 +61,13 @@
       elemento.classList.toggle("hidden", elemento.dataset.vista !== nombre);
     });
 
+    /* Cerrar cualquier modal abierto antes de cambiar de vista. */
+    try {
+      if (document.getElementById("modal-canasta")) AgroColab.parcelas.cerrarCanasta();
+      if (document.getElementById("modal-logistica")) AgroColab.parcelas.cerrarLogistica();
+      if (document.getElementById("modal-confirmacion-adopcion")) AgroColab.parcelas.cerrarModalConfirmacionArbol();
+    } catch (error) { /* los modales son opcionales según la vista */ }
+
     vistaActual = nombre;
     window.scrollTo({ top: 0, behavior: "auto" });
 
