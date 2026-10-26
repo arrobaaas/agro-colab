@@ -287,6 +287,21 @@
       const arbol = (datos || []).find(function (a) { return a.id === treeId; });
       if (!arbol) { window.alert("No se encontró el árbol."); return; }
 
+      // Un mismo usuario no puede adoptar más de una vez el mismo árbol.
+      const existente = carrito.find(function (c) {
+        return c && c.tipo === "arbol" && c.id === arbol.id;
+      });
+      const yaAdquirido = existente && (existente.estado === "pendiente" || existente.estado === "comprado");
+      if (yaAdquirido) {
+        window.alert(`Ya tienes una suscripción activa para "${arbol.nombre}". No puedes adoptar más de una vez.`);
+        return;
+      }
+
+      const confirmado = window.confirm(
+        `¿Estás seguro de que quieres adoptar el árbol "${arbol.nombre}"?\n\nEsto abrirá la canasta para completar el pago de la suscripción.`
+      );
+      if (!confirmado) return;
+
       const item = {
         id: arbol.id,
         nombre: arbol.nombre,
