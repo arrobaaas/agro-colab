@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from core import PedidoRequest, get_db
-from database import Pedido
+from database import Pedido, Usuario
 
 router = APIRouter()
 
