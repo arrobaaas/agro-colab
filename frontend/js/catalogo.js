@@ -1,95 +1,90 @@
-/* Agro-Colab - Catálogo de especies frutales y galería de imágenes.
+/* Agro-Colab - Servicio de catálogo de especies frutales y galería de imágenes.
 
    El backend expone un catálogo cerrado (GET /api/especies) con las especies
    disponibles y, para cada una, las fotos curadas que el agricultor puede usar.
-   Este módulo se encarga de pintar el selector de especie y la galería de fotos,
+   Este servicio se encarga de pintar el selector de especie y la galería de fotos,
    de modo que nunca se pueda publicar un árbol con un nombre o una foto ajenos
    a la especie declarada. */
 
-(function () {
-  const AgroColab = (window.AgroColab = window.AgroColab || {});
-  const { config } = AgroColab;
-
-  let especies = [];
-  let cargado = false;
-  let errorCarga = null;
+class CatalogoService {
+  constructor() {
+    this.config = window.AgroColab.config;
+    this.api = window.AgroColab.api;
+    this.especies = [];
+    this.cargado = false;
+    this.errorCarga = null;
+  }
 
   /* ---------- Carga del catálogo ---------- */
 
-  /* Pide el catálogo a la API. Se usa api.obtenerEspecies() cuando existe, y si
-     el navegador tiene cacheada una versión anterior de api.js (que no lo tenía)
-     se hace el request directo, para que un archivo viejo en caché no deje el
-     formulario sin opciones. */
-  async function pedirCatalogo() {
-    if (AgroColab.api && typeof AgroColab.api.obtenerEspecies === "function") {
-      return AgroColab.api.obtenerEspecies();
+  async pedirCatalogo() {
+    if (this.api && typeof this.api.obtenerEspecies === "function") {
+      return this.api.obtenerEspecies();
     }
 
-    const respuesta = await fetch(`${config.API_URL}/especies`, {
+    const respuesta = await fetch(`${this.config.API_URL}/especies`, {
       headers: { "Content-Type": "application/json" }
     });
     if (!respuesta.ok) throw new Error("HTTP " + respuesta.status);
     return respuesta.json();
   }
 
-  async function cargar() {
-    if (cargado) return especies;
+  async cargar() {
+    if (this.cargado) return this.especies;
     try {
-      const datos = await pedirCatalogo();
-      especies = Array.isArray(datos) ? datos : [];
-      errorCarga = null;
+      const datos = await this.pedirCatalogo();
+      this.especies = Array.isArray(datos) ? datos : [];
+      this.errorCarga = null;
     } catch (error) {
-      especies = [];
-      errorCarga = error;
+      this.especies = [];
+      this.errorCarga = error;
       console.error("[Agro-Colab] No se pudo cargar el catálogo de especies:", error);
     }
-    cargado = true;
-    return especies;
+    this.cargado = true;
+    return this.especies;
   }
 
-  function porId(especieId) {
-    return especies.find(function (especie) {
-      return especie.id === especieId;
-    }) || null;
+  porId(especieId) {
+    return this.especies.find((especie) => especie.id === especieId) || null;
   }
 
   /* ---------- Selector de especie ---------- */
 
-  function pintarSelect(select) {
+  pintarSelect(select) {
     if (!select) return;
 
     const valorActual = select.value;
 
-    if (errorCarga) {
+    if (this.errorCarga) {
       select.innerHTML = '<option value="">No se pudo cargar el catálogo</option>';
       return;
     }
 
     select.innerHTML = '<option value="">Selecciona una especie...</option>';
 
-    especies.forEach(function (especie) {
+    this.especies.forEach((especie) => {
       const opcion = document.createElement("option");
       opcion.value = especie.id;
       opcion.textContent = especie.emoji + " " + especie.nombre;
       select.appendChild(opcion);
     });
 
-    if (valorActual && porId(valorActual)) {
+    if (valorActual && this.porId(valorActual)) {
       select.value = valorActual;
     }
   }
 
   /* ---------- Galería de fotos ---------- */
 
-  function pintarGaleria(contenedor, especieId, alElegir, urlSeleccionada) {
+  pintarGaleria(contenedor, especieId, alElegir, urlSeleccionada) {
     if (!contenedor) return;
 
-    const especie = porId(especieId);
+    const especie = this.porId(especieId);
 
     if (!especie) {
       contenedor.innerHTML =
         '<p class="text-stone-400 text-xs text-center py-6 col-span-3">' +
-        (errorCarga
+        (this.errorCarga
           ? "No se pudo cargar el catálogo. Revisa tu conexión y recarga la página."
           : "Elige una especie para ver sus fotos disponibles.") +
         "</p>";
@@ -98,7 +93,7 @@
 
     contenedor.innerHTML = "";
 
-    especie.fotos.forEach(function (foto) {
+    especie.fotos.forEach((foto) => {
       const boton = document.createElement("button");
       boton.type = "button";
       boton.className = "foto-opcion";
@@ -112,8 +107,8 @@
       boton.innerHTML =
         '<img src="' + foto.url + '" alt="' + foto.titulo + '" loading="lazy" class="w-full h-full object-cover">';
 
-      boton.addEventListener("click", function () {
-        contenedor.querySelectorAll(".foto-opcion").forEach(function (otra) {
+      boton.addEventListener("click", () => {
+        contenedor.querySelectorAll(".foto-opcion").forEach((otra) => {
           otra.classList.remove("foto-opcion--activa");
         });
         boton.classList.add("foto-opcion--activa");
@@ -126,7 +121,7 @@
 
   /* ---------- Crédito de la foto seleccionada ---------- */
 
-  function pintarCredito(contenedor, foto) {
+  pintarCredito(contenedor, foto) {
     if (!contenedor) return;
 
     if (!foto) {
@@ -139,12 +134,7 @@
       "Foto: " + foto.autor + " · " + foto.licencia + " · " +
       '<a href="' + foto.fuente + '" target="_blank" rel="noopener" class="underline hover:text-emerald-700">Wikimedia Commons</a>';
   }
+}
 
-  AgroColab.catalogo = {
-    cargar,
-    porId,
-    pintarSelect,
-    pintarGaleria,
-    pintarCredito
-  };
-})();
+const catalogoService = new CatalogoService();
+window.AgroColab.catalogo = catalogoService;

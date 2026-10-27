@@ -1,38 +1,39 @@
-/* Agro-Colab - Helpers de interfaz (alertas y estado visual) */
+/* Agro-Colab - Servicio de interfaz (alertas y estado visual) */
 
-(function () {
-  const AgroColab = (window.AgroColab = window.AgroColab || {});
+class UiService {
+  constructor() {
+    this.clasesAlerta = {
+      exito: "alerta alerta--exito",
+      error: "alerta alerta--error",
+      info: "alerta alerta--info",
+      exitoGrande: "alerta alerta--exito-lg",
+      errorGrande: "alerta alerta--error-lg",
+      infoGrande: "alerta alerta--info-lg"
+    };
+  }
 
-  const CLASES_ALERTA = {
-    exito: "alerta alerta--exito",
-    error: "alerta alerta--error",
-    info: "alerta alerta--info",
-    exitoGrande: "alerta alerta--exito-lg",
-    errorGrande: "alerta alerta--error-lg",
-    infoGrande: "alerta alerta--info-lg"
-  };
-
-  function mostrarAlerta(elemento, tipo, mensaje) {
+  mostrarAlerta(elemento, tipo, mensaje) {
     if (!elemento) return;
-    elemento.className = CLASES_ALERTA[tipo] || CLASES_ALERTA.info;
+    elemento.className = this.clasesAlerta[tipo] || this.clasesAlerta.info;
     elemento.classList.remove("hidden");
     elemento.textContent = mensaje;
   }
 
-  function ocultarAlerta(elemento) {
+  ocultarAlerta(elemento) {
     if (!elemento) return;
     elemento.classList.add("hidden");
     elemento.textContent = "";
   }
 
-  function marcarRol(botonActivo, botonInactivo) {
+  marcarRol(botonActivo, botonInactivo) {
     botonActivo.className = "rol-btn rol-btn--activo";
     botonInactivo.className = "rol-btn rol-btn--inactivo";
   }
 
-  function formatearMonto(monto) {
+  formatearMonto(monto) {
     return `$${Number(monto).toLocaleString("es-CL")}`;
   }
+}
 
-  AgroColab.ui = { mostrarAlerta, ocultarAlerta, marcarRol, formatearMonto };
-})();
+const uiService = new UiService();
+window.AgroColab.ui = uiService;

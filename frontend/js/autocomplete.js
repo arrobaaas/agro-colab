@@ -1,14 +1,14 @@
-/* Agro-Colab - Autocompletado de direcciones con Photon (OpenStreetMap).
+/* Agro-Colab - Servicio de autocompletado de direcciones con Photon (OpenStreetMap).
    Muestra sugerencias de direcciones reales mientras el usuario escribe,
    sin usar la geolocalización del dispositivo. */
 
-(function () {
-  const AgroColab = (window.AgroColab = window.AgroColab || {});
+class AutocompleteService {
+  constructor() {
+    this.PHOTON_URL = "https://photon.komoot.io/api/";
+    this.temporizador = null;
+  }
 
-  const PHOTON_URL = "https://photon.komoot.io/api/";
-  let temporizador = null;
-
-  function formatearDireccion(lugar) {
+  formatearDireccion(lugar) {
     const p = lugar.properties || {};
     const partes = [];
 
@@ -21,11 +21,11 @@
     return partes.filter(Boolean).join(", ");
   }
 
-  async function buscarSugerencias(texto) {
+  async buscarSugerencias(texto) {
     if (!texto || texto.length < 3) return [];
 
     try {
-      const url = `${PHOTON_URL}?q=${encodeURIComponent(texto)}&limit=5`;
+      const url = `${this.PHOTON_URL}?q=${encodeURIComponent(texto)}&limit=5`;
       const respuesta = await fetch(url);
       const datos = await respuesta.json();
       return datos.features || [];
@@ -34,7 +34,7 @@
     }
   }
 
-  function mostrarSugerencias(contenedor, lugares) {
+  mostrarSugerencias(contenedor, lugares) {
     if (!lugares.length) {
       contenedor.classList.add("hidden");
       contenedor.innerHTML = "";
@@ -42,7 +42,7 @@
     }
 
     contenedor.innerHTML = lugares
-      .map(function (lugar, indice) {
+      .map((lugar, indice) => {
         return `
           <button
             type="button"
@@ -51,7 +51,7 @@
             onclick="AgroColab.autocomplete.seleccionarDireccion(${indice}, '${contenedor.id}')"
           >
             <i class="fa-solid fa-location-dot text-emerald-600 mr-2"></i>
-            <span>${formatearDireccion(lugar)}</span>
+            <span>${this.formatearDireccion(lugar)}</span>
           </button>
         `;
       })
@@ -60,31 +60,31 @@
     contenedor.classList.remove("hidden");
   }
 
-  function ocultarSugerencias(contenedor) {
+  ocultarSugerencias(contenedor) {
     contenedor.classList.add("hidden");
     contenedor.innerHTML = "";
   }
 
   /* Función llamada desde el oninput del HTML. */
-  async function buscarDireccion(input) {
+  async buscarDireccion(input) {
     const texto = input.value.trim();
     const contenedor = input.parentElement.querySelector(".sugerencias-lista");
     if (!contenedor) return;
 
-    if (temporizador) clearTimeout(temporizador);
+    if (this.temporizador) clearTimeout(this.temporizador);
 
     if (texto.length < 3) {
-      ocultarSugerencias(contenedor);
+      this.ocultarSugerencias(contenedor);
       return;
     }
 
-    temporizador = setTimeout(async function () {
-      const lugares = await buscarSugerencias(texto);
-      mostrarSugerencias(contenedor, lugares);
+    this.temporizador = setTimeout(async () => {
+      const lugares = await this.buscarSugerencias(texto);
+      this.mostrarSugerencias(contenedor, lugares);
     }, 350);
   }
 
-  function seleccionarDireccion(indice, contenedorId) {
+  seleccionarDireccion(indice, contenedorId) {
     const contenedor = document.getElementById(contenedorId);
     if (!contenedor) return;
 
@@ -95,20 +95,21 @@
     const input = contenedor.parentElement.querySelector("input");
     if (input) {
       input.value = texto;
-      ocultarSugerencias(contenedor);
+      this.ocultarSugerencias(contenedor);
     }
   }
 
-  function init() {
+  init() {
     /* Ocultar sugerencias al hacer clic fuera del input. */
-    document.addEventListener("click", function (evento) {
-      document.querySelectorAll(".sugerencias-lista").forEach(function (lista) {
+    document.addEventListener("click", (evento) => {
+      document.querySelectorAll(".sugerencias-lista").forEach((lista) => {
         if (!lista.parentElement.contains(evento.target)) {
           lista.classList.add("hidden");
         }
       });
     });
   }
+}
 
-  AgroColab.autocomplete = { init, buscarDireccion, seleccionarDireccion };
-})();
+const autocompleteService = new AutocompleteService();
+window.AgroColab.autocomplete = autocompleteService;

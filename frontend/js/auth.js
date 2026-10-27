@@ -1,11 +1,14 @@
-/* Agro-Colab - Sesión del usuario (persistencia en localStorage).
-   Este módulo solo guarda y lee datos: no navega, eso es tarea de views.js */
+/* Agro-Colab - Servicio de sesión del usuario (persistencia en localStorage).
+   Este servicio solo guarda y lee datos: no navega, eso es tarea de views.js */
 
-(function () {
-  const AgroColab = (window.AgroColab = window.AgroColab || {});
-  const { CLAVE_SESION, CLAVE_PLAN } = AgroColab.config;
+class AuthService {
+  constructor() {
+    this.config = window.AgroColab.config;
+    this.claveSesion = this.config.CLAVE_SESION;
+    this.clavePlan = this.config.CLAVE_PLAN;
+  }
 
-  function guardarSesion(usuario) {
+  guardarSesion(usuario) {
     const sesion = {
       id: usuario.id,
       nombre: usuario.nombre,
@@ -13,35 +16,36 @@
       rol: usuario.rol,
       loginEn: new Date().toISOString()
     };
-    localStorage.setItem(CLAVE_SESION, JSON.stringify(sesion));
+    localStorage.setItem(this.claveSesion, JSON.stringify(sesion));
     return sesion;
   }
 
-  function leerSesion() {
+  leerSesion() {
     try {
-      const raw = localStorage.getItem(CLAVE_SESION);
+      const raw = localStorage.getItem(this.claveSesion);
       return raw ? JSON.parse(raw) : null;
     } catch (error) {
       return null;
     }
   }
 
-  function eliminarSesion() {
-    localStorage.removeItem(CLAVE_SESION);
+  eliminarSesion() {
+    localStorage.removeItem(this.claveSesion);
   }
 
-  function guardarPlan(plan) {
-    localStorage.setItem(CLAVE_PLAN, JSON.stringify(plan));
+  guardarPlan(plan) {
+    localStorage.setItem(this.clavePlan, JSON.stringify(plan));
   }
 
-  function leerPlan() {
+  leerPlan() {
     try {
-      const raw = localStorage.getItem(CLAVE_PLAN);
+      const raw = localStorage.getItem(this.clavePlan);
       return raw ? JSON.parse(raw) : null;
     } catch (error) {
       return null;
     }
   }
+}
 
-  AgroColab.auth = { guardarSesion, leerSesion, eliminarSesion, guardarPlan, leerPlan };
-})();
+const authService = new AuthService();
+window.AgroColab.auth = authService;

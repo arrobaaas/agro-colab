@@ -1,16 +1,32 @@
-/* Agro-Colab - Punto de entrada. Decide qué vista se muestra al abrir la app:
-   login si no hay sesión, o la vista del rol si ya estaba conectado. */
+/* Agro-Colab - Servicio de aplicación: punto de entrada. Decide qué vista se
+   muestra al abrir la app: login si no hay sesión, o la vista del rol si ya
+   estaba conectado. */
 
-document.addEventListener("DOMContentLoaded", function () {
-  const { views, parcelas, agricultor, perfil, login, autocomplete, dashboard } = window.AgroColab;
+class AppService {
+  constructor() {
+    this.views = window.AgroColab.views;
+    this.parcelas = window.AgroColab.parcelas;
+    this.agricultor = window.AgroColab.agricultor;
+    this.perfil = window.AgroColab.perfil;
+    this.login = window.AgroColab.login;
+    this.autocomplete = window.AgroColab.autocomplete;
+    this.dashboard = window.AgroColab.dashboard;
+  }
 
-  parcelas.init();
-  agricultor.init();
-  perfil.init();
-  login.init();
-  autocomplete.init();
-  dashboard.init();
-  views.init();
+  init() {
+    document.addEventListener("DOMContentLoaded", () => {
+      this.parcelas.init();
+      this.agricultor.init();
+      this.perfil.init();
+      this.login.init();
+      this.autocomplete.init();
+      this.dashboard.init();
+      this.views.init();
 
-  views.mostrarVista(views.vistaInicial());
-});
+      this.views.mostrarVista(this.views.vistaInicial());
+    });
+  }
+}
+
+const appService = new AppService();
+window.AgroColab.app = appService;

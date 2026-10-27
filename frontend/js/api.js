@@ -1,11 +1,14 @@
-/* Agro-Colab - Capa de comunicación con el backend (FastAPI) */
+/* Agro-Colab - Capa de comunicación con el backend (FastAPI).
+   Servicio orientado a objetos: ApiService con instancia expuesta como
+   AgroColab.api para mantener la interfaz usada por el resto de la app. */
 
-(function () {
-  const AgroColab = (window.AgroColab = window.AgroColab || {});
-  const { API_URL } = AgroColab.config;
+class ApiService {
+  constructor() {
+    this.config = window.AgroColab.config;
+  }
 
-  async function apiFetch(ruta, opciones = {}) {
-    const respuesta = await fetch(`${API_URL}${ruta}`, {
+  async apiFetch(ruta, opciones = {}) {
+    const respuesta = await fetch(`${this.config.API_URL}${ruta}`, {
       headers: { "Content-Type": "application/json" },
       ...opciones
     });
@@ -34,94 +37,96 @@
     return cuerpo;
   }
 
-  AgroColab.api = {
-    login(email, password, rol) {
-      return apiFetch("/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password, rol })
-      });
-    },
+  login(email, password, rol) {
+    return this.apiFetch("/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password, rol })
+    });
+  }
 
-    obtenerArboles() {
-      return apiFetch("/arboles");
-    },
+  obtenerArboles() {
+    return this.apiFetch("/arboles");
+  }
 
-    obtenerEspecies() {
-      return apiFetch("/especies");
-    },
+  obtenerEspecies() {
+    return this.apiFetch("/especies");
+  }
 
-    suscribirArbol(sesion, treeId) {
-      return apiFetch("/suscribir", {
-        method: "POST",
-        body: JSON.stringify({
-          user_id: sesion ? sesion.id : null,
-          user_name: sesion ? sesion.nombre : null,
-          email: sesion ? sesion.email : null,
-          tree_id: treeId
-        })
-      });
-    },
+  suscribirArbol(sesion, treeId) {
+    return this.apiFetch("/suscribir", {
+      method: "POST",
+      body: JSON.stringify({
+        user_id: sesion ? sesion.id : null,
+        user_name: sesion ? sesion.nombre : null,
+        email: sesion ? sesion.email : null,
+        tree_id: treeId
+      })
+    });
+  }
 
-    cancelarSuscripcion(sesion, treeId) {
-      return apiFetch("/cancelar-suscripcion", {
-        method: "POST",
-        body: JSON.stringify({
-          user_id: sesion ? sesion.id : null,
-          user_name: sesion ? sesion.nombre : null,
-          tree_id: treeId
-        })
-      });
-    },
+  cancelarSuscripcion(sesion, treeId) {
+    return this.apiFetch("/cancelar-suscripcion", {
+      method: "POST",
+      body: JSON.stringify({
+        user_id: sesion ? sesion.id : null,
+        user_name: sesion ? sesion.nombre : null,
+        tree_id: treeId
+      })
+    });
+  }
 
-    crearPedido(pedido) {
-      return apiFetch("/pedidos", { method: "POST", body: JSON.stringify(pedido) });
-    },
+  crearPedido(pedido) {
+    return this.apiFetch("/pedidos", { method: "POST", body: JSON.stringify(pedido) });
+  }
 
-    subirArbol(arbol) {
-      return apiFetch("/arboles", { method: "POST", body: JSON.stringify(arbol) });
-    },
+  subirArbol(arbol) {
+    return this.apiFetch("/arboles", { method: "POST", body: JSON.stringify(arbol) });
+  }
 
-    eliminarArbol(arbolId) {
-      return apiFetch(`/arboles/${arbolId}`, { method: "DELETE" });
-    },
+  eliminarArbol(arbolId) {
+    return this.apiFetch(`/arboles/${arbolId}`, { method: "DELETE" });
+  }
 
-    actualizarArbol(arbolId, arbol) {
-      return apiFetch(`/arboles/${arbolId}`, { method: "PUT", body: JSON.stringify(arbol) });
-    },
+  actualizarArbol(arbolId, arbol) {
+    return this.apiFetch(`/arboles/${arbolId}`, { method: "PUT", body: JSON.stringify(arbol) });
+  }
 
-    actualizarPerfil(cambios) {
-      return apiFetch("/perfil", { method: "PUT", body: JSON.stringify(cambios) });
-    },
+  actualizarPerfil(cambios) {
+    return this.apiFetch("/perfil", { method: "PUT", body: JSON.stringify(cambios) });
+  }
 
-    registrarUsuario(datos) {
-      return apiFetch("/register", { method: "POST", body: JSON.stringify(datos) });
-    },
+  registrarUsuario(datos) {
+    return this.apiFetch("/register", { method: "POST", body: JSON.stringify(datos) });
+  }
 
-    verificarCuenta(email, codigo) {
-      return apiFetch("/verificar-cuenta", {
-        method: "POST",
-        body: JSON.stringify({ email, codigo })
-      });
-    },
+  verificarCuenta(email, codigo) {
+    return this.apiFetch("/verificar-cuenta", {
+      method: "POST",
+      body: JSON.stringify({ email, codigo })
+    });
+  }
 
-    eliminarCuenta(email) {
-      return apiFetch(`/usuario/${encodeURIComponent(email)}`, { method: "DELETE" });
-    },
+  eliminarCuenta(email) {
+    return this.apiFetch(`/usuario/${encodeURIComponent(email)}`, { method: "DELETE" });
+  }
 
-    obtenerSuscriptores(productorId) {
-      return apiFetch(`/mis-arboles/${productorId}/suscriptores`);
-    },
+  obtenerSuscriptores(productorId) {
+    return this.apiFetch(`/mis-arboles/${productorId}/suscriptores`);
+  }
 
-    obtenerMisArboles(usuarioId) {
-      return apiFetch(`/suscripciones/usuario/${usuarioId}`);
-    },
+  obtenerMisArboles(usuarioId) {
+    return this.apiFetch(`/suscripciones/usuario/${usuarioId}`);
+  }
 
-    expulsarSuscriptor(suscripcionId) {
-      return apiFetch(`/suscripciones/${suscripcionId}`, { method: "DELETE" });
-    },
+  expulsarSuscriptor(suscripcionId) {
+    return this.apiFetch(`/suscripciones/${suscripcionId}`, { method: "DELETE" });
+  }
 
-    obtenerUsuario(usuarioId) {
-      return apiFetch(`/usuario/${usuarioId}`);
-    }
-  };
-})();
+  obtenerUsuario(usuarioId) {
+    return this.apiFetch(`/usuario/${usuarioId}`);
+  }
+}
+
+const apiService = new ApiService();
+window.AgroColab.api = apiService;
+window.AgroColab.config = window.AgroColab.config || {};

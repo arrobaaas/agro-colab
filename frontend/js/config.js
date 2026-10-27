@@ -1,27 +1,28 @@
-/* Agro-Colab - Configuración global del frontend */
+/* Agro-Colab - Servicio de configuración global del frontend. */
 
-(function () {
-  const AgroColab = (window.AgroColab = window.AgroColab || {});
-
-  AgroColab.config = {
-    API_URL: window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+class ConfigService {
+  constructor() {
+    this.API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
       ? "http://127.0.0.1:8000/api"
-      : "https://agro-colab.onrender.com/api",
+      : "https://agro-colab.onrender.com/api";
 
-    CLAVE_SESION: "agrocolab_sesion",
-    CLAVE_PLAN: "agrocolab_plan",
+    this.claveSesion = "agrocolab_sesion";
+    this.clavePlan = "agrocolab_plan";
 
     /* Vista que se muestra cuando no hay sesión o el rol no tiene acceso. */
-    VISTA_SIN_SESION: "login",
+    this.VISTA_SIN_SESION = "login";
 
     /* Vista que ve cada rol.
        Por ahora comprador y agricultor comparten la vista de parcelas.
        Cuando exista la vista del productor, se separa aquí:
          comprador: "parcelas",
          agricultor: "mis-parcelas" */
-    VISTAS_POR_ROL: {
+    this.VISTAS_POR_ROL = {
       comprador: "parcelas",
       agricultor: "agricultor"
-    }
-  };
-})();
+    };
+  }
+}
+
+const configService = new ConfigService();
+window.AgroColab.config = configService;
