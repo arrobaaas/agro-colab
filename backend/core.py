@@ -8,7 +8,12 @@ eran compartidas dentro de la aplicacion FastAPI.
 from typing import Optional
 from datetime import datetime
 
-from fastapi import Depends
+import os
+import time
+from collections import defaultdict
+
+from fastapi import Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -20,6 +25,35 @@ from catalogo import (
     CATALOGO_ESPECIES, listar_especies, buscar_especie, fotos_permitidas,
     componer_nombre, normalizar_identificador, foto_de,
 )
+
+
+# ----------------- SEGURIDAD -----------------
+
+# En desarrollo local se permiten respuestas que ayudan a simular la verificación
+# de cuenta (el código se imprime y se devuelve para poder probar el flujo).
+# En producción jamás se debe exponer el código de verificación.
+MODO_DESARROLLO = os.getenv("AGROCOLAB_MOD_MODE", "produccion").lower() == "desarrollo"
+
+_intentos_por_ip: dict = defaultdict(list)
+
+def _limitar_intento(ip: str, maximo: int, ventana_segundos: int) -> bool:
+    """Registra un intento fallido-ish de autenticación y decide si se permite.
+    Es un contador simple en memoria por IP (suficiente para este proyecto)."""
+    ahora = time.monotonic()
+    ventana = [t for t in _intentos_por_ip.get(ip, []) if ahora - t < ventana_segundos]
+    if len(ventana) >= maximo:
+        return False
+    _intentos_por_ip[ip] = ventana + [ahora]
+    return True
+
+def limitar_por_ip(maximo: int = 10, ventana_segundos: int = 300):
+    """Dependencia de FastAPI que aplica rate limiting a una ruta."""
+    def _limiter(request: Request):
+        ip = request.client.host if request.client else "0.0.0.0"
+        if not _limitar_intento(ip, maximo, ventana_segundos):
+            raise HTTPException(status_code=429, detail={"status": "error", "mensaje": "Demasiados intentos. Intenta más tarde."})
+        return None
+    return _limiter
 
 
 # ----------------- SESIÓN / BASE DE DATOS -----------------

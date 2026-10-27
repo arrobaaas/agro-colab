@@ -8,14 +8,14 @@ import string
 
 from core import (
     LoginRequest, RegistroRequest, VerificacionRequest, PerfilRequest,
-    hash_password, verify_password, foto_de, get_db,
+    hash_password, verify_password, foto_de, get_db, MODO_DESARROLLO, limitar_por_ip,
 )
 from database import Usuario, Arbol, Suscripcion, Pedido, SessionLocal, es_hash_bcrypt
 
 router = APIRouter()
 
 
-@router.post("/api/register")
+@router.post("/api/register", dependencies=[Depends(limitar_por_ip(maximo=5, ventana_segundos=3600))])
 def registrar_usuario(data: RegistroRequest, db: Session = Depends(get_db)):
     # Verificar si el email ya existe
     existente = db.query(Usuario).filter(Usuario.email == data.email).first()
@@ -48,7 +48,7 @@ def registrar_usuario(data: RegistroRequest, db: Session = Depends(get_db)):
     print(f"Código de verificación: {codigo}")
     print(f"{'='*50}\n")
 
-    return {
+    respuesta = {
         "status": "success",
         "mensaje": f"Usuario {nuevo_usuario.nombre} registrado correctamente. Revisa tu correo para verificar tu cuenta.",
         "user": {
@@ -56,12 +56,17 @@ def registrar_usuario(data: RegistroRequest, db: Session = Depends(get_db)):
             "nombre": nuevo_usuario.nombre,
             "email": nuevo_usuario.email,
             "rol": nuevo_usuario.rol
-        },
-        "codigo_verificacion": codigo  # En producción, esto NO se retornaría
+        }
     }
+    # El código solo se expone en desarrollo para simular el envío por correo.
+    # Nunca debe salir en producción.
+    if MODO_DESARROLLO:
+        respuesta["user"]["codigo_verificacion"] = codigo
+
+    return respuesta
 
 
-@router.post("/api/login")
+@router.post("/api/login", dependencies=[Depends(limitar_por_ip(maximo=8, ventana_segundos=300))])
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     usuario = db.query(Usuario).filter(
         Usuario.email == data.email,
@@ -82,21 +87,26 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
         db.refresh(usuario)
         print(f"[migracion] contraseña re-hasheada para {usuario.email}")
 
+    usuario_respuesta = {
+        "id": usuario.id,
+        "nombre": usuario.nombre,
+        "email": usuario.email,
+        "rol": usuario.rol,
+        "verificado": usuario.verificado,
+    }
+    # El código solo se expone en desarrollo para simular el envío por correo.
+    # Nunca debe salir en producción.
+    if MODO_DESARROLLO:
+        usuario_respuesta["codigo_verificacion"] = usuario.codigo_verificacion
+
     return {
         "status": "success",
         "mensaje": f"Bienvenido/a {usuario.nombre}",
-        "user": {
-            "id": usuario.id,
-            "nombre": usuario.nombre,
-            "email": usuario.email,
-            "rol": usuario.rol,
-            "verificado": usuario.verificado,
-            "codigo_verificacion": usuario.codigo_verificacion
-        }
+        "user": usuario_respuesta
     }
 
 
-@router.post("/api/verificar-cuenta")
+@router.post("/api/verificar-cuenta", dependencies=[Depends(limitar_por_ip(maximo=10, ventana_segundos=3600))])
 def verificar_cuenta(data: VerificacionRequest, db: Session = Depends(get_db)):
     usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
     if not usuario:
@@ -196,42 +206,3 @@ def eliminar_usuario(email: str, db: Session = Depends(get_db)):
         "status": "success",
         "mensaje": "Todos tus datos han sido eliminados correctamente."
     }
-
-
-@router.get("/api/admin/reiniciar-bd")
-def reiniciar_bd():
-    """Reinicia la base de datos con los datos iniciales (para desarrollo)"""
-    db = SessionLocal()
-    try:
-        # Eliminar datos existentes
-        db.query(Suscripcion).delete()
-        db.query(Pedido).delete()
-        db.query(Arbol).delete()
-        db.query(Usuario).delete()
-        db.commit()
-
-        # Crear usuarios de prueba con contraseñas hasheadas
-        usuarios = [
-            Usuario(nombre="Camila Soto", email="comprador@agrocolab.cl", password=hash_password("123"), rol="comprador", verificado=1, consentimiento_datos=1, fecha_consentimiento=datetime.now(), acepta_terminos=1),
-            Usuario(nombre="Hernán Silva", email="agricultor@agrocolab.cl", password=hash_password("123"), rol="agricultor", verificado=1, consentimiento_datos=1, fecha_consentimiento=datetime.now(), acepta_terminos=1)
-        ]
-        db.add_all(usuarios)
-        db.commit()
-
-        # Crear árboles de prueba
-        arboles = [
-            Arbol(nombre="Palto Hass #104", especie="palto_hass", identificador="#104", plan="Básico", tipo_suscripcion="Compartido", precio_mensual_clp=12000, cupos_totales=5, cupos_ocupados=0, estimacion_cosecha="45 kg anuales", ubicacion="Valle del Aconcagua, Región de Valparaíso", imagen=foto_de("palto_hass", 0), imagen_origen="galeria", productor_id=2),
-            Arbol(nombre="Naranjo Valencia #22", especie="naranjo_valencia", identificador="#22", plan="Premium", tipo_suscripcion="Exclusivo", precio_mensual_clp=35000, cupos_totales=1, cupos_ocupados=0, estimacion_cosecha="80 kg anuales", ubicacion="Curicó, Región del Maule", imagen=foto_de("naranjo_valencia", 0), imagen_origen="galeria", productor_id=2),
-            Arbol(nombre="Limonero Eureka #12", especie="limonero_eureka", identificador="#12", plan="Intermedio", tipo_suscripcion="Compartido", precio_mensual_clp=8000, cupos_totales=3, cupos_ocupados=0, estimacion_cosecha="35 kg anuales", ubicacion="Mallarauco, Región Metropolitana", imagen=foto_de("limonero_eureka", 0), imagen_origen="galeria", productor_id=2)
-        ]
-        db.add_all(arboles)
-        db.commit()
-
-        # Sin suscripciones de prueba: los cupos arrancan en 0 y se llenan
-        # cuando alguien adopta un árbol de verdad desde el catálogo.
-
-        return {"status": "success", "mensaje": "Base de datos reiniciada correctamente."}
-    except Exception as e:
-        return {"status": "error", "mensaje": str(e)}
-    finally:
-        db.close()
