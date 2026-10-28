@@ -1,5 +1,7 @@
 /* Agro-Colab - Servicio de configuración global del frontend. */
 
+var AgroColab = window.AgroColab || {};
+
 class ConfigService {
   constructor() {
     this.API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"

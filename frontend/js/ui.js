@@ -1,5 +1,7 @@
 /* Agro-Colab - Servicio de interfaz (alertas y estado visual) */
 
+var AgroColab = window.AgroColab || {};
+
 class UiService {
   constructor() {
     this.clasesAlerta = {

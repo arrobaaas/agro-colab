@@ -2,6 +2,8 @@
    Servicio orientado a objetos: ApiService con instancia expuesta como
    AgroColab.api para mantener la interfaz usada por el resto de la app. */
 
+var AgroColab = window.AgroColab || {};
+
 class ApiService {
   constructor() {
     this.config = window.AgroColab.config;

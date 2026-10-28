@@ -167,35 +167,6 @@
     }
 
     init() {}
-
-    AgroColab.dashboard = ... // NO - this belongs outside
-  }
-
-  const dashboardService = new DashboardService();
-  window.AgroColab.dashboard = dashboardService;
-})();
-```
-
-Wait — I must NOT put `AgroColab.dashboard = ...` inside the class. Let me fix the ending.
-
-Let me rewrite the tail of dashboard.js properly.
-
-Also note: inside the class, `this.ui.formatearMonto` ✓.
-
-Let me rewrite dashboard.js fully with correct ending.</think>Corrijo el final de `dashboard.js` (debe asignar la instancia fuera de la clase):<tool_call>edit<arg_key>newString</arg_key><arg_value>      document.getElementById("modal-dest-nombre").value = (sesion && sesion.nombre) || arbol.nombre || "";
-      document.getElementById("modal-dest-tel").value = (sesion && sesion.telefono) || "";
-      document.getElementById("modal-dest-email").value = (sesion && sesion.email) || "";
-      document.getElementById("modal-dest-direccion").value = (sesion && sesion.direccion) || arbol.ubicacion || "";
-      document.getElementById("modal-dest-comuna").value = "";
-      document.getElementById("modal-dest-frecuencia").value = "quincenal";
-
-      if (esComercial) {
-        document.getElementById("modal-com-razon").value = "";
-        document.getElementById("modal-com-rut").value = "";
-      }
-    }
-
-    init() {}
   }
 
   const dashboardService = new DashboardService();

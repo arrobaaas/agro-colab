@@ -1,6 +1,8 @@
 /* Agro-Colab - Servicio de sesión del usuario (persistencia en localStorage).
    Este servicio solo guarda y lee datos: no navega, eso es tarea de views.js */
 
+var AgroColab = window.AgroColab || {};
+
 class AuthService {
   constructor() {
     this.config = window.AgroColab.config;
