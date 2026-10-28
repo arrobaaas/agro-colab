@@ -210,7 +210,7 @@
           </button>
         </div>
       `;
-      return contenedor;
+      return contenedor.innerHTML;
     }
 
     /* Dentro de esta vista siempre hay sesión, así que no se pide el nombre.
