@@ -54,11 +54,11 @@
             Tipo de Cuenta
           </label>
           <div class="grid grid-cols-2 gap-3 mb-6">
-            <button type="button" id="btn-comprador" class="rol-btn rol-btn--activo">
+            <button type="button" id="btn-comprador" class="rol-btn rol-btn--activo" onclick="AgroColab.login.setRol('comprador')">
               <i class="fa-solid fa-basket-shopping text-base"></i>
               <span>Comprador</span>
             </button>
-            <button type="button" id="btn-agricultor" class="rol-btn rol-btn--inactivo">
+            <button type="button" id="btn-agricultor" class="rol-btn rol-btn--inactivo" onclick="AgroColab.login.setRol('agricultor')">
               <i class="fa-solid fa-tractor text-base"></i>
               <span>Agricultor</span>
             </button>

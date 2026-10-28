@@ -217,8 +217,6 @@ class LoginService {
   }
 
   init() {
-    document.getElementById("btn-comprador").addEventListener("click", () => this.setRol("comprador"));
-    document.getElementById("btn-agricultor").addEventListener("click", () => this.setRol("agricultor"));
     document.getElementById("login-form").addEventListener("submit", (evento) => this.iniciarSesion(evento));
     document.getElementById("register-form").addEventListener("submit", (evento) => this.registrarUsuario(evento));
     document.getElementById("form-verificacion").addEventListener("submit", (evento) => this.verificarCuenta(evento));
