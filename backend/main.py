@@ -25,6 +25,9 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "https://agro-colab.onrender.com",
+        # Frontend publicado en GitHub Pages: sin este origen el navegador
+        # bloquea todas las llamadas a la API desde la demo en línea.
+        "https://arrobaaas.github.io",
     ],
     allow_credentials=True,
     allow_methods=["*"],
