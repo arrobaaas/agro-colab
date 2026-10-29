@@ -850,3 +850,83 @@ h1, h2, h3, h4 {
   background-color: var(--emerald-800);
   color: #fff;
 }
+
+/* ---------- Animaciones (efectos.js) ---------- */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Aparición al hacer scroll. Solo se ocultan si efectos.js está activo. */
+.js-reveal [data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.js-reveal [data-reveal].revelado {
+  opacity: 1;
+  transform: none;
+}
+
+/* Header que se esconde al bajar y reaparece al subir */
+header.sticky {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+header.sticky.header--oculto {
+  transform: translateY(-100%);
+}
+
+header.sticky.header--con-scroll {
+  box-shadow: 0 10px 30px -10px rgba(2, 44, 34, 0.45);
+}
+
+/* Entrada del texto del hero al cargar la vista */
+@keyframes subir-aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero__contenido > div > *,
+.hero__contenido > * {
+  animation: subir-aparecer 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero__contenido > div > :nth-child(2) { animation-delay: 0.1s; }
+.hero__contenido > div > :nth-child(3) { animation-delay: 0.2s; }
+.hero__contenido > div > :nth-child(4) { animation-delay: 0.3s; }
+.hero__contenido > div > :nth-child(5) { animation-delay: 0.4s; }
+
+/* Tarjetas que se pintan desde la API: entran en cascada */
+#tree-container > article,
+#dashboard-comprador > article {
+  animation: subir-aparecer 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+#tree-container > article:nth-child(2),
+#dashboard-comprador > article:nth-child(2) { animation-delay: 0.08s; }
+#tree-container > article:nth-child(3),
+#dashboard-comprador > article:nth-child(3) { animation-delay: 0.16s; }
+#tree-container > article:nth-child(4) { animation-delay: 0.24s; }
+#tree-container > article:nth-child(5) { animation-delay: 0.32s; }
+#tree-container > article:nth-child(n + 6) { animation-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
