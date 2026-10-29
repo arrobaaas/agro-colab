@@ -165,7 +165,7 @@
         container.innerHTML = "";
 
         if (!arboles.length) {
-          container.innerHTML = `<p class="text-stone-500 text-sm">No hay parcelas disponibles por ahora.</p>`;
+          container.innerHTML = `<p class="md:col-span-3 text-center text-stone-500 text-sm py-10">No hay árboles disponibles por ahora.</p>`;
           return;
         }
 
@@ -175,7 +175,7 @@
             : arboles.filter((arbol) => arbol.plan === this.planAdopcionSeleccionado);
 
         if (!visibles.length) {
-          container.innerHTML = `<p class="text-stone-500 text-sm">No hay árboles disponibles para el Plan ${this.planAdopcionSeleccionado}.</p>`;
+          container.innerHTML = `<p class="md:col-span-3 text-center text-stone-500 text-sm py-10">No hay árboles disponibles para el Plan ${this.planAdopcionSeleccionado}.</p>`;
           return;
         }
 
@@ -188,29 +188,61 @@
     }
 
     plantillaArbol(arbol) {
-      const cuposLibres = arbol.cupos_totales - arbol.cupos_ocupados;
-      const textoBoton = cuposLibres > 0 ? "Agregar al carro" : "Capacidad Completa";
+      const cuposTotales = arbol.cupos_totales || 0;
+      const cuposLibres = Math.max(0, cuposTotales - (arbol.cupos_ocupados || 0));
+      const porcentaje = cuposTotales ? Math.round(((cuposTotales - cuposLibres) / cuposTotales) * 100) : 100;
+      const disponible = cuposLibres > 0;
+      const exclusivo = arbol.tipo_suscripcion === "Exclusivo";
+      const textoCupos = disponible
+        ? `${cuposLibres} de ${cuposTotales} cupo${cuposTotales === 1 ? "" : "s"} libre${cuposLibres === 1 ? "" : "s"}`
+        : "Sin cupos disponibles";
 
-      const contenedor = document.createElement("div");
-      contenedor.className = "bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-sm";
-      contenedor.innerHTML = `
-        <div class="h-40 bg-stone-200">
-          <img src="${arbol.imagen}" alt="${arbol.nombre}" class="w-full h-full object-cover">
-        </div>
-        <div class="p-5">
-          <div class="flex items-center justify-between gap-2">
-            <p class="font-black text-lg text-stone-900">${arbol.nombre}</p>
-            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">${arbol.plan}</span>
+      /* Se devuelve la tarjeta completa, con su <article> exterior. Antes se
+         devolvía solo el innerHTML: se perdía el envoltorio y la foto y los
+         datos quedaban como celdas sueltas de la grilla. */
+      return `
+        <article class="arbol-card group">
+          <div class="arbol-card__media">
+            <img src="${arbol.imagen || ""}" alt="${arbol.nombre}" loading="lazy" onerror="this.style.display='none'">
+            <span class="arbol-card__plan">${arbol.plan}</span>
+            <span class="arbol-card__tipo ${exclusivo ? "arbol-card__tipo--exclusivo" : ""}">
+              <i class="fa-solid ${exclusivo ? "fa-crown" : "fa-users"}"></i> ${arbol.tipo_suscripcion || ""}
+            </span>
+            <div class="arbol-card__titulo">
+              ${arbol.especie_nombre ? `<p class="arbol-card__especie">${arbol.especie_nombre}</p>` : ""}
+              <h4>${arbol.nombre}</h4>
+            </div>
           </div>
-          <p class="text-xs text-stone-500 mt-2">${arbol.estimacion_cosecha} · ${arbol.ubicacion}</p>
-          <p class="text-lg font-black text-emerald-900 mt-2">${this.ui.formatearMonto(arbol.precio_mensual_clp)} <span class="text-[10px] font-normal text-stone-500">CLP / mes</span></p>
-          <p class="text-[11px] text-stone-500 mt-1">${cuposLibres} cupos disponibles</p>
-          <button type="button" class="${cuposLibres > 0 ? "btn-suscribir btn-suscribir--activo" : "btn-suscribir btn-suscribir--bloqueado"}" data-suscribir-id="${arbol.id}" ${cuposLibres === 0 ? "disabled" : ""}>
-            ${textoBoton}
-          </button>
-        </div>
+
+          <div class="p-5 flex flex-col gap-4 flex-1">
+            <ul class="space-y-1.5 text-xs text-stone-600">
+              <li class="flex items-center gap-2 truncate"><i class="fa-solid fa-location-dot text-rose-500 w-4 text-center"></i> ${arbol.ubicacion}</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-emerald-600 w-4 text-center"></i> Cosecha estimada: <strong class="text-stone-800">${arbol.estimacion_cosecha}</strong></li>
+              ${arbol.productor ? `<li class="flex items-center gap-2 truncate"><i class="fa-solid fa-tractor text-amber-600 w-4 text-center"></i> ${arbol.productor}</li>` : ""}
+            </ul>
+
+            <div>
+              <div class="flex justify-between text-[11px] mb-1.5">
+                <span class="${disponible ? "text-stone-500" : "text-rose-600 font-bold"}">${textoCupos}</span>
+                <span class="font-bold text-stone-700">${porcentaje}% adoptado</span>
+              </div>
+              <div class="h-1.5 rounded-full bg-stone-100 overflow-hidden">
+                <div class="h-full rounded-full ${disponible ? "bg-emerald-500" : "bg-rose-400"}" style="width: ${porcentaje}%"></div>
+              </div>
+            </div>
+
+            <div class="mt-auto pt-4 border-t border-stone-100 flex items-center justify-between gap-3">
+              <div>
+                <p class="text-xl font-black text-emerald-900 leading-none">${this.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
+                <p class="text-[10px] text-stone-500 mt-1">CLP por mes</p>
+              </div>
+              <button type="button" class="btn-suscribir ${disponible ? "btn-suscribir--activo" : "btn-suscribir--bloqueado"}" data-suscribir-id="${arbol.id}" ${disponible ? "" : "disabled"}>
+                <i class="fa-solid ${disponible ? "fa-cart-plus" : "fa-lock"}"></i> ${disponible ? "Adoptar" : "Completo"}
+              </button>
+            </div>
+          </div>
+        </article>
       `;
-      return contenedor.innerHTML;
     }
 
     /* Dentro de esta vista siempre hay sesión, así que no se pide el nombre.
@@ -376,7 +408,21 @@
       document.getElementById("seccion-parcelas").scrollIntoView({ behavior: "smooth" });
     }
 
-    actualizarFiltroActivo() {}
+    actualizarFiltroActivo() {
+      const plan = this.planAdopcionSeleccionado;
+
+      document.querySelectorAll("[data-plan-adopcion]").forEach((boton) => {
+        const tarjeta = boton.closest(".plan-adopcion-card");
+        if (tarjeta) tarjeta.classList.toggle("plan-adopcion-card--activo", boton.dataset.planAdopcion === plan);
+      });
+
+      const texto = document.getElementById("filtro-activo-texto");
+      if (texto) {
+        texto.textContent = plan === "todos"
+          ? "Mostrando los 3 planes de adopción. Selecciona un plan arriba para filtrar."
+          : `Mostrando solo el Plan ${plan}. Vuelve a pulsar el plan para ver todos.`;
+      }
+    }
 
     /* ---------- Canasta / Mis compras ---------- */
 
