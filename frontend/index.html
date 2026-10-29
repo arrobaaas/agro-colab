@@ -6,6 +6,9 @@
   <title>Agro-Colab | Cosecha Colaborativa</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="css/styles.css">
   <script src="js/config.js" defer></script>
   <script src="js/ui.js" defer></script>
@@ -21,18 +24,18 @@
   <script src="js/login.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
-<body class="bg-stone-100 text-stone-800 font-sans antialiased">
+<body class="text-stone-800 antialiased">
 
   <!-- ============================================================
        VISTA 1: LOGIN - lo primero que ve cualquier persona
        ============================================================ -->
   <div id="vista-login" data-vista="login" class="min-h-screen flex flex-col justify-between">
 
-    <header class="bg-white border-b border-stone-200 py-4 px-6 shadow-sm">
+    <header class="bg-white/80 backdrop-blur border-b border-stone-200 py-4 px-6">
       <div class="max-w-6xl mx-auto flex justify-between items-center">
         <div class="flex items-center space-x-2 text-stone-900">
-          <span class="text-2xl">🌱</span>
-          <span class="text-lg font-black tracking-tight">Agro-Colab</span>
+          <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
+          <span class="text-lg font-extrabold tracking-tight">Agro-Colab</span>
         </div>
         <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">
           Trazabilidad directa del huerto a tu mesa
@@ -41,8 +44,29 @@
     </header>
 
     <main class="flex-1 flex items-center justify-center p-4">
-      <div class="bg-white max-w-md w-full rounded-2xl border border-stone-200 shadow-xl overflow-hidden">
+      <div class="w-full max-w-5xl grid lg:grid-cols-2 bg-white rounded-3xl border border-stone-200 shadow-2xl overflow-hidden">
 
+        <!-- Panel visual (solo en pantallas grandes) -->
+        <div class="hero hidden lg:flex flex-col justify-end p-10 min-h-[36rem]">
+          <img
+            src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1200&q=80"
+            alt="Campos de cultivo"
+            class="hero__img"
+          >
+          <div class="hero__contenido">
+            <span class="hero__pill"><i class="fa-solid fa-leaf"></i> Cosecha colaborativa</span>
+            <h2 class="text-4xl font-extrabold leading-tight mt-5">
+              Del huerto chileno<br><span class="text-emerald-400">directo a tu mesa.</span>
+            </h2>
+            <ul class="mt-6 space-y-3 text-sm text-emerald-50/85">
+              <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-emerald-400"></i> Adopta un árbol y recibe su cosecha</li>
+              <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-emerald-400"></i> Tu pago llega directo al agricultor</li>
+              <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-emerald-400"></i> Trazabilidad de cada pedido</li>
+            </ul>
+          </div>
+        </div>
+
+        <div>
         <div class="bg-emerald-900 p-6 text-white text-center relative">
           <h2 class="text-2xl font-black" id="login-titulo">Iniciar Sesión</h2>
           <p class="text-xs text-emerald-200 mt-1" id="login-subtitulo">Ingresa a tu panel de gestión colaborativa</p>
@@ -226,6 +250,7 @@
           </div>
 
         </div>
+        </div>
       </div>
     </main>
 
@@ -240,15 +265,15 @@
   <div id="vista-parcelas" data-vista="parcelas" class="hidden">
 
     <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
-      <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
+      <div class="max-w-6xl mx-auto px-4 py-3 md:py-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-3">
         <div class="flex items-center space-x-3">
-          <span class="text-3xl">🌱</span>
+          <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
           <div>
             <h1 class="text-xl font-extrabold tracking-tight">Agro-Colab</h1>
-            <p class="text-[11px] text-emerald-200">Trazabilidad directa del huerto a tu mesa</p>
+            <p class="hidden sm:block text-[11px] text-emerald-200">Trazabilidad directa del huerto a tu mesa</p>
           </div>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
           <button type="button" class="nav-link" data-linea="adopcion" onclick="AgroColab.parcelas.establecerLinea('adopcion')">Adopción</button>
           <button type="button" class="nav-link" data-linea="abastecimiento" onclick="AgroColab.parcelas.establecerLinea('abastecimiento')">Abastecimiento</button>
           <button type="button" class="nav-link" onclick="AgroColab.parcelas.abrirCanasta()">
@@ -269,33 +294,74 @@
     </header>
 
     <!-- Banner de la vista -->
-    <section class="relative bg-stone-900 text-white py-14 px-4 overflow-hidden">
+    <section class="hero">
       <img
         src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1600&q=80"
         alt="Campos de cultivo"
-        class="absolute inset-0 w-full h-full object-cover opacity-35"
+        class="hero__img"
       >
-      <div class="relative max-w-4xl mx-auto text-center">
-        <span class="inline-block bg-emerald-600/90 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-          Dos formas de financiar la cosecha
-        </span>
-        <h2 class="text-3xl md:text-4xl font-black mb-3 leading-tight">
-          Financia la cosecha, asegura tu abastecimiento
-        </h2>
-        <p class="text-stone-200 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-          Adopta un árbol frutal y sé dueño de su producción, o contrata un plan de
-          abastecimiento con entrega programada. En ambos casos, trazabilidad directa
-          del huerto a tu mesa.
-        </p>
+      <div class="hero__contenido max-w-6xl mx-auto px-4 py-20 md:py-28">
+        <div class="max-w-2xl">
+          <span class="hero__pill">
+            <i class="fa-solid fa-leaf"></i> Del huerto chileno directo a tu mesa
+          </span>
+          <h2 class="text-4xl md:text-6xl font-extrabold leading-[1.05] mt-6 mb-5">
+            Financia la cosecha,<br>
+            <span class="text-emerald-400">asegura tu abastecimiento.</span>
+          </h2>
+          <p class="text-emerald-50/80 text-base md:text-lg leading-relaxed max-w-xl">
+            Adopta un árbol frutal y sé dueño de su producción, o contrata una canasta
+            de cosecha con entrega programada. Tu pago llega directo al agricultor.
+          </p>
+          <div class="flex flex-wrap gap-3 mt-8">
+            <button type="button" class="btn-hero btn-hero--primario" onclick="AgroColab.parcelas.establecerLinea('adopcion')">
+              <i class="fa-solid fa-tree"></i> Adoptar un árbol
+            </button>
+            <button type="button" class="btn-hero btn-hero--secundario" onclick="AgroColab.parcelas.establecerLinea('abastecimiento')">
+              <i class="fa-solid fa-basket-shopping"></i> Ver canastas
+            </button>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-10">
+            <span class="hero__pill"><i class="fa-solid fa-handshake"></i> Sin intermediarios</span>
+            <span class="hero__pill"><i class="fa-solid fa-route"></i> Trazabilidad por pedido</span>
+            <span class="hero__pill"><i class="fa-solid fa-apple-whole"></i> 12 especies frutales</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CÓMO FUNCIONA -->
+    <section class="max-w-6xl mx-auto px-4 pt-16">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <span class="eyebrow">Cómo funciona</span>
+        <h3 class="text-3xl font-extrabold text-stone-900 mt-3">Tres pasos del campo a tu casa</h3>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="paso-card">
+          <span class="paso-card__numero">01</span>
+          <div class="paso-card__icono"><i class="fa-solid fa-magnifying-glass"></i></div>
+          <h4 class="font-bold text-lg text-stone-900">Elige tu árbol o canasta</h4>
+          <p class="text-sm text-stone-500 mt-2 leading-relaxed">Explora árboles reales publicados por agricultores, con su ubicación, especie y cosecha estimada.</p>
+        </div>
+        <div class="paso-card">
+          <span class="paso-card__numero">02</span>
+          <div class="paso-card__icono"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+          <h4 class="font-bold text-lg text-stone-900">Financia la temporada</h4>
+          <p class="text-sm text-stone-500 mt-2 leading-relaxed">Tu cuota mensual llega directo al productor y le da liquidez antes de la cosecha.</p>
+        </div>
+        <div class="paso-card">
+          <span class="paso-card__numero">03</span>
+          <div class="paso-card__icono"><i class="fa-solid fa-truck-fast"></i></div>
+          <h4 class="font-bold text-lg text-stone-900">Recibe tu cosecha</h4>
+          <p class="text-sm text-stone-500 mt-2 leading-relaxed">Despacho a tu hogar o negocio, con un código de seguimiento que te dice de qué huerto viene.</p>
+        </div>
       </div>
     </section>
 
     <!-- SECCIÓN 1: PLANES DE ADOPCIÓN (línea de producto 1) -->
     <section id="seccion-adopcion" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
       <div class="text-center max-w-2xl mx-auto mb-10">
-        <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
-          Línea 1 · Adopción de Árboles
-        </span>
+        <span class="eyebrow">Línea 1 · Adopción de árboles</span>
         <h3 class="text-3xl font-black text-stone-900 mt-3 mb-2 tracking-tight">
           Elige tu plan de adopción
         </h3>
@@ -374,16 +440,17 @@
 
     <!-- SECCIÓN 2: CATÁLOGO DE ÁRBOLES ADOPTABLE -->
     <section id="seccion-parcelas" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-2 border-b border-stone-200">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-8">
         <div>
-          <h3 class="text-2xl font-bold text-stone-900">Árboles Disponibles para Adopción</h3>
-          <p class="text-xs text-stone-500" id="filtro-activo-texto">Mostrando los 3 planes de adopción. Selecciona un plan arriba para filtrar.</p>
+          <span class="eyebrow">Catálogo</span>
+          <h3 class="text-3xl font-extrabold text-stone-900 mt-3">Árboles disponibles para adopción</h3>
+          <p class="text-sm text-stone-500 mt-1" id="filtro-activo-texto">Mostrando los 3 planes de adopción. Selecciona un plan arriba para filtrar.</p>
         </div>
-        <button type="button" id="btn-actualizar-arboles" class="mt-2 sm:mt-0 text-xs text-emerald-800 hover:text-emerald-950 font-bold flex items-center gap-1.5 transition">
+        <button type="button" id="btn-actualizar-arboles" class="text-xs text-emerald-800 hover:text-emerald-950 font-bold flex items-center gap-1.5 bg-white border border-stone-200 hover:border-emerald-300 px-4 py-2 rounded-full transition">
           <i class="fa-solid fa-arrows-rotate"></i> Actualizar disponibilidad
         </button>
       </div>
-      <div id="tree-container" class="grid grid-cols-1 md:grid-cols-3 gap-7">
+      <div id="tree-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
         <p class="text-stone-500 text-sm">Cargando parcelas disponibles...</p>
       </div>
     </section>
@@ -391,9 +458,7 @@
     <!-- SECCIÓN 3: PLANES DE ABASTECIMIENTO (línea de producto 2) -->
     <section id="seccion-abastecimiento" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24 hidden">
       <div class="text-center max-w-2xl mx-auto mb-10">
-        <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
-          Línea 2 · Abastecimiento
-        </span>
+        <span class="eyebrow">Línea 2 · Abastecimiento</span>
         <h3 class="text-3xl font-black text-stone-900 mt-3 mb-2 tracking-tight">
           Tu cosecha semanal o mensual, sin vueltas
         </h3>
@@ -769,8 +834,38 @@
       </div>
     </div>
 
-    <footer class="bg-stone-900 text-stone-400 text-xs py-8 border-t border-stone-800 text-center">
-      <p>© 2026 Agro-Colab - Financia la cosecha, asegura tu abastecimiento.</p>
+    <footer class="footer-sitio mt-20">
+      <div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div class="md:col-span-2">
+          <div class="flex items-center gap-3">
+            <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
+            <span class="text-lg font-extrabold text-white">Agro-Colab</span>
+          </div>
+          <p class="text-sm text-emerald-200/70 mt-4 max-w-sm leading-relaxed">
+            Conectamos a las personas con el pequeño agricultor chileno: financiamiento
+            directo, sin intermediarios y con trazabilidad del huerto a la mesa.
+          </p>
+        </div>
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-white mb-4">Explorar</p>
+          <ul class="space-y-2 text-sm">
+            <li><button type="button" onclick="AgroColab.parcelas.establecerLinea('adopcion')">Adopción de árboles</button></li>
+            <li><button type="button" onclick="AgroColab.parcelas.establecerLinea('abastecimiento')">Canastas de abastecimiento</button></li>
+            <li><button type="button" onclick="AgroColab.views.mostrarVista('dashboard-comprador')">Mi panel</button></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-white mb-4">Legal</p>
+          <ul class="space-y-2 text-sm">
+            <li><a href="privacidad.html">Política de privacidad</a></li>
+            <li><a href="terminos.html">Términos y condiciones</a></li>
+            <li><a href="https://github.com/arrobaaas/agro-colab" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> Código fuente</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-emerald-900">
+        <p class="max-w-6xl mx-auto px-4 py-5 text-xs text-emerald-200/60">© 2026 Agro-Colab · Financia la cosecha, asegura tu abastecimiento.</p>
+      </div>
     </footer>
   </div>
 
@@ -779,15 +874,15 @@
        ============================================================ -->
   <div id="vista-dashboard-comprador" data-vista="dashboard-comprador" class="hidden">
     <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
-      <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
+      <div class="max-w-6xl mx-auto px-4 py-3 md:py-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-3">
         <div class="flex items-center space-x-3">
-          <span class="text-3xl">🌱</span>
+          <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
           <div>
             <h1 class="text-xl font-extrabold tracking-tight">Agro-Colab</h1>
-            <p class="text-[11px] text-emerald-200">Trazabilidad directa del huerto a tu mesa</p>
+            <p class="hidden sm:block text-[11px] text-emerald-200">Trazabilidad directa del huerto a tu mesa</p>
           </div>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
           <button type="button" class="nav-link" onclick="AgroColab.views.mostrarVista('parcelas')">
             <i class="fa-solid fa-leaf"></i> Catálogo
           </button>
@@ -827,15 +922,15 @@
   <div id="vista-agricultor" data-vista="agricultor" class="hidden">
 
     <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
-      <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
+      <div class="max-w-6xl mx-auto px-4 py-3 md:py-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-3">
         <div class="flex items-center space-x-3">
-          <span class="text-3xl">🌱</span>
+          <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
           <div>
             <h1 class="text-xl font-extrabold tracking-tight">Agro-Colab</h1>
-            <p class="text-[11px] text-emerald-200">Panel del Agricultor</p>
+            <p class="hidden sm:block text-[11px] text-emerald-200">Panel del Agricultor</p>
           </div>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
           <div id="nav-sesion-agricultor" class="flex items-center gap-2"></div>
           <button type="button" id="btn-cerrar-sesion-agricultor" class="btn-logout">
             <i class="fa-solid fa-right-from-bracket"></i> Salir
@@ -989,8 +1084,18 @@
 
     </main>
 
-    <footer class="bg-stone-900 text-stone-400 text-xs py-8 border-t border-stone-800 text-center">
-      <p>© 2026 Agro-Colab - Panel del Agricultor</p>
+    <footer class="footer-sitio mt-16">
+      <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="logo-marca" style="width:1.75rem;height:1.75rem;font-size:.8rem;border-radius:.6rem"><i class="fa-solid fa-seedling"></i></span>
+          <span class="font-bold text-white">Agro-Colab</span>
+          <span class="text-emerald-200/60">· Panel del Agricultor</span>
+        </div>
+        <div class="flex gap-4">
+          <a href="privacidad.html">Privacidad</a>
+          <a href="terminos.html">Términos</a>
+        </div>
+      </div>
     </footer>
   </div>
 

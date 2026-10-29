@@ -30,3 +30,7 @@ class AppService {
 
 const appService = new AppService();
 window.AgroColab.app = appService;
+
+/* Sin esta llamada no se conectaba ningún evento (carro, filtros, salir,
+   formularios) ni se restauraba la sesión al recargar la página. */
+appService.init();
