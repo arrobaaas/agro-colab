@@ -11,23 +11,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261029">
-  <script src="js/config.js?v=20261029" defer></script>
-  <script src="js/ui.js?v=20261029" defer></script>
-  <script src="js/api.js?v=20261029" defer></script>
-  <script src="js/auth.js?v=20261029" defer></script>
-  <script src="js/parcelas.js?v=20261029" defer></script>
-  <script src="js/catalogo.js?v=20261029" defer></script>
-  <script src="js/agricultor.js?v=20261029" defer></script>
-  <script src="js/perfil.js?v=20261029" defer></script>
-  <script src="js/autocomplete.js?v=20261029" defer></script>
-  <script src="js/dashboard.js?v=20261029" defer></script>
-  <script src="js/efectos.js?v=20261029" defer></script>
-  <script src="js/views.js?v=20261029" defer></script>
-  <script src="js/login.js?v=20261029" defer></script>
-  <script src="js/app.js?v=20261029" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261029b">
+  <script src="js/config.js?v=20261029b" defer></script>
+  <script src="js/ui.js?v=20261029b" defer></script>
+  <script src="js/api.js?v=20261029b" defer></script>
+  <script src="js/auth.js?v=20261029b" defer></script>
+  <script src="js/parcelas.js?v=20261029b" defer></script>
+  <script src="js/catalogo.js?v=20261029b" defer></script>
+  <script src="js/agricultor.js?v=20261029b" defer></script>
+  <script src="js/perfil.js?v=20261029b" defer></script>
+  <script src="js/autocomplete.js?v=20261029b" defer></script>
+  <script src="js/dashboard.js?v=20261029b" defer></script>
+  <script src="js/efectos.js?v=20261029b" defer></script>
+  <script src="js/views.js?v=20261029b" defer></script>
+  <script src="js/login.js?v=20261029b" defer></script>
+  <script src="js/app.js?v=20261029b" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
+  <div class="barra-progreso" aria-hidden="true"></div>
 
   <!-- ============================================================
        VISTA 1: LOGIN - lo primero que ve cualquier persona
@@ -297,7 +298,7 @@
     </header>
 
     <!-- Banner de la vista -->
-    <section class="hero">
+    <section class="hero hero--portada">
       <img
         src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1600&q=80"
         alt="Campos de cultivo"
@@ -333,26 +334,29 @@
       </div>
     </section>
 
+    <!-- Hoja de contenido: sube y cubre la portada al hacer scroll -->
+    <div class="hoja">
+
     <!-- CÓMO FUNCIONA -->
     <section class="max-w-6xl mx-auto px-4 pt-16">
-      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal>
+      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal="wipe">
         <span class="eyebrow">Cómo funciona</span>
         <h3 class="text-3xl font-extrabold text-stone-900 mt-3">Tres pasos del campo a tu casa</h3>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="paso-card" data-reveal style="--reveal-delay:0ms">
+        <div class="paso-card" data-reveal="flip" data-tilt style="--reveal-delay:0ms">
           <span class="paso-card__numero">01</span>
           <div class="paso-card__icono"><i class="fa-solid fa-magnifying-glass"></i></div>
           <h4 class="font-bold text-lg text-stone-900">Elige tu árbol o canasta</h4>
           <p class="text-sm text-stone-500 mt-2 leading-relaxed">Explora árboles reales publicados por agricultores, con su ubicación, especie y cosecha estimada.</p>
         </div>
-        <div class="paso-card" data-reveal style="--reveal-delay:120ms">
+        <div class="paso-card" data-reveal="flip" data-tilt style="--reveal-delay:150ms">
           <span class="paso-card__numero">02</span>
           <div class="paso-card__icono"><i class="fa-solid fa-hand-holding-dollar"></i></div>
           <h4 class="font-bold text-lg text-stone-900">Financia la temporada</h4>
           <p class="text-sm text-stone-500 mt-2 leading-relaxed">Tu cuota mensual llega directo al productor y le da liquidez antes de la cosecha.</p>
         </div>
-        <div class="paso-card" data-reveal style="--reveal-delay:240ms">
+        <div class="paso-card" data-reveal="flip" data-tilt style="--reveal-delay:300ms">
           <span class="paso-card__numero">03</span>
           <div class="paso-card__icono"><i class="fa-solid fa-truck-fast"></i></div>
           <h4 class="font-bold text-lg text-stone-900">Recibe tu cosecha</h4>
@@ -363,7 +367,7 @@
 
     <!-- SECCIÓN 1: PLANES DE ADOPCIÓN (línea de producto 1) -->
     <section id="seccion-adopcion" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
-      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal>
+      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal="wipe">
         <span class="eyebrow">Línea 1 · Adopción de árboles</span>
         <h3 class="text-3xl font-black text-stone-900 mt-3 mb-2 tracking-tight">
           Elige tu plan de adopción
@@ -375,10 +379,10 @@
         </p>
       </div>
 
-      <div id="grid-planes-adopcion" class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+      <div id="grid-planes-adopcion" class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch" data-reveal-grupo>
 
         <!-- PLAN BÁSICO: 5 copartícipes -->
-        <div class="plan-adopcion-card" data-reveal>
+        <div class="plan-adopcion-card" data-reveal="left" data-tilt>
           <div>
             <div class="flex justify-between items-center mb-4">
               <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Plan Básico</span>
@@ -398,7 +402,7 @@
         </div>
 
         <!-- PLAN INTERMEDIO: 3 copartícipes -->
-        <div class="plan-adopcion-card plan-adopcion-card--destacado" data-reveal style="--reveal-delay:120ms">
+        <div class="plan-adopcion-card plan-adopcion-card--destacado" data-reveal="zoom" data-tilt style="--reveal-delay:150ms">
           <span class="plan-adopcion-ribbon">Más Equilibrado</span>
           <div>
             <div class="flex justify-between items-center mb-4">
@@ -419,7 +423,7 @@
         </div>
 
         <!-- PLAN PREMIUM: exclusivo -->
-        <div class="plan-adopcion-card" data-reveal style="--reveal-delay:240ms">
+        <div class="plan-adopcion-card" data-reveal="right" data-tilt style="--reveal-delay:300ms">
           <div>
             <div class="flex justify-between items-center mb-4">
               <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Plan Premium</span>
@@ -443,7 +447,7 @@
 
     <!-- SECCIÓN 2: CATÁLOGO DE ÁRBOLES ADOPTABLE -->
     <section id="seccion-parcelas" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-8" data-reveal>
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-8" data-reveal="left">
         <div>
           <span class="eyebrow">Catálogo</span>
           <h3 class="text-3xl font-extrabold text-stone-900 mt-3">Árboles disponibles para adopción</h3>
@@ -460,7 +464,7 @@
 
     <!-- SECCIÓN 3: PLANES DE ABASTECIMIENTO (línea de producto 2) -->
     <section id="seccion-abastecimiento" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24 hidden">
-      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal>
+      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal="wipe">
         <span class="eyebrow">Línea 2 · Abastecimiento</span>
         <h3 class="text-3xl font-black text-stone-900 mt-3 mb-2 tracking-tight">
           Tu cosecha semanal o mensual, sin vueltas
@@ -472,10 +476,10 @@
         </p>
       </div>
 
-      <div id="grid-planes" class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+      <div id="grid-planes" class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch" data-reveal-grupo>
 
         <!-- PLAN 1: Dúo -->
-        <div class="bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between" data-reveal>
+        <div class="relative bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between" data-reveal="left" data-tilt>
           <div>
             <div class="flex justify-between items-center mb-4">
               <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Plan Dúo</span>
@@ -506,7 +510,7 @@
         </div>
 
         <!-- PLAN 2: Familiar -->
-        <div class="bg-emerald-950 text-white rounded-3xl border-2 border-emerald-600 p-7 shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between relative" data-reveal style="--reveal-delay:120ms">
+        <div class="bg-emerald-950 text-white rounded-3xl border-2 border-emerald-600 p-7 shadow-2xl transition-shadow duration-300 flex flex-col justify-between relative" data-reveal="zoom" data-tilt style="--reveal-delay:150ms">
           <div class="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-emerald-950 font-black text-[10px] tracking-wider uppercase px-4 py-1 rounded-full shadow">
             El Más Recomendado
           </div>
@@ -540,7 +544,7 @@
         </div>
 
         <!-- PLAN 3: B2B / Restaurantes -->
-        <div class="bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between" data-reveal style="--reveal-delay:240ms">
+        <div class="relative bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between" data-reveal="right" data-tilt style="--reveal-delay:300ms">
           <div>
             <div class="flex justify-between items-center mb-4">
               <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Plan B2B</span>
@@ -705,6 +709,9 @@
       </div>
     </section>
 
+    </div>
+    <!-- /hoja -->
+
     <!-- MODAL: CANASTA / MIS COMPRAS -->
     <div id="modal-canasta" class="fixed inset-0 z-[100] hidden">
       <div class="absolute inset-0 bg-black/60" onclick="AgroColab.parcelas.cerrarCanasta()"></div>
@@ -837,7 +844,7 @@
       </div>
     </div>
 
-    <footer class="footer-sitio mt-20">
+    <footer class="footer-sitio relative z-10">
       <div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-10" data-reveal>
         <div class="md:col-span-2">
           <div class="flex items-center gap-3">
@@ -901,7 +908,7 @@
     </header>
 
     <main class="max-w-6xl mx-auto px-4 py-14">
-      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal>
+      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal="wipe">
         <span class="inline-block bg-emerald-600/90 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
           Panel del Comprador
         </span>

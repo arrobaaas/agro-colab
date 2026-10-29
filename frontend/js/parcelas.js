@@ -179,15 +179,16 @@
           return;
         }
 
-        visibles.forEach((arbol) => {
-          container.insertAdjacentHTML("beforeend", this.plantillaArbol(arbol));
+        visibles.forEach((arbol, indice) => {
+          container.insertAdjacentHTML("beforeend", this.plantillaArbol(arbol, indice));
         });
+        if (AgroColab.efectos) AgroColab.efectos.observar(container);
       } catch (error) {
         container.innerHTML = `<div class="col-span-3 p-4 bg-red-50 text-red-700 text-xs rounded-xl">Error al conectar con la API (${this.config.API_URL}).</div>`;
       }
     }
 
-    plantillaArbol(arbol) {
+    plantillaArbol(arbol, indice = 0) {
       const cuposTotales = arbol.cupos_totales || 0;
       const cuposLibres = Math.max(0, cuposTotales - (arbol.cupos_ocupados || 0));
       const porcentaje = cuposTotales ? Math.round(((cuposTotales - cuposLibres) / cuposTotales) * 100) : 100;
@@ -201,7 +202,7 @@
          devolvía solo el innerHTML: se perdía el envoltorio y la foto y los
          datos quedaban como celdas sueltas de la grilla. */
       return `
-        <article class="arbol-card group">
+        <article class="arbol-card group" data-reveal="flip" data-tilt style="--reveal-delay:${(indice % 3) * 150}ms">
           <div class="arbol-card__media">
             <img src="${arbol.imagen || ""}" alt="${arbol.nombre}" loading="lazy" onerror="this.style.display='none'">
             <span class="arbol-card__plan">${arbol.plan}</span>
