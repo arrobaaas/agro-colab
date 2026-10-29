@@ -20,6 +20,7 @@
   <script src="js/perfil.js" defer></script>
   <script src="js/autocomplete.js" defer></script>
   <script src="js/dashboard.js" defer></script>
+  <script src="js/efectos.js" defer></script>
   <script src="js/views.js" defer></script>
   <script src="js/login.js" defer></script>
   <script src="js/app.js" defer></script>
@@ -332,24 +333,24 @@
 
     <!-- CÓMO FUNCIONA -->
     <section class="max-w-6xl mx-auto px-4 pt-16">
-      <div class="text-center max-w-2xl mx-auto mb-10">
+      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal>
         <span class="eyebrow">Cómo funciona</span>
         <h3 class="text-3xl font-extrabold text-stone-900 mt-3">Tres pasos del campo a tu casa</h3>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="paso-card">
+        <div class="paso-card" data-reveal style="--reveal-delay:0ms">
           <span class="paso-card__numero">01</span>
           <div class="paso-card__icono"><i class="fa-solid fa-magnifying-glass"></i></div>
           <h4 class="font-bold text-lg text-stone-900">Elige tu árbol o canasta</h4>
           <p class="text-sm text-stone-500 mt-2 leading-relaxed">Explora árboles reales publicados por agricultores, con su ubicación, especie y cosecha estimada.</p>
         </div>
-        <div class="paso-card">
+        <div class="paso-card" data-reveal style="--reveal-delay:120ms">
           <span class="paso-card__numero">02</span>
           <div class="paso-card__icono"><i class="fa-solid fa-hand-holding-dollar"></i></div>
           <h4 class="font-bold text-lg text-stone-900">Financia la temporada</h4>
           <p class="text-sm text-stone-500 mt-2 leading-relaxed">Tu cuota mensual llega directo al productor y le da liquidez antes de la cosecha.</p>
         </div>
-        <div class="paso-card">
+        <div class="paso-card" data-reveal style="--reveal-delay:240ms">
           <span class="paso-card__numero">03</span>
           <div class="paso-card__icono"><i class="fa-solid fa-truck-fast"></i></div>
           <h4 class="font-bold text-lg text-stone-900">Recibe tu cosecha</h4>
@@ -360,7 +361,7 @@
 
     <!-- SECCIÓN 1: PLANES DE ADOPCIÓN (línea de producto 1) -->
     <section id="seccion-adopcion" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
-      <div class="text-center max-w-2xl mx-auto mb-10">
+      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal>
         <span class="eyebrow">Línea 1 · Adopción de árboles</span>
         <h3 class="text-3xl font-black text-stone-900 mt-3 mb-2 tracking-tight">
           Elige tu plan de adopción
@@ -375,7 +376,7 @@
       <div id="grid-planes-adopcion" class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
 
         <!-- PLAN BÁSICO: 5 copartícipes -->
-        <div class="plan-adopcion-card">
+        <div class="plan-adopcion-card" data-reveal>
           <div>
             <div class="flex justify-between items-center mb-4">
               <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Plan Básico</span>
@@ -395,7 +396,7 @@
         </div>
 
         <!-- PLAN INTERMEDIO: 3 copartícipes -->
-        <div class="plan-adopcion-card plan-adopcion-card--destacado">
+        <div class="plan-adopcion-card plan-adopcion-card--destacado" data-reveal style="--reveal-delay:120ms">
           <span class="plan-adopcion-ribbon">Más Equilibrado</span>
           <div>
             <div class="flex justify-between items-center mb-4">
@@ -416,7 +417,7 @@
         </div>
 
         <!-- PLAN PREMIUM: exclusivo -->
-        <div class="plan-adopcion-card">
+        <div class="plan-adopcion-card" data-reveal style="--reveal-delay:240ms">
           <div>
             <div class="flex justify-between items-center mb-4">
               <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Plan Premium</span>
@@ -440,7 +441,7 @@
 
     <!-- SECCIÓN 2: CATÁLOGO DE ÁRBOLES ADOPTABLE -->
     <section id="seccion-parcelas" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-8">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-8" data-reveal>
         <div>
           <span class="eyebrow">Catálogo</span>
           <h3 class="text-3xl font-extrabold text-stone-900 mt-3">Árboles disponibles para adopción</h3>
@@ -457,7 +458,7 @@
 
     <!-- SECCIÓN 3: PLANES DE ABASTECIMIENTO (línea de producto 2) -->
     <section id="seccion-abastecimiento" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24 hidden">
-      <div class="text-center max-w-2xl mx-auto mb-10">
+      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal>
         <span class="eyebrow">Línea 2 · Abastecimiento</span>
         <h3 class="text-3xl font-black text-stone-900 mt-3 mb-2 tracking-tight">
           Tu cosecha semanal o mensual, sin vueltas
@@ -472,7 +473,7 @@
       <div id="grid-planes" class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
 
         <!-- PLAN 1: Dúo -->
-        <div class="bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+        <div class="bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between" data-reveal>
           <div>
             <div class="flex justify-between items-center mb-4">
               <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Plan Dúo</span>
@@ -503,7 +504,7 @@
         </div>
 
         <!-- PLAN 2: Familiar -->
-        <div class="bg-emerald-950 text-white rounded-3xl border-2 border-emerald-600 p-7 shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between relative">
+        <div class="bg-emerald-950 text-white rounded-3xl border-2 border-emerald-600 p-7 shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between relative" data-reveal style="--reveal-delay:120ms">
           <div class="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-emerald-950 font-black text-[10px] tracking-wider uppercase px-4 py-1 rounded-full shadow">
             El Más Recomendado
           </div>
@@ -537,7 +538,7 @@
         </div>
 
         <!-- PLAN 3: B2B / Restaurantes -->
-        <div class="bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+        <div class="bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between" data-reveal style="--reveal-delay:240ms">
           <div>
             <div class="flex justify-between items-center mb-4">
               <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Plan B2B</span>
@@ -835,7 +836,7 @@
     </div>
 
     <footer class="footer-sitio mt-20">
-      <div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-10">
+      <div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-10" data-reveal>
         <div class="md:col-span-2">
           <div class="flex items-center gap-3">
             <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
@@ -898,7 +899,7 @@
     </header>
 
     <main class="max-w-6xl mx-auto px-4 py-14">
-      <div class="text-center max-w-2xl mx-auto mb-10">
+      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal>
         <span class="inline-block bg-emerald-600/90 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
           Panel del Comprador
         </span>

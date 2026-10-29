@@ -11,6 +11,7 @@ class AppService {
     this.login = window.AgroColab.login;
     this.autocomplete = window.AgroColab.autocomplete;
     this.dashboard = window.AgroColab.dashboard;
+    this.efectos = window.AgroColab.efectos;
   }
 
   init() {
@@ -22,6 +23,7 @@ class AppService {
       this.autocomplete.init();
       this.dashboard.init();
       this.views.init();
+      this.efectos.init();
 
       this.views.mostrarVista(this.views.vistaInicial());
     });
