@@ -10,9 +10,15 @@ class ApiService {
   }
 
   async apiFetch(ruta, opciones = {}) {
+    const headers = { "Content-Type": "application/json" };
+    const sesion = window.AgroColab.auth ? window.AgroColab.auth.leerSesion() : null;
+    if (sesion && sesion.token) {
+      headers.Authorization = `Bearer ${sesion.token}`;
+    }
+
     const respuesta = await fetch(`${this.config.API_URL}${ruta}`, {
-      headers: { "Content-Type": "application/json" },
-      ...opciones
+      ...opciones,
+      headers
     });
 
     let cuerpo = null;
@@ -36,6 +42,13 @@ class ApiService {
       );
     }
 
+    /* Los errores lanzados con HTTPException (sesión inválida, sin permiso,
+       demasiados intentos) llegan envueltos en "detail": se desenvuelven para
+       que el resto de la app siga leyendo status/mensaje. */
+    if (!respuesta.ok && cuerpo.detail && typeof cuerpo.detail === "object" && cuerpo.detail.mensaje) {
+      return cuerpo.detail;
+    }
+
     return cuerpo;
   }
 
@@ -54,26 +67,19 @@ class ApiService {
     return this.apiFetch("/especies");
   }
 
+  /* El usuario se identifica con el token de sesión (ver apiFetch); el
+     parámetro sesion se mantiene por compatibilidad con quienes llaman. */
   suscribirArbol(sesion, treeId) {
     return this.apiFetch("/suscribir", {
       method: "POST",
-      body: JSON.stringify({
-        user_id: sesion ? sesion.id : null,
-        user_name: sesion ? sesion.nombre : null,
-        email: sesion ? sesion.email : null,
-        tree_id: treeId
-      })
+      body: JSON.stringify({ tree_id: treeId })
     });
   }
 
   cancelarSuscripcion(sesion, treeId) {
     return this.apiFetch("/cancelar-suscripcion", {
       method: "POST",
-      body: JSON.stringify({
-        user_id: sesion ? sesion.id : null,
-        user_name: sesion ? sesion.nombre : null,
-        tree_id: treeId
-      })
+      body: JSON.stringify({ tree_id: treeId })
     });
   }
 

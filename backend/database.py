@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Text, inspect, text
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Text, UniqueConstraint, inspect, text
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
 import bcrypt
@@ -91,6 +91,9 @@ class Arbol(Base):
 
 class Suscripcion(Base):
     __tablename__ = "suscripciones"
+    # Un usuario no puede ocupar dos cupos del mismo árbol (lo garantiza la base,
+    # no solo la validación previa, que no protege ante peticiones simultáneas)
+    __table_args__ = (UniqueConstraint("usuario_id", "arbol_id", name="uq_suscripcion_usuario_arbol"),)
 
     id = Column(Integer, primary_key=True, index=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
@@ -191,6 +194,13 @@ def migrar_cuentas_antiguas():
                 vistas.add(clave)
         db.flush()
 
+        # create_all() no agrega restricciones a tablas que ya existían: el
+        # índice único se crea aparte, ya sin duplicados que lo impidan.
+        db.execute(text(
+            "CREATE UNIQUE INDEX IF NOT EXISTS uq_suscripcion_usuario_arbol "
+            "ON suscripciones (usuario_id, arbol_id)"
+        ))
+
         for arbol in db.query(Arbol).all():
             reales = db.query(Suscripcion).filter(Suscripcion.arbol_id == arbol.id).count()
             if (arbol.cupos_ocupados or 0) != reales:
@@ -202,4 +212,4 @@ def migrar_cuentas_antiguas():
 
         db.commit()
     finally:
-        db.close()
+        db.close()

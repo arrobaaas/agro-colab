@@ -6,10 +6,21 @@ from sqlalchemy.orm import Session
 from core import (
     ArbolRequest, validar_imagen, buscar_especie, componer_nombre,
     normalizar_identificador, serializar_arbol, cupos_ocupados_de, get_db,
+    usuario_actual,
 )
-from database import Arbol, Usuario
+from database import Arbol, Suscripcion, Usuario
 
 router = APIRouter()
+
+
+def _arbol_propio(db: Session, arbol_id: int, usuario: Usuario):
+    """Devuelve (arbol, error): solo el productor que lo publicó puede gestionarlo."""
+    arbol = db.query(Arbol).filter(Arbol.id == arbol_id).first()
+    if not arbol:
+        return None, {"status": "error", "mensaje": "Árbol no encontrado."}
+    if arbol.productor_id != usuario.id:
+        return None, {"status": "error", "mensaje": "Solo el productor del árbol puede modificarlo."}
+    return arbol, None
 
 
 @router.get("/api/arboles")
@@ -19,16 +30,20 @@ def listar_arboles(db: Session = Depends(get_db)):
 
 
 @router.post("/api/arboles")
-def crear_arbol(data: ArbolRequest, db: Session = Depends(get_db)):
+def crear_arbol(
+    data: ArbolRequest,
+    productor: Usuario = Depends(usuario_actual),
+    db: Session = Depends(get_db),
+):
+    # El productor es el usuario de la sesión. Antes se buscaba por el nombre
+    # enviado en el formulario, y cualquiera podía publicar a nombre de otro.
+    if productor.rol != "agricultor":
+        return {"status": "error", "mensaje": "Solo los agricultores pueden publicar árboles."}
+
     # La especie debe existir en el catálogo: no se aceptan nombres libres
     especie = buscar_especie(data.especie)
     if not especie:
         return {"status": "error", "mensaje": "La especie seleccionada no está en el catálogo."}
-
-    # Buscar al productor por nombre
-    productor = db.query(Usuario).filter(Usuario.nombre == data.productor).first()
-    if not productor:
-        return {"status": "error", "mensaje": "Productor no encontrado."}
 
     # La imagen debe ser del catálogo de la especie o una foto propia válida
     imagen, origen, error = validar_imagen(data.imagen, data.especie)
@@ -61,10 +76,23 @@ def crear_arbol(data: ArbolRequest, db: Session = Depends(get_db)):
 
 
 @router.put("/api/arboles/{arbol_id}")
-def actualizar_arbol(arbol_id: int, data: ArbolRequest, db: Session = Depends(get_db)):
-    arbol = db.query(Arbol).filter(Arbol.id == arbol_id).first()
-    if not arbol:
-        return {"status": "error", "mensaje": "Árbol no encontrado."}
+def actualizar_arbol(
+    arbol_id: int,
+    data: ArbolRequest,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(get_db),
+):
+    arbol, error = _arbol_propio(db, arbol_id, usuario)
+    if error:
+        return error
+
+    # No se pueden dejar menos cupos que suscriptores actuales
+    ocupados = cupos_ocupados_de(arbol, db)
+    if data.cupos_totales < ocupados:
+        return {
+            "status": "error",
+            "mensaje": f"El árbol ya tiene {ocupados} suscriptores: no puedes dejar menos cupos que eso."
+        }
 
     especie = buscar_especie(data.especie)
     if not especie:
@@ -97,11 +125,17 @@ def actualizar_arbol(arbol_id: int, data: ArbolRequest, db: Session = Depends(ge
 
 
 @router.delete("/api/arboles/{arbol_id}")
-def eliminar_arbol(arbol_id: int, db: Session = Depends(get_db)):
-    arbol = db.query(Arbol).filter(Arbol.id == arbol_id).first()
-    if not arbol:
-        return {"status": "error", "mensaje": "Árbol no encontrado."}
+def eliminar_arbol(
+    arbol_id: int,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(get_db),
+):
+    arbol, error = _arbol_propio(db, arbol_id, usuario)
+    if error:
+        return error
 
+    # Sin esto las suscripciones quedaban apuntando a un árbol inexistente
+    db.query(Suscripcion).filter(Suscripcion.arbol_id == arbol.id).delete()
     db.delete(arbol)
     db.commit()
     return {"status": "success", "mensaje": f"Árbol '{arbol.nombre}' eliminado correctamente."}

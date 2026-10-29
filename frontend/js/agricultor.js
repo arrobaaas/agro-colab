@@ -263,7 +263,11 @@
       try {
         const sesion = this.auth.leerSesion();
         const datos = await this.api.obtenerSuscriptores(sesion.id);
-        const arbol = Array.isArray(datos) ? datos.find((a) => a.arbol_id === arbolId) : null;
+        if (!Array.isArray(datos)) {
+          contenedor.innerHTML = `<p class="text-red-500 text-sm text-center py-8">${(datos && datos.mensaje) || "Error al cargar suscriptores"}</p>`;
+          return;
+        }
+        const arbol = datos.find((a) => a.arbol_id === arbolId);
 
         if (!arbol) {
           contenedor.innerHTML = '<p class="text-red-500 text-sm text-center py-8">No se encontró el árbol en tu panel.</p>';
@@ -334,6 +338,8 @@
             `Rol: ${usuario.rol}\n` +
             `Cuenta verificada: ${usuario.verificado ? 'Sí' : 'No'}`
           );
+        } else {
+          window.alert((usuario && usuario.mensaje) || "No se pudo cargar el perfil del usuario.");
         }
       } catch (error) {
         window.alert("Error al cargar el perfil del usuario.");

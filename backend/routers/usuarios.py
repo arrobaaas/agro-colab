@@ -8,7 +8,7 @@ import string
 
 from core import (
     LoginRequest, RegistroRequest, VerificacionRequest, PerfilRequest,
-    hash_password, verify_password, foto_de, get_db, MODO_DESARROLLO, limitar_por_ip,
+    hash_password, verify_password, foto_de, get_db, MODO_DESARROLLO, limitar_por_ip, crear_token, usuario_actual,
 )
 from database import Usuario, Arbol, Suscripcion, Pedido, SessionLocal, es_hash_bcrypt
 
@@ -98,6 +98,9 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     # Nunca debe salir en producción.
     if MODO_DESARROLLO:
         usuario_respuesta["codigo_verificacion"] = usuario.codigo_verificacion
+    # Solo una cuenta verificada recibe token para operar con la API
+    if usuario.verificado:
+        usuario_respuesta["token"] = crear_token(usuario.id)
 
     return {
         "status": "success",
@@ -129,11 +132,29 @@ def verificar_cuenta(data: VerificacionRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/api/usuario/{usuario_id}")
-def obtener_usuario(usuario_id: int, db: Session = Depends(get_db)):
-    """Obtiene el perfil público de un usuario (para que el agricultor lo vea)."""
+def obtener_usuario(
+    usuario_id: int,
+    solicitante: Usuario = Depends(usuario_actual),
+    db: Session = Depends(get_db),
+):
+    """Perfil de un usuario (para que el agricultor vea a sus suscriptores).
+
+    Trae datos de contacto: solo lo puede ver el propio usuario o un productor
+    con quien tenga una suscripción activa.
+    """
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:
         return {"status": "error", "mensaje": "Usuario no encontrado."}
+
+    if solicitante.id != usuario.id:
+        es_su_productor = (
+            db.query(Suscripcion)
+            .join(Arbol, Suscripcion.arbol_id == Arbol.id)
+            .filter(Suscripcion.usuario_id == usuario.id, Arbol.productor_id == solicitante.id)
+            .first()
+        )
+        if not es_su_productor:
+            return {"status": "error", "mensaje": "No tienes permiso para ver este perfil."}
 
     return {
         "id": usuario.id,
@@ -147,13 +168,17 @@ def obtener_usuario(usuario_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/api/perfil")
-def actualizar_perfil(data: PerfilRequest, db: Session = Depends(get_db)):
+def actualizar_perfil(
+    data: PerfilRequest,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(get_db),
+):
     cambios = data.dict(exclude_unset=True)
 
-    # Buscar usuario por email
-    usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
-    if not usuario:
-        return {"status": "error", "mensaje": "Usuario no encontrado."}
+    # Se edita siempre la cuenta de la sesión. Antes se buscaba por el correo
+    # enviado, y cualquiera podía cambiar la contraseña de otra cuenta.
+    if data.email != usuario.email:
+        return {"status": "error", "mensaje": "Solo puedes editar tu propio perfil."}
 
     # Actualizar campos
     if "nombre" in cambios:
@@ -183,14 +208,21 @@ def actualizar_perfil(data: PerfilRequest, db: Session = Depends(get_db)):
 
 
 @router.delete("/api/usuario/{email}")
-def eliminar_usuario(email: str, db: Session = Depends(get_db)):
+def eliminar_usuario(
+    email: str,
+    usuario: Usuario = Depends(usuario_actual),
+    db: Session = Depends(get_db),
+):
     """Derecho a la eliminación de datos (Art. 20 Ley 21.719)"""
-    usuario = db.query(Usuario).filter(Usuario.email == email).first()
-    if not usuario:
-        return {"status": "error", "mensaje": "Usuario no encontrado."}
+    # Solo el titular puede borrar su cuenta
+    if email != usuario.email:
+        return {"status": "error", "mensaje": "Solo puedes eliminar tu propia cuenta."}
 
-    # Eliminar suscripciones del usuario
+    # Eliminar suscripciones del usuario y las de sus árboles publicados
     db.query(Suscripcion).filter(Suscripcion.usuario_id == usuario.id).delete()
+    ids_arboles = [a.id for a in db.query(Arbol.id).filter(Arbol.productor_id == usuario.id)]
+    if ids_arboles:
+        db.query(Suscripcion).filter(Suscripcion.arbol_id.in_(ids_arboles)).delete(synchronize_session=False)
 
     # Eliminar pedidos del usuario
     db.query(Pedido).filter(Pedido.cliente_id == usuario.id).delete()
