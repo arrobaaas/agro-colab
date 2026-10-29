@@ -297,11 +297,9 @@ la revisión del código y la responsabilidad sobre el resultado son del equipo.
 
 ## 👥 Equipo
 
-| Integrante | GitHub |
-|---|---|
-| Joaquin Alveal Santos | [@Joaquin-alveal](https://github.com/Joaquin-alveal) |
-| Matias Gonzalez Paredes | [@SKT1-Ctrl](https://github.com/SKT1-Ctrl) |
-| Nicolas Reyes Orellana | [@arrobaaas](https://github.com/arrobaaas) |
+- Joaquin Alveal Santos - [@Joaquin-alveal](https://github.com/Joaquin-Alveal)
+- Matias Gonzalez Paredes - [@Skt1-Ctrl](https://github.com/SKT1-Ctrl)
+- Nicolas Reyes Orellana - [@arrobaaas](https://github.com/arrobaaas)
 
 Proyecto semestral · INGT1003 Arquitectura de Desarrollo (Móvil y Web) · Universidad Mayor · 2026
 
