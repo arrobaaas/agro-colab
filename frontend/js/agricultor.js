@@ -502,16 +502,7 @@
     /* ---------- Navbar ---------- */
 
     pintarNavbarAgricultor() {
-      const sesion = this.auth.leerSesion();
-      const contenedor = document.getElementById("nav-sesion-agricultor");
-      if (!contenedor || !sesion) return;
-
-      contenedor.innerHTML = `
-        <span class="nav-chip nav-chip--clickeable" onclick="AgroColab.perfil.abrir()" title="Ver mi perfil">
-          <span class="hidden sm:inline font-bold text-white">${sesion.nombre}</span>
-          <span class="text-emerald-400 font-black uppercase">${sesion.rol}</span>
-          <i class="fa-solid fa-tractor"></i>
-        </span>`;
+      window.AgroColab.views.pintarNavbar();
     }
 
     /* ---------- Inicialización ---------- */
@@ -544,10 +535,6 @@
         this.actualizarResumenNombre("formulario");
       });
 
-      document.getElementById("btn-cerrar-sesion-agricultor").addEventListener("click", () => {
-        this.auth.eliminarSesion();
-        window.AgroColab.views.mostrarVista(this.config.VISTA_SIN_SESION);
-      });
       this.pintarNavbarAgricultor();
     }
 

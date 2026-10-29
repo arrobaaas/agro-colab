@@ -203,7 +203,6 @@ h1, h2, h3, h4 {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-
 /* Estado del plan que está filtrando el catálogo. */
 .plan-adopcion-card--activo {
   border-color: var(--emerald-600);
@@ -331,75 +330,11 @@ h1, h2, h3, h4 {
   border-width: 1px;
 }
 
-/* ---------- Navegación ---------- */
-.nav-link {
-  white-space: nowrap;
-  flex-shrink: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--emerald-100);
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.nav-link:hover {
-  background-color: var(--emerald-800);
-  color: #fff;
-}
-
-.nav-link--destacado {
-  color: var(--amber-200);
-  background-color: rgba(6, 95, 70, 0.8);
-  border: 1px solid var(--emerald-600);
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.nav-link--destacado:hover {
-  color: var(--amber-100);
-  background-color: var(--emerald-800);
-}
-
-.nav-chip {
-  flex-shrink: 0;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: var(--emerald-950);
-  border: 1px solid var(--emerald-600);
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.75rem;
-  font-size: 0.75rem;
-  color: var(--emerald-200);
-}
-
 /* ---------- Botón de canasta ---------- */
-.btn-canasta {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.75rem;
-  background-color: var(--emerald-800);
-  border: 1px solid var(--emerald-600);
-  color: #fff;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.btn-canasta:hover {
-  background-color: var(--emerald-700);
-}
 
 .canasta-contador {
   position: absolute;
+  border: 2px solid var(--emerald-950);
   top: -0.375rem;
   right: -0.375rem;
   background-color: var(--amber-500);
@@ -494,23 +429,6 @@ h1, h2, h3, h4 {
   background-color: var(--emerald-700);
   color: #fff;
   font-size: 0.7rem;
-}
-
-/* ---------- Nav chip clickeable (perfil) ---------- */
-.nav-chip--clickeable {
-  cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.15s ease;
-}
-
-.nav-chip--clickeable:hover {
-  background-color: var(--emerald-800);
-  transform: scale(1.02);
-}
-
-/* ---------- Estado activo de nav-link (Adopción / Abastecimiento) ---------- */
-.nav-link--activo {
-  background-color: var(--emerald-800);
-  color: #fff;
 }
 
 /* ---------- Tarjetas de destino (logística) ---------- */
@@ -825,27 +743,228 @@ h1, h2, h3, h4 {
   border-bottom: 1px solid var(--stone-100);
 }
 
-/* ---------- Sesión ---------- */
-.btn-logout {
-  flex-shrink: 0;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background-color: transparent;
-  border: 1px solid var(--emerald-500);
-  color: var(--emerald-200);
-  padding: 0.5rem 0.875rem;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+/* ---------- Header ---------- */
+.header-sitio {
+  color: #fff;
+  background-color: rgba(2, 44, 34, 0.82);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.btn-logout:hover {
-  background-color: var(--emerald-800);
-  color: #fff;
+.nav-pill,
+.nav-icono,
+.nav-usuario {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--emerald-50);
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-pill:hover,
+.nav-icono:hover,
+.nav-usuario:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.nav-pill:active,
+.nav-icono:active,
+.nav-usuario:active {
+  transform: scale(0.96);
+}
+
+.nav-pill {
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Variante para fondos claros (pie de la canasta) */
+.nav-pill--claro {
+  color: var(--emerald-900);
+  background-color: var(--emerald-50);
+  border-color: var(--emerald-100);
+}
+
+.nav-pill--claro:hover {
+  background-color: var(--emerald-100);
+  border-color: var(--emerald-200);
+}
+
+.nav-icono {
+  position: relative;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 0.95rem;
+}
+
+.nav-usuario {
+  gap: 0.6rem;
+  padding: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .nav-usuario {
+    padding-right: 1rem;
+  }
+}
+
+.nav-usuario__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--emerald-300), var(--emerald-500));
+  color: var(--emerald-950);
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+
+.nav-separador {
+  display: none;
+  width: 1px;
+  height: 1.5rem;
+  margin: 0 0.25rem;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+@media (min-width: 640px) {
+  .nav-separador {
+    display: block;
+  }
+
+  /* Sin botones antes (header del agricultor) no separa nada */
+  .nav-separador:first-child {
+    display: none;
+  }
+}
+
+/* ---------- Canasta (panel lateral) ---------- */
+.modal-fondo,
+.modal-animado > :first-child {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(2, 24, 18, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.drawer-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 28rem;
+  background-color: #f6f4ee;
+  box-shadow: -30px 0 60px -20px rgba(2, 44, 34, 0.5);
+}
+
+@media (min-width: 640px) {
+  .drawer-panel {
+    top: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    border-radius: 1.75rem;
+    overflow: hidden;
+  }
+}
+
+.drawer-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem;
+  background: linear-gradient(135deg, var(--emerald-950), var(--emerald-900));
+}
+
+.drawer-pie {
+  padding: 1.25rem;
+  background-color: #fff;
+  border-top: 1px solid var(--stone-200);
+}
+
+.canasta-item {
+  display: flex;
+  gap: 0.875rem;
+  padding: 0.875rem;
+  background-color: #fff;
+  border: 1px solid var(--stone-200);
+  border-radius: 1.25rem;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.canasta-item:hover {
+  border-color: var(--emerald-200);
+  box-shadow: 0 10px 25px -15px rgba(2, 44, 34, 0.35);
+}
+
+.canasta-item--entrando {
+  animation: subir-aparecer 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.canasta-item__miniatura {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--emerald-50), var(--emerald-100));
+  color: var(--emerald-700);
+  font-size: 1.5rem;
+}
+
+.canasta-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background-color: var(--amber-50);
+  color: var(--amber-800);
+  font-size: 0.625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.canasta-estado--comprado {
+  background-color: var(--emerald-50);
+  color: var(--emerald-800);
+}
+
+.canasta-accion {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--stone-500);
+  padding: 0.5rem 0.25rem;
+  transition: color 0.15s ease;
+}
+
+.canasta-accion:hover {
+  color: var(--stone-800);
+}
+
+.canasta-accion--peligro:hover {
+  color: var(--rose-700);
 }
 
 /* ---------- Animaciones (efectos.js) ---------- */
@@ -905,6 +1024,10 @@ html {
   border-radius: 2.5rem 2.5rem 0 0;
   background-color: #f6f4ee;
   box-shadow: 0 -24px 50px -12px rgba(2, 44, 34, 0.45);
+  /* Los bloques que esperan su entrada están desplazados (por ejemplo, 90px
+     a la derecha): sin esto ensanchaban la página y en el celular el
+     navegador alejaba el zoom. clip, a diferencia de hidden, no rompe sticky. */
+  overflow-x: clip;
 }
 
 /* ----- Transiciones de entrada tipo diapositiva ----- */
@@ -1033,6 +1156,59 @@ header.sticky.header--con-scroll {
 
 #dashboard-comprador > article:nth-child(2) { animation-delay: 0.08s; }
 #dashboard-comprador > article:nth-child(3) { animation-delay: 0.16s; }
+
+/* ----- Apertura y cierre de modales ----- */
+@keyframes fondo-aparecer {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fondo-desaparecer {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes drawer-entrar {
+  from { transform: translateX(105%); }
+  to { transform: none; }
+}
+
+@keyframes drawer-salir {
+  from { transform: none; }
+  to { transform: translateX(105%); }
+}
+
+@keyframes modal-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.modal-drawer:not(.hidden) .modal-fondo,
+.modal-animado:not(.hidden) > :first-child {
+  animation: fondo-aparecer 0.3s ease both;
+}
+
+.modal-drawer:not(.hidden) .drawer-panel {
+  animation: drawer-entrar 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.modal-drawer.cerrando .modal-fondo {
+  animation: fondo-desaparecer 0.3s ease both;
+}
+
+.modal-drawer.cerrando .drawer-panel {
+  animation: drawer-salir 0.3s cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
+.modal-animado:not(.hidden) > :nth-child(2) {
+  animation: modal-entrar 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {
