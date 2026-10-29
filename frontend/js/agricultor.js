@@ -7,6 +7,8 @@
 
 (function () {
   const AgroColab = (window.AgroColab = window.AgroColab || {});
+  // Escapa datos antes de insertarlos como HTML (ver ui.escapar)
+  const e = (valor) => window.AgroColab.ui.escapar(valor);
 
   class AgricultorService {
     constructor() {
@@ -54,19 +56,19 @@
           return `
           <article class="arbol-card" data-reveal="flip" data-tilt style="--reveal-delay:${(indice % 3) * 150}ms">
             <div class="arbol-card__media">
-              <img src="${arbol.imagen || ""}" alt="${arbol.nombre}" loading="lazy" onerror="this.style.display='none'">
-              <span class="arbol-card__plan">${arbol.plan}</span>
+              <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" loading="lazy" onerror="this.style.display='none'">
+              <span class="arbol-card__plan">${e(arbol.plan)}</span>
               <span class="arbol-card__tipo ${exclusivo ? "arbol-card__tipo--exclusivo" : ""}">
-                <i class="fa-solid ${exclusivo ? "fa-crown" : "fa-users"}"></i> ${arbol.tipo_suscripcion || ""}
+                <i class="fa-solid ${exclusivo ? "fa-crown" : "fa-users"}"></i> ${e(arbol.tipo_suscripcion || "")}
               </span>
               <div class="arbol-card__titulo">
-                ${arbol.especie_nombre ? `<p class="arbol-card__especie">${arbol.especie_nombre}</p>` : ""}
-                <h4>${arbol.nombre}</h4>
+                ${arbol.especie_nombre ? `<p class="arbol-card__especie">${e(arbol.especie_nombre)}</p>` : ""}
+                <h4>${e(arbol.nombre)}</h4>
               </div>
             </div>
 
             <div class="p-5 flex flex-col gap-4 flex-1">
-              <p class="text-xs text-stone-600 truncate"><i class="fa-solid fa-location-dot text-rose-500 mr-1.5"></i>${arbol.ubicacion}</p>
+              <p class="text-xs text-stone-600 truncate"><i class="fa-solid fa-location-dot text-rose-500 mr-1.5"></i>${e(arbol.ubicacion)}</p>
 
               <div>
                 <div class="flex justify-between text-[11px] mb-1.5">
@@ -90,13 +92,13 @@
               </div>
 
               <div class="mt-auto pt-4 border-t border-stone-100 flex items-center gap-2">
-                <button type="button" class="accion-arbol flex-1" onclick="AgroColab.agricultor.abrirSuscriptores(${arbol.id})">
+                <button type="button" class="accion-arbol flex-1" onclick="AgroColab.agricultor.abrirSuscriptores(${e(arbol.id)})">
                   <i class="fa-solid fa-users"></i> Suscriptores <span class="accion-arbol__contador">${ocupados}</span>
                 </button>
-                <button type="button" class="accion-arbol accion-arbol--icono" onclick="AgroColab.agricultor.abrirEdicion(${arbol.id})" title="Editar" aria-label="Editar ${arbol.nombre}">
+                <button type="button" class="accion-arbol accion-arbol--icono" onclick="AgroColab.agricultor.abrirEdicion(${e(arbol.id)})" title="Editar" aria-label="Editar ${e(arbol.nombre)}">
                   <i class="fa-solid fa-pen"></i>
                 </button>
-                <button type="button" class="accion-arbol accion-arbol--icono accion-arbol--peligro" onclick="AgroColab.agricultor.eliminarArbol(${arbol.id})" title="Eliminar" aria-label="Eliminar ${arbol.nombre}">
+                <button type="button" class="accion-arbol accion-arbol--icono accion-arbol--peligro" onclick="AgroColab.agricultor.eliminarArbol(${e(arbol.id)})" title="Eliminar" aria-label="Eliminar ${e(arbol.nombre)}">
                   <i class="fa-solid fa-trash"></i>
                 </button>
               </div>
@@ -321,7 +323,7 @@
         const sesion = this.auth.leerSesion();
         const datos = await this.api.obtenerSuscriptores(sesion.id);
         if (!Array.isArray(datos)) {
-          contenedor.innerHTML = `<p class="text-red-500 text-sm text-center py-8">${(datos && datos.mensaje) || "Error al cargar suscriptores"}</p>`;
+          contenedor.innerHTML = `<p class="text-red-500 text-sm text-center py-8">${e((datos && datos.mensaje) || "Error al cargar suscriptores")}</p>`;
           return;
         }
         const arbol = datos.find((a) => a.arbol_id === arbolId);
@@ -356,18 +358,18 @@
               .toUpperCase();
             return `
             <div class="canasta-item flex-col sm:flex-row sm:items-center">
-              <span class="nav-usuario__avatar w-11 h-11 text-sm flex-shrink-0">${iniciales}</span>
+              <span class="nav-usuario__avatar w-11 h-11 text-sm flex-shrink-0">${e(iniciales)}</span>
               <div class="flex-1">
-                <p class="font-bold text-sm text-stone-900">${s.nombre}</p>
-                <p class="text-xs text-stone-500"><i class="fa-solid fa-envelope text-stone-400 mr-1"></i>${s.email}</p>
-                <p class="text-xs text-stone-500">${s.telefono ? '<i class="fa-solid fa-phone text-stone-400 mr-1"></i>' + s.telefono : ''} ${s.direccion ? '<i class="fa-solid fa-location-dot text-stone-400 mr-1"></i>' + s.direccion : ''}</p>
-                <p class="text-[10px] text-stone-400 mt-1">Suscrito el ${s.fecha_suscripcion}</p>
+                <p class="font-bold text-sm text-stone-900">${e(s.nombre)}</p>
+                <p class="text-xs text-stone-500"><i class="fa-solid fa-envelope text-stone-400 mr-1"></i>${e(s.email)}</p>
+                <p class="text-xs text-stone-500">${s.telefono ? '<i class="fa-solid fa-phone text-stone-400 mr-1"></i>' + e(s.telefono) : ''} ${s.direccion ? '<i class="fa-solid fa-location-dot text-stone-400 mr-1"></i>' + e(s.direccion) : ''}</p>
+                <p class="text-[10px] text-stone-400 mt-1">Suscrito el ${e(s.fecha_suscripcion)}</p>
               </div>
               <div class="flex gap-2">
-                <button type="button" onclick="AgroColab.agricultor.verPerfilUsuario(${s.usuario_id})" class="text-emerald-600 hover:text-emerald-800 text-xs font-bold flex items-center gap-1">
+                <button type="button" onclick="AgroColab.agricultor.verPerfilUsuario(${e(s.usuario_id)})" class="text-emerald-600 hover:text-emerald-800 text-xs font-bold flex items-center gap-1">
                   <i class="fa-solid fa-id-card"></i> Ver perfil
                 </button>
-                <button type="button" onclick="AgroColab.agricultor.expulsarSuscriptor(${s.suscripcion_id})" class="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1">
+                <button type="button" onclick="AgroColab.agricultor.expulsarSuscriptor(${e(s.suscripcion_id)})" class="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1">
                   <i class="fa-solid fa-user-minus"></i> Expulsar
                 </button>
               </div>
@@ -501,8 +503,8 @@
         : "";
 
       destino.innerHTML =
-        '<span class="text-emerald-800 font-bold">' + especie.nombre + "</span>" +
-        (numero ? ' <span class="text-stone-600">' + numero + "</span>" : "") +
+        '<span class="text-emerald-800 font-bold">' + e(especie.nombre) + "</span>" +
+        (numero ? ' <span class="text-stone-600">' + e(numero) + "</span>" : "") +
         '<span class="text-stone-400"> · se mostrará así en el catálogo</span>';
     }
 

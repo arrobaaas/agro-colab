@@ -5,6 +5,8 @@
 
 (function () {
   const AgroColab = (window.AgroColab = window.AgroColab || {});
+  // Escapa datos antes de insertarlos como HTML (ver ui.escapar)
+  const e = (valor) => window.AgroColab.ui.escapar(valor);
   const { api, auth, ui } = AgroColab;
 
   const FRECUENCIAS = { semanal: "Semanal", quincenal: "Quincenal", mensual: "Mensual" };
@@ -25,12 +27,12 @@
 
     plantillaDestino(pedido) {
       const destino = pedido.tipo_destino === "comercial"
-        ? `<i class="fa-solid fa-store text-amber-600 w-4"></i> ${pedido.razon_social || "Local comercial"}`
+        ? `<i class="fa-solid fa-store text-amber-600 w-4"></i> ${e(pedido.razon_social || "Local comercial")}`
         : `<i class="fa-solid fa-house-chimney text-emerald-600 w-4"></i> Domicilio particular`;
       return `
         <li class="truncate">${destino}</li>
-        <li class="truncate"><i class="fa-solid fa-location-dot text-rose-500 w-4"></i> ${pedido.direccion}, ${pedido.comuna}</li>
-        <li><i class="fa-solid fa-calendar-days text-stone-400 w-4"></i> Despacho ${(FRECUENCIAS[pedido.frecuencia_entrega] || pedido.frecuencia_entrega || "").toLowerCase()}</li>`;
+        <li class="truncate"><i class="fa-solid fa-location-dot text-rose-500 w-4"></i> ${e(pedido.direccion)}, ${e(pedido.comuna)}</li>
+        <li><i class="fa-solid fa-calendar-days text-stone-400 w-4"></i> Despacho ${e((FRECUENCIAS[pedido.frecuencia_entrega] || pedido.frecuencia_entrega || "").toLowerCase())}</li>`;
     }
 
     plantillaArbol(arbol) {
@@ -47,18 +49,18 @@
       return `
         <article class="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden flex flex-col">
           <div class="relative h-36 bg-stone-200">
-            <img src="${arbol.imagen || ""}" alt="${arbol.nombre}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+            <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" class="w-full h-full object-cover" onerror="this.style.display='none'">
             <span class="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-600 text-white shadow">
               <i class="fa-solid fa-circle-check mr-1"></i>Suscripción activa
             </span>
-            ${arbol.tipo_suscripcion ? `<span class="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${claseTipo}">${arbol.tipo_suscripcion}</span>` : ""}
+            ${arbol.tipo_suscripcion ? `<span class="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${claseTipo}">${e(arbol.tipo_suscripcion)}</span>` : ""}
           </div>
 
           <div class="p-5 flex-1 flex flex-col">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <h3 class="font-black text-lg text-stone-900 truncate">${arbol.nombre}</h3>
-                ${arbol.especie_nombre ? `<p class="text-xs text-stone-500">${arbol.especie_nombre}</p>` : ""}
+                <h3 class="font-black text-lg text-stone-900 truncate">${e(arbol.nombre)}</h3>
+                ${arbol.especie_nombre ? `<p class="text-xs text-stone-500">${e(arbol.especie_nombre)}</p>` : ""}
               </div>
               <div class="text-right flex-shrink-0">
                 <p class="font-black text-emerald-900 leading-tight">${this.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
@@ -67,10 +69,10 @@
             </div>
 
             <ul class="mt-3 space-y-1 text-xs text-stone-600">
-              <li class="truncate"><i class="fa-solid fa-location-dot text-rose-500 w-4"></i> ${arbol.ubicacion || "Ubicación no informada"}</li>
-              ${arbol.productor ? `<li class="truncate"><i class="fa-solid fa-user-tie text-stone-400 w-4"></i> Productor: <strong>${arbol.productor}</strong></li>` : ""}
-              <li><i class="fa-solid fa-seedling text-emerald-600 w-4"></i> Plan <strong>${arbol.plan || "-"}</strong> · Cosecha estimada <strong>${arbol.estimacion_cosecha || "-"}</strong></li>
-              ${arbol.fecha_suscripcion ? `<li><i class="fa-solid fa-calendar-check text-stone-400 w-4"></i> Adoptado el ${arbol.fecha_suscripcion}</li>` : ""}
+              <li class="truncate"><i class="fa-solid fa-location-dot text-rose-500 w-4"></i> ${e(arbol.ubicacion || "Ubicación no informada")}</li>
+              ${arbol.productor ? `<li class="truncate"><i class="fa-solid fa-user-tie text-stone-400 w-4"></i> Productor: <strong>${e(arbol.productor)}</strong></li>` : ""}
+              <li><i class="fa-solid fa-seedling text-emerald-600 w-4"></i> Plan <strong>${e(arbol.plan || "-")}</strong> · Cosecha estimada <strong>${e(arbol.estimacion_cosecha || "-")}</strong></li>
+              ${arbol.fecha_suscripcion ? `<li><i class="fa-solid fa-calendar-check text-stone-400 w-4"></i> Adoptado el ${e(arbol.fecha_suscripcion)}</li>` : ""}
             </ul>
 
             <div class="mt-4">
@@ -95,10 +97,10 @@
             </div>
 
             <div class="mt-5 pt-4 border-t border-stone-100 flex flex-wrap gap-2">
-              <button type="button" class="px-4 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-sm hover:bg-stone-50" onclick="AgroColab.dashboard.editarLogisticaArbol(${arbol.arbol_id})">
+              <button type="button" class="px-4 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-sm hover:bg-stone-50" onclick="AgroColab.dashboard.editarLogisticaArbol(${e(arbol.arbol_id)})">
                 <i class="fa-solid fa-truck-fast"></i> ${despacho ? "Modificar logística" : "Configurar despacho"}
               </button>
-              <button type="button" class="px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 ml-auto" onclick="AgroColab.dashboard.cancelarSuscripcionArbol(${arbol.arbol_id})">
+              <button type="button" class="px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 ml-auto" onclick="AgroColab.dashboard.cancelarSuscripcionArbol(${e(arbol.arbol_id)})">
                 <i class="fa-solid fa-xmark"></i> Cancelar suscripción
               </button>
             </div>
@@ -117,12 +119,12 @@
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2">
-                <h3 class="font-black text-lg text-stone-900 leading-tight">${pedido.plan_nombre}</h3>
+                <h3 class="font-black text-lg text-stone-900 leading-tight">${e(pedido.plan_nombre)}</h3>
                 <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-600 text-white flex-shrink-0">
                   <i class="fa-solid fa-circle-check mr-1"></i>Activo
                 </span>
               </div>
-              <p class="text-xs text-stone-500 mt-0.5">Código <strong class="text-stone-700">${pedido.codigo_seguimiento}</strong>${pedido.fecha_registro ? ` · desde el ${pedido.fecha_registro.split(" ")[0]}` : ""}</p>
+              <p class="text-xs text-stone-500 mt-0.5">Código <strong class="text-stone-700">${e(pedido.codigo_seguimiento)}</strong>${pedido.fecha_registro ? ` · desde el ${pedido.fecha_registro.split(" ")[0]}` : ""}</p>
             </div>
           </div>
 
@@ -132,7 +134,7 @@
               <p class="text-[10px] text-stone-500 mt-1">CLP por entrega</p>
             </div>
             <span class="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full">
-              <i class="fa-solid fa-route mr-1"></i>${pedido.estado_logistica || "En preparación"}
+              <i class="fa-solid fa-route mr-1"></i>${e(pedido.estado_logistica || "En preparación")}
             </span>
           </div>
 
@@ -141,10 +143,10 @@
           </ul>
 
           <div class="mt-5 pt-4 border-t border-stone-100 flex flex-wrap gap-2">
-            <button type="button" class="px-4 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-sm hover:bg-stone-50" onclick="AgroColab.dashboard.editarLogisticaPedido(${pedido.id})">
+            <button type="button" class="px-4 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-sm hover:bg-stone-50" onclick="AgroColab.dashboard.editarLogisticaPedido(${e(pedido.id)})">
               <i class="fa-solid fa-truck-fast"></i> Modificar logística
             </button>
-            <button type="button" class="px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 ml-auto" onclick="AgroColab.dashboard.cancelarPlan(${pedido.id})">
+            <button type="button" class="px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 ml-auto" onclick="AgroColab.dashboard.cancelarPlan(${e(pedido.id)})">
               <i class="fa-solid fa-xmark"></i> Cancelar plan
             </button>
           </div>

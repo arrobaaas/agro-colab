@@ -33,6 +33,9 @@ def suscribir(
     usuario: Usuario = Depends(usuario_actual),
     db: Session = Depends(get_db),
 ):
+    if usuario.rol != "comprador":
+        return {"status": "error", "mensaje": "Solo los compradores pueden adoptar árboles."}
+
     arbol = db.query(Arbol).filter(Arbol.id == data.tree_id).first()
     if not arbol:
         return {"status": "error", "mensaje": "Árbol no encontrado."}

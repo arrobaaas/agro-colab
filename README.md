@@ -213,13 +213,16 @@ petición.
 ## 🔐 Seguridad y protección de datos
 
 **Medidas implementadas**
-- Contraseñas hasheadas con **bcrypt**. Las bases antiguas con texto plano se migran solas al arrancar.
-- **Tokens de sesión firmados con HMAC-SHA256**, con expiración de 7 días.
-- **Autorización por recurso:** cada usuario solo ve y modifica lo suyo, y solo el productor ve los datos de contacto de sus suscriptores.
+- Contraseñas hasheadas con **bcrypt**; mínimo 8 caracteres para cuentas nuevas. Las bases antiguas con texto plano se migran solas al arrancar.
+- **Tokens de sesión firmados con HMAC-SHA256**, con expiración de 7 días y ligados a la contraseña: al cambiarla, los tokens anteriores dejan de servir. Cambiar la contraseña exige la actual.
+- **Autorización por recurso:** cada usuario solo ve y modifica lo suyo, y solo el productor ve los datos de contacto de sus suscriptores. Solo los compradores adoptan y contratan planes.
+- **Precios fijados por el servidor:** el monto de un plan o de un árbol nunca se toma del navegador.
+- **Protección contra XSS:** todo dato se escapa antes de insertarse como HTML, el backend rechaza `<` y `>` en los textos y la página declara una **Content-Security-Policy** que limita a qué dominios puede conectarse.
+- **Validación estricta de entrada** con Pydantic: largos máximos, valores permitidos (roles, planes, frecuencias) y rangos numéricos.
+- **Rate limiting** por IP real (detrás del proxy de Render) y por cuenta en login y verificación.
+- **Cuentas demo protegidas:** sus credenciales son públicas, así que no se pueden borrar, cambiarles la contraseña ni eliminar sus árboles.
 - **Integridad de cupos:** la reserva se hace con un `UPDATE` condicional atómico, y un índice único impide que un usuario ocupe dos cupos del mismo árbol.
-- **Rate limiting** por IP en login, registro y verificación de cuenta.
-- **CORS** restringido a los orígenes conocidos del frontend.
-- Validación en el servidor de especies e imágenes del catálogo.
+- **Cabeceras de seguridad** (`nosniff`, `X-Frame-Options`, `Referrer-Policy`, `no-store`) y **CORS** restringido a los orígenes, métodos y cabeceras que usa el frontend.
 
 **Ley N° 21.719 de Protección de Datos Personales (Chile)**
 

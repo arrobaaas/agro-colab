@@ -4,6 +4,8 @@
 
 (function () {
   const AgroColab = (window.AgroColab = window.AgroColab || {});
+  // Escapa datos antes de insertarlos como HTML (ver ui.escapar)
+  const e = (valor) => window.AgroColab.ui.escapar(valor);
   const { auth, config } = AgroColab;
 
   class ViewsService {
@@ -101,10 +103,10 @@
       contenedores.forEach((contenedor) => {
         contenedor.innerHTML = `
           <button type="button" class="nav-usuario" onclick="AgroColab.perfil.abrir()" title="Ver mi perfil">
-            <span class="nav-usuario__avatar">${inicial}</span>
+            <span class="nav-usuario__avatar">${e(inicial)}</span>
             <span class="hidden md:flex flex-col text-left leading-tight">
-              <span class="text-xs font-bold text-white">${sesion.nombre}</span>
-              <span class="text-[10px] text-emerald-300 capitalize">${sesion.rol}</span>
+              <span class="text-xs font-bold text-white">${e(sesion.nombre)}</span>
+              <span class="text-[10px] text-emerald-300 capitalize">${e(sesion.rol)}</span>
             </span>
           </button>`;
       });

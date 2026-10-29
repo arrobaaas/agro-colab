@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Content-Security-Policy: solo se cargan recursos de los dominios que la
+       app usa. Si se colara un XSS, no podría enviar datos a otro servidor
+       (connect-src / img-src) ni cargar scripts externos. 'unsafe-inline' es
+       necesario por los onclick del HTML y los estilos que genera Tailwind. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://upload.wikimedia.org https://images.unsplash.com; connect-src 'self' http://127.0.0.1:8000 https://agro-colab.onrender.com https://photon.komoot.io; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Agro-Colab | Cosecha Colaborativa</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,21 +17,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261030a">
-  <script src="js/config.js?v=20261030a" defer></script>
-  <script src="js/ui.js?v=20261030a" defer></script>
-  <script src="js/api.js?v=20261030a" defer></script>
-  <script src="js/auth.js?v=20261030a" defer></script>
-  <script src="js/parcelas.js?v=20261030a" defer></script>
-  <script src="js/catalogo.js?v=20261030a" defer></script>
-  <script src="js/agricultor.js?v=20261030a" defer></script>
-  <script src="js/perfil.js?v=20261030a" defer></script>
-  <script src="js/autocomplete.js?v=20261030a" defer></script>
-  <script src="js/dashboard.js?v=20261030a" defer></script>
-  <script src="js/efectos.js?v=20261030a" defer></script>
-  <script src="js/views.js?v=20261030a" defer></script>
-  <script src="js/login.js?v=20261030a" defer></script>
-  <script src="js/app.js?v=20261030a" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261030b">
+  <script src="js/config.js?v=20261030b" defer></script>
+  <script src="js/ui.js?v=20261030b" defer></script>
+  <script src="js/api.js?v=20261030b" defer></script>
+  <script src="js/auth.js?v=20261030b" defer></script>
+  <script src="js/parcelas.js?v=20261030b" defer></script>
+  <script src="js/catalogo.js?v=20261030b" defer></script>
+  <script src="js/agricultor.js?v=20261030b" defer></script>
+  <script src="js/perfil.js?v=20261030b" defer></script>
+  <script src="js/autocomplete.js?v=20261030b" defer></script>
+  <script src="js/dashboard.js?v=20261030b" defer></script>
+  <script src="js/efectos.js?v=20261030b" defer></script>
+  <script src="js/views.js?v=20261030b" defer></script>
+  <script src="js/login.js?v=20261030b" defer></script>
+  <script src="js/app.js?v=20261030b" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -181,6 +187,7 @@
                 <input
                   type="password"
                   id="reg-password"
+                  minlength="8"
                   required
                   autocomplete="new-password"
                   placeholder="••••••••"
@@ -1201,7 +1208,11 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nueva contraseña (dejar vacío para no cambiar)</label>
-            <input type="password" id="perfil-input-password" placeholder="••••••••" class="input">
+            <input type="password" id="perfil-input-password" placeholder="Mínimo 8 caracteres" autocomplete="new-password" minlength="8" class="input">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Contraseña actual (solo si la cambias)</label>
+            <input type="password" id="perfil-input-password-actual" placeholder="••••••••" autocomplete="current-password" class="input">
           </div>
           <div id="alerta-perfil" class="hidden"></div>
           <button type="submit" class="btn-submit w-full">Guardar cambios</button>
