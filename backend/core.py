@@ -10,6 +10,9 @@ from datetime import datetime
 
 import os
 import time
+import hmac
+import hashlib
+import secrets
 from collections import defaultdict
 
 from fastapi import Depends, HTTPException, Request
@@ -56,6 +59,40 @@ def limitar_por_ip(maximo: int = 10, ventana_segundos: int = 300):
     return _limiter
 
 
+# ----------------- TOKENS DE SESIÓN -----------------
+# Token firmado con HMAC: "<usuario_id>.<expiracion>.<firma>". Sin él, cualquiera
+# podía actuar en nombre de otro usuario con solo enviar su id en la petición.
+# En producción AGROCOLAB_SECRET debe estar definido; si no, se genera uno al
+# arrancar y las sesiones se invalidan en cada reinicio del servidor.
+
+SECRETO_TOKENS = os.getenv("AGROCOLAB_SECRET") or secrets.token_hex(32)
+DURACION_TOKEN_SEGUNDOS = 7 * 24 * 3600
+
+def _firmar(carga: str) -> str:
+    return hmac.new(SECRETO_TOKENS.encode(), carga.encode(), hashlib.sha256).hexdigest()
+
+def crear_token(usuario_id: int) -> str:
+    expira = int(time.time()) + DURACION_TOKEN_SEGUNDOS
+    carga = f"{usuario_id}.{expira}"
+    return f"{carga}.{_firmar(carga)}"
+
+def leer_token(token: str) -> Optional[int]:
+    """Devuelve el id del usuario si el token es válido y no ha expirado."""
+    try:
+        usuario_id, expira, firma = token.split(".")
+        if not hmac.compare_digest(firma, _firmar(f"{usuario_id}.{expira}")):
+            return None
+        if int(expira) < time.time():
+            return None
+        return int(usuario_id)
+    except (ValueError, AttributeError):
+        return None
+
+
+def _no_autorizado(mensaje: str, codigo: int = 401):
+    return HTTPException(status_code=codigo, detail={"status": "error", "mensaje": mensaje})
+
+
 # ----------------- SESIÓN / BASE DE DATOS -----------------
 
 def get_db():
@@ -64,6 +101,23 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def usuario_actual(request: Request, db: Session = Depends(get_db)) -> Usuario:
+    """Dependencia de FastAPI: usuario autenticado según el header Authorization."""
+    cabecera = request.headers.get("Authorization", "")
+    token = cabecera[7:] if cabecera.startswith("Bearer ") else ""
+    usuario_id = leer_token(token) if token else None
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first() if usuario_id else None
+    if not usuario:
+        raise _no_autorizado("Tu sesión expiró. Inicia sesión nuevamente.")
+    return usuario
+
+
+def exigir_mismo_usuario(usuario: Usuario, usuario_id: int):
+    """Corta la petición si el usuario autenticado no es el dueño del recurso."""
+    if usuario.id != usuario_id:
+        raise _no_autorizado("No tienes permiso para ver estos datos.", 403)
 
 
 def datos_iniciales():
@@ -149,9 +203,7 @@ datos_iniciales()
 # ----------------- MODELOS DE DATOS (ESQUEMAS) -----------------
 
 class SuscripcionRequest(BaseModel):
-    user_name: Optional[str] = None
-    user_id: Optional[int] = None
-    email: Optional[str] = None
+    # El usuario sale del token de sesión; el cuerpo solo indica el árbol
     tree_id: int
 
 class LoginRequest(BaseModel):
@@ -165,7 +217,7 @@ class PedidoRequest(BaseModel):
     cliente_nombre: str
     telefono: str
     email: str
-    cliente_id: Optional[int] = None
+    cliente_id: Optional[int] = None  # ignorado: el cliente sale de la sesión
     tipo_destino: str  # "particular" o "comercial"
     razon_social: Optional[str] = None
     rut: Optional[str] = None
@@ -184,7 +236,7 @@ class ArbolRequest(BaseModel):
     precio_mensual_clp: int
     estimacion_cosecha: str
     imagen: str
-    productor: str
+    productor: Optional[str] = None  # ignorado: el productor sale de la sesión
 
 class PerfilRequest(BaseModel):
     nombre: str
@@ -262,27 +314,6 @@ def cupos_ocupados_de(arbol, db) -> int:
     verdad son siempre las filas de la tabla suscripciones.
     """
     return db.query(Suscripcion).filter(Suscripcion.arbol_id == arbol.id).count()
-
-
-def resolver_usuario(db, user_id: Optional[int] = None, user_name: Optional[str] = None, email: Optional[str] = None):
-    """Busca al usuario real de una suscripción.
-
-    Se acepta el id, el correo o el nombre para no depender de un solo campo
-    (el nombre puede cambiar al editar el perfil).
-    """
-    if user_id is not None:
-        usuario = db.query(Usuario).filter(Usuario.id == user_id).first()
-        if usuario:
-            return usuario
-    if email:
-        usuario = db.query(Usuario).filter(Usuario.email == email).first()
-        if usuario:
-            return usuario
-    if user_name:
-        usuario = db.query(Usuario).filter(Usuario.nombre == user_name).first()
-        if usuario:
-            return usuario
-    return None
 
 
 def serializar_arbol(arbol, db) -> dict:
