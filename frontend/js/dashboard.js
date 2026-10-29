@@ -140,9 +140,12 @@
             ${this.plantillaDestino(pedido)}
           </ul>
 
-          <div class="mt-5 pt-4 border-t border-stone-100 flex">
+          <div class="mt-5 pt-4 border-t border-stone-100 flex flex-wrap gap-2">
             <button type="button" class="px-4 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-sm hover:bg-stone-50" onclick="AgroColab.dashboard.editarLogisticaPedido(${pedido.id})">
               <i class="fa-solid fa-truck-fast"></i> Modificar logística
+            </button>
+            <button type="button" class="px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 ml-auto" onclick="AgroColab.dashboard.cancelarPlan(${pedido.id})">
+              <i class="fa-solid fa-xmark"></i> Cancelar plan
             </button>
           </div>
         </article>
@@ -229,6 +232,23 @@
       } catch (error) {
         window.alert("No se pudo cancelar la suscripción. Intenta nuevamente.");
         return null;
+      }
+    }
+
+    async cancelarPlan(pedidoId) {
+      const pedido = this.pedidos.find((p) => String(p.id) === String(pedidoId));
+      if (!pedido) return;
+      if (!window.confirm(`¿Cancelar el plan ${pedido.plan_nombre} (${pedido.codigo_seguimiento})? Dejarás de recibir sus despachos.`)) return;
+
+      try {
+        const data = await api.cancelarPlan(pedidoId);
+        if (data.status === "success") {
+          await this.cargar();
+        } else {
+          window.alert(data.mensaje || "No se pudo cancelar el plan.");
+        }
+      } catch (error) {
+        window.alert("No se pudo cancelar el plan. Intenta nuevamente.");
       }
     }
 

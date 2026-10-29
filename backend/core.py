@@ -348,4 +348,5 @@ def serializar_arbol(arbol, db) -> dict:
         "imagen": arbol.imagen,
         "imagen_origen": arbol.imagen_origen or "galeria",
         "productor": arbol.productor.nombre if arbol.productor else None,
+        "productor_id": arbol.productor_id,
     }

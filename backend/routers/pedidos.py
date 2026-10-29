@@ -138,3 +138,26 @@ def modificar_logistica(
         "mensaje": f"Logística actualizada para {pedido.codigo_seguimiento}.",
         "pedido": serializar_pedido(pedido)
     }
+
+
+@router.delete("/api/pedidos/{pedido_id}")
+def cancelar_plan(
+    pedido_id: int,
+    cliente: Usuario = Depends(usuario_actual),
+    db: Session = Depends(get_db),
+):
+    """Cancela un plan de abastecimiento propio.
+
+    El despacho de un árbol no se cancela aquí: se elimina junto con la
+    suscripción al árbol.
+    """
+    pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()
+    if not pedido or pedido.cliente_id != cliente.id:
+        return {"status": "error", "mensaje": "Pedido no encontrado."}
+    if pedido.tipo == "arbol":
+        return {"status": "error", "mensaje": "Para dejar un árbol, cancela su suscripción."}
+
+    nombre = pedido.plan_nombre
+    db.delete(pedido)
+    db.commit()
+    return {"status": "success", "mensaje": f"Plan {nombre} cancelado."}

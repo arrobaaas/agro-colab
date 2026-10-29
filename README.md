@@ -203,6 +203,7 @@ petición.
 | `POST` | `/api/pedidos` 🔒 | Registra un plan de abastecimiento o el despacho de la cosecha de un árbol adoptado |
 | `GET` | `/api/pedidos` 🔒 | Pedidos del usuario |
 | `PUT` | `/api/pedidos/{id}` 🔒 | Modifica el destino y la frecuencia de un pedido propio |
+| `DELETE` | `/api/pedidos/{id}` 🔒 | Cancela un plan de abastecimiento propio |
 | `GET` | `/api/usuario/{id}` 🔒 | Perfil propio, o el de un suscriptor para su productor |
 | `PUT` | `/api/perfil` 🔒 | Actualiza el perfil propio |
 | `DELETE` | `/api/usuario/{email}` 🔒 | Elimina la cuenta propia y todos sus datos |
