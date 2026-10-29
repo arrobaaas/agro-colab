@@ -11,21 +11,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261029c">
-  <script src="js/config.js?v=20261029c" defer></script>
-  <script src="js/ui.js?v=20261029c" defer></script>
-  <script src="js/api.js?v=20261029c" defer></script>
-  <script src="js/auth.js?v=20261029c" defer></script>
-  <script src="js/parcelas.js?v=20261029c" defer></script>
-  <script src="js/catalogo.js?v=20261029c" defer></script>
-  <script src="js/agricultor.js?v=20261029c" defer></script>
-  <script src="js/perfil.js?v=20261029c" defer></script>
-  <script src="js/autocomplete.js?v=20261029c" defer></script>
-  <script src="js/dashboard.js?v=20261029c" defer></script>
-  <script src="js/efectos.js?v=20261029c" defer></script>
-  <script src="js/views.js?v=20261029c" defer></script>
-  <script src="js/login.js?v=20261029c" defer></script>
-  <script src="js/app.js?v=20261029c" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261029d">
+  <script src="js/config.js?v=20261029d" defer></script>
+  <script src="js/ui.js?v=20261029d" defer></script>
+  <script src="js/api.js?v=20261029d" defer></script>
+  <script src="js/auth.js?v=20261029d" defer></script>
+  <script src="js/parcelas.js?v=20261029d" defer></script>
+  <script src="js/catalogo.js?v=20261029d" defer></script>
+  <script src="js/agricultor.js?v=20261029d" defer></script>
+  <script src="js/perfil.js?v=20261029d" defer></script>
+  <script src="js/autocomplete.js?v=20261029d" defer></script>
+  <script src="js/dashboard.js?v=20261029d" defer></script>
+  <script src="js/efectos.js?v=20261029d" defer></script>
+  <script src="js/views.js?v=20261029d" defer></script>
+  <script src="js/login.js?v=20261029d" defer></script>
+  <script src="js/app.js?v=20261029d" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -1326,18 +1326,44 @@
 
     <!-- MODAL: CONFIRMACION DE ADOPCION DE ARBOL -->
     <div id="modal-confirmacion-adopcion" class="modal-animado fixed inset-0 z-[120] hidden">
-      <div class="absolute inset-0 bg-black/60" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()"></div>
-      <div class="relative max-w-md mx-auto mt-20 bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <div class="bg-emerald-900 text-white p-6">
-          <span class="text-xs font-bold uppercase tracking-widest text-emerald-300">
-            <i class="fa-solid fa-shield-halved mr-1"></i> Confirmación de Adopción
-          </span>
-          <h3 id="modal-confirmacion-titulo" class="text-2xl font-black mt-2">¿Estás seguro de adoptar este árbol?</h3>
-          <p id="modal-confirmacion-texto" class="text-xs text-emerald-200 mt-2"></p>
+      <div class="absolute inset-0" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()"></div>
+      <div class="confirmacion-panel" role="dialog" aria-modal="true" aria-labelledby="modal-confirmacion-titulo">
+        <div class="confirmacion-media">
+          <img id="confirmacion-imagen" src="" alt="" onerror="this.style.display='none'">
+          <button type="button" class="nav-icono confirmacion-cerrar" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()" title="Cerrar" aria-label="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <div class="confirmacion-media__texto">
+            <span class="hero__pill"><i class="fa-solid fa-seedling"></i> Confirmar adopción</span>
+            <h3 id="modal-confirmacion-titulo" class="text-2xl sm:text-3xl font-extrabold mt-3 leading-tight"></h3>
+            <p id="confirmacion-especie" class="text-sm text-emerald-100/80 mt-1"></p>
+          </div>
         </div>
-        <div class="p-6 flex justify-end gap-3">
-          <button type="button" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()" class="px-5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm transition">No</button>
-          <button type="button" onclick="AgroColab.parcelas.confirmarAdopcion()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition">Sí</button>
+
+        <div class="p-5 sm:p-6">
+          <div id="confirmacion-detalles" class="grid grid-cols-2 gap-2.5"></div>
+
+          <div class="confirmacion-precio">
+            <div>
+              <p class="text-[11px] uppercase tracking-wider font-bold text-emerald-700/80">Tu aporte mensual</p>
+              <p id="confirmacion-precio" class="text-3xl font-extrabold text-emerald-900 leading-tight whitespace-nowrap"></p>
+            </div>
+            <span id="confirmacion-plan" class="eyebrow"></span>
+          </div>
+
+          <p class="text-xs text-stone-500 mt-4 flex gap-2 leading-relaxed">
+            <i class="fa-solid fa-circle-info text-emerald-600 mt-0.5"></i>
+            Se agregará a tu canasta como pendiente de pago. Puedes quitarlo antes de pagar.
+          </p>
+
+          <div class="mt-6 flex flex-col-reverse sm:flex-row gap-3">
+            <button type="button" class="confirmacion-secundario" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()">
+              Cancelar
+            </button>
+            <button type="button" class="btn-hero btn-hero--primario justify-center sm:flex-1" onclick="AgroColab.parcelas.confirmarAdopcion()">
+              <i class="fa-solid fa-bag-shopping"></i> Agregar a mi canasta
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -300,6 +300,8 @@
       this.cerrarModalConfirmacionArbol();
       if (!arbol) return;
       this.agregarItemAlArbol(arbol);
+      // Se abre la canasta para que se vea que el árbol llegó
+      this.abrirCanasta();
     }
 
     /* ---------- Modal de confirmación de adopción ---------- */
@@ -307,11 +309,36 @@
     abrirModalConfirmacionArbol(arbol) {
       this.arbolParaAdoptar = arbol;
       const modal = document.getElementById("modal-confirmacion-adopcion");
-      const titulo = document.getElementById("modal-confirmacion-titulo");
-      const texto = document.getElementById("modal-confirmacion-texto");
-      if (titulo) titulo.textContent = "¿Estás seguro de adoptar este árbol?";
-      if (texto) texto.textContent = `¿Estás seguro de que quieres adoptar el árbol "${arbol ? arbol.nombre : ""}"?`;
-      if (modal) modal.classList.remove("hidden");
+      if (!modal || !arbol) return;
+
+      const imagen = document.getElementById("confirmacion-imagen");
+      imagen.style.display = "";
+      imagen.src = arbol.imagen || "";
+      imagen.alt = arbol.nombre;
+      document.getElementById("modal-confirmacion-titulo").textContent = arbol.nombre;
+      document.getElementById("confirmacion-especie").textContent =
+        [arbol.especie_nombre, arbol.productor ? `Productor: ${arbol.productor}` : ""].filter(Boolean).join(" · ");
+      document.getElementById("confirmacion-precio").innerHTML =
+        `${this.ui.formatearMonto(arbol.precio_mensual_clp)} <span class="text-sm font-medium text-stone-500">CLP / mes</span>`;
+      document.getElementById("confirmacion-plan").textContent = `Plan ${arbol.plan}`;
+
+      const cuposLibres = Math.max(0, (arbol.cupos_totales || 0) - (arbol.cupos_ocupados || 0));
+      const exclusivo = arbol.tipo_suscripcion === "Exclusivo";
+      const detalles = [
+        ["fa-location-dot text-rose-500", "Ubicación", arbol.ubicacion],
+        ["fa-scale-balanced text-emerald-600", "Cosecha estimada", arbol.estimacion_cosecha],
+        [exclusivo ? "fa-crown text-amber-500" : "fa-users text-emerald-600", "Tipo", exclusivo ? "Exclusivo" : `Compartido (${arbol.cupos_totales})`],
+        ["fa-ticket text-emerald-600", "Cupos libres", `${cuposLibres} de ${arbol.cupos_totales}`]
+      ];
+      document.getElementById("confirmacion-detalles").innerHTML = detalles
+        .map(([icono, etiqueta, valor]) => `
+          <div class="confirmacion-dato">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-stone-400"><i class="fa-solid ${icono} mr-1"></i>${etiqueta}</p>
+            <p class="text-sm font-bold text-stone-800 mt-1 leading-snug">${valor || "-"}</p>
+          </div>`)
+        .join("");
+
+      modal.classList.remove("hidden");
     }
 
     cerrarModalConfirmacionArbol() {

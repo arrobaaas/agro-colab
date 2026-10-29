@@ -967,6 +967,102 @@ h1, h2, h3, h4 {
   color: var(--rose-700);
 }
 
+/* ---------- Confirmación de adopción ---------- */
+.confirmacion-panel {
+  position: relative;
+  width: calc(100% - 2rem);
+  max-width: 30rem;
+  max-height: 92vh;
+  margin: 4vh auto 0;
+  overflow-y: auto;
+  background-color: #fff;
+  border-radius: 1.75rem;
+  box-shadow: 0 40px 80px -20px rgba(2, 44, 34, 0.55);
+  /* Si en pantallas bajas hay que desplazarse, que no se vea la barra gris */
+  scrollbar-width: none;
+}
+
+.confirmacion-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.confirmacion-media {
+  position: relative;
+  height: clamp(9rem, 24vh, 14rem);
+  overflow: hidden;
+  color: #fff;
+  background: linear-gradient(135deg, var(--emerald-800), var(--emerald-950));
+}
+
+.confirmacion-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.confirmacion-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(2, 44, 34, 0.95) 0%, rgba(2, 44, 34, 0.35) 55%, rgba(2, 44, 34, 0.1) 100%);
+}
+
+.confirmacion-media__texto {
+  position: absolute;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: 1.25rem;
+  z-index: 1;
+}
+
+.confirmacion-cerrar {
+  position: absolute;
+  top: 0.875rem;
+  right: 0.875rem;
+  z-index: 2;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.confirmacion-precio .eyebrow {
+  white-space: nowrap;
+}
+
+.confirmacion-dato {
+  padding: 0.75rem 0.875rem;
+  border-radius: 1rem;
+  background-color: var(--stone-50);
+  border: 1px solid var(--stone-200);
+}
+
+.confirmacion-precio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem 1.125rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, var(--emerald-50), #fff);
+  border: 1px solid var(--emerald-100);
+}
+
+.confirmacion-secundario {
+  padding: 0.875rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--stone-600);
+  background-color: var(--stone-100);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.confirmacion-secundario:hover {
+  background-color: var(--stone-200);
+  color: var(--stone-800);
+}
+
 /* ---------- Animaciones (efectos.js) ---------- */
 html {
   scroll-behavior: smooth;
