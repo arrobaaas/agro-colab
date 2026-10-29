@@ -19,6 +19,7 @@
       this.planAdopcionSeleccionado = "todos";
       this.itemLogisticaActual = null;
       this.pedidoEditando = null;
+      this.compraPendiente = null;
       this.carrito = [];
       this.arbolParaAdoptar = null;
     }
@@ -367,8 +368,11 @@
           }
         }
 
-        // El producto comprado se elimina de la canasta y se configura su despacho
+        // El producto sale de la canasta mientras se configura su despacho.
+        // Un plan solo queda registrado al completar la logística: si se
+        // cierra antes, vuelve a la canasta (antes se perdía sin aviso).
         this.quitarDelCarrito(index);
+        this.compraPendiente = item.tipo === "plan" ? item : null;
         this.cerrarCanasta();
         this.abrirLogistica(item);
       } catch (error) {
@@ -623,6 +627,11 @@
       document.getElementById("modal-log-titulo").textContent = pedido
         ? "Modificar logística"
         : esArbol ? "¿Dónde recibes la cosecha de tu árbol?" : "¿Dónde deseas recibir los productos?";
+      document.getElementById("modal-log-subtitulo").textContent = pedido
+        ? "Cambia dónde y cada cuánto recibes este despacho."
+        : esArbol
+          ? "Tu adopción ya está pagada. Indica dónde quieres recibir la cosecha."
+          : "Último paso para completar tu compra: indica dónde quieres recibirla.";
       document.getElementById("modal-log-etiqueta").textContent = pedido
         ? `Pedido ${pedido.codigo_seguimiento}:`
         : esArbol ? "Árbol adoptado:" : "Plan en configuración:";
@@ -661,6 +670,13 @@
     cerrarLogistica() {
       document.getElementById("modal-logistica").classList.add("hidden");
       this.pedidoEditando = null;
+
+      if (this.compraPendiente) {
+        this.carrito.push({ ...this.compraPendiente, estado: "pendiente" });
+        this.compraPendiente = null;
+        this.actualizarContadorCanasta();
+        this.renderizarCanasta();
+      }
     }
 
     /* Marca el tipo de destino en el modal y muestra los datos comerciales
@@ -726,6 +742,7 @@
           return;
         }
 
+        this.compraPendiente = null;
         alerta.className = "alerta alerta--exito-lg";
         alerta.innerHTML = `
           <div class="flex items-center gap-2 mb-1">

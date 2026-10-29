@@ -95,6 +95,10 @@ class ApiService {
     return this.apiFetch(`/pedidos/${pedidoId}`, { method: "PUT", body: JSON.stringify(datos) });
   }
 
+  cancelarPlan(pedidoId) {
+    return this.apiFetch(`/pedidos/${pedidoId}`, { method: "DELETE" });
+  }
+
   subirArbol(arbol) {
     return this.apiFetch("/arboles", { method: "POST", body: JSON.stringify(arbol) });
   }

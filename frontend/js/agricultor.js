@@ -28,52 +28,85 @@
       const container = document.getElementById("lista-arboles-agricultor");
 
       if (!this.arbolesAgricultor.length) {
-        container.innerHTML = '<p class="text-stone-500 text-sm text-center py-8">No has publicado árboles todavía</p>';
+        container.innerHTML = `
+          <div class="sm:col-span-2 lg:col-span-3 text-center py-14 px-6 bg-white rounded-3xl border border-dashed border-stone-300">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-2xl mb-4">
+              <i class="fa-solid fa-seedling"></i>
+            </div>
+            <p class="text-lg font-extrabold text-stone-900">Todavía no publicas árboles</p>
+            <p class="text-sm text-stone-500 mt-1 max-w-sm mx-auto">Publica tu primer árbol y empieza a recibir financiamiento directo de los compradores.</p>
+            <button type="button" class="btn-hero btn-hero--primario mt-6" onclick="AgroColab.agricultor.mostrarFormulario()">
+              <i class="fa-solid fa-plus"></i> Publicar mi primer árbol
+            </button>
+          </div>`;
         return;
       }
 
       container.innerHTML = this.arbolesAgricultor
-        .map((arbol) => {
-          const cuposLibres = arbol.cupos_totales - arbol.cupos_ocupados;
-          const porcentaje = arbol.cupos_totales
-            ? Math.round((arbol.cupos_ocupados / arbol.cupos_totales) * 100)
-            : 0;
-          const claseBarra = cuposLibres > 0 ? "bg-emerald-600" : "bg-amber-500";
+        .map((arbol, indice) => {
+          const ocupados = arbol.cupos_ocupados || 0;
+          const totales = arbol.cupos_totales || 0;
+          const libres = Math.max(0, totales - ocupados);
+          const porcentaje = totales ? Math.round((ocupados / totales) * 100) : 0;
+          const exclusivo = arbol.tipo_suscripcion === "Exclusivo";
+          const ingreso = (arbol.precio_mensual_clp || 0) * ocupados;
+
           return `
-        <div class="p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-          <div class="w-16 h-16 rounded-xl overflow-hidden bg-stone-200 flex-shrink-0">
-            <img src="${arbol.imagen || "https://via.placeholder.com/150?text=Árbol"}" alt="${arbol.nombre}" class="w-full h-full object-cover">
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-1">
-              <h4 class="font-bold text-stone-900">${arbol.nombre}</h4>
-              <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${arbol.tipo_suscripcion === "Exclusivo" ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}">${arbol.tipo_suscripcion}</span>
+          <article class="arbol-card" data-reveal="flip" data-tilt style="--reveal-delay:${(indice % 3) * 150}ms">
+            <div class="arbol-card__media">
+              <img src="${arbol.imagen || ""}" alt="${arbol.nombre}" loading="lazy" onerror="this.style.display='none'">
+              <span class="arbol-card__plan">${arbol.plan}</span>
+              <span class="arbol-card__tipo ${exclusivo ? "arbol-card__tipo--exclusivo" : ""}">
+                <i class="fa-solid ${exclusivo ? "fa-crown" : "fa-users"}"></i> ${arbol.tipo_suscripcion || ""}
+              </span>
+              <div class="arbol-card__titulo">
+                ${arbol.especie_nombre ? `<p class="arbol-card__especie">${arbol.especie_nombre}</p>` : ""}
+                <h4>${arbol.nombre}</h4>
+              </div>
             </div>
-            <p class="text-xs text-stone-500 mb-1"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${arbol.ubicacion}</p>
-            <p class="text-xs text-stone-500">Plan: <strong>${arbol.plan}</strong> · Cupos: <strong>${arbol.cupos_ocupados}/${arbol.cupos_totales}</strong> · <span class="${cuposLibres > 0 ? "text-emerald-600" : "text-red-500"}">${cuposLibres > 0 ? cuposLibres + " libres" : "Completo"}</span></p>
-            <div class="w-full bg-stone-100 h-2 rounded-full overflow-hidden mt-2">
-              <div class="${claseBarra} h-2 rounded-full" style="width: ${porcentaje}%"></div>
+
+            <div class="p-5 flex flex-col gap-4 flex-1">
+              <p class="text-xs text-stone-600 truncate"><i class="fa-solid fa-location-dot text-rose-500 mr-1.5"></i>${arbol.ubicacion}</p>
+
+              <div>
+                <div class="flex justify-between text-[11px] mb-1.5">
+                  <span class="${libres ? "text-stone-500" : "text-amber-700 font-bold"}">${libres ? `${libres} cupo${libres === 1 ? "" : "s"} libre${libres === 1 ? "" : "s"}` : "Cupos completos"}</span>
+                  <span class="font-bold text-stone-700">${ocupados}/${totales} · ${porcentaje}%</span>
+                </div>
+                <div class="h-1.5 rounded-full bg-stone-100 overflow-hidden">
+                  <div class="h-full rounded-full ${libres ? "bg-emerald-500" : "bg-amber-500"}" style="width:${porcentaje}%"></div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div class="rounded-xl bg-stone-50 border border-stone-200 px-3 py-2">
+                  <p class="text-[10px] uppercase tracking-wider font-bold text-stone-400">Precio / cupo</p>
+                  <p class="text-sm font-extrabold text-stone-800">${this.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
+                </div>
+                <div class="rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-2">
+                  <p class="text-[10px] uppercase tracking-wider font-bold text-emerald-700/70">Ingreso / mes</p>
+                  <p class="text-sm font-extrabold text-emerald-900">${this.ui.formatearMonto(ingreso)}</p>
+                </div>
+              </div>
+
+              <div class="mt-auto pt-4 border-t border-stone-100 flex items-center gap-2">
+                <button type="button" class="accion-arbol flex-1" onclick="AgroColab.agricultor.abrirSuscriptores(${arbol.id})">
+                  <i class="fa-solid fa-users"></i> Suscriptores <span class="accion-arbol__contador">${ocupados}</span>
+                </button>
+                <button type="button" class="accion-arbol accion-arbol--icono" onclick="AgroColab.agricultor.abrirEdicion(${arbol.id})" title="Editar" aria-label="Editar ${arbol.nombre}">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button type="button" class="accion-arbol accion-arbol--icono accion-arbol--peligro" onclick="AgroColab.agricultor.eliminarArbol(${arbol.id})" title="Eliminar" aria-label="Eliminar ${arbol.nombre}">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
             </div>
-          </div>
-          <div class="text-right">
-            <p class="font-black text-emerald-900">${this.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
-            <p class="text-[10px] text-stone-400">CLP / mes</p>
-            <div class="mt-2 flex gap-2 justify-end flex-wrap">
-              <button type="button" onclick="AgroColab.agricultor.abrirSuscriptores(${arbol.id})" class="text-emerald-600 hover:text-emerald-800 text-xs font-bold flex items-center gap-1">
-                <i class="fa-solid fa-users"></i> Ver suscriptores (${arbol.cupos_ocupados})
-              </button>
-              <button type="button" onclick="AgroColab.agricultor.abrirEdicion(${arbol.id})" class="text-emerald-600 hover:text-emerald-800 text-xs font-bold flex items-center gap-1">
-                <i class="fa-solid fa-pen"></i> Editar
-              </button>
-              <button type="button" onclick="AgroColab.agricultor.eliminarArbol(${arbol.id})" class="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1">
-                <i class="fa-solid fa-trash"></i> Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
+          </article>
+        `;
         })
         .join("");
+
+      if (AgroColab.efectos) AgroColab.efectos.observar(container);
     }
 
     /* ---------- Editar árbol ---------- */
@@ -203,37 +236,61 @@
 
     actualizarEstadisticas() {
       const totalArboles = this.arbolesAgricultor.length;
-      const totalSuscriptores = this.arbolesAgricultor.reduce(
-        (suma, a) => suma + (a.cupos_ocupados || 0),
-        0
-      );
+      const totalSuscriptores = this.arbolesAgricultor.reduce((suma, a) => suma + (a.cupos_ocupados || 0), 0);
+      const totalCupos = this.arbolesAgricultor.reduce((suma, a) => suma + (a.cupos_totales || 0), 0);
+      const ocupacion = totalCupos ? Math.round((totalSuscriptores / totalCupos) * 100) : 0;
       const ingresos = this.arbolesAgricultor.reduce(
         (suma, a) => suma + (a.precio_mensual_clp || 0) * (a.cupos_ocupados || 0),
         0
       );
 
-      document.getElementById("stat-total-arboles").textContent = totalArboles;
-      document.getElementById("stat-suscriptores").textContent = totalSuscriptores;
-      document.getElementById("stat-ingresos").textContent = this.ui.formatearMonto(ingresos);
+      this.animarNumero("stat-total-arboles", totalArboles, (n) => String(n));
+      this.animarNumero("stat-suscriptores", totalSuscriptores, (n) => String(n));
+      this.animarNumero("stat-ocupacion", ocupacion, (n) => `${n}%`);
+      this.animarNumero("stat-ingresos", ingresos, (n) => this.ui.formatearMonto(n));
+      document.getElementById("stat-ocupacion-barra").style.width = `${ocupacion}%`;
     }
 
-    /* ---------- Cargar árboles del agricultor ---------- */
+    /* Cuenta desde 0 hasta el valor final (o lo muestra directo si el
+       usuario pidió reducir el movimiento). */
+    animarNumero(id, valorFinal, formato) {
+      const elemento = document.getElementById(id);
+      if (!elemento) return;
+
+      const efectos = AgroColab.efectos;
+      if (!valorFinal || (efectos && efectos.reducirMovimiento)) {
+        elemento.textContent = formato(valorFinal);
+        return;
+      }
+
+      const duracion = 1100;
+      const inicio = performance.now();
+      const paso = (ahora) => {
+        const avance = Math.min((ahora - inicio) / duracion, 1);
+        const suavizado = 1 - Math.pow(1 - avance, 3);
+        elemento.textContent = formato(Math.round(valorFinal * suavizado));
+        if (avance < 1) requestAnimationFrame(paso);
+      };
+      requestAnimationFrame(paso);
+    }
 
     async cargarArbolesAgricultor() {
       const container = document.getElementById("lista-arboles-agricultor");
-      container.innerHTML = '<p class="text-stone-500 text-sm text-center py-8">Cargando tus árboles...</p>';
+      container.innerHTML = '<p class="sm:col-span-2 lg:col-span-3 text-stone-500 text-sm text-center py-8">Cargando tus árboles...</p>';
 
       try {
         const arboles = await this.api.obtenerArboles();
         const sesion = this.auth.leerSesion();
+        // Por id: comparando el nombre se mezclaban agricultores homónimos y
+        // se perdían los árboles al cambiar el nombre en el perfil
         this.arbolesAgricultor = sesion
-          ? arboles.filter((a) => a.productor === sesion.nombre)
+          ? arboles.filter((a) => String(a.productor_id) === String(sesion.id))
           : [];
 
         this.renderizarListaArboles();
         this.actualizarEstadisticas();
       } catch (error) {
-        container.innerHTML = '<p class="text-red-500 text-sm text-center py-8">Error al cargar tus árboles</p>';
+        container.innerHTML = '<p class="sm:col-span-2 lg:col-span-3 text-red-500 text-sm text-center py-8">Error al cargar tus árboles</p>';
       }
     }
 
@@ -298,10 +355,8 @@
               .join("")
               .toUpperCase();
             return `
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-stone-50 rounded-xl border border-stone-200">
-              <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span class="text-xs font-black text-emerald-700">${iniciales}</span>
-              </div>
+            <div class="canasta-item flex-col sm:flex-row sm:items-center">
+              <span class="nav-usuario__avatar w-11 h-11 text-sm flex-shrink-0">${iniciales}</span>
               <div class="flex-1">
                 <p class="font-bold text-sm text-stone-900">${s.nombre}</p>
                 <p class="text-xs text-stone-500"><i class="fa-solid fa-envelope text-stone-400 mr-1"></i>${s.email}</p>
@@ -370,13 +425,57 @@
     /* ---------- Formulario de subida de árbol ---------- */
 
     mostrarFormulario() {
-      document.getElementById("dashboard-agricultor").classList.add("hidden");
-      document.getElementById("formulario-arbol").classList.remove("hidden");
+      this.cambiarSeccion("dashboard-agricultor", "formulario-arbol");
+      this.pintarVistaPrevia();
+    }
+
+    /* Oculta una sección y muestra la otra con su animación de entrada. */
+    cambiarSeccion(ocultarId, mostrarId) {
+      const mostrar = document.getElementById(mostrarId);
+      document.getElementById("vista-agricultor").classList.toggle("modo-formulario", mostrarId === "formulario-arbol");
+      document.getElementById(ocultarId).classList.add("hidden");
+      mostrar.classList.remove("hidden", "vista-seccion--entrando");
+      void mostrar.offsetWidth; // reinicia la animación
+      mostrar.classList.add("vista-seccion--entrando");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     mostrarDashboard() {
-      document.getElementById("formulario-arbol").classList.add("hidden");
-      document.getElementById("dashboard-agricultor").classList.remove("hidden");
+      this.cambiarSeccion("formulario-arbol", "dashboard-agricultor");
+    }
+
+    /* ---------- Vista previa en vivo del formulario ---------- */
+
+    pintarVistaPrevia() {
+      const contenedor = document.getElementById("vista-previa-arbol");
+      if (!contenedor || !AgroColab.parcelas) return;
+
+      const especie = this.catalogo.porId(this.formulario.especie);
+      const identificador = document.getElementById("arbol-identificador").value.trim();
+      const numero = identificador ? (identificador.startsWith("#") ? identificador : `#${identificador}`) : "";
+      const cupos = Math.max(1, Number(document.getElementById("arbol-cupos").value) || 1);
+      const sesion = this.auth.leerSesion();
+
+      const arbol = {
+        id: 0,
+        nombre: especie ? `${especie.nombre}${numero ? " " + numero : ""}` : "Tu árbol",
+        especie_nombre: especie ? especie.nombre : "Elige una especie",
+        imagen: this.formulario.foto ? this.formulario.foto.url : "",
+        plan: document.getElementById("arbol-plan").value,
+        tipo_suscripcion: document.getElementById("arbol-tipo").value,
+        ubicacion: document.getElementById("arbol-ubicacion").value.trim() || "Ubicación del huerto",
+        estimacion_cosecha: document.getElementById("arbol-cosecha").value.trim() || "—",
+        productor: sesion ? sesion.nombre : "",
+        precio_mensual_clp: Number(document.getElementById("arbol-precio").value) || 0,
+        cupos_totales: cupos,
+        cupos_ocupados: 0
+      };
+
+      // Se reutiliza la tarjeta real del catálogo para que la vista previa sea fiel
+      contenedor.innerHTML = AgroColab.parcelas.plantillaArbol(arbol, 0);
+      const tarjeta = contenedor.querySelector("article");
+      tarjeta.removeAttribute("data-reveal");
+      tarjeta.querySelector("[data-suscribir-id]").setAttribute("disabled", "");
     }
 
     /* Muestra cómo se verá el nombre del árbol con la especie y el identificador elegidos. */
@@ -414,6 +513,7 @@
         (foto) => {
           this.formulario.foto = foto;
           this.catalogo.pintarCredito(document.getElementById("credito-arbol"), foto);
+          this.pintarVistaPrevia();
         },
         this.formulario.foto ? this.formulario.foto.url : null
       );
@@ -510,7 +610,10 @@
     async init() {
       document.getElementById("btn-subir-arbol").addEventListener("click", () => this.mostrarFormulario());
       document.getElementById("btn-cancelar-arbol").addEventListener("click", () => this.mostrarDashboard());
-      document.getElementById("form-subir-arbol").addEventListener("submit", (evento) => this.subirArbol(evento));
+      const formularioArbol = document.getElementById("form-subir-arbol");
+      formularioArbol.addEventListener("submit", (evento) => this.subirArbol(evento));
+      formularioArbol.addEventListener("input", () => this.pintarVistaPrevia());
+      formularioArbol.addEventListener("change", () => this.pintarVistaPrevia());
       document.getElementById("form-editar-arbol").addEventListener("submit", (evento) => this.guardarEdicion(evento));
 
       /* Catálogo de especies: selector + galería de fotos */
@@ -539,7 +642,22 @@
     }
 
     async cargar() {
+      const sesion = this.auth.leerSesion();
+      const nombre = sesion && sesion.nombre ? sesion.nombre.split(" ")[0] : "agricultor";
+      document.getElementById("agricultor-saludo").textContent = nombre;
+      const fecha = new Date().toLocaleDateString("es-CL", {
+        weekday: "long", day: "numeric", month: "long", year: "numeric"
+      });
+      document.getElementById("agricultor-fecha").textContent = fecha.charAt(0).toUpperCase() + fecha.slice(1);
+      this.mostrarDashboardSinAnimar();
       return this.cargarArbolesAgricultor();
+    }
+
+    /* Al entrar a la vista siempre se parte en el panel, no en el formulario */
+    mostrarDashboardSinAnimar() {
+      document.getElementById("vista-agricultor").classList.remove("modo-formulario");
+      document.getElementById("formulario-arbol").classList.add("hidden");
+      document.getElementById("dashboard-agricultor").classList.remove("hidden");
     }
   }
 

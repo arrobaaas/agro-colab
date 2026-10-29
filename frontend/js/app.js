@@ -1,6 +1,5 @@
-/* Agro-Colab - Servicio de aplicación: punto de entrada. Decide qué vista se
-   muestra al abrir la app: login si no hay sesión, o la vista del rol si ya
-   estaba conectado. */
+/* Agro-Colab - Servicio de aplicación: punto de entrada. Inicializa los
+   servicios y muestra siempre el login al abrir la app. */
 
 class AppService {
   constructor() {
@@ -16,6 +15,10 @@ class AppService {
 
   init() {
     document.addEventListener("DOMContentLoaded", () => {
+      /* Cada visita parte en el login: no se reutiliza una sesión guardada
+         (por ejemplo, la de una cuenta de demostración que quedó abierta). */
+      window.AgroColab.auth.eliminarSesion();
+
       this.parcelas.init();
       this.agricultor.init();
       this.perfil.init();

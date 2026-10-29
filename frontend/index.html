@@ -11,21 +11,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261029e">
-  <script src="js/config.js?v=20261029e" defer></script>
-  <script src="js/ui.js?v=20261029e" defer></script>
-  <script src="js/api.js?v=20261029e" defer></script>
-  <script src="js/auth.js?v=20261029e" defer></script>
-  <script src="js/parcelas.js?v=20261029e" defer></script>
-  <script src="js/catalogo.js?v=20261029e" defer></script>
-  <script src="js/agricultor.js?v=20261029e" defer></script>
-  <script src="js/perfil.js?v=20261029e" defer></script>
-  <script src="js/autocomplete.js?v=20261029e" defer></script>
-  <script src="js/dashboard.js?v=20261029e" defer></script>
-  <script src="js/efectos.js?v=20261029e" defer></script>
-  <script src="js/views.js?v=20261029e" defer></script>
-  <script src="js/login.js?v=20261029e" defer></script>
-  <script src="js/app.js?v=20261029e" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261030a">
+  <script src="js/config.js?v=20261030a" defer></script>
+  <script src="js/ui.js?v=20261030a" defer></script>
+  <script src="js/api.js?v=20261030a" defer></script>
+  <script src="js/auth.js?v=20261030a" defer></script>
+  <script src="js/parcelas.js?v=20261030a" defer></script>
+  <script src="js/catalogo.js?v=20261030a" defer></script>
+  <script src="js/agricultor.js?v=20261030a" defer></script>
+  <script src="js/perfil.js?v=20261030a" defer></script>
+  <script src="js/autocomplete.js?v=20261030a" defer></script>
+  <script src="js/dashboard.js?v=20261030a" defer></script>
+  <script src="js/efectos.js?v=20261030a" defer></script>
+  <script src="js/views.js?v=20261030a" defer></script>
+  <script src="js/login.js?v=20261030a" defer></script>
+  <script src="js/app.js?v=20261030a" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -759,13 +759,10 @@
         </div>
         <nav class="flex items-center gap-1.5 sm:gap-2" aria-label="Navegación principal">
           <button type="button" class="nav-pill" onclick="AgroColab.views.mostrarVista('parcelas')">
-            <i class="fa-regular fa-compass"></i><span class="hidden sm:inline">Catálogo</span>
+            <i class="fa-solid fa-arrow-left"></i><span class="hidden sm:inline">Volver al catálogo</span>
           </button>
           <span class="nav-separador"></span>
           <div data-nav-sesion></div>
-          <button type="button" class="nav-icono" data-cerrar-sesion title="Cerrar sesión" aria-label="Cerrar sesión">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-          </button>
         </nav>
       </div>
     </header>
@@ -827,152 +824,181 @@
       </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-10">
+    <!-- Portada del panel -->
+    <section class="panel-portada">
+      <div class="panel-portada__contenido max-w-6xl mx-auto px-4 py-12 md:py-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <!-- La portada cambia de texto según se vea el panel o el formulario -->
+        <div data-solo-panel>
+          <span class="hero__pill"><i class="fa-solid fa-tractor"></i> Panel del agricultor</span>
+          <h2 class="text-3xl md:text-5xl font-extrabold leading-tight mt-5">
+            Hola, <span id="agricultor-saludo" class="text-emerald-400">agricultor</span>
+          </h2>
+          <p class="text-emerald-50/75 text-base md:text-lg mt-3 max-w-xl">
+            Así va tu huerto: tus árboles publicados, quiénes los financian y lo que generan cada mes.
+          </p>
+          <p id="agricultor-fecha" class="text-xs text-emerald-200/60 mt-4"></p>
+        </div>
+        <div data-solo-formulario>
+          <span class="hero__pill"><i class="fa-solid fa-seedling"></i> Nueva publicación</span>
+          <h2 class="text-3xl md:text-5xl font-extrabold leading-tight mt-5">
+            Publicar un <span class="text-emerald-400">árbol</span>
+          </h2>
+          <p class="text-emerald-50/75 text-base md:text-lg mt-3 max-w-xl">
+            Completa los pasos; a la derecha ves cómo quedará tu árbol en el catálogo.
+          </p>
+        </div>
+        <button type="button" id="btn-subir-arbol" class="btn-hero btn-hero--primario self-start md:self-auto" data-solo-panel>
+          <i class="fa-solid fa-plus"></i> Publicar árbol
+        </button>
+        <button type="button" id="btn-cancelar-arbol" class="btn-hero btn-hero--secundario self-start md:self-auto" data-solo-formulario>
+          <i class="fa-solid fa-arrow-left"></i> Volver al panel
+        </button>
+      </div>
+    </section>
+
+    <main class="relative z-10 max-w-6xl mx-auto px-4 -mt-10 pb-16">
 
       <!-- Dashboard del agricultor -->
-      <section id="dashboard-agricultor">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-          <div>
-            <h2 class="text-3xl font-black text-stone-900">Mi Dashboard</h2>
-            <p class="text-sm text-stone-500 mt-1">Gestiona tus árboles y revisa el estado de tus publicaciones</p>
-          </div>
-          <button type="button" id="btn-subir-arbol" class="mt-4 sm:mt-0 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm px-6 py-3 rounded-xl transition">
-            <i class="fa-solid fa-plus mr-2"></i>Subir Árbol
-          </button>
-        </div>
+      <section id="dashboard-agricultor" class="vista-seccion">
 
-        <!-- Estadísticas -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-          <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-tree text-emerald-700 text-xl"></i>
-              </div>
-              <div>
-                <p class="text-2xl font-black text-stone-900" id="stat-total-arboles">0</p>
-                <p class="text-xs text-stone-500">Árboles publicados</p>
-              </div>
-            </div>
+        <!-- Indicadores -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          <div class="kpi" data-reveal style="--reveal-delay:0ms">
+            <div class="kpi__icono bg-emerald-50 text-emerald-700"><i class="fa-solid fa-tree"></i></div>
+            <p class="kpi__valor" id="stat-total-arboles">0</p>
+            <p class="kpi__etiqueta">Árboles publicados</p>
           </div>
-          <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-users text-amber-700 text-xl"></i>
-              </div>
-              <div>
-                <p class="text-2xl font-black text-stone-900" id="stat-suscriptores">0</p>
-                <p class="text-xs text-stone-500">Suscriptores totales</p>
-              </div>
-            </div>
+          <div class="kpi" data-reveal style="--reveal-delay:100ms">
+            <div class="kpi__icono bg-sky-50 text-sky-700"><i class="fa-solid fa-users"></i></div>
+            <p class="kpi__valor" id="stat-suscriptores">0</p>
+            <p class="kpi__etiqueta">Suscriptores activos</p>
           </div>
-          <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-dollar-sign text-emerald-700 text-xl"></i>
-              </div>
-              <div>
-                <p class="text-2xl font-black text-stone-900" id="stat-ingresos">$0</p>
-                <p class="text-xs text-stone-500">Ingresos estimados</p>
-              </div>
-            </div>
+          <div class="kpi" data-reveal style="--reveal-delay:200ms">
+            <div class="kpi__icono bg-amber-50 text-amber-700"><i class="fa-solid fa-chart-pie"></i></div>
+            <p class="kpi__valor" id="stat-ocupacion">0%</p>
+            <p class="kpi__etiqueta">Ocupación de cupos</p>
+            <div class="kpi__barra"><div id="stat-ocupacion-barra" style="width:0%"></div></div>
+          </div>
+          <div class="kpi kpi--destacado" data-reveal style="--reveal-delay:300ms">
+            <div class="kpi__icono bg-white/10 text-emerald-300"><i class="fa-solid fa-sack-dollar"></i></div>
+            <p class="kpi__valor text-white" id="stat-ingresos">$0</p>
+            <p class="kpi__etiqueta text-emerald-200/70">Ingresos mensuales estimados</p>
           </div>
         </div>
 
         <!-- Lista de árboles del agricultor -->
-        <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-          <div class="p-6 border-b border-stone-100">
-            <h3 class="text-lg font-bold text-stone-900">Mis Árboles</h3>
+        <div class="mt-14 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-6" data-reveal="left">
+          <div>
+            <span class="eyebrow">Tu huerto</span>
+            <h3 class="text-3xl font-extrabold text-stone-900 mt-3">Mis árboles</h3>
+            <p class="text-sm text-stone-500 mt-1">Revisa la ocupación de cada árbol, gestiona sus suscriptores o edita su publicación.</p>
           </div>
-          <div id="lista-arboles-agricultor" class="divide-y divide-stone-100">
-            <p class="text-stone-500 text-sm text-center py-8">Cargando tus árboles...</p>
-          </div>
+        </div>
+        <div id="lista-arboles-agricultor" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <p class="sm:col-span-2 lg:col-span-3 text-stone-500 text-sm text-center py-8">Cargando tus árboles...</p>
         </div>
       </section>
 
-      <!-- Formulario para subir árbol -->
-      <section id="formulario-arbol" class="hidden">
-        <div class="max-w-2xl mx-auto">
-          <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-            <div class="bg-emerald-900 text-white p-6">
-              <h3 class="text-xl font-black">Subir Nuevo Árbol</h3>
-              <p class="text-xs text-emerald-200 mt-1">Completa la información del árbol para publicarlo</p>
-            </div>
-            <form id="form-subir-arbol" class="p-6 space-y-5">
+      <!-- Formulario para publicar un árbol -->
+      <section id="formulario-arbol" class="vista-seccion hidden">
+        <div class="grid lg:grid-cols-[1fr_22rem] gap-8 items-start">
+          <form id="form-subir-arbol" class="space-y-5">
+
+            <fieldset class="paso-formulario">
+              <legend><span>1</span> Especie y foto</legend>
               <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Especie del Árbol</label>
+                <label for="arbol-especie" class="campo-etiqueta">Especie del árbol</label>
                 <select id="arbol-especie" required class="input">
                   <option value="">Cargando catálogo...</option>
                 </select>
-                <p class="text-[10px] text-stone-400 mt-1" id="arbol-especie-descripcion"></p>
+                <p class="text-xs text-stone-500 mt-1.5" id="arbol-especie-descripcion"></p>
               </div>
               <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Número del Árbol en el Huerto (opcional)</label>
+                <label for="arbol-identificador" class="campo-etiqueta">Número del árbol en el huerto <span class="text-stone-400 font-medium normal-case tracking-normal">(opcional)</span></label>
                 <input type="text" id="arbol-identificador" maxlength="12" placeholder="Ej: 104" class="input">
-                <p class="text-[10px] text-stone-400 mt-1" id="resumen-nombre">
+                <p class="text-xs mt-1.5" id="resumen-nombre">
                   <span class="text-stone-400">El nombre se arma con la especie y el número del árbol.</span>
                 </p>
               </div>
               <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Ubicación</label>
+                <p class="campo-etiqueta">Foto del árbol</p>
+                <div id="galeria-arbol" class="galeria-fotos"></div>
+                <p class="text-[11px] text-stone-400 mt-2" id="credito-arbol"></p>
+                <p class="text-[11px] text-stone-400 mt-1">
+                  <i class="fa-solid fa-circle-info text-emerald-600 mr-1"></i>
+                  Solo se usan fotos del catálogo de la especie elegida, para que nunca se publique un árbol con la imagen de otra fruta.
+                </p>
+              </div>
+            </fieldset>
+
+            <fieldset class="paso-formulario">
+              <legend><span>2</span> Ubicación del huerto</legend>
+              <div>
+                <label for="arbol-ubicacion" class="campo-etiqueta">Ubicación</label>
                 <div class="relative">
                   <input type="text" id="arbol-ubicacion" required placeholder="Ej: Curicó, Maule" autocomplete="off" class="input" oninput="AgroColab.autocomplete.buscarDireccion(this)">
                   <div id="sugerencias-arbol-ubicacion" class="sugerencias-lista hidden absolute left-0 right-0 z-20"></div>
                 </div>
-                <p class="text-[10px] text-stone-400 mt-1">Empieza a escribir y selecciona el lugar del huerto entre las sugerencias</p>
+                <p class="text-[11px] text-stone-400 mt-1.5">Empieza a escribir y elige el lugar entre las sugerencias.</p>
               </div>
-              <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Plan de Adopción</label>
-                <select id="arbol-plan" class="input">
-                  <option value="Básico">Básico (5 copartícipes)</option>
-                  <option value="Intermedio">Intermedio (3 copartícipes)</option>
-                  <option value="Premium">Premium (Exclusivo)</option>
-                </select>
+            </fieldset>
+
+            <fieldset class="paso-formulario">
+              <legend><span>3</span> Plan y cupos</legend>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="arbol-plan" class="campo-etiqueta">Plan de adopción</label>
+                  <select id="arbol-plan" class="input">
+                    <option value="Básico">Básico (5 copartícipes)</option>
+                    <option value="Intermedio">Intermedio (3 copartícipes)</option>
+                    <option value="Premium">Premium (exclusivo)</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="arbol-tipo" class="campo-etiqueta">Tipo de suscripción</label>
+                  <select id="arbol-tipo" class="input">
+                    <option value="Compartido">Compartido</option>
+                    <option value="Exclusivo">Exclusivo</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="arbol-cupos" class="campo-etiqueta">Cupos totales</label>
+                  <input type="number" id="arbol-cupos" required min="1" value="5" class="input">
+                </div>
               </div>
-              <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Tipo de Suscripción</label>
-                <select id="arbol-tipo" class="input">
-                  <option value="Compartido">Compartido</option>
-                  <option value="Exclusivo">Exclusivo</option>
-                </select>
+            </fieldset>
+
+            <fieldset class="paso-formulario">
+              <legend><span>4</span> Precio y cosecha</legend>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="arbol-precio" class="campo-etiqueta">Precio mensual por cupo (CLP)</label>
+                  <input type="number" id="arbol-precio" required min="0" placeholder="Ej: 15000" class="input">
+                </div>
+                <div>
+                  <label for="arbol-cosecha" class="campo-etiqueta">Estimación de cosecha</label>
+                  <input type="text" id="arbol-cosecha" required placeholder="Ej: 50 kg por temporada" class="input">
+                </div>
               </div>
-              <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Cupos Totales</label>
-                <input type="number" id="arbol-cupos" required min="1" value="5" class="input">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Precio Mensual (CLP)</label>
-                <input type="number" id="arbol-precio" required min="0" placeholder="Ej: 15000" class="input">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Estimación de Cosecha</label>
-                <input type="text" id="arbol-cosecha" required placeholder="Ej: 50 kg por temporada" class="input">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Foto del Árbol</label>
-                <div id="galeria-arbol" class="galeria-fotos"></div>
-                <p class="text-[10px] text-stone-400 mt-2" id="credito-arbol"></p>
-                <p class="text-[10px] text-stone-400 mt-1">
-                  <i class="fa-solid fa-circle-info text-emerald-600 mr-1"></i>
-                  Solo se pueden usar fotos del catálogo de la especie elegida, para que nunca se publique un árbol con la imagen de otra fruta.
-                </p>
-              </div>
-              <div id="alerta-subir-arbol" class="hidden"></div>
-              <div class="flex gap-3">
-                <button type="button" id="btn-cancelar-arbol" class="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm py-3 rounded-xl transition">
-                  Cancelar
-                </button>
-                <button type="submit" class="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm py-3 rounded-xl transition">
-                  Publicar Árbol
-                </button>
-              </div>
-            </form>
-          </div>
+            </fieldset>
+
+            <div id="alerta-subir-arbol" class="hidden"></div>
+
+            <button type="submit" class="btn-hero btn-hero--primario w-full justify-center">
+              <i class="fa-solid fa-paper-plane"></i> Publicar árbol
+            </button>
+          </form>
+
+          <!-- Vista previa en vivo -->
+          <aside class="lg:sticky lg:top-24">
+            <p class="eyebrow mb-3"><i class="fa-regular fa-eye mr-1"></i> Vista previa en el catálogo</p>
+            <div id="vista-previa-arbol"></div>
+          </aside>
         </div>
       </section>
-
     </main>
 
-    <footer class="footer-sitio mt-16">
+    <footer class="footer-sitio">
       <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
         <div class="flex items-center gap-2">
           <span class="logo-marca" style="width:1.75rem;height:1.75rem;font-size:.8rem;border-radius:.6rem"><i class="fa-solid fa-seedling"></i></span>
@@ -991,13 +1017,15 @@
   <div id="modal-suscriptores" class="modal-animado fixed inset-0 z-[100] hidden">
     <div class="absolute inset-0 bg-black/60" onclick="AgroColab.agricultor.cerrarSuscriptores()"></div>
     <div class="relative max-w-2xl mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
-      <div class="bg-emerald-900 text-white p-6 flex justify-between items-center sticky top-0">
+      <div class="bg-gradient-to-br from-emerald-950 to-emerald-900 text-white p-6 flex justify-between items-start gap-4 sticky top-0 z-10">
         <div>
-          <h3 class="text-xl font-black">Suscriptores</h3>
-          <p class="text-xs text-emerald-200" id="suscriptores-arbol-nombre">Árbol</p>
-          <p class="text-[11px] text-emerald-100 mt-1" id="suscriptores-contador">0 suscriptores</p>
+          <span class="hero__pill"><i class="fa-solid fa-users"></i> <span id="suscriptores-contador">0 suscriptores</span></span>
+          <h3 class="text-2xl font-extrabold mt-3">Suscriptores</h3>
+          <p class="text-sm text-emerald-200/80" id="suscriptores-arbol-nombre">Árbol</p>
         </div>
-        <button type="button" onclick="AgroColab.agricultor.cerrarSuscriptores()" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+        <button type="button" class="nav-icono" onclick="AgroColab.agricultor.cerrarSuscriptores()" title="Cerrar" aria-label="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
       <input type="hidden" id="suscriptores-arbol-id">
       <div class="p-6">
@@ -1055,13 +1083,16 @@
   <!-- MODAL: EDITAR ÁRBOL -->
   <div id="modal-editar-arbol" class="modal-animado fixed inset-0 z-[100] hidden">
     <div class="absolute inset-0 bg-black/60" onclick="AgroColab.agricultor.cerrarEdicion()"></div>
-    <div class="relative max-w-lg mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden">
-      <div class="bg-emerald-900 text-white p-6 flex justify-between items-center">
+    <div class="relative max-w-lg mx-auto mt-[5vh] bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+      <div class="bg-gradient-to-br from-emerald-950 to-emerald-900 text-white p-6 flex justify-between items-start gap-4 sticky top-0 z-10">
         <div>
-          <h3 class="text-xl font-black">Editar Árbol</h3>
-          <p class="text-xs text-emerald-200">Modifica la información del árbol</p>
+          <span class="hero__pill"><i class="fa-solid fa-pen"></i> Edición</span>
+          <h3 class="text-2xl font-extrabold mt-3">Editar árbol</h3>
+          <p class="text-sm text-emerald-200/80">Los cambios se ven de inmediato en el catálogo.</p>
         </div>
-        <button type="button" onclick="AgroColab.agricultor.cerrarEdicion()" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+        <button type="button" class="nav-icono" onclick="AgroColab.agricultor.cerrarEdicion()" title="Cerrar" aria-label="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
       <form id="form-editar-arbol" class="p-6 space-y-4">
         <input type="hidden" id="editar-arbol-id">
@@ -1268,7 +1299,7 @@
           </button>
           <span class="hero__pill"><i class="fa-solid fa-truck-fast"></i> Logística y despacho</span>
           <h3 id="modal-log-titulo" class="text-2xl sm:text-3xl font-extrabold mt-3 pr-10">¿Dónde deseas recibir los productos?</h3>
-          <p class="text-xs sm:text-sm text-emerald-200 mt-1">
+          <p id="modal-log-subtitulo" class="text-xs sm:text-sm text-emerald-200 mt-1">
             Configura si el destino es tu hogar o tu establecimiento gastronómico / negocio.
           </p>
           <div class="mt-4 inline-flex flex-wrap items-center gap-x-3 gap-y-1 bg-white/5 border border-white/15 px-4 py-2 rounded-full text-xs">
