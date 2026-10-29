@@ -198,7 +198,8 @@ def datos_iniciales():
         db.close()
 
 
-datos_iniciales()
+# datos_iniciales() no se llama aquí: al importar core.py las tablas todavía
+# no existen. main.py la ejecuta después de create_all().
 
 # ----------------- MODELOS DE DATOS (ESQUEMAS) -----------------
 
