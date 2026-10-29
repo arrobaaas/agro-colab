@@ -87,12 +87,6 @@
       document.getElementById("seccion-abastecimiento").classList.toggle("hidden", esAdopcion);
       document.getElementById("seccion-logistica").classList.toggle("hidden", esAdopcion);
 
-      document.querySelectorAll("[data-linea]").forEach(function (boton) {
-        const activo = boton.dataset.linea === linea;
-        boton.classList.toggle("nav-link--activo", activo);
-        boton.setAttribute("aria-selected", activo ? "true" : "false");
-      });
-
       const destino = scrollTo || (esAdopcion ? "seccion-adopcion" : "seccion-abastecimiento");
       document.getElementById(destino).scrollIntoView({ behavior: "smooth" });
     }
@@ -291,6 +285,7 @@
         nombre: arbol.nombre,
         descripcion: `Árbol adoptado - Plan ${arbol.plan}`,
         precio: arbol.precio_mensual_clp,
+        imagen: arbol.imagen,
         estado: "pendiente",
         tipo: "arbol"
       };
@@ -305,6 +300,8 @@
       this.cerrarModalConfirmacionArbol();
       if (!arbol) return;
       this.agregarItemAlArbol(arbol);
+      // Se abre la canasta para que se vea que el árbol llegó
+      this.abrirCanasta();
     }
 
     /* ---------- Modal de confirmación de adopción ---------- */
@@ -312,11 +309,36 @@
     abrirModalConfirmacionArbol(arbol) {
       this.arbolParaAdoptar = arbol;
       const modal = document.getElementById("modal-confirmacion-adopcion");
-      const titulo = document.getElementById("modal-confirmacion-titulo");
-      const texto = document.getElementById("modal-confirmacion-texto");
-      if (titulo) titulo.textContent = "¿Estás seguro de adoptar este árbol?";
-      if (texto) texto.textContent = `¿Estás seguro de que quieres adoptar el árbol "${arbol ? arbol.nombre : ""}"?`;
-      if (modal) modal.classList.remove("hidden");
+      if (!modal || !arbol) return;
+
+      const imagen = document.getElementById("confirmacion-imagen");
+      imagen.style.display = "";
+      imagen.src = arbol.imagen || "";
+      imagen.alt = arbol.nombre;
+      document.getElementById("modal-confirmacion-titulo").textContent = arbol.nombre;
+      document.getElementById("confirmacion-especie").textContent =
+        [arbol.especie_nombre, arbol.productor ? `Productor: ${arbol.productor}` : ""].filter(Boolean).join(" · ");
+      document.getElementById("confirmacion-precio").innerHTML =
+        `${this.ui.formatearMonto(arbol.precio_mensual_clp)} <span class="text-sm font-medium text-stone-500">CLP / mes</span>`;
+      document.getElementById("confirmacion-plan").textContent = `Plan ${arbol.plan}`;
+
+      const cuposLibres = Math.max(0, (arbol.cupos_totales || 0) - (arbol.cupos_ocupados || 0));
+      const exclusivo = arbol.tipo_suscripcion === "Exclusivo";
+      const detalles = [
+        ["fa-location-dot text-rose-500", "Ubicación", arbol.ubicacion],
+        ["fa-scale-balanced text-emerald-600", "Cosecha estimada", arbol.estimacion_cosecha],
+        [exclusivo ? "fa-crown text-amber-500" : "fa-users text-emerald-600", "Tipo", exclusivo ? "Exclusivo" : `Compartido (${arbol.cupos_totales})`],
+        ["fa-ticket text-emerald-600", "Cupos libres", `${cuposLibres} de ${arbol.cupos_totales}`]
+      ];
+      document.getElementById("confirmacion-detalles").innerHTML = detalles
+        .map(([icono, etiqueta, valor]) => `
+          <div class="confirmacion-dato">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-stone-400"><i class="fa-solid ${icono} mr-1"></i>${etiqueta}</p>
+            <p class="text-sm font-bold text-stone-800 mt-1 leading-snug">${valor || "-"}</p>
+          </div>`)
+        .join("");
+
+      modal.classList.remove("hidden");
     }
 
     cerrarModalConfirmacionArbol() {
@@ -429,12 +451,20 @@
 
     abrirCanasta() {
       const modal = document.getElementById("modal-canasta");
-      modal.classList.remove("hidden");
+      modal.classList.remove("hidden", "cerrando");
+      this.animarCanasta = true;
       this.renderizarCanasta();
     }
 
+    /* Se anima la salida antes de ocultar: así no desaparece de golpe. */
     cerrarCanasta() {
-      document.getElementById("modal-canasta").classList.add("hidden");
+      const modal = document.getElementById("modal-canasta");
+      if (!modal || modal.classList.contains("hidden") || modal.classList.contains("cerrando")) return;
+      modal.classList.add("cerrando");
+      window.setTimeout(() => {
+        modal.classList.add("hidden");
+        modal.classList.remove("cerrando");
+      }, 300);
     }
 
     agregarAlCarrito(item) {
@@ -456,41 +486,78 @@
 
     renderizarCanasta() {
       const contenido = document.getElementById("canasta-contenido");
+      const pie = document.getElementById("canasta-pie");
+      const resumen = document.getElementById("canasta-resumen");
+
+      /* Los ítems entran en cascada solo al abrir, no en cada cambio */
+      const animar = this.animarCanasta;
+      this.animarCanasta = false;
 
       if (this.carrito.length === 0) {
-        contenido.innerHTML = '<p class="text-stone-500 text-sm text-center py-8">Tu canasta está vacía</p>';
+        resumen.textContent = "Tus árboles y planes";
+        pie.classList.add("hidden");
+        contenido.innerHTML = `
+          <div class="text-center py-14">
+            <div class="w-20 h-20 mx-auto rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-3xl mb-5">
+              <i class="fa-solid fa-seedling"></i>
+            </div>
+            <p class="font-extrabold text-stone-900 text-lg">Tu canasta está vacía</p>
+            <p class="text-sm text-stone-500 mt-1 max-w-xs mx-auto">Adopta un árbol o elige una canasta de abastecimiento para empezar.</p>
+            <button type="button" class="btn-hero btn-hero--primario mt-6" onclick="AgroColab.parcelas.cerrarCanasta(); AgroColab.parcelas.establecerLinea('adopcion')">
+              <i class="fa-solid fa-tree"></i> Explorar árboles
+            </button>
+          </div>`;
         return;
       }
 
-      let html = '<div class="space-y-4">';
-      this.carrito.forEach(function (item, index) {
-        const esComprado = item.estado === "comprado";
-        html += `
-          <div class="flex justify-between items-center p-4 bg-stone-50 rounded-xl border ${esComprado ? 'border-emerald-200 bg-emerald-50/50' : 'border-stone-200'}">
-            <div>
-              <div class="flex items-center gap-2">
-                <p class="font-bold text-sm text-stone-900">${item.nombre}</p>
-                ${esComprado ? '<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Comprado</span>' : ''}
+      const pendientes = this.carrito.filter((item) => item.estado !== "comprado");
+      const totalPendiente = pendientes.reduce((total, item) => total + (Number(item.precio) || 0), 0);
+      resumen.textContent = `${this.carrito.length} producto${this.carrito.length === 1 ? "" : "s"} · ${pendientes.length} por pagar`;
+
+      contenido.innerHTML = `<div class="space-y-3">${this.carrito
+        .map((item, index) => {
+          const comprado = item.estado === "comprado";
+          const miniatura = item.imagen
+            ? `<img src="${item.imagen}" alt="" class="w-full h-full object-cover" onerror="this.remove()">`
+            : `<i class="fa-solid ${item.tipo === "plan" ? "fa-basket-shopping" : "fa-tree"}"></i>`;
+          const accion = comprado
+            ? `<button type="button" class="canasta-accion canasta-accion--peligro" onclick="AgroColab.parcelas.cancelarCompra(${index})">Cancelar</button>`
+            : `<button type="button" class="canasta-accion" onclick="AgroColab.parcelas.quitarDelCarrito(${index})">Quitar</button>`;
+          const pagar = !comprado && (item.tipo === "arbol" || item.tipo === "plan")
+            ? `<button type="button" class="btn-suscribir btn-suscribir--activo" onclick="AgroColab.parcelas.pagarSuscripcion(${index})"><i class="fa-solid fa-lock"></i> Pagar</button>`
+            : "";
+
+          return `
+            <article class="canasta-item ${animar ? "canasta-item--entrando" : ""}" style="animation-delay:${0.15 + index * 0.07}s">
+              <div class="canasta-item__miniatura">${miniatura}</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                  <p class="font-bold text-sm text-stone-900 truncate">${item.nombre}</p>
+                  <span class="canasta-estado ${comprado ? "canasta-estado--comprado" : ""}">
+                    <i class="fa-solid ${comprado ? "fa-circle-check" : "fa-clock"}"></i> ${comprado ? "Comprado" : "Por pagar"}
+                  </span>
+                </div>
+                <p class="text-xs text-stone-500 truncate mt-0.5">${item.descripcion}</p>
+                <div class="flex items-center justify-between gap-2 mt-3">
+                  <p class="font-extrabold text-emerald-900">${this.ui.formatearMonto(item.precio)} <span class="text-[10px] font-medium text-stone-500">CLP${item.tipo === "arbol" ? " / mes" : ""}</span></p>
+                  <div class="flex items-center gap-2">${accion}${pagar}</div>
+                </div>
               </div>
-              <p class="text-xs text-stone-500">${item.descripcion}</p>
-            </div>
-            <div class="flex items-center gap-3">
-              <span class="font-black text-emerald-900">${this.ui.formatearMonto(item.precio)} CLP</span>
-              ${esComprado
-                ? `
-                  <button type="button" onclick="AgroColab.parcelas.cancelarCompra(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">Cancelar</button>
-                `
-                : `<button type="button" onclick="AgroColab.parcelas.quitarDelCarrito(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">Quitar</button>`
-              }
-              ${!esComprado && (item.tipo === "arbol" || item.tipo === "plan") ? `
-                <button type="button" onclick="AgroColab.parcelas.pagarSuscripcion(${index})" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-sm">Pagar</button>
-              ` : ""}
-            </div>
+            </article>`;
+        })
+        .join("")}</div>`;
+
+      pie.classList.remove("hidden");
+      pie.innerHTML = `
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-[11px] uppercase tracking-wider font-bold text-stone-500">Total por pagar</p>
+            <p class="text-2xl font-extrabold text-emerald-900 leading-tight">${this.ui.formatearMonto(totalPendiente)} <span class="text-xs font-medium text-stone-500">CLP</span></p>
           </div>
-        `;
-      });
-      html += '</div>';
-      contenido.innerHTML = html;
+          <button type="button" class="nav-pill nav-pill--claro" onclick="AgroColab.parcelas.cerrarCanasta()">
+            Seguir explorando <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>`;
     }
 
     quitarDelCarrito(index) {

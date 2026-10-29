@@ -166,6 +166,7 @@
 
         if (data.status === "success") {
           this.auth.guardarSesion(data.user);
+          window.AgroColab.views.pintarNavbar();
           this.ui.mostrarAlerta(alerta, "exito", "Perfil actualizado correctamente.");
           setTimeout(() => this.cerrar(), 1500);
         } else {

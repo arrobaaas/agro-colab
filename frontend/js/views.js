@@ -86,18 +86,28 @@
       return sesion ? config.VISTAS_POR_ROL[sesion.rol] || config.VISTA_SIN_SESION : config.VISTA_SIN_SESION;
     }
 
+    /* Pinta el usuario en todos los headers (catálogo, panel y agricultor).
+       Antes se buscaba un único id repetido en dos vistas y el panel del
+       comprador quedaba vacío. */
     pintarNavbar() {
       const sesion = auth.leerSesion();
-      const contenedor = document.getElementById("nav-sesion");
-      if (!contenedor || !sesion) return;
+      const contenedores = document.querySelectorAll("[data-nav-sesion]");
+      if (!sesion) {
+        contenedores.forEach((contenedor) => (contenedor.innerHTML = ""));
+        return;
+      }
 
-      const icono = sesion.rol === "agricultor" ? "fa-solid fa-tractor" : "fa-solid fa-user";
-      contenedor.innerHTML = `
-        <span class="nav-chip nav-chip--clickeable" onclick="AgroColab.perfil.abrir()" title="Ver mi perfil">
-          <span class="hidden sm:inline font-bold text-white">${sesion.nombre}</span>
-          <span class="text-emerald-400 font-black uppercase">${sesion.rol}</span>
-          <i class="${icono}"></i>
-        </span>`;
+      const inicial = (sesion.nombre || "?").trim().charAt(0).toUpperCase();
+      contenedores.forEach((contenedor) => {
+        contenedor.innerHTML = `
+          <button type="button" class="nav-usuario" onclick="AgroColab.perfil.abrir()" title="Ver mi perfil">
+            <span class="nav-usuario__avatar">${inicial}</span>
+            <span class="hidden md:flex flex-col text-left leading-tight">
+              <span class="text-xs font-bold text-white">${sesion.nombre}</span>
+              <span class="text-[10px] text-emerald-300 capitalize">${sesion.rol}</span>
+            </span>
+          </button>`;
+      });
     }
 
     cerrarSesion() {
@@ -106,7 +116,9 @@
     }
 
     init() {
-      document.getElementById("btn-cerrar-sesion").addEventListener("click", () => this.cerrarSesion());
+      document.querySelectorAll("[data-cerrar-sesion]").forEach((boton) => {
+        boton.addEventListener("click", () => this.cerrarSesion());
+      });
       this.pintarNavbar();
     }
   }

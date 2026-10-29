@@ -11,21 +11,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261029b">
-  <script src="js/config.js?v=20261029b" defer></script>
-  <script src="js/ui.js?v=20261029b" defer></script>
-  <script src="js/api.js?v=20261029b" defer></script>
-  <script src="js/auth.js?v=20261029b" defer></script>
-  <script src="js/parcelas.js?v=20261029b" defer></script>
-  <script src="js/catalogo.js?v=20261029b" defer></script>
-  <script src="js/agricultor.js?v=20261029b" defer></script>
-  <script src="js/perfil.js?v=20261029b" defer></script>
-  <script src="js/autocomplete.js?v=20261029b" defer></script>
-  <script src="js/dashboard.js?v=20261029b" defer></script>
-  <script src="js/efectos.js?v=20261029b" defer></script>
-  <script src="js/views.js?v=20261029b" defer></script>
-  <script src="js/login.js?v=20261029b" defer></script>
-  <script src="js/app.js?v=20261029b" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261029d">
+  <script src="js/config.js?v=20261029d" defer></script>
+  <script src="js/ui.js?v=20261029d" defer></script>
+  <script src="js/api.js?v=20261029d" defer></script>
+  <script src="js/auth.js?v=20261029d" defer></script>
+  <script src="js/parcelas.js?v=20261029d" defer></script>
+  <script src="js/catalogo.js?v=20261029d" defer></script>
+  <script src="js/agricultor.js?v=20261029d" defer></script>
+  <script src="js/perfil.js?v=20261029d" defer></script>
+  <script src="js/autocomplete.js?v=20261029d" defer></script>
+  <script src="js/dashboard.js?v=20261029d" defer></script>
+  <script src="js/efectos.js?v=20261029d" defer></script>
+  <script src="js/views.js?v=20261029d" defer></script>
+  <script src="js/login.js?v=20261029d" defer></script>
+  <script src="js/app.js?v=20261029d" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -268,32 +268,29 @@
        ============================================================ -->
   <div id="vista-parcelas" data-vista="parcelas" class="hidden">
 
-    <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
-      <div class="max-w-6xl mx-auto px-4 py-3 md:py-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-3">
-        <div class="flex items-center space-x-3">
+    <header class="header-sitio sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 h-16 md:h-[72px] flex justify-between items-center gap-3">
+        <div class="flex items-center gap-3">
           <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
-          <div>
-            <h1 class="text-xl font-extrabold tracking-tight">Agro-Colab</h1>
-            <p class="hidden sm:block text-[11px] text-emerald-200">Trazabilidad directa del huerto a tu mesa</p>
+          <div class="leading-tight">
+            <p class="text-lg font-extrabold tracking-tight">Agro-Colab</p>
+            <p class="hidden sm:block text-[11px] text-emerald-200/70">Trazabilidad directa del huerto a tu mesa</p>
           </div>
         </div>
-        <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-          <button type="button" class="nav-link" data-linea="adopcion" onclick="AgroColab.parcelas.establecerLinea('adopcion')">Adopción</button>
-          <button type="button" class="nav-link" data-linea="abastecimiento" onclick="AgroColab.parcelas.establecerLinea('abastecimiento')">Abastecimiento</button>
-          <button type="button" class="nav-link" onclick="AgroColab.parcelas.abrirCanasta()">
-            <i class="fa-solid fa-basket-shopping"></i> Compras
+        <nav class="flex items-center gap-1.5 sm:gap-2" aria-label="Navegación principal">
+          <button type="button" class="nav-pill" onclick="AgroColab.views.mostrarVista('dashboard-comprador')">
+            <i class="fa-regular fa-chart-bar"></i><span class="hidden sm:inline">Mi panel</span>
           </button>
-          <button type="button" class="nav-link" onclick="AgroColab.views.mostrarVista('dashboard-comprador')">
-            <i class="fa-solid fa-gauge-high"></i> Mi Panel
+          <button type="button" class="nav-icono" onclick="AgroColab.parcelas.abrirCanasta()" title="Mi canasta" aria-label="Mi canasta">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span id="canasta-contador" class="canasta-contador hidden">0</span>
           </button>
-          <a href="privacidad.html" class="nav-link">
-            <i class="fa-solid fa-shield-halved"></i> Privacidad
-          </a>
-          <div id="nav-sesion" class="flex items-center gap-2"></div>
-          <button type="button" id="btn-cerrar-sesion" class="btn-logout">
-            <i class="fa-solid fa-right-from-bracket"></i> Salir
+          <span class="nav-separador"></span>
+          <div data-nav-sesion></div>
+          <button type="button" class="nav-icono" data-cerrar-sesion title="Cerrar sesión" aria-label="Cerrar sesión">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
           </button>
-        </div>
+        </nav>
       </div>
     </header>
 
@@ -713,26 +710,30 @@
     <!-- /hoja -->
 
     <!-- MODAL: CANASTA / MIS COMPRAS -->
-    <div id="modal-canasta" class="fixed inset-0 z-[100] hidden">
-      <div class="absolute inset-0 bg-black/60" onclick="AgroColab.parcelas.cerrarCanasta()"></div>
-      <div class="relative max-w-2xl mx-auto mt-20 bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <div class="bg-emerald-900 text-white p-6 flex justify-between items-center">
-          <div>
-            <h3 class="text-xl font-black">Mi Canasta</h3>
-            <p class="text-xs text-emerald-200">Tus compras y productos en el carrito</p>
+    <div id="modal-canasta" class="modal-drawer fixed inset-0 z-[100] hidden">
+      <div class="modal-fondo" onclick="AgroColab.parcelas.cerrarCanasta()"></div>
+      <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="canasta-titulo">
+        <div class="drawer-cabecera">
+          <div class="flex items-center gap-3">
+            <span class="logo-marca"><i class="fa-solid fa-bag-shopping"></i></span>
+            <div class="leading-tight">
+              <h3 id="canasta-titulo" class="text-lg font-extrabold text-white">Mi canasta</h3>
+              <p id="canasta-resumen" class="text-xs text-emerald-200/70">Tus árboles y planes</p>
+            </div>
           </div>
-          <button type="button" onclick="AgroColab.parcelas.cerrarCanasta()" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+          <button type="button" class="nav-icono" onclick="AgroColab.parcelas.cerrarCanasta()" title="Cerrar" aria-label="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
-        <div class="p-6 max-h-[60vh] overflow-y-auto">
-          <div id="canasta-contenido">
-            <p class="text-stone-500 text-sm text-center py-8">Tu canasta está vacía</p>
-          </div>
+        <div class="flex-1 overflow-y-auto p-5">
+          <div id="canasta-contenido"></div>
         </div>
-      </div>
+        <div id="canasta-pie" class="drawer-pie hidden"></div>
+      </aside>
     </div>
 
     <!-- MODAL: LOGÍSTICA Y DESPACHO (al suscribirse) -->
-    <div id="modal-logistica" class="fixed inset-0 z-[100] hidden">
+    <div id="modal-logistica" class="modal-animado fixed inset-0 z-[100] hidden">
       <div class="absolute inset-0 bg-black/60" onclick="AgroColab.parcelas.cerrarLogistica()"></div>
       <div class="relative max-w-2xl mx-auto mt-10 bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         <div class="bg-emerald-900 text-white p-6">
@@ -883,27 +884,25 @@
        VISTA DASHBOARD COMPRADOR: estado del árbol adoptado
        ============================================================ -->
   <div id="vista-dashboard-comprador" data-vista="dashboard-comprador" class="hidden">
-    <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
-      <div class="max-w-6xl mx-auto px-4 py-3 md:py-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-3">
-        <div class="flex items-center space-x-3">
+    <header class="header-sitio sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 h-16 md:h-[72px] flex justify-between items-center gap-3">
+        <div class="flex items-center gap-3">
           <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
-          <div>
-            <h1 class="text-xl font-extrabold tracking-tight">Agro-Colab</h1>
-            <p class="hidden sm:block text-[11px] text-emerald-200">Trazabilidad directa del huerto a tu mesa</p>
+          <div class="leading-tight">
+            <p class="text-lg font-extrabold tracking-tight">Agro-Colab</p>
+            <p class="hidden sm:block text-[11px] text-emerald-200/70">Trazabilidad directa del huerto a tu mesa</p>
           </div>
         </div>
-        <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-          <button type="button" class="nav-link" onclick="AgroColab.views.mostrarVista('parcelas')">
-            <i class="fa-solid fa-leaf"></i> Catálogo
+        <nav class="flex items-center gap-1.5 sm:gap-2" aria-label="Navegación principal">
+          <button type="button" class="nav-pill" onclick="AgroColab.views.mostrarVista('parcelas')">
+            <i class="fa-regular fa-compass"></i><span class="hidden sm:inline">Catálogo</span>
           </button>
-          <a href="privacidad.html" class="nav-link">
-            <i class="fa-solid fa-shield-halved"></i> Privacidad
-          </a>
-          <div id="nav-sesion" class="flex items-center gap-2"></div>
-          <button type="button" id="btn-cerrar-sesion" class="btn-logout" onclick="AgroColab.views.mostrarVista('parcelas')">
-            <i class="fa-solid fa-right-from-bracket"></i> Salir
+          <span class="nav-separador"></span>
+          <div data-nav-sesion></div>
+          <button type="button" class="nav-icono" data-cerrar-sesion title="Cerrar sesión" aria-label="Cerrar sesión">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
           </button>
-        </div>
+        </nav>
       </div>
     </header>
 
@@ -924,6 +923,20 @@
         <p class="md:col-span-2 text-stone-500 text-sm text-center py-8">Cargando tu panel de adopción...</p>
       </div>
     </main>
+
+    <footer class="footer-sitio">
+      <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="logo-marca" style="width:1.75rem;height:1.75rem;font-size:.8rem;border-radius:.6rem"><i class="fa-solid fa-seedling"></i></span>
+          <span class="font-bold text-white">Agro-Colab</span>
+          <span class="text-emerald-200/60">· Panel del Comprador</span>
+        </div>
+        <div class="flex gap-4">
+          <a href="privacidad.html">Privacidad</a>
+          <a href="terminos.html">Términos</a>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <!-- ============================================================
@@ -931,21 +944,22 @@
        ============================================================ -->
   <div id="vista-agricultor" data-vista="agricultor" class="hidden">
 
-    <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
-      <div class="max-w-6xl mx-auto px-4 py-3 md:py-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-3">
-        <div class="flex items-center space-x-3">
+    <header class="header-sitio sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 h-16 md:h-[72px] flex justify-between items-center gap-3">
+        <div class="flex items-center gap-3">
           <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
-          <div>
-            <h1 class="text-xl font-extrabold tracking-tight">Agro-Colab</h1>
-            <p class="hidden sm:block text-[11px] text-emerald-200">Panel del Agricultor</p>
+          <div class="leading-tight">
+            <p class="text-lg font-extrabold tracking-tight">Agro-Colab</p>
+            <p class="hidden sm:block text-[11px] text-emerald-200/70">Panel del Agricultor</p>
           </div>
         </div>
-        <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-          <div id="nav-sesion-agricultor" class="flex items-center gap-2"></div>
-          <button type="button" id="btn-cerrar-sesion-agricultor" class="btn-logout">
-            <i class="fa-solid fa-right-from-bracket"></i> Salir
+        <nav class="flex items-center gap-1.5 sm:gap-2" aria-label="Navegación principal">
+          <span class="nav-separador"></span>
+          <div data-nav-sesion></div>
+          <button type="button" class="nav-icono" data-cerrar-sesion title="Cerrar sesión" aria-label="Cerrar sesión">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
           </button>
-        </div>
+        </nav>
       </div>
     </header>
 
@@ -1110,7 +1124,7 @@
   </div>
 
   <!-- MODAL: SUSCRIPTORES DE UN ÁRBOL -->
-  <div id="modal-suscriptores" class="fixed inset-0 z-[100] hidden">
+  <div id="modal-suscriptores" class="modal-animado fixed inset-0 z-[100] hidden">
     <div class="absolute inset-0 bg-black/60" onclick="AgroColab.agricultor.cerrarSuscriptores()"></div>
     <div class="relative max-w-2xl mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
       <div class="bg-emerald-900 text-white p-6 flex justify-between items-center sticky top-0">
@@ -1135,7 +1149,7 @@
   </div>
 
   <!-- MODAL: VERIFICACIÓN DE CUENTA -->
-  <div id="modal-verificacion" class="fixed inset-0 z-[100] hidden">
+  <div id="modal-verificacion" class="modal-animado fixed inset-0 z-[100] hidden">
     <div class="absolute inset-0 bg-black/60" onclick="AgroColab.login.cerrarVerificacion()"></div>
     <div class="relative max-w-md mx-auto mt-20 bg-white rounded-3xl shadow-2xl overflow-hidden">
       <div class="bg-emerald-900 text-white p-6 text-center">
@@ -1175,7 +1189,7 @@
   </div>
 
   <!-- MODAL: EDITAR ÁRBOL -->
-  <div id="modal-editar-arbol" class="fixed inset-0 z-[100] hidden">
+  <div id="modal-editar-arbol" class="modal-animado fixed inset-0 z-[100] hidden">
     <div class="absolute inset-0 bg-black/60" onclick="AgroColab.agricultor.cerrarEdicion()"></div>
     <div class="relative max-w-lg mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden">
       <div class="bg-emerald-900 text-white p-6 flex justify-between items-center">
@@ -1246,7 +1260,7 @@
   </div>
 
   <!-- MODAL: PERFIL DE USUARIO (fuera de las vistas para funcionar en ambas) -->
-  <div id="modal-perfil" class="fixed inset-0 z-[100] hidden">
+  <div id="modal-perfil" class="modal-animado fixed inset-0 z-[100] hidden">
     <div class="absolute inset-0 bg-black/60" onclick="AgroColab.perfil.cerrar()"></div>
     <div class="relative max-w-lg mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden">
       <div class="bg-emerald-900 text-white p-6 flex justify-between items-center">
@@ -1311,19 +1325,45 @@
   </div>
 
     <!-- MODAL: CONFIRMACION DE ADOPCION DE ARBOL -->
-    <div id="modal-confirmacion-adopcion" class="fixed inset-0 z-[120] hidden">
-      <div class="absolute inset-0 bg-black/60" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()"></div>
-      <div class="relative max-w-md mx-auto mt-20 bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <div class="bg-emerald-900 text-white p-6">
-          <span class="text-xs font-bold uppercase tracking-widest text-emerald-300">
-            <i class="fa-solid fa-shield-halved mr-1"></i> Confirmación de Adopción
-          </span>
-          <h3 id="modal-confirmacion-titulo" class="text-2xl font-black mt-2">¿Estás seguro de adoptar este árbol?</h3>
-          <p id="modal-confirmacion-texto" class="text-xs text-emerald-200 mt-2"></p>
+    <div id="modal-confirmacion-adopcion" class="modal-animado fixed inset-0 z-[120] hidden">
+      <div class="absolute inset-0" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()"></div>
+      <div class="confirmacion-panel" role="dialog" aria-modal="true" aria-labelledby="modal-confirmacion-titulo">
+        <div class="confirmacion-media">
+          <img id="confirmacion-imagen" src="" alt="" onerror="this.style.display='none'">
+          <button type="button" class="nav-icono confirmacion-cerrar" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()" title="Cerrar" aria-label="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <div class="confirmacion-media__texto">
+            <span class="hero__pill"><i class="fa-solid fa-seedling"></i> Confirmar adopción</span>
+            <h3 id="modal-confirmacion-titulo" class="text-2xl sm:text-3xl font-extrabold mt-3 leading-tight"></h3>
+            <p id="confirmacion-especie" class="text-sm text-emerald-100/80 mt-1"></p>
+          </div>
         </div>
-        <div class="p-6 flex justify-end gap-3">
-          <button type="button" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()" class="px-5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm transition">No</button>
-          <button type="button" onclick="AgroColab.parcelas.confirmarAdopcion()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition">Sí</button>
+
+        <div class="p-5 sm:p-6">
+          <div id="confirmacion-detalles" class="grid grid-cols-2 gap-2.5"></div>
+
+          <div class="confirmacion-precio">
+            <div>
+              <p class="text-[11px] uppercase tracking-wider font-bold text-emerald-700/80">Tu aporte mensual</p>
+              <p id="confirmacion-precio" class="text-3xl font-extrabold text-emerald-900 leading-tight whitespace-nowrap"></p>
+            </div>
+            <span id="confirmacion-plan" class="eyebrow"></span>
+          </div>
+
+          <p class="text-xs text-stone-500 mt-4 flex gap-2 leading-relaxed">
+            <i class="fa-solid fa-circle-info text-emerald-600 mt-0.5"></i>
+            Se agregará a tu canasta como pendiente de pago. Puedes quitarlo antes de pagar.
+          </p>
+
+          <div class="mt-6 flex flex-col-reverse sm:flex-row gap-3">
+            <button type="button" class="confirmacion-secundario" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()">
+              Cancelar
+            </button>
+            <button type="button" class="btn-hero btn-hero--primario justify-center sm:flex-1" onclick="AgroColab.parcelas.confirmarAdopcion()">
+              <i class="fa-solid fa-bag-shopping"></i> Agregar a mi canasta
+            </button>
+          </div>
         </div>
       </div>
     </div>
