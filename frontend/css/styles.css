@@ -189,7 +189,7 @@ h1, h2, h3, h4 {
   border: 1px solid var(--stone-200);
   background-color: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .plan-adopcion-card:hover {
@@ -203,9 +203,6 @@ h1, h2, h3, h4 {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-.plan-adopcion-card--destacado:hover {
-  transform: scale(1.02);
-}
 
 /* Estado del plan que está filtrando el catálogo. */
 .plan-adopcion-card--activo {
@@ -549,6 +546,7 @@ h1, h2, h3, h4 {
 
 /* ---------- Tarjetas de árbol ---------- */
 .arbol-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   background-color: #fff;
@@ -560,7 +558,6 @@ h1, h2, h3, h4 {
 }
 
 .arbol-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 20px 40px -12px rgba(6, 78, 59, 0.25);
 }
 
@@ -856,17 +853,142 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Aparición al hacer scroll. Solo se ocultan si efectos.js está activo. */
+/* Barra de progreso de lectura */
+.barra-progreso {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--emerald-400), var(--emerald-300), var(--amber-500));
+  transform-origin: left;
+  transform: scaleX(var(--progreso, 0));
+  pointer-events: none;
+}
+
+/* ----- Portada fija: el contenido la cubre como una diapositiva ----- */
+@media (min-width: 768px) {
+  .hero--portada {
+    position: sticky;
+    top: 0;
+    z-index: 0;
+  }
+}
+
+.hero--portada .hero__img {
+  transform: translateY(calc(var(--avance, 0) * 12%)) scale(calc(1.05 + var(--avance, 0) * 0.15));
+  will-change: transform;
+}
+
+.hero--portada .hero__contenido {
+  transform: translateY(calc(var(--avance, 0) * -70px)) scale(calc(1 - var(--avance, 0) * 0.08));
+  opacity: calc(1 - var(--avance, 0) * 1.4);
+  will-change: transform, opacity;
+}
+
+/* Luz que sigue al mouse sobre la portada */
+.hero--portada::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(600px circle at var(--luz-x, 30%) var(--luz-y, 40%), rgba(52, 211, 153, 0.16), transparent 60%);
+}
+
+.hoja {
+  position: relative;
+  z-index: 10;
+  margin-top: -2.5rem;
+  padding-bottom: 5rem;
+  border-radius: 2.5rem 2.5rem 0 0;
+  background-color: #f6f4ee;
+  box-shadow: 0 -24px 50px -12px rgba(2, 44, 34, 0.45);
+}
+
+/* ----- Transiciones de entrada tipo diapositiva ----- */
+/* Solo se ocultan si efectos.js está activo (clase js-reveal). */
 .js-reveal [data-reveal] {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(40px);
+  transition:
+    opacity 0.9s ease,
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1);
   transition-delay: var(--reveal-delay, 0ms);
 }
+
+/* Entrar desde la izquierda o la derecha (como "Desplazar") */
+.js-reveal [data-reveal="left"] {
+  transform: translateX(-90px) rotate(-1.5deg);
+}
+
+.js-reveal [data-reveal="right"] {
+  transform: translateX(90px) rotate(1.5deg);
+}
+
+/* Zoom */
+.js-reveal [data-reveal="zoom"] {
+  transform: scale(0.82);
+}
+
+/* Volteo 3D (como "Voltear") */
+.js-reveal [data-reveal="flip"] {
+  transform: perspective(1200px) rotateX(38deg) translateY(50px);
+  transform-origin: 50% 0%;
+}
+
+/* Barrido de izquierda a derecha (como "Barrido"). Se recortan los hijos y
+   no el bloque: un bloque recortado entero mide área cero y el
+   IntersectionObserver nunca lo detectaría. */
+.js-reveal [data-reveal="wipe"] {
+  opacity: 1;
+  transform: none;
+}
+
+.js-reveal [data-reveal="wipe"] > * {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.js-reveal [data-reveal="wipe"] > :nth-child(2) { transition-delay: 0.12s; }
+.js-reveal [data-reveal="wipe"] > :nth-child(3) { transition-delay: 0.24s; }
 
 .js-reveal [data-reveal].revelado {
   opacity: 1;
   transform: none;
+}
+
+.js-reveal [data-reveal="wipe"].revelado > * {
+  clip-path: inset(0 0 0 0);
+}
+
+/* ----- Inclinación 3D con brillo al pasar el mouse ----- */
+[data-tilt] {
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+
+[data-tilt].tilt--activo {
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-6px);
+  transition: transform 0.12s linear, box-shadow 0.3s ease;
+  box-shadow: 0 30px 50px -20px rgba(2, 44, 34, 0.35);
+}
+
+[data-tilt]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.28), transparent 45%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+[data-tilt].tilt--activo::before {
+  opacity: 1;
 }
 
 /* Header que se esconde al bajar y reaparece al subir */
@@ -896,7 +1018,7 @@ header.sticky.header--con-scroll {
 
 .hero__contenido > div > *,
 .hero__contenido > * {
-  animation: subir-aparecer 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: subir-aparecer 0.8s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 .hero__contenido > div > :nth-child(2) { animation-delay: 0.1s; }
@@ -904,19 +1026,13 @@ header.sticky.header--con-scroll {
 .hero__contenido > div > :nth-child(4) { animation-delay: 0.3s; }
 .hero__contenido > div > :nth-child(5) { animation-delay: 0.4s; }
 
-/* Tarjetas que se pintan desde la API: entran en cascada */
-#tree-container > article,
+/* Tarjetas del panel del comprador: entran en cascada */
 #dashboard-comprador > article {
-  animation: subir-aparecer 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: subir-aparecer 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
-#tree-container > article:nth-child(2),
 #dashboard-comprador > article:nth-child(2) { animation-delay: 0.08s; }
-#tree-container > article:nth-child(3),
 #dashboard-comprador > article:nth-child(3) { animation-delay: 0.16s; }
-#tree-container > article:nth-child(4) { animation-delay: 0.24s; }
-#tree-container > article:nth-child(5) { animation-delay: 0.32s; }
-#tree-container > article:nth-child(n + 6) { animation-delay: 0.4s; }
 
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -928,5 +1044,9 @@ header.sticky.header--con-scroll {
   *::after {
     animation: none !important;
     transition: none !important;
+  }
+
+  .hero--portada {
+    position: relative;
   }
 }
