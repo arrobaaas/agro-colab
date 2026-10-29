@@ -18,6 +18,7 @@
       this.destinoSeleccionado = "particular";
       this.planAdopcionSeleccionado = "todos";
       this.itemLogisticaActual = null;
+      this.pedidoEditando = null;
       this.carrito = [];
       this.arbolParaAdoptar = null;
     }
@@ -47,7 +48,9 @@
         descripcion: `Plan de abastecimiento - ${boton.dataset.planFrecuencia}`,
         precio: this.planActual.precio,
         estado: "pendiente",
-        tipo: "plan"
+        tipo: "plan",
+        destino: boton.dataset.planDestino,
+        frecuencia: boton.dataset.planFrecuencia
       };
       this.agregarAlCarrito(item);
       this.itemLogisticaActual = item;
@@ -364,10 +367,10 @@
           }
         }
 
-        // El producto comprado se elimina de la canasta y la canasta vuelve a estar vacía.
+        // El producto comprado se elimina de la canasta y se configura su despacho
         this.quitarDelCarrito(index);
-
-        this.abrirLogistica();
+        this.cerrarCanasta();
+        this.abrirLogistica(item);
       } catch (error) {
         window.alert("Error de comunicación con el backend");
       }
@@ -398,6 +401,10 @@
             this.cambiarDestino(radio.value);
           });
         });
+
+      document.querySelectorAll('input[name="modal_tipo_dest"]').forEach((radio) => {
+        radio.addEventListener("change", () => this.cambiarDestinoModal(radio.value));
+      });
 
       document.getElementById("form-logistica-principal").addEventListener("submit", (evento) => {
         evento.preventDefault();
@@ -596,79 +603,86 @@
       }
     }
 
-    /* ---------- Modal de Logística (al suscribirse) ---------- */
+    /* ---------- Modal de Logística ---------- */
 
-    abrirLogistica() {
-      const modal = document.getElementById("modal-logistica");
-      modal.classList.remove("hidden");
+    /* Abre el formulario de despacho en uno de dos modos:
+       - Crear: al pagar desde la canasta, item es el árbol o el plan pagado.
+       - Editar: desde el panel, pedido es el despacho que ya existe. */
+    abrirLogistica(item = null, pedido = null) {
+      this.itemLogisticaActual = item;
+      this.pedidoEditando = pedido;
+
+      const sesion = auth.leerSesion() || {};
+      const esArbol = Boolean(item && item.tipo === "arbol") || Boolean(pedido && pedido.tipo === "arbol");
+
+      document.getElementById("form-modal-logistica").reset();
+      const alerta = document.getElementById("modal-alerta-logistica");
+      alerta.className = "hidden";
+      alerta.innerHTML = "";
+
+      document.getElementById("modal-log-titulo").textContent = pedido
+        ? "Modificar logística"
+        : esArbol ? "¿Dónde recibes la cosecha de tu árbol?" : "¿Dónde deseas recibir los productos?";
+      document.getElementById("modal-log-etiqueta").textContent = pedido
+        ? `Pedido ${pedido.codigo_seguimiento}:`
+        : esArbol ? "Árbol adoptado:" : "Plan en configuración:";
+      document.getElementById("modal-log-plan-nombre").textContent =
+        pedido ? pedido.plan_nombre : item ? item.nombre : this.planActual.nombre;
+      document.getElementById("modal-log-plan-precio").textContent =
+        `${this.ui.formatearMonto(pedido ? pedido.monto_clp : item ? item.precio : this.planActual.precio)} CLP`;
+      document.querySelector("#modal-log-boton span").textContent =
+        pedido ? "Guardar cambios" : "Confirmar destino y registrar pedido";
+
+      this.cambiarDestinoModal((pedido && pedido.tipo_destino) || (item && item.destino) || "particular");
+
+      /* Al editar solo cambian destino, dirección y frecuencia: el contacto se
+         oculta y deja de ser obligatorio (si no, el teléfono vacío bloqueaba
+         el envío del formulario). */
+      document.getElementById("modal-bloque-contacto").classList.toggle("hidden", Boolean(pedido));
+      ["modal-dest-nombre", "modal-dest-tel", "modal-dest-email"].forEach((id) => {
+        document.getElementById(id).required = !pedido;
+      });
+
+      document.getElementById("modal-dest-nombre").value = sesion.nombre || "";
+      document.getElementById("modal-dest-email").value = sesion.email || "";
+      document.getElementById("modal-dest-frecuencia").value =
+        (pedido && pedido.frecuencia_entrega) || (item && item.frecuencia) || "quincenal";
+
+      if (pedido) {
+        document.getElementById("modal-dest-direccion").value = pedido.direccion || "";
+        document.getElementById("modal-dest-comuna").value = pedido.comuna || "";
+        document.getElementById("modal-com-razon").value = pedido.razon_social || "";
+        document.getElementById("modal-com-rut").value = pedido.rut || "";
+      }
+
+      document.getElementById("modal-logistica").classList.remove("hidden");
     }
 
     cerrarLogistica() {
       document.getElementById("modal-logistica").classList.add("hidden");
+      this.pedidoEditando = null;
     }
 
-    /* ---------- Modificar la logística desde la canasta ---------- */
-
-    editarLogistica(index) {
-      const item = this.carrito[index];
-      if (!item) return;
-
-      this.abrirLogistica();
-
-      const sesion = auth.leerSesion();
-
-      const radioPart = document.querySelector('input[name="modal_tipo_dest"][value="particular"]');
-      const radioCom = document.querySelector('input[name="modal_tipo_dest"][value="comercial"]');
-      const cardPart = document.getElementById("modal-card-part");
-      const cardCom = document.getElementById("modal-card-com");
-      const bloqueCom = document.getElementById("modal-bloque-comercial");
-
-      const esComercial = item.tipoDestino === "comercial";
-      if (esComercial) {
-        if (radioCom) radioCom.checked = true;
-        if (radioPart) radioPart.checked = false;
-        cardCom.className = "destino-card destino-card--activo-comercial";
-        cardPart.className = "destino-card destino-card--inactivo";
-        bloqueCom.classList.remove("hidden");
-      } else {
-        if (radioPart) radioPart.checked = true;
-        if (radioCom) radioCom.checked = false;
-        cardPart.className = "destino-card destino-card--activo-particular";
-        cardCom.className = "destino-card destino-card--inactivo";
-        bloqueCom.classList.add("hidden");
-      }
-
-      document.getElementById("modal-dest-nombre").value =
-        (item.contacto && item.contacto.nombre) || (sesion && sesion.nombre) || "";
-      document.getElementById("modal-dest-tel").value =
-        (item.contacto && item.contacto.tel) || (sesion && sesion.telefono) || "";
-      document.getElementById("modal-dest-email").value =
-        (item.contacto && item.contacto.email) || (sesion && sesion.email) || "";
-      document.getElementById("modal-dest-direccion").value = item.direccion || "";
-      document.getElementById("modal-dest-comuna").value = item.comuna || "";
-      document.getElementById("modal-dest-frecuencia").value = item.frecuencia || "quincenal";
-
-      if (esComercial) {
-        document.getElementById("modal-com-razon").value = item.razonSocial || "";
-        document.getElementById("modal-com-rut").value = item.rut || "";
-      }
+    /* Marca el tipo de destino en el modal y muestra los datos comerciales
+       solo cuando corresponden. */
+    cambiarDestinoModal(tipo) {
+      const esComercial = tipo === "comercial";
+      const radio = document.querySelector(`input[name="modal_tipo_dest"][value="${esComercial ? "comercial" : "particular"}"]`);
+      if (radio) radio.checked = true;
+      document.getElementById("modal-card-part").className =
+        `destino-card ${esComercial ? "destino-card--inactivo" : "destino-card--activo-particular"}`;
+      document.getElementById("modal-card-com").className =
+        `destino-card ${esComercial ? "destino-card--activo-comercial" : "destino-card--inactivo"}`;
+      document.getElementById("modal-bloque-comercial").classList.toggle("hidden", !esComercial);
     }
 
     async enviarLogisticaModal(evento) {
       evento.preventDefault();
 
       const alerta = document.getElementById("modal-alerta-logistica");
-      const formulario = document.getElementById("form-modal-logistica");
       const esComercial = document.querySelector('input[name="modal_tipo_dest"]:checked').value === "comercial";
-      const sesion = auth.leerSesion();
 
-      const bodyData = {
-        plan_nombre: this.planActual.nombre,
-        monto_clp: this.planActual.precio,
-        cliente_id: sesion ? sesion.id : null,
-        cliente_nombre: document.getElementById("modal-dest-nombre").value.trim(),
-        telefono: document.getElementById("modal-dest-tel").value.trim(),
-        email: document.getElementById("modal-dest-email").value.trim(),
+      const datos = {
         tipo_destino: esComercial ? "comercial" : "particular",
         razon_social: esComercial ? document.getElementById("modal-com-razon").value.trim() : null,
         rut: esComercial ? document.getElementById("modal-com-rut").value.trim() : null,
@@ -677,48 +691,58 @@
         frecuencia_entrega: document.getElementById("modal-dest-frecuencia").value
       };
 
-      if (esComercial && (!bodyData.razon_social || !bodyData.rut)) {
+      if (esComercial && (!datos.razon_social || !datos.rut)) {
         this.ui.mostrarAlerta(alerta, "error", "Completa la razón social y el RUT para el despacho comercial.");
         return;
       }
 
-      this.ui.mostrarAlerta(alerta, "info", "Registrando tu pedido...");
+      const editando = this.pedidoEditando;
+      this.ui.mostrarAlerta(alerta, "info", editando ? "Guardando cambios..." : "Registrando tu pedido...");
 
       try {
-        const data = await this.api.crearPedido(bodyData);
-
-        if (data.status === "success") {
-          alerta.className = "alerta alerta--exito-lg";
-          alerta.innerHTML = `
-            <div class="flex items-center gap-2 mb-1">
-              <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-              <span class="text-sm font-bold">${data.mensaje}</span>
-            </div>
-            <p class="text-stone-600">Destino: <strong>${bodyData.direccion}, ${bodyData.comuna}</strong> (${bodyData.tipo_destino.toUpperCase()}) | Frecuencia: <strong>${bodyData.frecuencia_entrega}</strong>.</p>
-          `;
-          formulario.reset();
-
-          // Guardar los datos de entrega en el item del carrito para poder
-          // reutilizarlos al modificar la logística.
-          if (this.itemLogisticaActual) {
-            this.itemLogisticaActual.direccion = bodyData.direccion;
-            this.itemLogisticaActual.comuna = bodyData.comuna;
-            this.itemLogisticaActual.frecuencia = bodyData.frecuencia_entrega;
-            this.itemLogisticaActual.tipoDestino = bodyData.tipo_destino;
-            this.itemLogisticaActual.contacto = {
-              nombre: bodyData.cliente_nombre,
-              tel: bodyData.telefono,
-              email: bodyData.email
-            };
-          }
-
-          setTimeout(() => {
-            this.cerrarLogistica();
-            AgroColab.views.mostrarVista("dashboard-comprador");
-          }, 2000);
+        let data;
+        if (editando) {
+          data = await this.api.actualizarLogistica(editando.id, datos);
         } else {
-          this.ui.mostrarAlerta(alerta, "error", data.mensaje || "No se pudo registrar la solicitud logística.");
+          /* El pedido corresponde a lo que se pagó. Antes se usaba siempre
+             this.planActual, y pagar un árbol registraba además la canasta de
+             abastecimiento por defecto. */
+          const item = this.itemLogisticaActual;
+          const esArbol = Boolean(item && item.tipo === "arbol");
+          data = await this.api.crearPedido({
+            ...datos,
+            plan_nombre: item ? (esArbol ? `Cosecha de ${item.nombre}` : item.nombre) : this.planActual.nombre,
+            monto_clp: item ? item.precio : this.planActual.precio,
+            cliente_nombre: document.getElementById("modal-dest-nombre").value.trim(),
+            telefono: document.getElementById("modal-dest-tel").value.trim(),
+            email: document.getElementById("modal-dest-email").value.trim(),
+            tipo: esArbol ? "arbol" : "abastecimiento",
+            arbol_id: esArbol ? item.id : null
+          });
         }
+
+        if (data.status !== "success") {
+          this.ui.mostrarAlerta(alerta, "error", data.mensaje || "No se pudo guardar la logística.");
+          return;
+        }
+
+        alerta.className = "alerta alerta--exito-lg";
+        alerta.innerHTML = `
+          <div class="flex items-center gap-2 mb-1">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+            <span class="text-sm font-bold">${data.mensaje}</span>
+          </div>
+          <p class="text-stone-600">Destino: <strong>${datos.direccion}, ${datos.comuna}</strong> (${datos.tipo_destino}) · Frecuencia: <strong>${datos.frecuencia_entrega}</strong>.</p>
+        `;
+
+        setTimeout(() => {
+          this.cerrarLogistica();
+          if (AgroColab.views.vistaActual === "dashboard-comprador") {
+            AgroColab.dashboard.cargar();
+          } else {
+            AgroColab.views.mostrarVista("dashboard-comprador");
+          }
+        }, 1500);
       } catch (error) {
         this.ui.mostrarAlerta(alerta, "error", "Error de comunicación con el backend.");
       }

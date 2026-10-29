@@ -200,8 +200,9 @@ petición.
 | `GET` | `/api/suscripciones/usuario/{id}` 🔒 | Árboles adoptados por el usuario |
 | `GET` | `/api/mis-arboles/{id}/suscriptores` 🔒 | Suscriptores de los árboles del productor |
 | `DELETE` | `/api/suscripciones/{id}` 🔒 | Expulsa a un suscriptor (solo el productor) |
-| `POST` | `/api/pedidos` 🔒 | Registra un pedido de abastecimiento |
+| `POST` | `/api/pedidos` 🔒 | Registra un plan de abastecimiento o el despacho de la cosecha de un árbol adoptado |
 | `GET` | `/api/pedidos` 🔒 | Pedidos del usuario |
+| `PUT` | `/api/pedidos/{id}` 🔒 | Modifica el destino y la frecuencia de un pedido propio |
 | `GET` | `/api/usuario/{id}` 🔒 | Perfil propio, o el de un suscriptor para su productor |
 | `PUT` | `/api/perfil` 🔒 | Actualiza el perfil propio |
 | `DELETE` | `/api/usuario/{email}` 🔒 | Elimina la cuenta propia y todos sus datos |

@@ -13,9 +13,18 @@ from core import (
     SuscripcionRequest, cupos_ocupados_de, serializar_arbol,
     get_db, especie_de_arbol, buscar_especie, usuario_actual, exigir_mismo_usuario,
 )
-from database import Arbol, Suscripcion, Usuario
+from database import Arbol, Pedido, Suscripcion, Usuario
 
 router = APIRouter()
+
+
+def borrar_despacho_del_arbol(db: Session, usuario_id: int, arbol_id: int):
+    """Sin la suscripción, el despacho de la cosecha de ese árbol ya no aplica."""
+    db.query(Pedido).filter(
+        Pedido.cliente_id == usuario_id,
+        Pedido.arbol_id == arbol_id,
+        Pedido.tipo == "arbol",
+    ).delete(synchronize_session=False)
 
 
 @router.post("/api/suscribir")
@@ -186,6 +195,7 @@ def expulsar_suscriptor(
     if not arbol or arbol.productor_id != usuario.id:
         return {"status": "error", "mensaje": "Solo el productor del árbol puede expulsar suscriptores."}
 
+    borrar_despacho_del_arbol(db, suscripcion.usuario_id, arbol.id)
     db.delete(suscripcion)
     db.flush()
     arbol.cupos_ocupados = cupos_ocupados_de(arbol, db)
@@ -214,6 +224,7 @@ def cancelar_suscripcion(
     if not suscripcion:
         return {"status": "error", "mensaje": "No estás suscrito a este árbol."}
 
+    borrar_despacho_del_arbol(db, usuario.id, arbol.id)
     db.delete(suscripcion)
     db.flush()
 

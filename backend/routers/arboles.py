@@ -8,7 +8,7 @@ from core import (
     normalizar_identificador, serializar_arbol, cupos_ocupados_de, get_db,
     usuario_actual,
 )
-from database import Arbol, Suscripcion, Usuario
+from database import Arbol, Pedido, Suscripcion, Usuario
 
 router = APIRouter()
 
@@ -134,8 +134,10 @@ def eliminar_arbol(
     if error:
         return error
 
-    # Sin esto las suscripciones quedaban apuntando a un árbol inexistente
+    # Sin esto las suscripciones y sus despachos quedaban apuntando a un
+    # árbol inexistente
     db.query(Suscripcion).filter(Suscripcion.arbol_id == arbol.id).delete()
+    db.query(Pedido).filter(Pedido.arbol_id == arbol.id).delete()
     db.delete(arbol)
     db.commit()
     return {"status": "success", "mensaje": f"Árbol '{arbol.nombre}' eliminado correctamente."}

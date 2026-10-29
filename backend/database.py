@@ -119,6 +119,10 @@ class Pedido(Base):
     codigo_seguimiento = Column(String, unique=True)
     fecha_registro = Column(DateTime, default=datetime.utcnow)
     estado_logistica = Column(String)
+    # "abastecimiento" = plan de canastas | "arbol" = despacho de la cosecha
+    # de un árbol adoptado (arbol_id). Sin esto el panel no podía distinguirlos.
+    tipo = Column(String, default="abastecimiento")
+    arbol_id = Column(Integer, ForeignKey("arboles.id"), nullable=True)
 
     cliente = relationship("Usuario", back_populates="pedidos")
 

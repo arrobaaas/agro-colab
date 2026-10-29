@@ -87,6 +87,14 @@ class ApiService {
     return this.apiFetch("/pedidos", { method: "POST", body: JSON.stringify(pedido) });
   }
 
+  obtenerPedidos() {
+    return this.apiFetch("/pedidos");
+  }
+
+  actualizarLogistica(pedidoId, datos) {
+    return this.apiFetch(`/pedidos/${pedidoId}`, { method: "PUT", body: JSON.stringify(datos) });
+  }
+
   subirArbol(arbol) {
     return this.apiFetch("/arboles", { method: "POST", body: JSON.stringify(arbol) });
   }

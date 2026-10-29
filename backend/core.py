@@ -225,6 +225,17 @@ class PedidoRequest(BaseModel):
     direccion: str
     comuna: str
     frecuencia_entrega: str
+    tipo: str = "abastecimiento"  # "abastecimiento" o "arbol"
+    arbol_id: Optional[int] = None
+
+class LogisticaRequest(BaseModel):
+    """Datos de despacho que se pueden modificar en un pedido existente."""
+    tipo_destino: str
+    razon_social: Optional[str] = None
+    rut: Optional[str] = None
+    direccion: str
+    comuna: str
+    frecuencia_entrega: str
 
 class ArbolRequest(BaseModel):
     nombre: Optional[str] = None  # se compone desde especie + identificador
