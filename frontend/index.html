@@ -21,24 +21,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261031i">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261031i">
-  <script src="js/config.js?v=20261031i" defer></script>
-  <script src="js/ui.js?v=20261031i" defer></script>
-  <script src="js/api.js?v=20261031i" defer></script>
-  <script src="js/auth.js?v=20261031i" defer></script>
-  <script src="js/parcelas.js?v=20261031i" defer></script>
-  <script src="js/catalogo.js?v=20261031i" defer></script>
-  <script src="js/agricultor.js?v=20261031i" defer></script>
-  <script src="js/perfil.js?v=20261031i" defer></script>
-  <script src="js/autocomplete.js?v=20261031i" defer></script>
-  <script src="js/dashboard.js?v=20261031i" defer></script>
-  <script src="js/efectos.js?v=20261031i" defer></script>
-  <script src="js/constelacion.js?v=20261031i" defer></script>
-  <script src="js/views.js?v=20261031i" defer></script>
-  <script src="js/login.js?v=20261031i" defer></script>
-  <script src="js/acciones.js?v=20261031i" defer></script>
-  <script src="js/app.js?v=20261031i" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261031j">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031j">
+  <script src="js/config.js?v=20261031j" defer></script>
+  <script src="js/ui.js?v=20261031j" defer></script>
+  <script src="js/api.js?v=20261031j" defer></script>
+  <script src="js/auth.js?v=20261031j" defer></script>
+  <script src="js/parcelas.js?v=20261031j" defer></script>
+  <script src="js/catalogo.js?v=20261031j" defer></script>
+  <script src="js/agricultor.js?v=20261031j" defer></script>
+  <script src="js/perfil.js?v=20261031j" defer></script>
+  <script src="js/autocomplete.js?v=20261031j" defer></script>
+  <script src="js/dashboard.js?v=20261031j" defer></script>
+  <script src="js/efectos.js?v=20261031j" defer></script>
+  <script src="js/constelacion.js?v=20261031j" defer></script>
+  <script src="js/views.js?v=20261031j" defer></script>
+  <script src="js/login.js?v=20261031j" defer></script>
+  <script src="js/acciones.js?v=20261031j" defer></script>
+  <script src="js/app.js?v=20261031j" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -46,55 +46,41 @@
   <!-- ============================================================
        VISTA 1: LOGIN - lo primero que ve cualquier persona
        ============================================================ -->
-  <div id="vista-login" data-vista="login" class="min-h-screen flex flex-col justify-between">
+  <div id="vista-login" data-vista="login" class="tema-comprador login">
 
-    <header class="bg-white/80 backdrop-blur border-b border-stone-200 py-4 px-6">
-      <div class="max-w-6xl mx-auto flex justify-between items-center">
-        <div class="flex items-center space-x-2 text-stone-900">
-          <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
-          <span class="text-lg font-extrabold tracking-tight">Agro-Colab</span>
-        </div>
-        <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">
-          Trazabilidad directa del huerto a tu mesa
-        </span>
+    <header class="tc-nav">
+      <div class="tc-contenedor tc-nav__fila">
+        <span class="tc-marca"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado-l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado-l)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</span>
+        <span class="tc-etiqueta tc-etiqueta--gris tc-solo-escritorio">Del huerto a tu mesa</span>
       </div>
     </header>
 
-    <main class="flex-1 flex items-center justify-center p-4">
-      <div class="w-full max-w-5xl grid lg:grid-cols-2 bg-white rounded-3xl border border-stone-200 shadow-2xl overflow-hidden">
+    <main class="tc-hero login__escenario">
+      <div class="tc-contenedor login__grid">
 
-        <!-- Panel visual (solo en pantallas grandes) -->
-        <div class="hero hidden lg:flex flex-col justify-end p-10 min-h-[36rem]">
-          <img
-            src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1200&q=80"
-            alt="Campos de cultivo"
-            class="hero__img"
-          >
-          <div class="hero__contenido">
-            <span class="hero__pill"><i class="fa-solid fa-leaf"></i> Cosecha colaborativa</span>
-            <h2 class="text-4xl font-extrabold leading-tight mt-5">
-              Del huerto chileno<br><span class="text-emerald-400">directo a tu mesa.</span>
-            </h2>
-            <ul class="mt-6 space-y-3 text-sm text-emerald-50/85">
-              <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-emerald-400"></i> Adopta un árbol y recibe su cosecha</li>
-              <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-emerald-400"></i> Tu pago llega directo al agricultor</li>
-              <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-emerald-400"></i> Trazabilidad de cada pedido</li>
-            </ul>
+        <!-- Portada: árbol 3D y titular -->
+        <section class="login__portada">
+          <div class="tc-hero__visual login__arbol">
+            <canvas data-constelacion aria-hidden="true"></canvas>
           </div>
-        </div>
+          <div class="login__texto">
+            <p class="tc-etiqueta">Cosecha colaborativa · Chile</p>
+            <h1 class="tc-display login__titular">Del huerto chileno.<br><span class="tc-tenue">Directo a tu mesa.</span></h1>
+            <p class="tc-cuerpo login__bajada">
+              Adopta un árbol frutal o contrata una canasta de cosecha.
+              Tu pago llega directo al agricultor, sin intermediarios.
+            </p>
+          </div>
+        </section>
 
-        <div>
-        <div class="bg-emerald-900 p-6 text-white text-center relative">
-          <h2 class="text-2xl font-black" id="login-titulo">Iniciar Sesión</h2>
-          <p class="text-xs text-emerald-200 mt-1" id="login-subtitulo">Ingresa a tu panel de gestión colaborativa</p>
-        </div>
+        <!-- Tarjeta de acceso -->
+        <section class="login__tarjeta" aria-labelledby="login-titulo">
+          <h2 class="tc-titulo-sm" id="login-titulo">Iniciar sesión</h2>
+          <p class="tc-cuerpo-sm" id="login-subtitulo" style="margin-top:.4rem">Ingresa a tu panel de gestión colaborativa</p>
 
-        <div class="p-8">
           <!-- Selector de Rol -->
-          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
-            Tipo de Cuenta
-          </label>
-          <div class="grid grid-cols-2 gap-3 mb-6">
+          <p class="tc-kpi__etiqueta">Tipo de cuenta</p>
+          <div class="login__roles">
             <button type="button" id="btn-comprador" class="rol-btn rol-btn--activo" data-accion="login.setRol" data-args='["comprador"]'>
               <i class="fa-solid fa-basket-shopping text-base"></i>
               <span>Comprador</span>
@@ -108,7 +94,7 @@
           <!-- Formulario de Login -->
           <form id="login-form" class="space-y-4" data-sin-envio>
             <div>
-              <label for="email" class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
+              <label for="email" class="login__etiqueta">Correo Electrónico</label>
               <div class="relative">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
                   <i class="fa-regular fa-envelope"></i>
@@ -125,7 +111,7 @@
             </div>
 
             <div>
-              <label for="password" class="block text-xs font-semibold text-stone-700 mb-1">Contraseña</label>
+              <label for="password" class="login__etiqueta">Contraseña</label>
               <div class="relative">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
                   <i class="fa-solid fa-lock"></i>
@@ -146,13 +132,13 @@
 
             <div id="alert-box" class="hidden"></div>
 
-            <button type="button" class="btn-submit mt-2" data-accion="login.iniciarSesion" data-args='[null]'>Acceder al Sistema</button>
+            <button type="button" class="tc-boton login__enviar" data-accion="login.iniciarSesion" data-args='[null]'>Ingresar</button>
           </form>
 
           <!-- Formulario de Registro -->
           <form id="register-form" class="space-y-4 hidden" data-sin-envio>
             <div>
-              <label for="reg-nombre" class="block text-xs font-semibold text-stone-700 mb-1">Nombre completo</label>
+              <label for="reg-nombre" class="login__etiqueta">Nombre completo</label>
               <div class="relative">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
                   <i class="fa-regular fa-user"></i>
@@ -169,7 +155,7 @@
             </div>
 
             <div>
-              <label for="reg-email" class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
+              <label for="reg-email" class="login__etiqueta">Correo Electrónico</label>
               <div class="relative">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
                   <i class="fa-regular fa-envelope"></i>
@@ -186,7 +172,7 @@
             </div>
 
             <div>
-              <label for="reg-password" class="block text-xs font-semibold text-stone-700 mb-1">Contraseña</label>
+              <label for="reg-password" class="login__etiqueta">Contraseña</label>
               <div class="relative">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
                   <i class="fa-solid fa-lock"></i>
@@ -207,7 +193,7 @@
             </div>
 
             <div>
-              <label for="reg-telefono" class="block text-xs font-semibold text-stone-700 mb-1">Teléfono (opcional)</label>
+              <label for="reg-telefono" class="login__etiqueta">Teléfono (opcional)</label>
               <div class="relative">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400 text-sm">
                   <i class="fa-solid fa-phone"></i>
@@ -223,7 +209,7 @@
             </div>
 
             <div>
-              <label for="reg-direccion" class="block text-xs font-semibold text-stone-700 mb-1">Dirección (opcional)</label>
+              <label for="reg-direccion" class="login__etiqueta">Dirección (opcional)</label>
               <input
                 type="text"
                 id="reg-direccion"
@@ -233,47 +219,51 @@
               >
             </div>
 
-            <div class="bg-stone-50 border border-stone-200 rounded-xl p-4 space-y-3">
+            <div class="login__consentimiento">
               <label class="flex items-start gap-2 cursor-pointer">
                 <input type="checkbox" id="reg-consentimiento" required class="mt-1 text-emerald-700">
                 <span class="text-xs text-stone-600">
-                  Acepto el tratamiento de mis datos personales para los fines del servicio. Ver <a href="privacidad.html" target="_blank" class="text-emerald-700 hover:underline font-semibold">Política de Privacidad</a>. (Obligatorio)
+                  Acepto el tratamiento de mis datos personales para los fines del servicio. Ver <a href="privacidad.html" target="_blank" class="perfil-enlace">Política de Privacidad</a>. (Obligatorio)
                 </span>
               </label>
               <label class="flex items-start gap-2 cursor-pointer">
                 <input type="checkbox" id="reg-terminos" required class="mt-1 text-emerald-700">
                 <span class="text-xs text-stone-600">
-                  Acepto los <a href="terminos.html" target="_blank" class="text-emerald-700 hover:underline font-semibold">Términos y Condiciones</a> de Agro-Colab. (Obligatorio)
+                  Acepto los <a href="terminos.html" target="_blank" class="perfil-enlace">Términos y Condiciones</a> de Agro-Colab. (Obligatorio)
                 </span>
               </label>
             </div>
 
             <div id="alerta-registro" class="hidden"></div>
 
-            <button type="submit" class="btn-submit mt-2">Crear Cuenta</button>
+            <button type="submit" class="tc-boton login__enviar">Crear cuenta</button>
           </form>
 
           <!-- Botón para alternar entre login y registro -->
-          <div class="mt-4 text-center">
-            <button type="button" id="btn-alternar" class="text-xs text-emerald-700 hover:text-emerald-900 font-semibold">
+          <div class="login__alternar">
+            <button type="button" id="btn-alternar" class="tc-enlace">
               ¿No tienes cuenta? Regístrate
             </button>
           </div>
 
           <!-- Ayuda rápida para pruebas -->
-          <div class="mt-6 pt-4 border-t border-stone-100 bg-stone-50 p-3 rounded-lg text-[11px] text-stone-500 space-y-1">
-            <p class="font-bold text-stone-700">Cuentas de demostración:</p>
-            <p>• Comprador: <span class="font-mono text-emerald-800">comprador@agrocolab.cl</span> / <span class="font-mono">123</span></p>
-            <p>• Agricultor: <span class="font-mono text-emerald-800">agricultor@agrocolab.cl</span> / <span class="font-mono">123</span></p>
+          <div class="login__demo">
+            <p class="tc-kpi__etiqueta">Cuentas de demostración</p>
+            <p>Comprador <code>comprador@agrocolab.cl</code> · <code>123</code></p>
+            <p>Agricultor <code>agricultor@agrocolab.cl</code> · <code>123</code></p>
           </div>
-
-        </div>
-        </div>
+        </section>
       </div>
     </main>
 
-    <footer class="text-center py-4 text-xs text-stone-400">
-      © 2026 Agro-Colab · Prototipo colaborativo
+    <footer class="tc-footer">
+      <div class="tc-contenedor tc-footer__base" style="border-top:0">
+        <span>© 2026 Agro-Colab · Prototipo académico</span>
+        <span style="display:flex;gap:1.5rem">
+          <a href="privacidad.html">Privacidad</a>
+          <a href="terminos.html">Términos</a>
+        </span>
+      </div>
     </footer>
   </div>
 
@@ -960,7 +950,7 @@
   </div>
 
   <!-- MODAL: VERIFICACIÓN DE CUENTA -->
-  <div id="modal-verificacion" class="modal-animado fixed inset-0 z-[100] hidden">
+  <div id="modal-verificacion" class="modal-animado fixed inset-0 z-[100] hidden tema-comprador">
     <div class="absolute inset-0 bg-black/60" data-accion="login.cerrarVerificacion"></div>
     <div class="relative max-w-md mx-auto mt-20 bg-white rounded-3xl shadow-2xl overflow-hidden">
       <div class="bg-emerald-900 text-white p-6 text-center">
@@ -988,7 +978,7 @@
             >
           </div>
           <div id="alerta-verificacion" class="hidden"></div>
-          <button type="submit" class="btn-submit w-full">Verificar Cuenta</button>
+          <button type="submit" class="tc-boton" style="width:100%">Verificar cuenta</button>
         </form>
         <div class="mt-4 text-center">
           <button type="button" data-accion="login.reenviarCodigo" class="text-xs text-emerald-700 hover:text-emerald-900 font-semibold">
