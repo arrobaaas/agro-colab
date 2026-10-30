@@ -97,16 +97,81 @@ def limitar_por_ip(maximo: int = 10, ventana_segundos: int = 300):
 
 # ----------------- CORREO -----------------
 
+def plantilla_correo(nombre: str, titulo: str, intro: str, codigo: str = "", pie: str = "") -> str:
+    """HTML de los correos con la marca de Agro-Colab.
+
+    Tablas y estilos en línea: los clientes de correo (Gmail, Outlook)
+    ignoran las hojas de estilo. Todo texto variable pasa por html.escape.
+    """
+    bloque_codigo = (
+        "<tr><td style='padding:8px 40px 8px'>"
+        "<div style='background:#f6f4ee;border-radius:16px;padding:22px;text-align:center;"
+        "font-family:Menlo,Consolas,monospace;font-size:34px;letter-spacing:10px;color:#0c1410'>"
+        f"{html.escape(codigo)}</div></td></tr>"
+        if codigo else ""
+    )
+    return (
+        "<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'></head>"
+        "<body style='margin:0;background:#f6f4ee;font-family:Inter,Arial,sans-serif'>"
+        "<table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='padding:32px 12px'><tr><td align='center'>"
+        "<table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='max-width:520px;background:#ffffff;border-radius:24px;overflow:hidden'>"
+        "<tr><td style='background:#040806;padding:26px 40px;color:#ffffff;font-size:18px;font-weight:600'>"
+        "<span style='color:#34d399'>&#9650;</span>&nbsp; Agro-Colab</td></tr>"
+        f"<tr><td style='padding:36px 40px 8px;color:#0c1410;font-size:24px;line-height:1.25'>{html.escape(titulo)}</td></tr>"
+        f"<tr><td style='padding:8px 40px 16px;color:#3d4842;font-size:15px;line-height:1.6'>Hola {html.escape(nombre)},<br>{html.escape(intro)}</td></tr>"
+        f"{bloque_codigo}"
+        f"<tr><td style='padding:16px 40px 36px;color:#67716b;font-size:13px;line-height:1.6'>{html.escape(pie)}</td></tr>"
+        "<tr><td style='border-top:1px solid #edeae2;padding:18px 40px;color:#8b938f;font-size:12px'>"
+        "Agro-Colab · Proyecto académico INGT1003, Universidad Mayor. Este correo se envió automáticamente; no lo respondas.</td></tr>"
+        "</table></td></tr></table></body></html>"
+    )
+
+
 def enviar_codigo_verificacion(destino: str, nombre: str, codigo: str) -> bool:
     """Envía el código de verificación de cuenta por correo."""
     return enviar_correo(
         destino,
         nombre,
         f"Tu código de verificación de Agro-Colab: {codigo}",
-        f"<p>Hola {html.escape(nombre)},</p>"
-        f"<p>Tu código para verificar tu cuenta en Agro-Colab es:</p>"
-        f"<p style='font-size:28px;font-weight:bold;letter-spacing:6px'>{codigo}</p>"
-        f"<p>Vence en 30 minutos. Si no creaste una cuenta, ignora este correo.</p>",
+        plantilla_correo(
+            nombre,
+            "Verifica tu cuenta",
+            "Para terminar de crear tu cuenta en Agro-Colab, ingresa este código:",
+            codigo,
+            "El código vence en 30 minutos. Si no creaste una cuenta, ignora este correo.",
+        ),
+    )
+
+
+def enviar_codigo_recuperacion(destino: str, nombre: str, codigo: str) -> bool:
+    """Envía el código para restablecer la contraseña."""
+    return enviar_correo(
+        destino,
+        nombre,
+        f"Restablece tu contraseña de Agro-Colab: {codigo}",
+        plantilla_correo(
+            nombre,
+            "Restablece tu contraseña",
+            "Recibimos una solicitud para cambiar la contraseña de tu cuenta. Usa este código:",
+            codigo,
+            "El código vence en 15 minutos. Si no fuiste tú, ignora este correo: tu contraseña no cambiará.",
+        ),
+    )
+
+
+def enviar_aviso_cambio_contrasena(destino: str, nombre: str) -> bool:
+    """Avisa que la contraseña cambió, por si no fue el dueño de la cuenta."""
+    return enviar_correo(
+        destino,
+        nombre,
+        "Tu contraseña de Agro-Colab cambió",
+        plantilla_correo(
+            nombre,
+            "Tu contraseña cambió",
+            "La contraseña de tu cuenta se restableció correctamente y se cerraron las sesiones abiertas.",
+            "",
+            "Si no fuiste tú, restablécela de inmediato desde «¿Olvidaste tu contraseña?» y escríbenos.",
+        ),
     )
 
 
@@ -399,6 +464,14 @@ class ReenvioRequest(BaseModel):
 class VerificacionRequest(BaseModel):
     email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)]
     codigo: Annotated[str, StringConstraints(pattern=r"^\d{6}$")]
+
+class RecuperacionRequest(BaseModel):
+    email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)]
+
+class RestablecerRequest(BaseModel):
+    email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)]
+    codigo: Annotated[str, StringConstraints(pattern=r"^\d{6}$")]
+    password: Contrasena
 
 
 # ----------------- VALIDACIÓN DE ESPECIES E IMAGEN -----------------

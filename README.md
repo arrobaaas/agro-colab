@@ -193,7 +193,7 @@ queda en `http://127.0.0.1:8000/docs`.
 |---|---|---|
 | `AGROCOLAB_SECRET` | En producción | Clave para firmar los tokens de sesión. Si falta, se genera una al arrancar y las sesiones se cierran en cada reinicio. |
 | `AGROCOLAB_MOD_MODE` | No | `desarrollo` devuelve el código de verificación de cuenta en la respuesta, para probar el registro sin correo. Por defecto: `produccion`. |
-| `BREVO_API_KEY` | Para registrar cuentas en producción | Clave de la API de [Brevo](https://www.brevo.com) para enviar el código de verificación por correo (plan gratuito: 300 correos al día). |
+| `BREVO_API_KEY` | Para registrar cuentas y recuperar contraseñas en producción | Clave de la API de [Brevo](https://www.brevo.com) para enviar los códigos por correo (plan gratuito: 300 correos al día). |
 | `CORREO_REMITENTE` | Junto con `BREVO_API_KEY` | Correo verificado en Brevo desde el que se envía el código. |
 | `ALERTA_CORREO` | No | Correo que recibe las alertas de seguridad (usa Brevo). |
 | `ALERTA_WEBHOOK_URL` | No | Webhook de Discord o Slack para las alertas de seguridad (`https://`). |
@@ -215,6 +215,9 @@ petición.
 |---|---|---|
 | `POST` | `/api/register` | Registra una cuenta y envía el código de verificación |
 | `POST` | `/api/verificar-cuenta` | Verifica la cuenta con el código de 6 dígitos |
+| `POST` | `/api/recuperar-contrasena` | Envía un código para restablecer la contraseña (misma respuesta exista o no la cuenta) |
+| `POST` | `/api/restablecer-contrasena` | Cambia la contraseña con el código y cierra las sesiones abiertas |
+| `GET` | `/api/estado` | Indica si el envío real de correos está activo |
 | `POST` | `/api/login` | Inicia sesión y devuelve el token |
 | `GET` | `/api/especies` | Catálogo cerrado de especies con sus fotos verificadas |
 | `GET` | `/api/arboles` | Catálogo público de árboles |
@@ -332,7 +335,7 @@ consentimiento y el derecho a eliminación.
 - [x] Autenticación con tokens y autorización por recurso
 - [x] Pasarela de pago (simulada)
 - [ ] Migración a PostgreSQL
-- [ ] Envío real del correo de verificación
+- [x] Envío real del correo de verificación (Brevo) y recuperación de contraseña
 - [ ] Fotos propias del productor con flujo de moderación
 - [ ] Pruebas automatizadas e integración continua
 

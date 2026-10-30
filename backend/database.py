@@ -55,6 +55,11 @@ class Usuario(Base):
     verificado = Column(Integer, default=0) # 0 = no verificado, 1 = verificado
     codigo_verificacion = Column(String, nullable=True)
     codigo_expira = Column(DateTime, nullable=True)  # el código vale 30 minutos
+    # Recuperación de contraseña: se guarda el hash del código (no el código),
+    # su vencimiento y los intentos fallidos
+    recuperacion_hash = Column(String, nullable=True)
+    recuperacion_expira = Column(DateTime, nullable=True)
+    recuperacion_intentos = Column(Integer, default=0)
     consentimiento_datos = Column(Integer, default=0) # 0 = no aceptado, 1 = aceptado
     fecha_consentimiento = Column(DateTime, nullable=True)
     acepta_terminos = Column(Integer, default=0) # 0 = no aceptado, 1 = aceptado

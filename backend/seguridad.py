@@ -48,6 +48,7 @@ REGLAS = {
     "limite_excedido": (1, timedelta(minutes=10), "ip", "Un cliente superó el límite de intentos"),
     "entrada_html": (1, timedelta(minutes=10), "ip", "Intento de inyectar HTML o JavaScript (posible XSS)"),
     "csp_violacion": (1, timedelta(minutes=10), "ip", "El navegador de un visitante bloqueó código no autorizado (CSP)"),
+    "recuperacion_fallida": (8, timedelta(minutes=15), "ip", "Muchos códigos de recuperación de contraseña incorrectos"),
     "pago_rechazado": (5, timedelta(minutes=15), "ip", "Muchos pagos rechazados seguidos (posible prueba de tarjetas)"),
 }
 

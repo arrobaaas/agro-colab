@@ -3,12 +3,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+import hashlib
 import hmac
 import secrets
 
 from core import (
     LoginRequest, RegistroRequest, VerificacionRequest, PerfilRequest, ReenvioRequest,
-    correo_configurado, enviar_codigo_verificacion,
+    RecuperacionRequest, RestablecerRequest,
+    correo_configurado, enviar_codigo_verificacion, enviar_codigo_recuperacion, enviar_aviso_cambio_contrasena,
     hash_password, verify_password, foto_de, get_db, MODO_DESARROLLO, limitar_por_ip, crear_token, usuario_actual,
     limitar, es_cuenta_demo,
 )
@@ -175,6 +177,106 @@ def verificar_cuenta(data: VerificacionRequest, db: Session = Depends(get_db)):
         "status": "success",
         "mensaje": "Cuenta verificada correctamente. Ya puedes iniciar sesión."
     }
+
+
+# ----------------- ESTADO DEL SERVICIO -----------------
+
+@router.get("/api/estado")
+def estado_servicio():
+    """Indica si el envío real de correos está activo (sin exponer claves).
+
+    El frontend lo usa para avisar antes de registrarse, y sirve para
+    comprobar la configuración de Render sin crear una cuenta de prueba.
+    """
+    return {
+        "status": "success",
+        "correo_real": correo_configurado(),
+        "modo_desarrollo": MODO_DESARROLLO,
+    }
+
+
+# ----------------- RECUPERACIÓN DE CONTRASEÑA -----------------
+
+VIGENCIA_RECUPERACION = timedelta(minutes=15)
+MAX_INTENTOS_RECUPERACION = 5
+MENSAJE_RECUPERACION = "Si el correo tiene una cuenta, te enviamos un código para restablecer tu contraseña. Revisa también la carpeta de spam."
+
+
+def hash_codigo(codigo: str) -> str:
+    """El código se guarda como hash: quien lea la base no puede usarlo."""
+    return hashlib.sha256(codigo.encode("utf-8")).hexdigest()
+
+
+@router.post("/api/recuperar-contrasena", dependencies=[Depends(limitar_por_ip(maximo=5, ventana_segundos=3600))])
+def recuperar_contrasena(data: RecuperacionRequest, db: Session = Depends(get_db)):
+    limitar(f"recuperar:{data.email.lower()}", maximo=3, ventana_segundos=3600)
+
+    if not MODO_DESARROLLO and not correo_configurado():
+        return {"status": "error", "mensaje": "La recuperación de contraseña no está disponible por ahora. Intenta más tarde."}
+
+    respuesta = {"status": "success", "mensaje": MENSAJE_RECUPERACION}
+
+    # Siempre la misma respuesta, exista o no la cuenta: no se revela qué
+    # correos están registrados (enumeración de usuarios)
+    usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
+    if not usuario or es_cuenta_demo(usuario):
+        registrar_evento("recuperacion_solicitada", "info", email=data.email, detalle="sin cuenta o cuenta demo")
+        return respuesta
+
+    codigo = f"{secrets.randbelow(1_000_000):06d}"
+    usuario.recuperacion_hash = hash_codigo(codigo)
+    usuario.recuperacion_expira = datetime.utcnow() + VIGENCIA_RECUPERACION
+    usuario.recuperacion_intentos = 0
+    db.commit()
+    registrar_evento("recuperacion_solicitada", "info", usuario=usuario)
+
+    if MODO_DESARROLLO:
+        # Solo en desarrollo, para probar sin correo. Nunca en producción.
+        print(f"[desarrollo] código de recuperación de {usuario.email}: {codigo}")
+        respuesta["codigo_desarrollo"] = codigo
+    elif not enviar_codigo_recuperacion(usuario.email, usuario.nombre, codigo):
+        return {"status": "error", "mensaje": "No pudimos enviar el correo. Intenta nuevamente en unos minutos."}
+    return respuesta
+
+
+@router.post("/api/restablecer-contrasena", dependencies=[Depends(limitar_por_ip(maximo=10, ventana_segundos=3600))])
+def restablecer_contrasena(data: RestablecerRequest, db: Session = Depends(get_db)):
+    limitar(f"restablecer:{data.email.lower()}", maximo=8, ventana_segundos=3600)
+    error = {"status": "error", "mensaje": "Código incorrecto o vencido. Puedes pedir uno nuevo."}
+
+    usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
+    if not usuario or not usuario.recuperacion_hash:
+        registrar_evento("recuperacion_fallida", "advertencia", email=data.email, detalle="sin código vigente")
+        return error
+
+    vigente = usuario.recuperacion_expira and usuario.recuperacion_expira >= datetime.utcnow()
+    if not vigente or not hmac.compare_digest(usuario.recuperacion_hash, hash_codigo(data.codigo)):
+        # Tras varios intentos el código se anula: 6 dígitos no resisten
+        # fuerza bruta sin este tope (además del límite por IP y por cuenta)
+        usuario.recuperacion_intentos = (usuario.recuperacion_intentos or 0) + 1
+        if not vigente or usuario.recuperacion_intentos >= MAX_INTENTOS_RECUPERACION:
+            usuario.recuperacion_hash = None
+            usuario.recuperacion_expira = None
+        db.commit()
+        registrar_evento("recuperacion_fallida", "advertencia", usuario=usuario, detalle=f"intento {usuario.recuperacion_intentos}")
+        return error
+
+    # El token de sesión depende del hash de la contraseña (core.crear_token):
+    # al cambiarla, todas las sesiones abiertas dejan de valer
+    usuario.password = hash_password(data.password)
+    usuario.recuperacion_hash = None
+    usuario.recuperacion_expira = None
+    usuario.recuperacion_intentos = 0
+    # Recibir el código prueba que el correo es suyo
+    usuario.verificado = 1
+    usuario.codigo_verificacion = None
+    usuario.codigo_expira = None
+    db.commit()
+    registrar_evento("contrasena_restablecida", "info", usuario=usuario)
+
+    if not MODO_DESARROLLO:
+        enviar_aviso_cambio_contrasena(usuario.email, usuario.nombre)
+    return {"status": "success", "mensaje": "Tu contraseña se restableció. Ya puedes iniciar sesión con la nueva."}
 
 
 @router.get("/api/usuario/{usuario_id}")

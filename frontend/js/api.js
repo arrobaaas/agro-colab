@@ -122,6 +122,17 @@ class ApiService {
     return this.apiFetch("/register", { method: "POST", body: JSON.stringify(datos) });
   }
 
+  recuperarContrasena(email) {
+    return this.apiFetch("/recuperar-contrasena", { method: "POST", body: JSON.stringify({ email }) });
+  }
+
+  restablecerContrasena(email, codigo, password) {
+    return this.apiFetch("/restablecer-contrasena", {
+      method: "POST",
+      body: JSON.stringify({ email, codigo, password })
+    });
+  }
+
   verificarCuenta(email, codigo) {
     return this.apiFetch("/verificar-cuenta", {
       method: "POST",
