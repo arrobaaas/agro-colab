@@ -123,7 +123,7 @@
       document.getElementById("editar-tipo").value = arbol.tipo_suscripcion;
       document.getElementById("editar-cupos").value = arbol.cupos_totales;
       document.getElementById("editar-precio").value = arbol.precio_mensual_clp;
-      document.getElementById("editar-cosecha").value = arbol.estimacion_cosecha;
+      document.getElementById("editar-cosecha").value = this.kilosDeCosecha(arbol.estimacion_cosecha);
 
       this.edicion.especie = arbol.especie || "";
       this.edicion.identificador = arbol.identificador || "";
@@ -188,12 +188,12 @@
         tipo_suscripcion: document.getElementById("editar-tipo").value,
         cupos_totales: Number(document.getElementById("editar-cupos").value),
         precio_mensual_clp: Number(document.getElementById("editar-precio").value),
-        estimacion_cosecha: document.getElementById("editar-cosecha").value.trim(),
+        estimacion_cosecha_kg: Number(document.getElementById("editar-cosecha").value),
         imagen: this.edicion.foto.url,
         productor: this.auth.leerSesion().nombre
       };
 
-      if (!bodyData.ubicacion || !bodyData.estimacion_cosecha) {
+      if (!bodyData.ubicacion || !(bodyData.estimacion_cosecha_kg >= 1)) {
         this.ui.mostrarAlerta(alerta, "error", "Completa todos los campos obligatorios.");
         return;
       }
@@ -446,6 +446,20 @@
       this.cambiarSeccion("formulario-arbol", "dashboard-agricultor");
     }
 
+    /* ---------- Cosecha en kilos ---------- */
+
+    /* Mismo texto que arma el backend (core.texto_cosecha) */
+    textoCosecha(kilos) {
+      const numero = Math.round(Number(kilos));
+      return numero >= 1 ? `${numero.toLocaleString("es-CL")} kg anuales` : "—";
+    }
+
+    /* Número de kilos de un texto guardado: "1.200 kg anuales" -> 1200 */
+    kilosDeCosecha(texto) {
+      const coincidencia = String(texto || "").match(/[\d.]+/);
+      return coincidencia ? Number(coincidencia[0].replace(/\./g, "")) || "" : "";
+    }
+
     /* ---------- Vista previa en vivo del formulario ---------- */
 
     pintarVistaPrevia() {
@@ -466,7 +480,7 @@
         plan: document.getElementById("arbol-plan").value,
         tipo_suscripcion: document.getElementById("arbol-tipo").value,
         ubicacion: document.getElementById("arbol-ubicacion").value.trim() || "Ubicación del huerto",
-        estimacion_cosecha: document.getElementById("arbol-cosecha").value.trim() || "—",
+        estimacion_cosecha: this.textoCosecha(document.getElementById("arbol-cosecha").value),
         productor: sesion ? sesion.nombre : "",
         precio_mensual_clp: Number(document.getElementById("arbol-precio").value) || 0,
         cupos_totales: cupos,
@@ -564,12 +578,12 @@
         tipo_suscripcion: document.getElementById("arbol-tipo").value,
         cupos_totales: Number(document.getElementById("arbol-cupos").value),
         precio_mensual_clp: Number(document.getElementById("arbol-precio").value),
-        estimacion_cosecha: document.getElementById("arbol-cosecha").value.trim(),
+        estimacion_cosecha_kg: Number(document.getElementById("arbol-cosecha").value),
         imagen: this.formulario.foto.url,
         productor: sesion.nombre
       };
 
-      if (!bodyData.ubicacion || !bodyData.estimacion_cosecha) {
+      if (!bodyData.ubicacion || !(bodyData.estimacion_cosecha_kg >= 1)) {
         this.ui.mostrarAlerta(alerta, "error", "Completa todos los campos obligatorios.");
         return;
       }

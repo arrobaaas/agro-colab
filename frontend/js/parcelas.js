@@ -126,6 +126,10 @@
         this.ui.mostrarAlerta(alerta, "errorGrande", "Completa la razón social y el RUT para el despacho comercial.");
         return;
       }
+      if (esComercial && !this.rutValido(bodyData.rut)) {
+        this.ui.mostrarAlerta(alerta, "errorGrande", "El RUT de la empresa no es válido. Revisa el dígito verificador (ej: 76.123.456-0).");
+        return;
+      }
 
       this.ui.mostrarAlerta(alerta, "infoGrande", "Registrando tu pedido...");
 
@@ -609,6 +613,50 @@
       }
     }
 
+    /* ---------- RUT de empresa ---------- */
+
+    /* Valida el RUT con su dígito verificador (módulo 11), igual que el
+       backend: "ansdjnjasdhjadh" o un RUT inventado no pasan. */
+    rutValido(valor) {
+      const limpio = String(valor || "").replace(/[.\-\s]/g, "").toUpperCase();
+      const cuerpo = limpio.slice(0, -1);
+      const dv = limpio.slice(-1);
+      if (!/^\d{7,8}$/.test(cuerpo) || !/^[0-9K]$/.test(dv)) return false;
+
+      let suma = 0;
+      let factor = 2;
+      for (const digito of cuerpo.split("").reverse()) {
+        suma += Number(digito) * factor;
+        factor = factor === 7 ? 2 : factor + 1;
+      }
+      const resto = 11 - (suma % 11);
+      const esperado = resto === 11 ? "0" : resto === 10 ? "K" : String(resto);
+      return dv === esperado;
+    }
+
+    /* Da formato mientras se escribe (76123456k -> 76.123.456-K) y avisa si
+       el dígito verificador no corresponde. Se llama desde data-al-escribir. */
+    formatearCampoRut(input) {
+      const limpio = input.value.replace(/[^0-9kK]/g, "").toUpperCase().slice(0, 9);
+      let formateado = limpio;
+      if (limpio.length > 1) {
+        const cuerpo = limpio.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        formateado = `${cuerpo}-${limpio.slice(-1)}`;
+      }
+      input.value = formateado;
+
+      const ayuda = input.parentElement.querySelector("[data-ayuda-rut]");
+      const completo = limpio.length >= 8;
+      const valido = this.rutValido(formateado);
+      input.classList.toggle("input--invalido", completo && !valido);
+      if (ayuda) {
+        ayuda.className = `campo-ayuda ${completo ? (valido ? "campo-ayuda--ok" : "campo-ayuda--error") : ""}`;
+        ayuda.textContent = !completo
+          ? "Con dígito verificador, ej: 76.123.456-0"
+          : valido ? "RUT válido" : "El dígito verificador no corresponde a este RUT";
+      }
+    }
+
     /* ---------- Modal de Logística ---------- */
 
     /* Abre el formulario de despacho en uno de dos modos:
@@ -711,6 +759,10 @@
 
       if (esComercial && (!datos.razon_social || !datos.rut)) {
         this.ui.mostrarAlerta(alerta, "error", "Completa la razón social y el RUT para el despacho comercial.");
+        return;
+      }
+      if (esComercial && !this.rutValido(datos.rut)) {
+        this.ui.mostrarAlerta(alerta, "error", "El RUT de la empresa no es válido. Revisa el dígito verificador (ej: 76.123.456-0).");
         return;
       }
 
