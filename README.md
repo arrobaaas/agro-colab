@@ -10,6 +10,7 @@ directa del huerto a la mesa y sin intermediarios.
 
 [![Demo en vivo](https://img.shields.io/badge/demo-en%20vivo-059669?style=for-the-badge&logo=github)](https://arrobaaas.github.io/agro-colab/)
 [![Licencia MIT](https://img.shields.io/badge/licencia-MIT-blue?style=for-the-badge)](LICENSE)
+[![Pruebas](https://img.shields.io/github/actions/workflow/status/arrobaaas/agro-colab/pruebas.yml?branch=main&label=pruebas&style=for-the-badge)](https://github.com/arrobaaas/agro-colab/actions/workflows/pruebas.yml)
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
@@ -140,8 +141,10 @@ agro-colab/
 │   ├── catalogo.py            # Catálogo cerrado de especies con fotos atribuidas
 │   ├── seguridad.py           # Registro de eventos, reglas de alerta y alertas
 │   ├── notificaciones.py      # Envío de correos (Brevo)
-│   ├── routers/               # arboles, especies, suscripciones, pedidos, usuarios, monitoreo
-│   └── requirements.txt
+│   ├── routers/               # arboles, especies, suscripciones, pedidos, pagos, usuarios, monitoreo
+│   ├── tests/                 # Pruebas automatizadas (pytest)
+│   ├── requirements.txt
+│   └── requirements-dev.txt   # requirements.txt + pytest y httpx
 ├── Informe.pdf                # Informe del proyecto
 ├── Presentacion.pptx          # Presentación del proyecto
 ├── scripts/compilar-css.sh    # Compila Tailwind localmente (verifica el checksum)
@@ -202,6 +205,28 @@ queda en `http://127.0.0.1:8000/docs`.
 Sin `BREVO_API_KEY` y `CORREO_REMITENTE`, en producción el registro de cuentas nuevas
 avisa que no está disponible, en lugar de crear cuentas que nadie podría verificar.
 Las cuentas de demostración funcionan siempre.
+
+---
+
+## 🧪 Pruebas
+
+El backend tiene **35 pruebas automatizadas** (pytest) que corren en GitHub Actions
+en cada push y en cada pull request, junto con una revisión de sintaxis de todo el
+JavaScript del frontend.
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
+Las pruebas usan una base SQLite temporal (nunca `agrocolab.db`) y no envían correos.
+
+| Archivo | Qué cubre |
+|---|---|
+| `tests/test_cuentas.py` | Registro y verificación, login, tokens alterados, recuperación de contraseña (sin enumeración de usuarios, código guardado como hash y anulado tras 5 errores, cierre de sesiones) |
+| `tests/test_pagos.py` | Pasarela simulada: aprobación y rechazo, monto fijado por el servidor, tarjetas inválidas, sin cobro si no hay cupo, número y CVV nunca guardados, planes que exigen un pago propio y no reutilizable |
+| `tests/test_seguridad.py` | Autorización por recurso, cabeceras de seguridad, rechazo de HTML (XSS), imágenes fuera del catálogo, cuentas demo protegidas, límite de intentos de login, borrado de datos al eliminar la cuenta |
 
 ---
 
@@ -337,7 +362,7 @@ consentimiento y el derecho a eliminación.
 - [ ] Migración a PostgreSQL
 - [x] Envío real del correo de verificación (Brevo) y recuperación de contraseña
 - [ ] Fotos propias del productor con flujo de moderación
-- [ ] Pruebas automatizadas e integración continua
+- [x] Pruebas automatizadas e integración continua
 
 ---
 
