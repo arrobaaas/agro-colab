@@ -6,11 +6,14 @@
   <meta name="theme-color" content="#040806">
   <title>Términos y condiciones | Agro-Colab</title>
   <meta name="description" content="Términos y condiciones de Agro-Colab: adopción de árboles frutales, planes de abastecimiento, pagos, cancelaciones y reembolsos.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261031h">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261031h">
+  <link rel="stylesheet" href="css/styles.css?v=20261031i">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031i">
+  <script src="js/efectos.js?v=20261031i" defer></script>
+  <script src="js/constelacion.js?v=20261031i" defer></script>
+  <script src="js/legal.js?v=20261031i" defer></script>
 </head>
 <body class="tema-comprador">
 
@@ -23,8 +26,9 @@
     </div>
   </header>
 
-  <section class="tc-hero">
-    <div class="tc-contenedor tc-legal-portada">
+  <section class="tc-hero hero--portada">
+    <div class="tc-contenedor tc-legal-portada hero__contenido">
+      <div>
       <p class="tc-etiqueta">Legal</p>
       <h1 class="tc-display" style="margin-top:1.5rem">Términos y<br><span class="tc-tenue">condiciones.</span></h1>
       <p class="tc-cuerpo" style="margin-top:2rem">
@@ -36,12 +40,16 @@
         <span>Vigente desde el 1 de noviembre de 2026</span>
         <span>Ley N° 19.496 de Protección de los Derechos de los Consumidores</span>
       </div>
+      </div>
+      <div class="tc-hero__visual tc-legal-arbol">
+        <canvas data-constelacion aria-hidden="true"></canvas>
+      </div>
     </div>
   </section>
 
-  <div class="tema-comprador" style="--luz:1">
+  <div class="tema-comprador hoja" style="--luz:1">
     <main class="tc-contenedor tc-legal">
-      <aside class="tc-indice" aria-label="Índice">
+      <aside class="tc-indice" aria-label="Índice" data-reveal="left">
         <p class="tc-etiqueta tc-etiqueta--gris">Contenido</p>
         <ol>
           <li><a href="#resumen">Resumen</a></li>
@@ -62,7 +70,7 @@
 
       <article class="tc-prosa">
 
-        <section id="resumen">
+        <section id="resumen" data-reveal>
           <h2>Resumen en simple</h2>
           <p>Esto no reemplaza al texto completo, pero es lo esencial:</p>
           <dl class="tc-resumen">
@@ -79,7 +87,7 @@
           </p>
         </section>
 
-        <section id="servicio">
+        <section id="servicio" data-reveal>
           <h2>1. El servicio</h2>
           <p>
             Agro-Colab es una plataforma que conecta a personas y negocios (<strong>compradores</strong>)
@@ -95,7 +103,7 @@
           <p>Al crear una cuenta o contratar un plan aceptas estos términos y la <a href="privacidad.html">Política de privacidad</a>.</p>
         </section>
 
-        <section id="cuentas">
+        <section id="cuentas" data-reveal>
           <h2>2. Cuentas</h2>
           <ul>
             <li>Debes ser mayor de 18 años y entregar información veraz y actualizada.</li>
@@ -105,7 +113,7 @@
           </ul>
         </section>
 
-        <section id="adopcion">
+        <section id="adopcion" data-reveal>
           <h2>3. Adopción de árboles</h2>
           <p>
             Cada árbol publicado indica su especie, ubicación, plan, número de cupos, aporte mensual y
@@ -127,7 +135,7 @@
           </p>
         </section>
 
-        <section id="abastecimiento">
+        <section id="abastecimiento" data-reveal>
           <h2>4. Planes de abastecimiento</h2>
           <p>
             Cada plan define el contenido de la canasta, su precio y la frecuencia de despacho (semanal,
@@ -137,7 +145,7 @@
           </p>
         </section>
 
-        <section id="pagos">
+        <section id="pagos" data-reveal>
           <h2>5. Pagos y renovación</h2>
           <ul>
             <li>Los precios se muestran en pesos chilenos (CLP), con impuestos incluidos cuando corresponda.</li>
@@ -147,7 +155,7 @@
           </ul>
         </section>
 
-        <section id="cancelacion">
+        <section id="cancelacion" data-reveal>
           <h2>6. Cancelación y reembolsos</h2>
           <p>
             Esta política busca un equilibrio: el agricultor necesita que los aportes ya recibidos sean
@@ -177,7 +185,7 @@
           </ul>
         </section>
 
-        <section id="garantias">
+        <section id="garantias" data-reveal>
           <h2>7. Si algo sale mal</h2>
 
           <h3>Riesgo agrícola compartido</h3>
@@ -205,7 +213,7 @@
           </p>
         </section>
 
-        <section id="agricultor">
+        <section id="agricultor" data-reveal>
           <h2>8. Compromisos del agricultor</h2>
           <p>Para publicar en Agro-Colab, el agricultor se compromete a:</p>
           <ul>
@@ -222,7 +230,7 @@
           </p>
         </section>
 
-        <section id="despacho">
+        <section id="despacho" data-reveal>
           <h2>9. Despacho y entregas</h2>
           <ul>
             <li>Despachamos a la dirección que indiques, en la frecuencia elegida. Puedes cambiar la dirección o la frecuencia desde tu panel hasta 48 horas antes del próximo despacho.</li>
@@ -231,7 +239,7 @@
           </ul>
         </section>
 
-        <section id="uso">
+        <section id="uso" data-reveal>
           <h2>10. Uso aceptable</h2>
           <p>
             No está permitido intentar acceder a cuentas o datos ajenos, vulnerar la seguridad de la
@@ -241,7 +249,7 @@
           </p>
         </section>
 
-        <section id="responsabilidad">
+        <section id="responsabilidad" data-reveal>
           <h2>11. Responsabilidad y propiedad intelectual</h2>
           <p>
             Agro-Colab responde por el funcionamiento de la plataforma y la intermediación del pago. Cada
@@ -254,7 +262,7 @@
           </p>
         </section>
 
-        <section id="cambios">
+        <section id="cambios" data-reveal>
           <h2>12. Cambios, reclamos y ley aplicable</h2>
           <ul>
             <li>Si modificamos estos términos, te avisaremos con 30 días de anticipación. Si no estás de acuerdo, podrás cancelar sin costo antes de que entren en vigor.</li>

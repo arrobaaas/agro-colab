@@ -31,15 +31,10 @@
 
       if (!this.arbolesAgricultor.length) {
         container.innerHTML = `
-          <div class="sm:col-span-2 lg:col-span-3 text-center py-14 px-6 bg-white rounded-3xl border border-dashed border-stone-300">
-            <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-2xl mb-4">
-              <i class="fa-solid fa-seedling"></i>
-            </div>
-            <p class="text-lg font-extrabold text-stone-900">Todavía no publicas árboles</p>
-            <p class="text-sm text-stone-500 mt-1 max-w-sm mx-auto">Publica tu primer árbol y empieza a recibir financiamiento directo de los compradores.</p>
-            <button type="button" class="btn-hero btn-hero--primario mt-6" data-accion="agricultor.mostrarFormulario">
-              <i class="fa-solid fa-plus"></i> Publicar mi primer árbol
-            </button>
+          <div class="tc-vacio tc-arboles__completo">
+            <p class="tc-titulo-sm">Todavía no publicas árboles.</p>
+            <p class="tc-cuerpo-sm" style="margin-top:.75rem">Publica tu primer árbol y empieza a recibir financiamiento directo de los compradores.</p>
+            <button type="button" class="tc-boton" style="margin-top:2rem" data-accion="agricultor.mostrarFormulario">Publicar mi primer árbol</button>
           </div>`;
         return;
       }
@@ -54,51 +49,41 @@
           const ingreso = (arbol.precio_mensual_clp || 0) * ocupados;
 
           return `
-          <article class="arbol-card" data-reveal="flip" data-tilt style="--reveal-delay:${(indice % 3) * 150}ms">
-            <div class="arbol-card__media">
+          <article class="tc-arbol" data-reveal="flip" style="--reveal-delay:${(indice % 3) * 150}ms">
+            <div class="tc-arbol__foto">
               <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" loading="lazy" data-si-falla="ocultar">
-              <span class="arbol-card__plan">${e(arbol.plan)}</span>
-              <span class="arbol-card__tipo ${exclusivo ? "arbol-card__tipo--exclusivo" : ""}">
-                <i class="fa-solid ${exclusivo ? "fa-crown" : "fa-users"}"></i> ${e(arbol.tipo_suscripcion || "")}
-              </span>
-              <div class="arbol-card__titulo">
-                ${arbol.especie_nombre ? `<p class="arbol-card__especie">${e(arbol.especie_nombre)}</p>` : ""}
-                <h4>${e(arbol.nombre)}</h4>
-              </div>
             </div>
+            <div class="tc-arbol__cuerpo">
+              <p class="tc-etiqueta tc-etiqueta--verde">
+                ${e(arbol.especie_nombre || "Árbol frutal")} · Plan ${e(arbol.plan)}${exclusivo ? " · Exclusivo" : ""}
+              </p>
+              <h3 class="tc-arbol__nombre">${e(arbol.nombre)}</h3>
+              <ul class="tc-meta">
+                <li>${e(arbol.ubicacion)}</li>
+                <li>Precio por cupo <strong>${this.ui.formatearMonto(arbol.precio_mensual_clp)}</strong></li>
+              </ul>
 
-            <div class="p-5 flex flex-col gap-4 flex-1">
-              <p class="text-xs text-stone-600 truncate"><i class="fa-solid fa-location-dot text-rose-500 mr-1.5"></i>${e(arbol.ubicacion)}</p>
+              <div class="tc-barra ${libres ? "" : "tc-barra--llena"}"><div style="width:${porcentaje}%"></div></div>
+              <p class="tc-barra__texto">
+                <span>${libres ? `${libres} cupo${libres === 1 ? "" : "s"} libre${libres === 1 ? "" : "s"}` : "Cupos completos"}</span>
+                <span>${ocupados}/${totales} · ${porcentaje}%</span>
+              </p>
 
-              <div>
-                <div class="flex justify-between text-[11px] mb-1.5">
-                  <span class="${libres ? "text-stone-500" : "text-amber-700 font-bold"}">${libres ? `${libres} cupo${libres === 1 ? "" : "s"} libre${libres === 1 ? "" : "s"}` : "Cupos completos"}</span>
-                  <span class="font-bold text-stone-700">${ocupados}/${totales} · ${porcentaje}%</span>
-                </div>
-                <div class="h-1.5 rounded-full bg-stone-100 overflow-hidden">
-                  <div class="h-full rounded-full ${libres ? "bg-emerald-500" : "bg-amber-500"}" style="width:${porcentaje}%"></div>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2">
-                <div class="rounded-xl bg-stone-50 border border-stone-200 px-3 py-2">
-                  <p class="text-[10px] uppercase tracking-wider font-bold text-stone-400">Precio / cupo</p>
-                  <p class="text-sm font-extrabold text-stone-800">${this.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
-                </div>
-                <div class="rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-2">
-                  <p class="text-[10px] uppercase tracking-wider font-bold text-emerald-700/70">Ingreso / mes</p>
-                  <p class="text-sm font-extrabold text-emerald-900">${this.ui.formatearMonto(ingreso)}</p>
+              <div class="tc-arbol__pie">
+                <div>
+                  <p class="tc-kpi__etiqueta">Ingreso mensual</p>
+                  <p class="tc-precio" style="margin-top:.3rem">${this.ui.formatearMonto(ingreso)}<small>CLP / mes</small></p>
                 </div>
               </div>
 
-              <div class="mt-auto pt-4 border-t border-stone-100 flex items-center gap-2">
-                <button type="button" class="accion-arbol flex-1" data-accion="agricultor.abrirSuscriptores" data-args='[${Number(arbol.id)}]'>
-                  <i class="fa-solid fa-users"></i> Suscriptores <span class="accion-arbol__contador">${ocupados}</span>
+              <div class="tc-arbol__acciones">
+                <button type="button" class="tc-boton tc-boton--contorno" data-accion="agricultor.abrirSuscriptores" data-args='[${Number(arbol.id)}]'>
+                  Suscriptores <span class="tc-arbol__contador">${ocupados}</span>
                 </button>
-                <button type="button" class="accion-arbol accion-arbol--icono" data-accion="agricultor.abrirEdicion" data-args='[${Number(arbol.id)}]' title="Editar" aria-label="Editar ${e(arbol.nombre)}">
+                <button type="button" class="nav-icono" data-accion="agricultor.abrirEdicion" data-args='[${Number(arbol.id)}]' title="Editar" aria-label="Editar ${e(arbol.nombre)}">
                   <i class="fa-solid fa-pen"></i>
                 </button>
-                <button type="button" class="accion-arbol accion-arbol--icono accion-arbol--peligro" data-accion="agricultor.eliminarArbol" data-args='[${Number(arbol.id)}]' title="Eliminar" aria-label="Eliminar ${e(arbol.nombre)}">
+                <button type="button" class="nav-icono tc-icono--peligro" data-accion="agricultor.eliminarArbol" data-args='[${Number(arbol.id)}]' title="Eliminar" aria-label="Eliminar ${e(arbol.nombre)}">
                   <i class="fa-solid fa-trash"></i>
                 </button>
               </div>
@@ -278,7 +263,7 @@
 
     async cargarArbolesAgricultor() {
       const container = document.getElementById("lista-arboles-agricultor");
-      container.innerHTML = '<p class="sm:col-span-2 lg:col-span-3 text-stone-500 text-sm text-center py-8">Cargando tus árboles...</p>';
+      container.innerHTML = '<p class="tc-cuerpo-sm">Cargando tus árboles...</p>';
 
       try {
         const arboles = await this.api.obtenerArboles();
@@ -292,7 +277,7 @@
         this.renderizarListaArboles();
         this.actualizarEstadisticas();
       } catch (error) {
-        container.innerHTML = '<p class="sm:col-span-2 lg:col-span-3 text-red-500 text-sm text-center py-8">Error al cargar tus árboles</p>';
+        container.innerHTML = '<p class="tc-cuerpo-sm">No se pudieron cargar tus árboles. Intenta nuevamente.</p>';
       }
     }
 
