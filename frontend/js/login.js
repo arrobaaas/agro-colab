@@ -83,13 +83,13 @@ class LoginService {
     if (loginForm.classList.contains("hidden")) {
       loginForm.classList.remove("hidden");
       registerForm.classList.add("hidden");
-      titulo.textContent = "Iniciar Sesión";
+      titulo.textContent = "Iniciar sesión";
       subtitulo.textContent = "Ingresa a tu panel de gestión colaborativa";
       btnAlternar.textContent = "¿No tienes cuenta? Regístrate";
     } else {
       loginForm.classList.add("hidden");
       registerForm.classList.remove("hidden");
-      titulo.textContent = "Crear Cuenta";
+      titulo.textContent = "Crear cuenta";
       subtitulo.textContent = "Regístrate para comenzar a adoptar árboles";
       btnAlternar.textContent = "¿Ya tienes cuenta? Inicia sesión";
     }

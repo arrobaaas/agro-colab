@@ -2517,21 +2517,34 @@ html {
 
 .tema-comprador .tc-icono--peligro:hover { color: var(--tc-peligro); }
 
-/* Encabezados de los modales del agricultor (suscriptores, edición): siguen
-   la luz de la página, así que el texto no puede ser blanco fijo */
-.tema-comprador.modal-animado .bg-gradient-to-br,
-.tema-comprador.modal-animado .bg-gradient-to-br h3 {
+/* Encabezados de los modales (despacho, suscriptores, edición): su fondo
+   sigue la luz de la página, así que ningún texto puede tener un color
+   claro fijo; antes, con la página iluminada, el título, el subtítulo y el
+   precio del plan quedaban blancos sobre blanco */
+.tema-comprador .bg-gradient-to-br,
+.tema-comprador .bg-gradient-to-br h3,
+.tema-comprador .bg-gradient-to-br .text-white {
   color: var(--tc-texto);
+}
+
+.tema-comprador .bg-gradient-to-br h3 {
   font-weight: 400;
   letter-spacing: -0.02em;
 }
 
-.tema-comprador.modal-animado .bg-gradient-to-br p {
+.tema-comprador .bg-gradient-to-br p,
+.tema-comprador .bg-gradient-to-br [class*="text-emerald-1"],
+.tema-comprador .bg-gradient-to-br [class*="text-emerald-2"] {
   color: var(--tc-texto-3);
 }
 
-.tema-comprador.modal-animado .bg-gradient-to-br {
-  border-bottom: 1px solid var(--tc-linea);
+.tema-comprador .bg-gradient-to-br .text-emerald-300 {
+  color: var(--tc-accion);
+}
+
+.tema-comprador .bg-gradient-to-br .bg-white\/5 {
+  background-color: var(--tc-superficie-2);
+  border-color: var(--tc-linea-fuerte);
 }
 
 /* En modo formulario la portada es solo un encabezado: sin árbol ni alto
@@ -2597,6 +2610,195 @@ html {
   background-color: rgba(52, 211, 153, 0.1);
   border-color: rgba(52, 211, 153, 0.25);
   color: var(--tc-accion);
+}
+
+/* ----- Login ----- */
+/* El login es siempre oscuro: no se ilumina al bajar en el celular */
+.login {
+  --luz: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--tc-vacio);
+}
+
+.login .tc-nav {
+  position: relative;
+  z-index: 3;
+}
+
+.login__escenario {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.login__grid {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+  width: 100%;
+  padding-top: 1.5rem;
+  padding-bottom: 4rem;
+}
+
+@media (min-width: 1024px) {
+  .login__grid {
+    grid-template-columns: 1fr 27rem;
+    gap: 5rem;
+  }
+}
+
+.login__portada {
+  position: relative;
+}
+
+/* El árbol queda detrás del titular, como en la portada del catálogo */
+.login__arbol {
+  width: min(100%, 190px);
+  margin: 0 auto;
+}
+
+@media (min-width: 1024px) {
+  .login__arbol {
+    position: absolute;
+    top: 50%;
+    right: -7rem;
+    width: 480px;
+    max-width: none;
+    transform: translateY(-50%);
+    opacity: 0.55;
+  }
+
+  /* Alineado arriba: en el registro la tarjeta es más alta y el titular
+     no debe bajar con ella */
+  .login__portada {
+    align-self: start;
+    padding-top: 5.5rem;
+  }
+
+  .login__texto {
+    position: relative;
+    z-index: 1;
+    max-width: 34rem;
+  }
+}
+
+.login__titular {
+  margin-top: 1.5rem;
+  font-size: clamp(2.5rem, 6vw, 4.75rem);
+}
+
+.login__bajada {
+  margin-top: 1.75rem;
+}
+
+@media (max-width: 1023px) {
+  .login__texto { text-align: center; }
+  .login__titular { margin-top: 1rem; }
+  .login__bajada { display: none; }
+}
+
+.login__tarjeta {
+  position: relative;
+  z-index: 1;
+  padding: 2rem;
+  border-radius: 28px;
+  background-color: color-mix(in srgb, var(--tc-superficie) 88%, transparent);
+  border: 1px solid var(--tc-linea-fuerte);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8);
+  animation: subir-aparecer 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s backwards;
+}
+
+@media (max-width: 479px) {
+  .login__tarjeta { padding: 1.5rem 1.25rem; }
+}
+
+.login__tarjeta form {
+  margin-top: 1.25rem;
+}
+
+.login__tarjeta > .tc-kpi__etiqueta {
+  margin-top: 1.75rem;
+}
+
+.login__roles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.tema-comprador .rol-btn {
+  flex-direction: row;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  border-width: 1px;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.tema-comprador .rol-btn--activo {
+  border-color: var(--tc-accion);
+  background-color: color-mix(in srgb, var(--tc-accion) 14%, transparent);
+  color: var(--tc-accion);
+}
+
+.tema-comprador .rol-btn--inactivo {
+  border-color: var(--tc-linea-fuerte);
+  background-color: transparent;
+  color: var(--tc-texto-2);
+}
+
+.tema-comprador .rol-btn--inactivo:hover {
+  background-color: var(--tc-superficie-2);
+}
+
+.login__etiqueta {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--tc-texto-2);
+}
+
+.login__enviar {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.login__consentimiento {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background-color: var(--tc-superficie-2);
+  border: 1px solid var(--tc-linea);
+}
+
+.login__alternar {
+  margin-top: 1.25rem;
+  text-align: center;
+}
+
+.login__demo {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--tc-linea);
+  font-size: 0.8125rem;
+  color: var(--tc-texto-3);
+}
+
+.login__demo code {
+  color: var(--tc-accion);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
 }
 
 /* ----- Celular ----- */
