@@ -21,27 +21,28 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261031l">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261031l">
-  <script src="js/config.js?v=20261031l" defer></script>
-  <script src="js/ui.js?v=20261031l" defer></script>
-  <script src="js/dialogo.js?v=20261031l" defer></script>
-  <script src="js/api.js?v=20261031l" defer></script>
-  <script src="js/auth.js?v=20261031l" defer></script>
-  <script src="js/pago.js?v=20261031l" defer></script>
-  <script src="js/parcelas.js?v=20261031l" defer></script>
-  <script src="js/catalogo.js?v=20261031l" defer></script>
-  <script src="js/agricultor.js?v=20261031l" defer></script>
-  <script src="js/graficos.js?v=20261031l" defer></script>
-  <script src="js/perfil.js?v=20261031l" defer></script>
-  <script src="js/autocomplete.js?v=20261031l" defer></script>
-  <script src="js/dashboard.js?v=20261031l" defer></script>
-  <script src="js/efectos.js?v=20261031l" defer></script>
-  <script src="js/constelacion.js?v=20261031l" defer></script>
-  <script src="js/views.js?v=20261031l" defer></script>
-  <script src="js/login.js?v=20261031l" defer></script>
-  <script src="js/acciones.js?v=20261031l" defer></script>
-  <script src="js/app.js?v=20261031l" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261031m">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031m">
+  <script src="js/config.js?v=20261031m" defer></script>
+  <script src="js/ui.js?v=20261031m" defer></script>
+  <script src="js/dialogo.js?v=20261031m" defer></script>
+  <script src="js/api.js?v=20261031m" defer></script>
+  <script src="js/auth.js?v=20261031m" defer></script>
+  <script src="js/pago.js?v=20261031m" defer></script>
+  <script src="js/parcelas.js?v=20261031m" defer></script>
+  <script src="js/catalogo.js?v=20261031m" defer></script>
+  <script src="js/agricultor.js?v=20261031m" defer></script>
+  <script src="js/graficos.js?v=20261031m" defer></script>
+  <script src="js/perfil.js?v=20261031m" defer></script>
+  <script src="js/autocomplete.js?v=20261031m" defer></script>
+  <script src="js/dashboard.js?v=20261031m" defer></script>
+  <script src="js/efectos.js?v=20261031m" defer></script>
+  <script src="js/constelacion.js?v=20261031m" defer></script>
+  <script src="js/views.js?v=20261031m" defer></script>
+  <script src="js/login.js?v=20261031m" defer></script>
+  <script src="js/recuperacion.js?v=20261031m" defer></script>
+  <script src="js/acciones.js?v=20261031m" defer></script>
+  <script src="js/app.js?v=20261031m" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -131,6 +132,10 @@
                   <i class="fa-regular fa-eye"></i>
                 </button>
               </div>
+            </div>
+
+            <div class="login__olvido">
+              <button type="button" class="tc-enlace tc-enlace--suave" data-accion="recuperacion.abrir">¿Olvidaste tu contraseña?</button>
             </div>
 
             <div id="alert-box" class="hidden"></div>
@@ -979,6 +984,70 @@
         <div id="lista-suscriptores" class="space-y-3">
           <p class="text-stone-500 text-sm text-center py-8">Cargando suscriptores...</p>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RECUPERAR CONTRASEÑA (recuperacion.js) -->
+  <div id="modal-recuperar" class="modal-animado fixed inset-0 z-[120] hidden tema-comprador">
+    <div class="absolute inset-0" data-accion="recuperacion.cerrar"></div>
+    <div class="perfil-panel recuperar-panel" role="dialog" aria-modal="true" aria-labelledby="recuperar-titulo">
+      <button type="button" class="nav-icono recuperar-cerrar" data-accion="recuperacion.cerrar" title="Cerrar" aria-label="Cerrar">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Paso 1: correo -->
+      <div data-paso-recuperar="correo">
+        <span class="dialogo__icono"><i class="fa-solid fa-key"></i></span>
+        <h3 id="recuperar-titulo" class="tc-titulo-sm">¿Olvidaste tu contraseña?</h3>
+        <p class="tc-cuerpo-sm" style="margin-top:.6rem">Escribe el correo de tu cuenta y te enviaremos un código para crear una nueva.</p>
+        <form id="recuperar-form-correo" class="recuperar-form" novalidate>
+          <div class="perfil-campo">
+            <label for="recuperar-email">Correo electrónico</label>
+            <input type="email" id="recuperar-email" class="input" autocomplete="email" maxlength="120" placeholder="tu@correo.com">
+          </div>
+          <div id="recuperar-alerta-correo" class="hidden"></div>
+          <button type="submit" id="recuperar-enviar" class="tc-boton login__enviar">Enviar código</button>
+        </form>
+      </div>
+
+      <!-- Paso 2: código y nueva contraseña -->
+      <div data-paso-recuperar="codigo" class="hidden">
+        <span class="dialogo__icono"><i class="fa-solid fa-envelope-open-text"></i></span>
+        <h3 class="tc-titulo-sm">Revisa tu correo</h3>
+        <p class="tc-cuerpo-sm" style="margin-top:.6rem">
+          Si <strong id="recuperar-destino"></strong> tiene una cuenta, le enviamos un código de 6 dígitos.
+          Vence en 15 minutos; revisa también la carpeta de spam.
+        </p>
+        <p id="recuperar-codigo-desarrollo" class="recuperar-desarrollo hidden">Modo desarrollo, código: <strong></strong></p>
+        <form id="recuperar-form-codigo" class="recuperar-form" novalidate>
+          <div class="perfil-campo">
+            <label for="recuperar-codigo">Código</label>
+            <input type="text" id="recuperar-codigo" class="input recuperar-codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
+          </div>
+          <div class="perfil-campo">
+            <label for="recuperar-password">Nueva contraseña</label>
+            <input type="password" id="recuperar-password" class="input" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Mínimo 8 caracteres">
+          </div>
+          <div class="perfil-campo">
+            <label for="recuperar-password2">Repite la nueva contraseña</label>
+            <input type="password" id="recuperar-password2" class="input" autocomplete="new-password" maxlength="128">
+          </div>
+          <div id="recuperar-alerta-codigo" class="hidden"></div>
+          <button type="submit" id="recuperar-cambiar" class="tc-boton login__enviar">Cambiar contraseña</button>
+        </form>
+        <div class="recuperar-enlaces">
+          <button type="button" class="tc-enlace tc-enlace--suave" data-accion="recuperacion.reenviar">Reenviar código</button>
+          <button type="button" class="tc-enlace tc-enlace--suave" data-accion="recuperacion.cambiarCorreo">Usar otro correo</button>
+        </div>
+      </div>
+
+      <!-- Paso 3: listo -->
+      <div data-paso-recuperar="listo" class="hidden recuperar-listo">
+        <span class="pago-sello pago-sello--ok"><i class="fa-solid fa-check"></i></span>
+        <h3 class="tc-titulo-sm">Contraseña actualizada</h3>
+        <p class="tc-cuerpo-sm" style="margin-top:.6rem">Por seguridad cerramos las sesiones abiertas de tu cuenta. Ingresa con tu nueva contraseña.</p>
+        <button type="button" id="recuperar-ir-login" class="tc-boton login__enviar" style="margin-top:1.75rem" data-accion="recuperacion.irAlLogin">Iniciar sesión</button>
       </div>
     </div>
   </div>

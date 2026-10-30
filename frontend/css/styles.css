@@ -3513,6 +3513,81 @@ html {
 
 .tc-pago__estado--rechazado { color: var(--tc-peligro); }
 
+/* ----- Recuperar contraseña (recuperacion.js) ----- */
+.login__olvido {
+  margin-top: -0.25rem;
+  text-align: right;
+}
+
+.login__olvido .tc-enlace {
+  font-size: 0.75rem;
+}
+
+.recuperar-panel {
+  max-width: 28rem;
+  margin-top: 8vh;
+  padding: 2rem;
+}
+
+@media (max-width: 479px) {
+  .recuperar-panel { padding: 1.5rem 1.25rem; }
+}
+
+.recuperar-cerrar {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+}
+
+.recuperar-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.recuperar-codigo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.5rem;
+  letter-spacing: 0.5em;
+  text-align: center;
+}
+
+.recuperar-desarrollo {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px dashed var(--tc-linea-fuerte);
+  font-size: 0.8125rem;
+  color: var(--tc-texto-2);
+}
+
+.recuperar-desarrollo strong {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.2em;
+  color: var(--tc-accion);
+}
+
+.recuperar-enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.recuperar-enlaces .tc-enlace { font-size: 0.75rem; }
+
+.recuperar-listo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 1rem;
+}
+
+.recuperar-listo.hidden { display: none; }
+.recuperar-listo .tc-titulo-sm { margin-top: 1.5rem; }
+
 /* ----- Celular ----- */
 /* Ninguna vista puede ensanchar la página: si algo se salía (la barra
    superior, o una tarjeta que espera su animación de entrada), el navegador
