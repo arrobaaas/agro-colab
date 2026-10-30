@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#040806">
+  <meta name="robots" content="noindex">
+  <!-- GitHub Pages sirve esta página en cualquier ruta inexistente: base fija
+       la carpeta del sitio para que los estilos, scripts y enlaces funcionen
+       sin importar la profundidad de la URL -->
+  <base href="/agro-colab/frontend/">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>Página no encontrada | Agro-Colab</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
+  <link rel="stylesheet" href="css/styles.css?v=">
+  <link rel="stylesheet" href="css/tailwind.css?v=">
+  <script src="js/efectos.js?v=" defer></script>
+  <script src="js/constelacion.js?v=" defer></script>
+  <script src="js/legal.js?v=" defer></script>
+</head>
+<body class="tema-comprador error-pagina">
+
+  <header class="tc-nav tc-nav--solida">
+    <div class="tc-contenedor tc-nav__fila">
+      <a href="index.html" class="tc-marca"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</a>
+    </div>
+  </header>
+
+  <main class="tc-hero error-pagina__escenario">
+    <div class="tc-contenedor error-pagina__grid">
+      <div>
+        <p class="tc-etiqueta">Error 404</p>
+        <h1 class="tc-display" style="margin-top:1.5rem">Este árbol no está en el huerto.<br><span class="tc-tenue">Aún.</span></h1>
+        <p class="tc-cuerpo" style="margin-top:2rem">
+          La página que buscas no existe, cambió de lugar o el enlace está incompleto.
+          Tu sesión y tu canasta siguen guardadas.
+        </p>
+        <div class="tc-acciones">
+          <a href="index.html" class="tc-boton">Volver al inicio</a>
+          <a href="https://github.com/arrobaaas/agro-colab/issues" class="tc-enlace" target="_blank" rel="noopener">
+            Reportar el problema <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+      <div class="tc-hero__visual error-pagina__visual">
+        <span class="error-pagina__numero" aria-hidden="true">404</span>
+        <canvas data-constelacion aria-hidden="true"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <footer class="tc-footer">
+    <div class="tc-contenedor tc-footer__base" style="border-top:0">
+      <span>© 2026 Agro-Colab</span>
+      <span style="display:flex;gap:1.5rem">
+        <a href="privacidad.html">Privacidad</a>
+        <a href="terminos.html">Términos</a>
+      </span>
+    </div>
+  </footer>
+</body>
+</html>
