@@ -106,6 +106,12 @@
         const recorrido = raiz.scrollHeight - window.innerHeight;
         raiz.style.setProperty("--progreso", recorrido > 0 ? (actual / recorrido).toFixed(4) : 0);
 
+        /* Iluminación del tema del comprador: al pasar la portada la página
+           se ilumina (1) y al volver arriba se oscurece (0). El fundido lo
+           hace CSS (transición de --luz en styles.css) */
+        const luz = actual > window.innerHeight * 0.45 ? "1" : "0";
+        if (raiz.style.getPropertyValue("--luz") !== luz) raiz.style.setProperty("--luz", luz);
+
         /* Avance de la portada (0 arriba, 1 cuando el contenido ya la cubrió) */
         if (!this.reducirMovimiento) {
           document.querySelectorAll(".hero--portada").forEach((hero) => {
