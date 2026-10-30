@@ -2449,6 +2449,156 @@ html {
 .tema-comprador .campo-ayuda--ok { color: var(--tc-accion); }
 .tema-comprador .campo-ayuda--error { color: var(--tc-peligro); }
 
+/* ----- Panel del agricultor ----- */
+.tc-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid var(--tc-linea);
+  background-color: var(--tc-linea);
+}
+
+@media (min-width: 900px) {
+  .tc-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.tc-kpi {
+  padding: 1.75rem 1.5rem;
+  background-color: var(--tc-vacio);
+}
+
+.tc-kpi--destacado {
+  background-color: var(--tc-superficie);
+}
+
+.tc-kpi__etiqueta {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tc-texto-3);
+}
+
+.tc-kpi__valor {
+  margin-top: 1rem;
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.tc-kpi--destacado .tc-kpi__valor { color: var(--tc-accion); }
+.tc-kpi .tc-barra { margin-top: 1.25rem; }
+
+.tc-arboles__completo { grid-column: 1 / -1; }
+
+.tc-arbol__acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--tc-linea);
+}
+
+.tc-arbol__acciones .tc-boton { flex: 1; }
+
+.tc-arbol__contador {
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--tc-superficie-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.tema-comprador .tc-icono--peligro:hover { color: var(--tc-peligro); }
+
+/* Encabezados de los modales del agricultor (suscriptores, edición): siguen
+   la luz de la página, así que el texto no puede ser blanco fijo */
+.tema-comprador.modal-animado .bg-gradient-to-br,
+.tema-comprador.modal-animado .bg-gradient-to-br h3 {
+  color: var(--tc-texto);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.tema-comprador.modal-animado .bg-gradient-to-br p {
+  color: var(--tc-texto-3);
+}
+
+.tema-comprador.modal-animado .bg-gradient-to-br {
+  border-bottom: 1px solid var(--tc-linea);
+}
+
+/* En modo formulario la portada es solo un encabezado: sin árbol ni alto
+   de pantalla completa */
+#vista-agricultor.modo-formulario .tc-hero__grid {
+  grid-template-columns: 1fr;
+  min-height: auto;
+  padding-bottom: 5rem;
+}
+
+#formulario-arbol.tc-seccion { padding-top: 4rem; }
+
+.tc-formulario {
+  display: grid;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .tc-formulario { grid-template-columns: 1fr 22rem; }
+  .tc-formulario__previa { position: sticky; top: 96px; }
+}
+
+.tc-formulario__previa .vista-previa-oscura { margin-top: 1rem; padding: 0; }
+
+.tema-comprador .paso-formulario {
+  padding: 1.75rem;
+  border-radius: 24px;
+  background-color: var(--tc-superficie);
+  border-color: var(--tc-linea);
+}
+
+.tema-comprador .paso-formulario legend {
+  font-size: 1.125rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--tc-texto);
+}
+
+.tema-comprador .paso-formulario legend span {
+  background: var(--tc-accion);
+  color: var(--tc-sobre-accion);
+  font-weight: 600;
+}
+
+.tema-comprador .campo-etiqueta {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--tc-texto-2);
+}
+
+.tema-comprador .accion-arbol {
+  color: var(--tc-texto);
+  background-color: var(--tc-superficie-2);
+  border-color: var(--tc-linea-fuerte);
+}
+
+.tema-comprador .accion-arbol--peligro:hover { color: var(--tc-peligro); }
+
+.tema-comprador .hero__pill {
+  background-color: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.25);
+  color: var(--tc-accion);
+}
+
 /* ----- Celular ----- */
 /* Ninguna vista puede ensanchar la página: si algo se salía (la barra
    superior, o una tarjeta que espera su animación de entrada), el navegador
@@ -2682,8 +2832,29 @@ html:has(> body.tema-comprador) {
 
 /* ----- Páginas legales (privacidad y términos) ----- */
 .tc-legal-portada {
-  padding-top: 5rem;
+  display: grid;
+  gap: 1rem;
+  align-items: center;
+  padding-top: 4rem;
   padding-bottom: 5rem;
+}
+
+@media (min-width: 900px) {
+  .tc-legal-portada {
+    grid-template-columns: 1.3fr 1fr;
+    gap: 3rem;
+  }
+}
+
+.tc-legal-arbol {
+  max-width: 440px;
+}
+
+@media (max-width: 899px) {
+  .tc-legal-arbol {
+    order: -1;
+    width: min(100%, 300px);
+  }
 }
 
 .tc-legal-meta {

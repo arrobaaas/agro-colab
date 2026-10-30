@@ -6,11 +6,14 @@
   <meta name="theme-color" content="#040806">
   <title>Política de privacidad | Agro-Colab</title>
   <meta name="description" content="Cómo Agro-Colab trata tus datos personales conforme a la Ley N° 21.719: qué datos, para qué, con quién, por cuánto tiempo y cómo ejercer tus derechos.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261031h">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261031h">
+  <link rel="stylesheet" href="css/styles.css?v=20261031i">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031i">
+  <script src="js/efectos.js?v=20261031i" defer></script>
+  <script src="js/constelacion.js?v=20261031i" defer></script>
+  <script src="js/legal.js?v=20261031i" defer></script>
 </head>
 <body class="tema-comprador">
 
@@ -23,8 +26,9 @@
     </div>
   </header>
 
-  <section class="tc-hero">
-    <div class="tc-contenedor tc-legal-portada">
+  <section class="tc-hero hero--portada">
+    <div class="tc-contenedor tc-legal-portada hero__contenido">
+      <div>
       <p class="tc-etiqueta">Legal</p>
       <h1 class="tc-display" style="margin-top:1.5rem">Política de<br><span class="tc-tenue">privacidad.</span></h1>
       <p class="tc-cuerpo" style="margin-top:2rem">
@@ -36,12 +40,16 @@
         <span>Vigente desde el 1 de noviembre de 2026</span>
         <span>Ley N° 21.719 de Protección de Datos Personales</span>
       </div>
+      </div>
+      <div class="tc-hero__visual tc-legal-arbol">
+        <canvas data-constelacion aria-hidden="true"></canvas>
+      </div>
     </div>
   </section>
 
-  <div class="tema-comprador" style="--luz:1">
+  <div class="tema-comprador hoja" style="--luz:1">
     <main class="tc-contenedor tc-legal">
-      <aside class="tc-indice" aria-label="Índice">
+      <aside class="tc-indice" aria-label="Índice" data-reveal="left">
         <p class="tc-etiqueta tc-etiqueta--gris">Contenido</p>
         <ol>
           <li><a href="#resumen">Resumen</a></li>
@@ -59,7 +67,7 @@
 
       <article class="tc-prosa">
 
-        <section id="resumen">
+        <section id="resumen" data-reveal>
           <h2>Resumen en simple</h2>
           <dl class="tc-resumen">
             <div><dt>Pedimos lo mínimo</dt><dd>Nombre, correo y contraseña para tu cuenta; teléfono y dirección solo para tus despachos.</dd></div>
@@ -74,7 +82,7 @@
           </p>
         </section>
 
-        <section id="responsable">
+        <section id="responsable" data-reveal>
           <h2>1. Responsable del tratamiento</h2>
           <p>
             El responsable de tus datos es el equipo de Agro-Colab. Para cualquier consulta sobre
@@ -86,7 +94,7 @@
           </ul>
         </section>
 
-        <section id="datos">
+        <section id="datos" data-reveal>
           <h2>2. Qué datos tratamos</h2>
           <table class="tc-tabla">
             <thead><tr><th>Categoría</th><th>Datos</th><th>Origen</th></tr></thead>
@@ -102,7 +110,7 @@
           <p>No tratamos datos sensibles (salud, origen étnico, opiniones políticas u otros) ni datos de menores de edad.</p>
         </section>
 
-        <section id="finalidades">
+        <section id="finalidades" data-reveal>
           <h2>3. Para qué los usamos</h2>
           <table class="tc-tabla">
             <thead><tr><th>Finalidad</th><th>Base de licitud</th></tr></thead>
@@ -117,7 +125,7 @@
           <p>No tomamos decisiones automatizadas que te afecten de forma significativa ni elaboramos perfiles con fines comerciales.</p>
         </section>
 
-        <section id="destinatarios">
+        <section id="destinatarios" data-reveal>
           <h2>4. Con quién los compartimos</h2>
           <h3>El agricultor de tus árboles</h3>
           <p>
@@ -145,7 +153,7 @@
           <p><strong>Nunca vendemos ni arrendamos tus datos</strong>, ni los compartimos con fines publicitarios.</p>
         </section>
 
-        <section id="navegador">
+        <section id="navegador" data-reveal>
           <h2>5. Lo que se guarda en tu navegador</h2>
           <ul>
             <li><strong>Tu sesión, tu canasta y la última vista</strong> se guardan en el almacenamiento de la pestaña (sessionStorage). Se borran solos al cerrar la pestaña o al cerrar sesión.</li>
@@ -154,7 +162,7 @@
           </ul>
         </section>
 
-        <section id="conservacion">
+        <section id="conservacion" data-reveal>
           <h2>6. Cuánto tiempo los guardamos</h2>
           <table class="tc-tabla">
             <thead><tr><th>Datos</th><th>Plazo</th></tr></thead>
@@ -167,7 +175,7 @@
           </table>
         </section>
 
-        <section id="seguridad">
+        <section id="seguridad" data-reveal>
           <h2>7. Seguridad y brechas</h2>
           <p>Protegemos tus datos con medidas técnicas, entre ellas:</p>
           <ul>
@@ -186,7 +194,7 @@
           </p>
         </section>
 
-        <section id="derechos">
+        <section id="derechos" data-reveal>
           <h2>8. Tus derechos</h2>
           <p>La Ley N° 21.719 te reconoce los siguientes derechos sobre tus datos:</p>
           <table class="tc-tabla">
@@ -206,7 +214,7 @@
           </p>
         </section>
 
-        <section id="cambios">
+        <section id="cambios" data-reveal>
           <h2>9. Cambios en esta política</h2>
           <p>
             Si cambiamos esta política de forma relevante, te lo avisaremos con anticipación en la plataforma.

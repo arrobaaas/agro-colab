@@ -1,5 +1,5 @@
-/* Agro-Colab - Árbol 3D de la portada (ConstelacionService), expuesto como
-   AgroColab.constelacion.
+/* Agro-Colab - Árboles 3D de las portadas (ConstelacionService), expuesto
+   como AgroColab.constelacion. Hay un árbol por cada canvas[data-constelacion].
 
    Un árbol volumétrico hecho de partículas triangulares en la paleta de la
    marca: copa formada por varias esferas, tronco, ramas, raíces y un anillo
@@ -26,9 +26,10 @@
     [0, 0.78, 0, 0.28]
   ];
 
-  class ConstelacionService {
-    constructor() {
-      this.canvas = null;
+  /* Un árbol 3D dibujado en un canvas */
+  class Arbol3D {
+    constructor(canvas) {
+      this.canvas = canvas;
       this.contexto = null;
       this.particulas = [];
       this.visible = false;
@@ -233,8 +234,7 @@
     }
 
     init() {
-      this.canvas = document.getElementById("constelacion");
-      if (!this.canvas || !this.canvas.getContext) return;
+      if (!this.canvas.getContext) return;
       this.contexto = this.canvas.getContext("2d");
       this.crearArbol();
       this.ajustarTamano();
@@ -269,6 +269,27 @@
           }
         }).observe(this.canvas);
       }
+    }
+  }
+
+  /* Crea un árbol por cada <canvas data-constelacion> de la página
+     (portada del comprador, del agricultor y de las páginas legales) */
+  class ConstelacionService {
+    constructor() {
+      this.arboles = [];
+    }
+
+    init() {
+      document.querySelectorAll("canvas[data-constelacion]").forEach((canvas) => {
+        const arbol = new Arbol3D(canvas);
+        arbol.init();
+        this.arboles.push(arbol);
+      });
+    }
+
+    /* Para medir rendimiento en las pruebas */
+    dibujar(tiempo) {
+      this.arboles.forEach((arbol) => arbol.ancho && arbol.dibujar(tiempo));
     }
   }
 
