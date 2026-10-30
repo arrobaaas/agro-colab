@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from core import PedidoRequest, LogisticaRequest, get_db, usuario_actual
+from seguridad import registrar_evento
 from database import Arbol, Pedido, Suscripcion, Usuario
 
 router = APIRouter()
@@ -53,6 +54,7 @@ def registrar_pedido(
     db: Session = Depends(get_db),
 ):
     if cliente.rol != "comprador":
+        registrar_evento("acceso_denegado", "advertencia", usuario=cliente, detalle="contratar plan sin ser comprador")
         return {"status": "error", "mensaje": "Solo los compradores pueden contratar planes."}
 
     error = validar_logistica(pedido)
@@ -67,11 +69,13 @@ def registrar_pedido(
         ).first()
         arbol = db.query(Arbol).filter(Arbol.id == pedido.arbol_id).first()
         if not suscrito or not arbol:
+            registrar_evento("acceso_denegado", "advertencia", usuario=cliente, detalle=f"despacho del árbol {pedido.arbol_id} sin adoptarlo")
             return {"status": "error", "mensaje": "No tienes adoptado ese árbol."}
         plan_nombre = f"Cosecha de {arbol.nombre}"
         monto = arbol.precio_mensual_clp
     else:
         if pedido.plan_nombre not in PLANES_ABASTECIMIENTO:
+            registrar_evento("plan_inexistente", "advertencia", usuario=cliente, detalle=f"plan pedido: {pedido.plan_nombre}")
             return {"status": "error", "mensaje": "El plan elegido no existe."}
         plan_nombre = pedido.plan_nombre
         monto = PLANES_ABASTECIMIENTO[plan_nombre]
@@ -131,6 +135,8 @@ def modificar_logistica(
     """Cambia el destino y la frecuencia de un pedido propio."""
     pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()
     if not pedido or pedido.cliente_id != cliente.id:
+        if pedido:
+            registrar_evento("acceso_denegado", "advertencia", usuario=cliente, detalle=f"pedido {pedido_id} de otro cliente")
         return {"status": "error", "mensaje": "Pedido no encontrado."}
 
     error = validar_logistica(datos)
@@ -166,6 +172,8 @@ def cancelar_plan(
     """
     pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()
     if not pedido or pedido.cliente_id != cliente.id:
+        if pedido:
+            registrar_evento("acceso_denegado", "advertencia", usuario=cliente, detalle=f"pedido {pedido_id} de otro cliente")
         return {"status": "error", "mensaje": "Pedido no encontrado."}
     if pedido.tipo == "arbol":
         return {"status": "error", "mensaje": "Para dejar un árbol, cancela su suscripción."}

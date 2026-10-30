@@ -112,7 +112,10 @@ agro-colab/
 │   ├── index.html             # SPA: login y vistas de comprador y agricultor
 │   ├── privacidad.html        # Política de privacidad (Ley 21.719)
 │   ├── terminos.html          # Términos y condiciones
-│   ├── css/styles.css
+│   ├── monitoreo.html         # Panel de monitoreo de seguridad (con token)
+│   ├── css/
+│   │   ├── styles.css         # Estilos propios
+│   │   └── tailwind.css       # Tailwind compilado (scripts/compilar-css.sh)
 │   └── js/
 │       ├── config.js          # URL de la API y vistas por rol
 │       ├── api.js             # Cliente HTTP: adjunta el token de sesión
@@ -125,17 +128,23 @@ agro-colab/
 │       ├── catalogo.js        # Selector de especies y galería de fotos
 │       ├── autocomplete.js    # Autocompletado de direcciones (Photon)
 │       ├── perfil.js          # Perfil de usuario
-│       ├── ui.js              # Alertas y formato de montos
+│       ├── ui.js              # Alertas, formato de montos y escape de HTML
+│       ├── acciones.js        # Delegación de eventos (sin onclick en el HTML)
+│       ├── efectos.js         # Animaciones de scroll e inclinación 3D
+│       ├── monitoreo.js       # Panel de monitoreo de seguridad
 │       └── app.js             # Arranque de la aplicación
 ├── backend/
 │   ├── main.py                # Aplicación FastAPI, CORS y registro de routers
 │   ├── core.py                # Esquemas, tokens de sesión y lógica compartida
 │   ├── database.py            # Modelos SQLAlchemy y migraciones
 │   ├── catalogo.py            # Catálogo cerrado de especies con fotos atribuidas
-│   ├── routers/               # arboles, especies, suscripciones, pedidos, usuarios
+│   ├── seguridad.py           # Registro de eventos, reglas de alerta y alertas
+│   ├── notificaciones.py      # Envío de correos (Brevo)
+│   ├── routers/               # arboles, especies, suscripciones, pedidos, usuarios, monitoreo
 │   └── requirements.txt
 ├── Informe.pdf                # Informe del proyecto
 ├── Presentacion.pptx          # Presentación del proyecto
+├── scripts/compilar-css.sh    # Compila Tailwind localmente (verifica el checksum)
 ├── LICENSE
 └── THIRD_PARTY_NOTICES.md
 ```
@@ -166,6 +175,14 @@ cd frontend
 python3 -m http.server 3000
 ```
 
+Los estilos de Tailwind ya vienen compilados en `frontend/css/tailwind.css`. Si agregas
+clases nuevas al HTML o al JavaScript, vuelve a compilarlos (no requiere Node; descarga
+el ejecutable oficial y verifica su checksum antes de usarlo):
+
+```bash
+bash scripts/compilar-css.sh
+```
+
 La base de datos SQLite (`backend/agrocolab.db`) se crea sola al primer arranque, con las
 cuentas de demostración y tres árboles de ejemplo. La documentación interactiva de la API
 queda en `http://127.0.0.1:8000/docs`.
@@ -178,6 +195,9 @@ queda en `http://127.0.0.1:8000/docs`.
 | `AGROCOLAB_MOD_MODE` | No | `desarrollo` devuelve el código de verificación de cuenta en la respuesta, para probar el registro sin correo. Por defecto: `produccion`. |
 | `BREVO_API_KEY` | Para registrar cuentas en producción | Clave de la API de [Brevo](https://www.brevo.com) para enviar el código de verificación por correo (plan gratuito: 300 correos al día). |
 | `CORREO_REMITENTE` | Junto con `BREVO_API_KEY` | Correo verificado en Brevo desde el que se envía el código. |
+| `ALERTA_CORREO` | No | Correo que recibe las alertas de seguridad (usa Brevo). |
+| `ALERTA_WEBHOOK_URL` | No | Webhook de Discord o Slack para las alertas de seguridad (`https://`). |
+| `MONITOREO_TOKEN` | Para usar el panel | Token secreto (24 caracteres o más) que da acceso al panel de monitoreo. Sin él, el panel está desactivado. |
 
 Sin `BREVO_API_KEY` y `CORREO_REMITENTE`, en producción el registro de cuentas nuevas
 avisa que no está disponible, en lugar de crear cuentas que nadie podría verificar.
@@ -232,6 +252,31 @@ petición.
 - **Integridad de cupos:** la reserva se hace con un `UPDATE` condicional atómico, y un índice único impide que un usuario ocupe dos cupos del mismo árbol.
 - **Cabeceras de seguridad** (`nosniff`, `X-Frame-Options`, `Referrer-Policy`, `no-store`) y **CORS** restringido a los orígenes, métodos y cabeceras que usa el frontend.
 
+**Registro, monitoreo y alertas**
+
+El backend registra cada evento de seguridad en la tabla `eventos_seguridad` (30 días) y
+como una línea JSON en los logs del servidor: logins fallidos y exitosos, tokens
+falsificados, accesos a datos ajenos, bloqueos por rate limit, intentos de XSS, ataques a
+las cuentas demo, cambios de contraseña y cuentas eliminadas. El navegador también reporta
+cuando la CSP bloquea código (`POST /api/seguridad/csp`).
+
+Cuando se cumple una regla se envía una **alerta** por correo y/o webhook, como máximo una
+vez por hora por regla y origen:
+
+| Regla | Se dispara con |
+|---|---|
+| Posible fuerza bruta | 5 logins fallidos contra una cuenta en 15 min |
+| Tokens falsificados | 5 tokens inválidos desde una IP en 10 min |
+| Acceso a datos ajenos | 5 accesos denegados desde una IP en 10 min |
+| Ataque a cuentas demo | 3 intentos de modificarlas desde una IP en 30 min |
+| Rate limit superado | 1 bloqueo |
+| Intento de XSS | 1 texto con `<` o `>` |
+| Bloqueo de CSP | 1 reporte del navegador |
+
+El **panel de monitoreo** (`frontend/monitoreo.html`) muestra los eventos de las últimas
+24 horas, por tipo y por severidad, y se actualiza cada 30 segundos. Pide el
+`MONITOREO_TOKEN`, que se guarda solo en memoria.
+
 **Ley N° 21.719 de Protección de Datos Personales (Chile)**
 
 El proyecto incorpora desde el diseño los requisitos de la ley, vigente desde el 1 de
@@ -253,6 +298,7 @@ acceso, rectificación y eliminación desde el perfil del usuario.
 | Dirección | Despacho de productos | Consentimiento | Hasta eliminación |
 | Suscripciones | Gestión de adopciones | Contrato | Hasta eliminación |
 | Pedidos | Gestión logística | Contrato | Hasta eliminación |
+| IP, correo y acción en eventos de seguridad | Detectar y responder a ataques | Interés legítimo (seguridad del servicio) | 30 días |
 
 | Derecho (Art. 20) | Cómo ejercerlo |
 |---|---|

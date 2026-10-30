@@ -8,34 +8,35 @@
        (connect-src / img-src) ni cargar scripts externos. script-src no
        permite código inline: los eventos se conectan desde acciones.js, así
        que un atributo onclick/onerror inyectado no se ejecutaría.
-       'unsafe-inline' queda solo en style-src, por los estilos que genera
-       Tailwind (un estilo no puede ejecutar código). -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://upload.wikimedia.org https://images.unsplash.com; connect-src 'self' http://127.0.0.1:8000 https://agro-colab.onrender.com https://photon.komoot.io; object-src 'none'; base-uri 'self'; form-action 'self'">
+       Tailwind se sirve compilado desde el propio sitio (css/tailwind.css).
+       'unsafe-inline' queda solo en style-src, por los atributos style=""
+       (un estilo no puede ejecutar código). -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://upload.wikimedia.org https://images.unsplash.com; connect-src 'self' http://127.0.0.1:8000 https://agro-colab.onrender.com https://photon.komoot.io; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Agro-Colab | Cosecha Colaborativa</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- ?v= obliga a descargar de nuevo CSS y JS tras cada cambio (GitHub Pages
        los cachea 10 min). Actualizar la fecha al publicar cambios. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261030c">
-  <script src="js/config.js?v=20261030c" defer></script>
-  <script src="js/ui.js?v=20261030c" defer></script>
-  <script src="js/api.js?v=20261030c" defer></script>
-  <script src="js/auth.js?v=20261030c" defer></script>
-  <script src="js/parcelas.js?v=20261030c" defer></script>
-  <script src="js/catalogo.js?v=20261030c" defer></script>
-  <script src="js/agricultor.js?v=20261030c" defer></script>
-  <script src="js/perfil.js?v=20261030c" defer></script>
-  <script src="js/autocomplete.js?v=20261030c" defer></script>
-  <script src="js/dashboard.js?v=20261030c" defer></script>
-  <script src="js/efectos.js?v=20261030c" defer></script>
-  <script src="js/views.js?v=20261030c" defer></script>
-  <script src="js/login.js?v=20261030c" defer></script>
-  <script src="js/acciones.js?v=20261030c" defer></script>
-  <script src="js/app.js?v=20261030c" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261030e">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261030e">
+  <script src="js/config.js?v=20261030e" defer></script>
+  <script src="js/ui.js?v=20261030e" defer></script>
+  <script src="js/api.js?v=20261030e" defer></script>
+  <script src="js/auth.js?v=20261030e" defer></script>
+  <script src="js/parcelas.js?v=20261030e" defer></script>
+  <script src="js/catalogo.js?v=20261030e" defer></script>
+  <script src="js/agricultor.js?v=20261030e" defer></script>
+  <script src="js/perfil.js?v=20261030e" defer></script>
+  <script src="js/autocomplete.js?v=20261030e" defer></script>
+  <script src="js/dashboard.js?v=20261030e" defer></script>
+  <script src="js/efectos.js?v=20261030e" defer></script>
+  <script src="js/views.js?v=20261030e" defer></script>
+  <script src="js/login.js?v=20261030e" defer></script>
+  <script src="js/acciones.js?v=20261030e" defer></script>
+  <script src="js/app.js?v=20261030e" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>

@@ -8,6 +8,7 @@ from core import (
     normalizar_identificador, serializar_arbol, cupos_ocupados_de, get_db,
     usuario_actual, es_cuenta_demo,
 )
+from seguridad import registrar_evento
 from database import Arbol, Pedido, Suscripcion, Usuario
 
 router = APIRouter()
@@ -19,6 +20,7 @@ def _arbol_propio(db: Session, arbol_id: int, usuario: Usuario):
     if not arbol:
         return None, {"status": "error", "mensaje": "Árbol no encontrado."}
     if arbol.productor_id != usuario.id:
+        registrar_evento("acceso_denegado", "advertencia", usuario=usuario, detalle=f"árbol {arbol_id} de otro productor")
         return None, {"status": "error", "mensaje": "Solo el productor del árbol puede modificarlo."}
     return arbol, None
 
@@ -38,6 +40,7 @@ def crear_arbol(
     # El productor es el usuario de la sesión. Antes se buscaba por el nombre
     # enviado en el formulario, y cualquiera podía publicar a nombre de otro.
     if productor.rol != "agricultor":
+        registrar_evento("acceso_denegado", "advertencia", usuario=productor, detalle="publicar árbol sin ser agricultor")
         return {"status": "error", "mensaje": "Solo los agricultores pueden publicar árboles."}
 
     # La especie debe existir en el catálogo: no se aceptan nombres libres
@@ -136,6 +139,7 @@ def eliminar_arbol(
     # Las credenciales demo son públicas: borrar los árboles dejaría la demo
     # vacía para todos
     if es_cuenta_demo(usuario):
+        registrar_evento("cuenta_demo", "advertencia", usuario=usuario, detalle=f"eliminar árbol {arbol_id}")
         return {"status": "error", "mensaje": "La cuenta de demostración no puede eliminar árboles."}
 
     # Sin esto las suscripciones y sus despachos quedaban apuntando a un

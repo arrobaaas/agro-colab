@@ -15,11 +15,11 @@ solo el código fuente propio.
 | SQLAlchemy | MIT | https://github.com/sqlalchemy/sqlalchemy |
 | bcrypt | Apache-2.0 | https://github.com/pyca/bcrypt |
 
-## Dependencias del frontend (cargadas por CDN)
+## Dependencias del frontend
 
 | Dependencia | Licencia | Fuente |
 |---|---|---|
-| Tailwind CSS | MIT | https://github.com/tailwindlabs/tailwindcss |
+| Tailwind CSS 3.4.17 (compilado en `frontend/css/tailwind.css`) | MIT | https://github.com/tailwindlabs/tailwindcss |
 | Font Awesome Free 6.4 | Íconos: CC BY 4.0 · Fuentes: SIL OFL 1.1 · Código: MIT | https://fontawesome.com/license/free |
 
 ## Servicios y datos

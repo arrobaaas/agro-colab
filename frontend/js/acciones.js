@@ -20,6 +20,26 @@ class AccionesService {
   constructor() {
     /* Solo se pueden invocar métodos de estos servicios */
     this.modulos = ["parcelas", "views", "perfil", "login", "dashboard", "agricultor", "autocomplete"];
+    this.reportesCSP = 0;
+  }
+
+  /* Avisa al backend cuando la CSP bloquea algo: casi siempre es un intento
+     de inyectar código, y así queda en el registro de seguridad. Máximo 5
+     reportes por carga de página para no inundar el servidor. */
+  reportarViolacionCSP(evento) {
+    if (this.reportesCSP >= 5) return;
+    this.reportesCSP += 1;
+    window.AgroColab.api
+      .apiFetch("/seguridad/csp", {
+        method: "POST",
+        body: JSON.stringify({
+          directiva: String(evento.effectiveDirective || evento.violatedDirective || "").slice(0, 100),
+          bloqueado: String(evento.blockedURI || "inline").slice(0, 300),
+          pagina: String(evento.documentURI || location.pathname).slice(0, 300),
+          muestra: evento.sample ? String(evento.sample).slice(0, 120) : null
+        })
+      })
+      .catch(() => { /* el reporte es best-effort */ });
   }
 
   /* Convierte un argumento escrito en el HTML a su tipo (número o texto) */
@@ -56,6 +76,7 @@ class AccionesService {
   }
 
   init() {
+    document.addEventListener("securitypolicyviolation", (evento) => this.reportarViolacionCSP(evento));
     document.addEventListener("click", (evento) => this.alHacerClic(evento));
 
     document.addEventListener("input", (evento) => {

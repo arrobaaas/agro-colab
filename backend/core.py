@@ -9,12 +9,8 @@ from typing import Annotated, Literal, Optional
 from datetime import datetime
 
 import html
-import json
-import logging
 import os
 import time
-import urllib.error
-import urllib.request
 import hmac
 import hashlib
 import secrets
@@ -29,6 +25,8 @@ from database import (
     hash_password, verify_password, asegurar_columnas, migrar_cuentas_antiguas,
     CUENTAS_DEMO,
 )
+from notificaciones import correo_configurado, enviar_correo
+from seguridad import registrar_evento
 from catalogo import (
     CATALOGO_ESPECIES, listar_especies, buscar_especie, fotos_permitidas,
     componer_nombre, normalizar_identificador, foto_de,
@@ -86,6 +84,7 @@ def demasiados_intentos():
 def limitar(clave: str, maximo: int, ventana_segundos: int):
     """Corta la petición si la clave superó el máximo de intentos."""
     if not _limitar_intento(clave, maximo, ventana_segundos):
+        registrar_evento("limite_excedido", "advertencia", detalle=clave)
         raise demasiados_intentos()
 
 
@@ -97,51 +96,18 @@ def limitar_por_ip(maximo: int = 10, ventana_segundos: int = 300):
 
 
 # ----------------- CORREO -----------------
-# Envío del código de verificación con la API HTTP de Brevo (plan gratuito,
-# solo pide verificar el remitente). Se usa HTTP y no SMTP porque algunos
-# hostings bloquean los puertos SMTP. Variables de entorno:
-#   BREVO_API_KEY      clave de la API
-#   CORREO_REMITENTE   correo verificado en Brevo desde el que se envía
-
-registro = logging.getLogger("agrocolab")
-
-
-def correo_configurado() -> bool:
-    return bool(os.getenv("BREVO_API_KEY") and os.getenv("CORREO_REMITENTE"))
-
 
 def enviar_codigo_verificacion(destino: str, nombre: str, codigo: str) -> bool:
-    """Envía el código por correo. Devuelve True si el proveedor lo aceptó."""
-    if not correo_configurado():
-        return False
-
-    cuerpo = {
-        "sender": {"name": "Agro-Colab", "email": os.getenv("CORREO_REMITENTE")},
-        "to": [{"email": destino, "name": nombre}],
-        "subject": f"Tu código de verificación de Agro-Colab: {codigo}",
-        "htmlContent": (
-            f"<p>Hola {html.escape(nombre)},</p>"
-            f"<p>Tu código para verificar tu cuenta en Agro-Colab es:</p>"
-            f"<p style='font-size:28px;font-weight:bold;letter-spacing:6px'>{codigo}</p>"
-            f"<p>Vence en 30 minutos. Si no creaste una cuenta, ignora este correo.</p>"
-        ),
-    }
-    peticion = urllib.request.Request(
-        "https://api.brevo.com/v3/smtp/email",
-        data=json.dumps(cuerpo).encode("utf-8"),
-        headers={
-            "api-key": os.getenv("BREVO_API_KEY"),
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        },
-        method="POST",
+    """Envía el código de verificación de cuenta por correo."""
+    return enviar_correo(
+        destino,
+        nombre,
+        f"Tu código de verificación de Agro-Colab: {codigo}",
+        f"<p>Hola {html.escape(nombre)},</p>"
+        f"<p>Tu código para verificar tu cuenta en Agro-Colab es:</p>"
+        f"<p style='font-size:28px;font-weight:bold;letter-spacing:6px'>{codigo}</p>"
+        f"<p>Vence en 30 minutos. Si no creaste una cuenta, ignora este correo.</p>",
     )
-    try:
-        with urllib.request.urlopen(peticion, timeout=10) as respuesta:
-            return 200 <= respuesta.status < 300
-    except (urllib.error.URLError, TimeoutError) as error:
-        registro.error("No se pudo enviar el correo de verificación: %s", error)
-        return False
 
 
 # ----------------- TOKENS DE SESIÓN -----------------
@@ -198,6 +164,12 @@ def usuario_actual(request: Request, db: Session = Depends(get_db)) -> Usuario:
         esperada = _firmar(f"{usuario_id}.{expira}.{candidato.password}") if candidato else ""
         if candidato and hmac.compare_digest(firma, esperada):
             usuario = candidato
+        else:
+            # Un token vencido es normal; uno con firma que no cuadra fue
+            # falsificado, manipulado o pertenece a una contraseña anterior
+            registrar_evento("token_invalido", "advertencia", detalle=f"usuario_id={usuario_id}")
+    elif cabecera.startswith("Bearer ") and not partes:
+        registrar_evento("token_invalido", "advertencia", detalle="formato inválido")
     if not usuario:
         raise _no_autorizado("Tu sesión expiró. Inicia sesión nuevamente.")
     return usuario
@@ -212,6 +184,7 @@ def es_cuenta_demo(usuario: Usuario) -> bool:
 def exigir_mismo_usuario(usuario: Usuario, usuario_id: int):
     """Corta la petición si el usuario autenticado no es el dueño del recurso."""
     if usuario.id != usuario_id:
+        registrar_evento("acceso_denegado", "advertencia", usuario=usuario, detalle=f"datos del usuario {usuario_id}")
         raise _no_autorizado("No tienes permiso para ver estos datos.", 403)
 
 
