@@ -12,6 +12,7 @@ class AppService {
     this.autocomplete = window.AgroColab.autocomplete;
     this.dashboard = window.AgroColab.dashboard;
     this.acciones = window.AgroColab.acciones;
+    this.constelacion = window.AgroColab.constelacion;
     this.efectos = window.AgroColab.efectos;
   }
 
@@ -30,6 +31,7 @@ class AppService {
       this.dashboard.init();
       this.views.init();
       this.efectos.init();
+      this.constelacion.init();
 
       this.views.mostrarVista(this.views.vistaInicial());
     });

@@ -19,24 +19,25 @@
        los cachea 10 min). Actualizar la fecha al publicar cambios. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261031b">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261031b">
-  <script src="js/config.js?v=20261031b" defer></script>
-  <script src="js/ui.js?v=20261031b" defer></script>
-  <script src="js/api.js?v=20261031b" defer></script>
-  <script src="js/auth.js?v=20261031b" defer></script>
-  <script src="js/parcelas.js?v=20261031b" defer></script>
-  <script src="js/catalogo.js?v=20261031b" defer></script>
-  <script src="js/agricultor.js?v=20261031b" defer></script>
-  <script src="js/perfil.js?v=20261031b" defer></script>
-  <script src="js/autocomplete.js?v=20261031b" defer></script>
-  <script src="js/dashboard.js?v=20261031b" defer></script>
-  <script src="js/efectos.js?v=20261031b" defer></script>
-  <script src="js/views.js?v=20261031b" defer></script>
-  <script src="js/login.js?v=20261031b" defer></script>
-  <script src="js/acciones.js?v=20261031b" defer></script>
-  <script src="js/app.js?v=20261031b" defer></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/styles.css?v=20261031d">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031d">
+  <script src="js/config.js?v=20261031d" defer></script>
+  <script src="js/ui.js?v=20261031d" defer></script>
+  <script src="js/api.js?v=20261031d" defer></script>
+  <script src="js/auth.js?v=20261031d" defer></script>
+  <script src="js/parcelas.js?v=20261031d" defer></script>
+  <script src="js/catalogo.js?v=20261031d" defer></script>
+  <script src="js/agricultor.js?v=20261031d" defer></script>
+  <script src="js/perfil.js?v=20261031d" defer></script>
+  <script src="js/autocomplete.js?v=20261031d" defer></script>
+  <script src="js/dashboard.js?v=20261031d" defer></script>
+  <script src="js/efectos.js?v=20261031d" defer></script>
+  <script src="js/constelacion.js?v=20261031d" defer></script>
+  <script src="js/views.js?v=20261031d" defer></script>
+  <script src="js/login.js?v=20261031d" defer></script>
+  <script src="js/acciones.js?v=20261031d" defer></script>
+  <script src="js/app.js?v=20261031d" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -278,20 +279,14 @@
   <!-- ============================================================
        VISTA 2: PARCELAS - la que ve el usuario según su rol
        ============================================================ -->
-  <div id="vista-parcelas" data-vista="parcelas" class="hidden">
+  <div id="vista-parcelas" data-vista="parcelas" class="hidden tema-comprador">
 
-    <header class="header-sitio sticky top-0 z-50">
-      <div class="max-w-6xl mx-auto px-4 h-16 md:h-[72px] flex justify-between items-center gap-3">
-        <div class="flex items-center gap-3">
-          <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
-          <div class="leading-tight">
-            <p class="text-lg font-extrabold tracking-tight">Agro-Colab</p>
-            <p class="hidden sm:block text-[11px] text-emerald-200/70">Trazabilidad directa del huerto a tu mesa</p>
-          </div>
-        </div>
-        <nav class="flex items-center gap-1.5 sm:gap-2" aria-label="Navegación principal">
+    <header class="tc-nav sticky top-0 z-50">
+      <div class="tc-contenedor tc-nav__fila">
+        <span class="tc-marca"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado-a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado-a)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</span>
+        <nav class="tc-nav__enlaces" aria-label="Navegación principal">
           <button type="button" class="nav-pill" data-accion="views.mostrarVista" data-args='["dashboard-comprador"]'>
-            <i class="fa-regular fa-chart-bar"></i><span class="hidden sm:inline">Mi panel</span>
+            <span>Mi panel</span>
           </button>
           <button type="button" class="nav-icono" data-accion="parcelas.abrirCanasta" title="Mi canasta" aria-label="Mi canasta">
             <i class="fa-solid fa-bag-shopping"></i>
@@ -306,283 +301,202 @@
       </div>
     </header>
 
-    <!-- Banner de la vista -->
-    <section class="hero hero--portada">
-      <img
-        src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1600&q=80"
-        alt="Campos de cultivo"
-        class="hero__img"
-      >
-      <div class="hero__contenido max-w-6xl mx-auto px-4 py-20 md:py-28">
-        <div class="max-w-2xl">
-          <span class="hero__pill">
-            <i class="fa-solid fa-leaf"></i> Del huerto chileno directo a tu mesa
-          </span>
-          <h2 class="text-4xl md:text-6xl font-extrabold leading-[1.05] mt-6 mb-5">
-            Financia la cosecha,<br>
-            <span class="text-emerald-400">asegura tu abastecimiento.</span>
-          </h2>
-          <p class="text-emerald-50/80 text-base md:text-lg leading-relaxed max-w-xl">
+    <!-- Portada: titular en dos columnas y constelación en forma de árbol -->
+    <section class="tc-hero hero--portada">
+      <div class="tc-contenedor tc-hero__grid hero__contenido">
+        <div>
+          <p class="tc-etiqueta">Cosecha colaborativa · Chile</p>
+          <h1 class="tc-display" style="margin-top:1.5rem">Financia la cosecha.<br><span class="tc-tenue">Recibe lo que crece.</span></h1>
+          <p class="tc-cuerpo" style="margin-top:2rem">
             Adopta un árbol frutal y sé dueño de su producción, o contrata una canasta
             de cosecha con entrega programada. Tu pago llega directo al agricultor.
           </p>
-          <div class="flex flex-wrap gap-3 mt-8">
-            <button type="button" class="btn-hero btn-hero--primario" data-accion="parcelas.establecerLinea" data-args='["adopcion"]'>
-              <i class="fa-solid fa-tree"></i> Adoptar un árbol
+          <div class="tc-acciones">
+            <button type="button" class="tc-boton" data-accion="parcelas.establecerLinea" data-args='["adopcion"]'>
+              Adoptar un árbol
             </button>
-            <button type="button" class="btn-hero btn-hero--secundario" data-accion="parcelas.establecerLinea" data-args='["abastecimiento"]'>
-              <i class="fa-solid fa-basket-shopping"></i> Ver canastas
+            <button type="button" class="tc-enlace" data-accion="parcelas.establecerLinea" data-args='["abastecimiento"]'>
+              Ver canastas <i class="fa-solid fa-arrow-right"></i>
             </button>
           </div>
-          <div class="flex flex-wrap gap-2 mt-10">
-            <span class="hero__pill"><i class="fa-solid fa-handshake"></i> Sin intermediarios</span>
-            <span class="hero__pill"><i class="fa-solid fa-route"></i> Trazabilidad por pedido</span>
-            <span class="hero__pill"><i class="fa-solid fa-apple-whole"></i> 12 especies frutales</span>
-          </div>
+          <dl class="tc-datos">
+            <div><dt>Intermediarios</dt><dd>Ninguno</dd></div>
+            <div><dt>Especies</dt><dd>12 frutales</dd></div>
+            <div><dt>Trazabilidad</dt><dd>Por cada pedido</dd></div>
+          </dl>
+        </div>
+        <div class="tc-hero__visual">
+          <canvas id="constelacion" aria-hidden="true"></canvas>
         </div>
       </div>
     </section>
 
-    <!-- Hoja de contenido: sube y cubre la portada al hacer scroll -->
+    <!-- Hoja de contenido: sube sobre la portada al hacer scroll -->
     <div class="hoja">
 
     <!-- CÓMO FUNCIONA -->
-    <section class="max-w-6xl mx-auto px-4 pt-16">
-      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal="wipe">
-        <span class="eyebrow">Cómo funciona</span>
-        <h3 class="text-3xl font-extrabold text-stone-900 mt-3">Tres pasos del campo a tu casa</h3>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="paso-card" data-reveal="flip" data-tilt style="--reveal-delay:0ms">
-          <span class="paso-card__numero">01</span>
-          <div class="paso-card__icono"><i class="fa-solid fa-magnifying-glass"></i></div>
-          <h4 class="font-bold text-lg text-stone-900">Elige tu árbol o canasta</h4>
-          <p class="text-sm text-stone-500 mt-2 leading-relaxed">Explora árboles reales publicados por agricultores, con su ubicación, especie y cosecha estimada.</p>
+    <section class="tc-seccion">
+      <div class="tc-contenedor tc-dos-columnas">
+        <div data-reveal="wipe">
+          <p class="tc-etiqueta">Cómo funciona</p>
+          <h2 class="tc-titulo" style="margin-top:1.25rem">Del huerto a tu mesa, en tres pasos.</h2>
         </div>
-        <div class="paso-card" data-reveal="flip" data-tilt style="--reveal-delay:150ms">
-          <span class="paso-card__numero">02</span>
-          <div class="paso-card__icono"><i class="fa-solid fa-hand-holding-dollar"></i></div>
-          <h4 class="font-bold text-lg text-stone-900">Financia la temporada</h4>
-          <p class="text-sm text-stone-500 mt-2 leading-relaxed">Tu cuota mensual llega directo al productor y le da liquidez antes de la cosecha.</p>
-        </div>
-        <div class="paso-card" data-reveal="flip" data-tilt style="--reveal-delay:300ms">
-          <span class="paso-card__numero">03</span>
-          <div class="paso-card__icono"><i class="fa-solid fa-truck-fast"></i></div>
-          <h4 class="font-bold text-lg text-stone-900">Recibe tu cosecha</h4>
-          <p class="text-sm text-stone-500 mt-2 leading-relaxed">Despacho a tu hogar o negocio, con un código de seguimiento que te dice de qué huerto viene.</p>
-        </div>
+        <ol class="tc-pasos">
+          <li data-reveal style="--reveal-delay:0ms">
+            <span class="tc-pasos__numero">01</span>
+            <div>
+              <h3 class="tc-subtitulo">Elige tu árbol o canasta</h3>
+              <p class="tc-cuerpo-sm" style="margin-top:.5rem">Árboles reales publicados por agricultores, con su ubicación, especie y cosecha estimada.</p>
+            </div>
+          </li>
+          <li data-reveal style="--reveal-delay:120ms">
+            <span class="tc-pasos__numero">02</span>
+            <div>
+              <h3 class="tc-subtitulo">Financia la temporada</h3>
+              <p class="tc-cuerpo-sm" style="margin-top:.5rem">Tu cuota mensual llega directo al productor y le da liquidez antes de la cosecha.</p>
+            </div>
+          </li>
+          <li data-reveal style="--reveal-delay:240ms">
+            <span class="tc-pasos__numero">03</span>
+            <div>
+              <h3 class="tc-subtitulo">Recibe tu cosecha</h3>
+              <p class="tc-cuerpo-sm" style="margin-top:.5rem">Despacho a tu hogar o negocio, con un código de seguimiento que te dice de qué huerto viene.</p>
+            </div>
+          </li>
+        </ol>
       </div>
     </section>
 
     <!-- SECCIÓN 1: PLANES DE ADOPCIÓN (línea de producto 1) -->
-    <section id="seccion-adopcion" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
-      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal="wipe">
-        <span class="eyebrow">Línea 1 · Adopción de árboles</span>
-        <h3 class="text-3xl font-black text-stone-900 mt-3 mb-2 tracking-tight">
-          Elige tu plan de adopción
-        </h3>
-        <p class="text-xs md:text-sm text-stone-600 leading-relaxed">
-          En la adopción compras un <strong>cupo</strong> sobre un árbol concreto: el
-          plan define cuántos copartícipes comparte su producción. Al elegir un plan
-          verás los árboles disponibles de ese plan.
-        </p>
-      </div>
-
-      <div id="grid-planes-adopcion" class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch" data-reveal-grupo>
-
-        <!-- PLAN BÁSICO: 5 copartícipes -->
-        <div class="plan-adopcion-card" data-reveal="left" data-tilt>
+    <section id="seccion-adopcion" class="tc-seccion scroll-mt-24">
+      <div class="tc-contenedor">
+        <div class="tc-encabezado" data-reveal="wipe">
           <div>
-            <div class="flex justify-between items-center mb-4">
-              <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Plan Básico</span>
-              <span class="plan-chip">5 copartícipes</span>
-            </div>
-            <h4 class="text-2xl font-black text-stone-900 mb-1">Cosecha Compartida</h4>
-            <p class="text-xs text-stone-500 mb-6">Comparte el árbol y su producción de temporada con 5 personas.</p>
-            <div class="border-t border-stone-100 pt-5 space-y-3 text-xs text-stone-700">
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> 1 de cada 5 partes de la cosecha</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Cupo más bajo, menor inversión</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Ideal para consumo ocasional</p>
-            </div>
+            <p class="tc-etiqueta">Línea 1 · Adopción de árboles</p>
+            <h2 class="tc-titulo" style="margin-top:1.25rem">Elige cuánto de un árbol quieres.</h2>
           </div>
-          <button type="button" class="btn-plan btn-plan--neutro" data-plan-adopcion="Básico">
-            Ver árboles Plan Básico
-          </button>
+          <p class="tc-cuerpo">
+            Compras un cupo sobre un árbol concreto: el plan define con cuántas personas
+            compartes su producción. Al elegir un plan verás sus árboles disponibles.
+          </p>
         </div>
 
-        <!-- PLAN INTERMEDIO: 3 copartícipes -->
-        <div class="plan-adopcion-card plan-adopcion-card--destacado" data-reveal="zoom" data-tilt style="--reveal-delay:150ms">
-          <span class="plan-adopcion-ribbon">Más Equilibrado</span>
-          <div>
-            <div class="flex justify-between items-center mb-4">
-              <span class="text-xs font-bold uppercase tracking-wider text-emerald-300">Plan Intermedio</span>
-              <span class="plan-chip plan-chip--dark">3 copartícipes</span>
-            </div>
-            <h4 class="text-2xl font-black text-white mb-1">Cosecha en Común</h4>
-            <p class="text-xs text-emerald-200/80 mb-6">Una porción más grande de la producción, manteniendo el árbol en manos de varios.</p>
-            <div class="border-t border-emerald-800/80 pt-5 space-y-3 text-xs text-emerald-100">
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> 1 de cada 3 partes de la cosecha</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Mejor rendimiento por cupo</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Ideal para consumo familiar mensual</p>
-            </div>
-          </div>
-          <button type="button" class="btn-plan btn-plan--destacado" data-plan-adopcion="Intermedio">
-            Ver árboles Plan Intermedio
-          </button>
-        </div>
+        <div id="grid-planes-adopcion" class="tc-planes" data-reveal-grupo>
+          <article class="plan-adopcion-card" data-reveal="left">
+            <p class="tc-etiqueta tc-etiqueta--gris">Plan Básico</p>
+            <h3 class="tc-plan__nombre">Cosecha compartida</h3>
+            <p class="tc-plan__cifra">1/5<small>de la cosecha</small></p>
+            <p class="tc-cuerpo-sm tc-plan__descripcion">Comparte el árbol y su producción de temporada con 5 personas.</p>
+            <ul class="tc-lista">
+              <li><i class="fa-solid fa-check"></i> El cupo de menor inversión</li>
+              <li><i class="fa-solid fa-check"></i> Ideal para consumo ocasional</li>
+            </ul>
+            <button type="button" class="tc-enlace" data-plan-adopcion="Básico">Ver árboles <i class="fa-solid fa-arrow-right"></i></button>
+          </article>
 
-        <!-- PLAN PREMIUM: exclusivo -->
-        <div class="plan-adopcion-card" data-reveal="right" data-tilt style="--reveal-delay:300ms">
-          <div>
-            <div class="flex justify-between items-center mb-4">
-              <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Plan Premium</span>
-              <span class="plan-chip">Exclusivo</span>
-            </div>
-            <h4 class="text-2xl font-black text-stone-900 mb-1">Dueño Exclusivo</h4>
-            <p class="text-xs text-stone-500 mb-6">Eres el único dueño del 100% de lo que produzca el árbol en la temporada.</p>
-            <div class="border-t border-stone-100 pt-5 space-y-3 text-xs text-stone-700">
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> 100% de la producción del árbol</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Cupo único, sin copartícipes</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Mayor inversión, máximo rendimiento</p>
-            </div>
-          </div>
-          <button type="button" class="btn-plan btn-plan--oscuro" data-plan-adopcion="Premium">
-            Ver árboles Plan Premium
-          </button>
-        </div>
+          <article class="plan-adopcion-card tc-plan--destacado" data-reveal="zoom" style="--reveal-delay:150ms">
+            <p class="tc-etiqueta">Plan Intermedio · Más equilibrado</p>
+            <h3 class="tc-plan__nombre">Cosecha en común</h3>
+            <p class="tc-plan__cifra">1/3<small>de la cosecha</small></p>
+            <p class="tc-cuerpo-sm tc-plan__descripcion">Una porción más grande de la producción, manteniendo el árbol en manos de varios.</p>
+            <ul class="tc-lista">
+              <li><i class="fa-solid fa-check"></i> Mejor rendimiento por cupo</li>
+              <li><i class="fa-solid fa-check"></i> Ideal para consumo familiar mensual</li>
+            </ul>
+            <button type="button" class="tc-enlace" data-plan-adopcion="Intermedio">Ver árboles <i class="fa-solid fa-arrow-right"></i></button>
+          </article>
 
+          <article class="plan-adopcion-card" data-reveal="right" style="--reveal-delay:300ms">
+            <p class="tc-etiqueta tc-etiqueta--gris">Plan Premium</p>
+            <h3 class="tc-plan__nombre">Dueño exclusivo</h3>
+            <p class="tc-plan__cifra">100%<small>para ti</small></p>
+            <p class="tc-cuerpo-sm tc-plan__descripcion">Eres el único dueño de todo lo que produzca el árbol en la temporada.</p>
+            <ul class="tc-lista">
+              <li><i class="fa-solid fa-check"></i> Cupo único, sin copartícipes</li>
+              <li><i class="fa-solid fa-check"></i> Máximo rendimiento</li>
+            </ul>
+            <button type="button" class="tc-enlace" data-plan-adopcion="Premium">Ver árboles <i class="fa-solid fa-arrow-right"></i></button>
+          </article>
+        </div>
       </div>
     </section>
 
     <!-- SECCIÓN 2: CATÁLOGO DE ÁRBOLES ADOPTABLE -->
-    <section id="seccion-parcelas" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-8" data-reveal="left">
-        <div>
-          <span class="eyebrow">Catálogo</span>
-          <h3 class="text-3xl font-extrabold text-stone-900 mt-3">Árboles disponibles para adopción</h3>
-          <p class="text-sm text-stone-500 mt-1" id="filtro-activo-texto">Mostrando los 3 planes de adopción. Selecciona un plan arriba para filtrar.</p>
+    <section id="seccion-parcelas" class="tc-seccion scroll-mt-24">
+      <div class="tc-contenedor">
+        <div class="tc-encabezado tc-encabezado--accion" data-reveal="left">
+          <div>
+            <p class="tc-etiqueta">Catálogo</p>
+            <h2 class="tc-titulo" style="margin-top:1.25rem">Árboles disponibles.</h2>
+            <p class="tc-cuerpo-sm" style="margin-top:1rem" id="filtro-activo-texto">Mostrando los 3 planes de adopción. Selecciona un plan arriba para filtrar.</p>
+          </div>
+          <button type="button" id="btn-actualizar-arboles" class="tc-enlace tc-enlace--suave">
+            <i class="fa-solid fa-arrows-rotate"></i> Actualizar
+          </button>
         </div>
-        <button type="button" id="btn-actualizar-arboles" class="text-xs text-emerald-800 hover:text-emerald-950 font-bold flex items-center gap-1.5 bg-white border border-stone-200 hover:border-emerald-300 px-4 py-2 rounded-full transition">
-          <i class="fa-solid fa-arrows-rotate"></i> Actualizar disponibilidad
-        </button>
-      </div>
-      <div id="tree-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
-        <p class="text-stone-500 text-sm">Cargando parcelas disponibles...</p>
+        <div id="tree-container" class="tc-arboles">
+          <p class="tc-cuerpo-sm">Cargando árboles disponibles...</p>
+        </div>
       </div>
     </section>
 
     <!-- SECCIÓN 3: PLANES DE ABASTECIMIENTO (línea de producto 2) -->
-    <section id="seccion-abastecimiento" class="max-w-6xl mx-auto my-14 px-4 scroll-mt-24 hidden">
-      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal="wipe">
-        <span class="eyebrow">Línea 2 · Abastecimiento</span>
-        <h3 class="text-3xl font-black text-stone-900 mt-3 mb-2 tracking-tight">
-          Tu cosecha semanal o mensual, sin vueltas
-        </h3>
-        <p class="text-xs md:text-sm text-stone-600 leading-relaxed">
-          En vez de un cupo sobre un árbol, aquí contratas una <strong>canasta de
-          cosecha</strong> ya definida, con entrega programada y despacho a domicilio o
-          al local. Al hacer clic serás llevado directamente al selector logístico.
-        </p>
-      </div>
-
-      <div id="grid-planes" class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch" data-reveal-grupo>
-
-        <!-- PLAN 1: Dúo -->
-        <div class="relative bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between" data-reveal="left" data-tilt>
+    <section id="seccion-abastecimiento" class="tc-seccion scroll-mt-24 hidden">
+      <div class="tc-contenedor">
+        <div class="tc-encabezado" data-reveal="wipe">
           <div>
-            <div class="flex justify-between items-center mb-4">
-              <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Plan Dúo</span>
-              <span class="text-[11px] bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full font-semibold">1 a 2 personas</span>
-            </div>
-            <h4 class="text-2xl font-black text-stone-900 mb-1">Canasta Huerto Esencial</h4>
-            <p class="text-xs text-stone-500 mb-6">Equilibrio de cítricos y paltas de temporada para consumo fresco.</p>
-            <div class="mb-6">
-              <span class="text-3xl font-black text-emerald-900">$19.900</span>
-              <span class="text-xs font-normal text-stone-500">/ entrega quincenal</span>
-            </div>
-            <div class="border-t border-stone-100 pt-5 space-y-3 text-xs text-stone-700 mb-8">
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> <strong>2.5 kg</strong> Palta Hass certificada</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> <strong>3.0 kg</strong> Limón / Naranja fresca</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Reparto refrigerado incluido</p>
-            </div>
+            <p class="tc-etiqueta">Línea 2 · Abastecimiento</p>
+            <h2 class="tc-titulo" style="margin-top:1.25rem">Tu cosecha, con entrega programada.</h2>
           </div>
-          <button
-            type="button"
-            class="btn-plan btn-plan--neutro"
-            data-plan-nombre="Canasta Huerto Esencial"
-            data-plan-precio="19900"
-            data-plan-destino="particular"
-            data-plan-frecuencia="quincenal"
-          >
-            Seleccionar Plan Dúo
-          </button>
+          <p class="tc-cuerpo">
+            En vez de un cupo sobre un árbol, contratas una canasta de cosecha ya definida,
+            con despacho a domicilio o al local.
+          </p>
         </div>
 
-        <!-- PLAN 2: Familiar -->
-        <div class="bg-emerald-950 text-white rounded-3xl border-2 border-emerald-600 p-7 shadow-2xl transition-shadow duration-300 flex flex-col justify-between relative" data-reveal="zoom" data-tilt style="--reveal-delay:150ms">
-          <div class="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-emerald-950 font-black text-[10px] tracking-wider uppercase px-4 py-1 rounded-full shadow">
-            El Más Recomendado
-          </div>
-          <div>
-            <div class="flex justify-between items-center mb-4 mt-1">
-              <span class="text-xs font-bold uppercase tracking-wider text-emerald-300">Plan Familiar</span>
-              <span class="text-[11px] bg-emerald-900 text-emerald-200 px-2.5 py-1 rounded-full font-semibold">3 a 5 personas</span>
-            </div>
-            <h4 class="text-2xl font-black text-white mb-1">Cosecha Completa Familiar</h4>
-            <p class="text-xs text-emerald-200/80 mb-6">Abastecimiento integral directo del huerto sin cámaras frigoríficas intermedias.</p>
-            <div class="mb-6">
-              <span class="text-3xl font-black text-emerald-300">$34.900</span>
-              <span class="text-xs font-normal text-emerald-200/70">/ entrega quincenal</span>
-            </div>
-            <div class="border-t border-emerald-800/80 pt-5 space-y-3 text-xs text-emerald-100 mb-8">
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> <strong>5.0 kg</strong> Palta Hass calibre primera</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> <strong>6.0 kg</strong> Fruta de temporada variada</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Participación en 2 árboles frutales</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            class="btn-plan btn-plan--destacado"
-            data-plan-nombre="Cosecha Completa Familiar"
-            data-plan-precio="34900"
-            data-plan-destino="particular"
-            data-plan-frecuencia="quincenal"
-          >
-            Seleccionar Plan Familiar
-          </button>
-        </div>
+        <div id="grid-planes" class="tc-planes" data-reveal-grupo>
+          <article class="tc-plan" data-reveal="left">
+            <p class="tc-etiqueta tc-etiqueta--gris">Plan Dúo · 1 a 2 personas</p>
+            <h3 class="tc-plan__nombre">Canasta Huerto Esencial</h3>
+            <p class="tc-plan__cifra">$19.900<small>/ quincenal</small></p>
+            <ul class="tc-lista">
+              <li><i class="fa-solid fa-check"></i> 2,5 kg de palta Hass</li>
+              <li><i class="fa-solid fa-check"></i> 3 kg de limón o naranja</li>
+              <li><i class="fa-solid fa-check"></i> Reparto refrigerado incluido</li>
+            </ul>
+            <button type="button" class="tc-enlace" data-plan-nombre="Canasta Huerto Esencial" data-plan-precio="19900" data-plan-destino="particular" data-plan-frecuencia="quincenal">
+              Elegir plan <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </article>
 
-        <!-- PLAN 3: B2B / Restaurantes -->
-        <div class="relative bg-white rounded-3xl border border-stone-200 p-7 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between" data-reveal="right" data-tilt style="--reveal-delay:300ms">
-          <div>
-            <div class="flex justify-between items-center mb-4">
-              <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Plan B2B</span>
-              <span class="text-[11px] bg-amber-50 text-amber-800 px-2.5 py-1 rounded-full font-semibold">Uso Comercial</span>
-            </div>
-            <h4 class="text-2xl font-black text-stone-900 mb-1">Lote Gastronómico B2B</h4>
-            <p class="text-xs text-stone-500 mb-6">Para cafeterías y cocinas que buscan precio mayorista blindado y facturación.</p>
-            <div class="mb-6">
-              <span class="text-3xl font-black text-emerald-900">$89.000</span>
-              <span class="text-xs font-normal text-stone-500">/ mes (facturable)</span>
-            </div>
-            <div class="border-t border-stone-100 pt-5 space-y-3 text-xs text-stone-700 mb-8">
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> <strong>25 kg</strong> entregados por lotes semanales</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Calibre adaptado a cocina o barra</p>
-              <p class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Certificado de origen para la carta</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            class="btn-plan btn-plan--oscuro"
-            data-plan-nombre="Lote Gastronómico B2B"
-            data-plan-precio="89000"
-            data-plan-destino="comercial"
-            data-plan-frecuencia="semanal"
-          >
-            Configurar Destino B2B
-          </button>
-        </div>
+          <article class="tc-plan tc-plan--destacado" data-reveal="zoom" style="--reveal-delay:150ms">
+            <p class="tc-etiqueta">Plan Familiar · El más elegido</p>
+            <h3 class="tc-plan__nombre">Cosecha Completa Familiar</h3>
+            <p class="tc-plan__cifra">$34.900<small>/ quincenal</small></p>
+            <ul class="tc-lista">
+              <li><i class="fa-solid fa-check"></i> 5 kg de palta Hass calibre primera</li>
+              <li><i class="fa-solid fa-check"></i> 6 kg de fruta de temporada</li>
+              <li><i class="fa-solid fa-check"></i> Participación en 2 árboles</li>
+            </ul>
+            <button type="button" class="tc-enlace" data-plan-nombre="Cosecha Completa Familiar" data-plan-precio="34900" data-plan-destino="particular" data-plan-frecuencia="quincenal">
+              Elegir plan <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </article>
 
+          <article class="tc-plan" data-reveal="right" style="--reveal-delay:300ms">
+            <p class="tc-etiqueta tc-etiqueta--gris">Plan B2B · Uso comercial</p>
+            <h3 class="tc-plan__nombre">Lote Gastronómico</h3>
+            <p class="tc-plan__cifra">$89.000<small>/ mes</small></p>
+            <ul class="tc-lista">
+              <li><i class="fa-solid fa-check"></i> 25 kg en lotes semanales</li>
+              <li><i class="fa-solid fa-check"></i> Calibre adaptado a cocina o barra</li>
+              <li><i class="fa-solid fa-check"></i> Factura y certificado de origen</li>
+            </ul>
+            <button type="button" class="tc-enlace" data-plan-nombre="Lote Gastronómico B2B" data-plan-precio="89000" data-plan-destino="comercial" data-plan-frecuencia="semanal">
+              Configurar despacho B2B <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -722,37 +636,35 @@
     </div>
     <!-- /hoja -->
 
-    <footer class="footer-sitio relative z-10">
-      <div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-10" data-reveal>
-        <div class="md:col-span-2">
-          <div class="flex items-center gap-3">
-            <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
-            <span class="text-lg font-extrabold text-white">Agro-Colab</span>
-          </div>
-          <p class="text-sm text-emerald-200/70 mt-4 max-w-sm leading-relaxed">
+    <footer class="tc-footer">
+      <div class="tc-contenedor tc-footer__grid">
+        <div>
+          <span class="tc-marca"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado-b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado-b)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</span>
+          <p class="tc-cuerpo-sm" style="margin-top:1.25rem;max-width:22rem">
             Conectamos a las personas con el pequeño agricultor chileno: financiamiento
             directo, sin intermediarios y con trazabilidad del huerto a la mesa.
           </p>
         </div>
         <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-white mb-4">Explorar</p>
-          <ul class="space-y-2 text-sm">
+          <h4>Explorar</h4>
+          <ul>
             <li><button type="button" data-accion="parcelas.establecerLinea" data-args='["adopcion"]'>Adopción de árboles</button></li>
             <li><button type="button" data-accion="parcelas.establecerLinea" data-args='["abastecimiento"]'>Canastas de abastecimiento</button></li>
             <li><button type="button" data-accion="views.mostrarVista" data-args='["dashboard-comprador"]'>Mi panel</button></li>
           </ul>
         </div>
         <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-white mb-4">Legal</p>
-          <ul class="space-y-2 text-sm">
+          <h4>Legal</h4>
+          <ul>
             <li><a href="privacidad.html">Política de privacidad</a></li>
             <li><a href="terminos.html">Términos y condiciones</a></li>
-            <li><a href="https://github.com/arrobaaas/agro-colab" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> Código fuente</a></li>
+            <li><a href="https://github.com/arrobaaas/agro-colab" target="_blank" rel="noopener">Código fuente</a></li>
           </ul>
         </div>
       </div>
-      <div class="border-t border-emerald-900">
-        <p class="max-w-6xl mx-auto px-4 py-5 text-xs text-emerald-200/60">© 2026 Agro-Colab · Financia la cosecha, asegura tu abastecimiento.</p>
+      <div class="tc-contenedor tc-footer__base">
+        <span>© 2026 Agro-Colab</span>
+        <span>Financia la cosecha, asegura tu abastecimiento.</span>
       </div>
     </footer>
   </div>
@@ -760,19 +672,13 @@
   <!-- ============================================================
        VISTA DASHBOARD COMPRADOR: estado del árbol adoptado
        ============================================================ -->
-  <div id="vista-dashboard-comprador" data-vista="dashboard-comprador" class="hidden">
-    <header class="header-sitio sticky top-0 z-50">
-      <div class="max-w-6xl mx-auto px-4 h-16 md:h-[72px] flex justify-between items-center gap-3">
-        <div class="flex items-center gap-3">
-          <span class="logo-marca"><i class="fa-solid fa-seedling"></i></span>
-          <div class="leading-tight">
-            <p class="text-lg font-extrabold tracking-tight">Agro-Colab</p>
-            <p class="hidden sm:block text-[11px] text-emerald-200/70">Trazabilidad directa del huerto a tu mesa</p>
-          </div>
-        </div>
-        <nav class="flex items-center gap-1.5 sm:gap-2" aria-label="Navegación principal">
+  <div id="vista-dashboard-comprador" data-vista="dashboard-comprador" class="hidden tema-comprador">
+    <header class="tc-nav sticky top-0 z-50">
+      <div class="tc-contenedor tc-nav__fila">
+        <span class="tc-marca"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado-c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado-c)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</span>
+        <nav class="tc-nav__enlaces" aria-label="Navegación principal">
           <button type="button" class="nav-pill" data-accion="views.mostrarVista" data-args='["parcelas"]'>
-            <i class="fa-solid fa-arrow-left"></i><span class="hidden sm:inline">Volver al catálogo</span>
+            <i class="fa-solid fa-arrow-left"></i><span>Catálogo</span>
           </button>
           <span class="nav-separador"></span>
           <div data-nav-sesion></div>
@@ -780,35 +686,27 @@
       </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-14">
-      <div class="text-center max-w-2xl mx-auto mb-10" data-reveal="wipe">
-        <span class="inline-block bg-emerald-600/90 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-          Panel del Comprador
-        </span>
-        <h2 class="text-3xl md:text-4xl font-black mb-3 leading-tight">
-          Tu panel
-        </h2>
-        <p class="text-stone-500 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+    <main class="tc-contenedor" style="padding-bottom:6rem">
+      <div class="tc-panel-cabecera" data-reveal="wipe">
+        <p class="tc-etiqueta">Tu panel</p>
+        <h1 class="tc-display" style="margin-top:1.5rem">Hola, <span id="panel-saludo">bienvenido</span>.</h1>
+        <p class="tc-cuerpo" style="margin-top:1.75rem">
           Tus árboles adoptados, tus planes de abastecimiento y dónde recibes cada despacho.
         </p>
       </div>
 
-      <div id="dashboard-comprador" class="grid gap-6 md:grid-cols-2">
-        <p class="md:col-span-2 text-stone-500 text-sm text-center py-8">Cargando tu panel de adopción...</p>
+      <div id="dashboard-comprador">
+        <p class="tc-cuerpo-sm">Cargando tu panel...</p>
       </div>
     </main>
 
-    <footer class="footer-sitio">
-      <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
-        <div class="flex items-center gap-2">
-          <span class="logo-marca" style="width:1.75rem;height:1.75rem;font-size:.8rem;border-radius:.6rem"><i class="fa-solid fa-seedling"></i></span>
-          <span class="font-bold text-white">Agro-Colab</span>
-          <span class="text-emerald-200/60">· Panel del Comprador</span>
-        </div>
-        <div class="flex gap-4">
+    <footer class="tc-footer">
+      <div class="tc-contenedor tc-footer__base" style="border-top:0">
+        <span class="tc-marca" style="font-size:.875rem"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado-d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado-d)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</span>
+        <span style="display:flex;gap:1.5rem">
           <a href="privacidad.html">Privacidad</a>
           <a href="terminos.html">Términos</a>
-        </div>
+        </span>
       </div>
     </footer>
   </div>
@@ -1008,7 +906,7 @@
           <!-- Vista previa en vivo -->
           <aside class="lg:sticky lg:top-24">
             <p class="eyebrow mb-3"><i class="fa-regular fa-eye mr-1"></i> Vista previa en el catálogo</p>
-            <div id="vista-previa-arbol"></div>
+            <div id="vista-previa-arbol" class="tema-comprador vista-previa-oscura"></div>
           </aside>
         </div>
       </section>
@@ -1243,7 +1141,7 @@
   </div>
 
     <!-- MODAL: CONFIRMACION DE ADOPCION DE ARBOL -->
-    <div id="modal-confirmacion-adopcion" class="modal-animado fixed inset-0 z-[120] hidden">
+    <div id="modal-confirmacion-adopcion" class="modal-animado fixed inset-0 z-[120] hidden tema-comprador">
       <div class="absolute inset-0" data-accion="parcelas.cerrarModalConfirmacionArbol"></div>
       <div class="confirmacion-panel" role="dialog" aria-modal="true" aria-labelledby="modal-confirmacion-titulo">
         <div class="confirmacion-media">
@@ -1290,7 +1188,7 @@
          pueden abrir también desde el panel del comprador (dentro de una
          vista oculta quedaban invisibles). -->
     <!-- MODAL: CANASTA / MIS COMPRAS -->
-    <div id="modal-canasta" class="modal-drawer fixed inset-0 z-[100] hidden">
+    <div id="modal-canasta" class="modal-drawer fixed inset-0 z-[100] hidden tema-comprador">
       <div class="modal-fondo" data-accion="parcelas.cerrarCanasta"></div>
       <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="canasta-titulo">
         <div class="drawer-cabecera">
@@ -1313,7 +1211,7 @@
     </div>
 
     <!-- MODAL: LOGÍSTICA Y DESPACHO (al suscribirse) -->
-    <div id="modal-logistica" class="modal-animado fixed inset-0 z-[100] hidden">
+    <div id="modal-logistica" class="modal-animado fixed inset-0 z-[100] hidden tema-comprador">
       <div class="absolute inset-0 bg-black/60" data-accion="parcelas.cerrarLogistica"></div>
       <div class="relative max-w-2xl mx-auto mt-10 bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         <div class="relative bg-gradient-to-br from-emerald-950 to-emerald-900 text-white p-6">
