@@ -1,5 +1,6 @@
 /* Agro-Colab - Servicio de aplicación: punto de entrada. Inicializa los
-   servicios y muestra siempre el login al abrir la app. */
+   servicios y muestra el login, o la vista del rol si la pestaña ya tenía
+   una sesión abierta. */
 
 class AppService {
   constructor() {
@@ -16,9 +17,9 @@ class AppService {
 
   init() {
     document.addEventListener("DOMContentLoaded", () => {
-      /* Cada visita parte en el login: no se reutiliza una sesión guardada
-         (por ejemplo, la de una cuenta de demostración que quedó abierta). */
-      window.AgroColab.auth.eliminarSesion();
+      /* La sesión dura lo que dure la pestaña (ver auth.js): una visita
+         nueva parte en el login, pero ir a Privacidad y volver no la cierra */
+      window.AgroColab.auth.limpiarSesionAntigua();
       this.acciones.init();
 
       this.parcelas.init();

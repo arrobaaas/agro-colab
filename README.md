@@ -244,7 +244,7 @@ petición.
 - **Autorización por recurso:** cada usuario solo ve y modifica lo suyo, y solo el productor ve los datos de contacto de sus suscriptores. Solo los compradores adoptan y contratan planes.
 - **Precios fijados por el servidor:** el monto de un plan o de un árbol nunca se toma del navegador.
 - **Protección contra XSS en tres capas:** todo dato se escapa antes de insertarse como HTML, el backend rechaza `<` y `>` en los textos y una **Content-Security-Policy estricta** prohíbe el JavaScript en línea (`script-src` sin `'unsafe-inline'`) y las conexiones a dominios ajenos. El HTML no tiene manejadores `onclick`: los eventos se conectan por delegación (`acciones.js`).
-- **Sesión solo en memoria:** el token no se guarda en `localStorage`, y cada visita parte en el login.
+- **Sesión limitada a la pestaña:** la sesión y la canasta se guardan en `sessionStorage`, no en `localStorage`. Sobreviven a recargar o a ir a Privacidad y volver, y se borran al cerrar la pestaña: cada visita nueva parte en el login. Cerrar sesión vacía también la canasta.
 - **Validación estricta de entrada** con Pydantic: largos máximos, valores permitidos (roles, planes, frecuencias) y rangos numéricos.
 - **Rate limiting** por IP real (detrás del proxy de Render) y por cuenta en login, registro y verificación, guardado en la base de datos para que sobreviva a reinicios.
 - **Verificación de cuenta por correo:** código de 6 dígitos generado con `secrets`, vigente por 30 minutos, con reenvío y sin revelar qué correos están registrados.

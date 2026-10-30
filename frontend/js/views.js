@@ -73,6 +73,7 @@
       } catch (error) { /* los modales son opcionales según la vista */ }
 
       this.vistaActual = nombre;
+      if (nombre !== config.VISTA_SIN_SESION) auth.guardarVista(nombre);
       window.scrollTo({ top: 0, behavior: "auto" });
 
       if (vista.alMostrar) vista.alMostrar();
@@ -85,7 +86,14 @@
 
     vistaInicial() {
       const sesion = auth.leerSesion();
-      return sesion ? config.VISTAS_POR_ROL[sesion.rol] || config.VISTA_SIN_SESION : config.VISTA_SIN_SESION;
+      if (!sesion) return config.VISTA_SIN_SESION;
+
+      // Si la pestaña venía de otra vista permitida para el rol, se vuelve a ella
+      const anterior = auth.leerVista();
+      const vista = anterior && this.vistas[anterior];
+      if (vista && (!vista.roles || vista.roles.includes(sesion.rol))) return anterior;
+
+      return config.VISTAS_POR_ROL[sesion.rol] || config.VISTA_SIN_SESION;
     }
 
     /* Pinta el usuario en todos los headers (catálogo, panel y agricultor).
@@ -114,6 +122,7 @@
 
     cerrarSesion() {
       auth.eliminarSesion();
+      if (AgroColab.parcelas) AgroColab.parcelas.vaciarCarrito();
       this.mostrarVista(config.VISTA_SIN_SESION);
     }
 

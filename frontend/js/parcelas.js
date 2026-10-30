@@ -389,6 +389,8 @@
     /* ---------- Arranque de la vista ---------- */
 
     init() {
+      this.carrito = auth.leerCarrito();
+      this.actualizarContadorCanasta();
       const planGuardado = auth.leerPlan();
       if (planGuardado && planGuardado.nombre) {
         this.planActual = planGuardado;
@@ -484,8 +486,20 @@
       }, 300);
     }
 
+    /* La canasta se guarda en la pestaña (auth.guardarCarrito) para no
+       perderla al ir a Privacidad o Términos y volver */
+    guardarCarrito() {
+      auth.guardarCarrito(this.carrito);
+    }
+
+    vaciarCarrito() {
+      this.carrito = [];
+      this.actualizarContadorCanasta();
+    }
+
     agregarAlCarrito(item) {
       this.carrito.push(item);
+      this.guardarCarrito();
       this.actualizarContadorCanasta();
       this.renderizarCanasta();
     }
@@ -579,6 +593,7 @@
 
     quitarDelCarrito(index) {
       this.carrito.splice(index, 1);
+      this.guardarCarrito();
       this.actualizarContadorCanasta();
       this.renderizarCanasta();
     }
@@ -608,6 +623,7 @@
         }
 
         this.carrito.splice(index, 1);
+        this.guardarCarrito();
         this.actualizarContadorCanasta();
         this.renderizarCanasta();
       }
@@ -723,6 +739,7 @@
 
       if (this.compraPendiente) {
         this.carrito.push({ ...this.compraPendiente, estado: "pendiente" });
+        this.guardarCarrito();
         this.compraPendiente = null;
         this.actualizarContadorCanasta();
         this.renderizarCanasta();

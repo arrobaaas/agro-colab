@@ -10,6 +10,8 @@ class ConfigService {
 
     this.claveSesion = "agrocolab_sesion";
     this.clavePlan = "agrocolab_plan";
+    this.claveCarrito = "agrocolab_carrito";
+    this.claveVista = "agrocolab_vista";
 
     /* Vista que se muestra cuando no hay sesión o el rol no tiene acceso. */
     this.VISTA_SIN_SESION = "login";
