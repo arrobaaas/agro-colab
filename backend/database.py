@@ -2,10 +2,12 @@ from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateT
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
 import bcrypt
+import os
 import hmac
 
 # Conexión a SQLite (para desarrollo local)
-SQLALCHEMY_DATABASE_URL = "sqlite:///./agrocolab.db"
+# Configurable para que las pruebas (backend/tests) usen una base temporal
+SQLALCHEMY_DATABASE_URL = os.getenv("AGROCOLAB_DB_URL", "sqlite:///./agrocolab.db")
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}

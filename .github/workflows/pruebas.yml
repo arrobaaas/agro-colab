@@ -1,0 +1,41 @@
+# Integración continua: corre las pruebas del backend y revisa la sintaxis
+# del frontend en cada push y en cada pull request.
+name: Pruebas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Instalar dependencias
+        run: pip install -r requirements-dev.txt
+      - name: Correr las pruebas
+        run: python -m pytest
+
+  frontend:
+    name: Frontend (sintaxis JavaScript)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Revisar la sintaxis de cada archivo
+        run: for archivo in frontend/js/*.js; do node --check "$archivo" || exit 1; done
