@@ -69,11 +69,14 @@ class ApiService {
 
   /* El usuario se identifica con el token de sesión (ver apiFetch); el
      parámetro sesion se mantiene por compatibilidad con quienes llaman. */
-  suscribirArbol(sesion, treeId) {
-    return this.apiFetch("/suscribir", {
-      method: "POST",
-      body: JSON.stringify({ tree_id: treeId })
-    });
+  /* Pasarela simulada: si el pago de un árbol se aprueba, el servidor
+     confirma la adopción en la misma operación */
+  pagar(datos) {
+    return this.apiFetch("/pagos", { method: "POST", body: JSON.stringify(datos) });
+  }
+
+  obtenerPagos() {
+    return this.apiFetch("/pagos");
   }
 
   cancelarSuscripcion(sesion, treeId) {

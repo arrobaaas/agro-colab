@@ -29,6 +29,7 @@ class AppService {
       this.login.init();
       this.autocomplete.init();
       this.dashboard.init();
+      window.AgroColab.pago.init();
       this.views.init();
       this.efectos.init();
       this.constelacion.init();

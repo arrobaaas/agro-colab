@@ -18,6 +18,7 @@
       this.ui = ui;
       this.arboles = [];
       this.pedidos = [];
+      this.pagos = [];
     }
 
     /* Despacho registrado para la cosecha de un árbol (el más reciente) */
@@ -130,6 +131,30 @@
       `;
     }
 
+    /* Comprobantes de la pasarela simulada, aprobados y rechazados */
+    plantillaPagos() {
+      if (!this.pagos.length) return "";
+      return `
+        ${this.encabezadoSeccion("Historial de pagos", this.pagos.length)}
+        <div class="tc-pagos" data-reveal>
+          ${this.pagos
+            .map((pago) => {
+              const aprobado = pago.estado === "aprobado";
+              return `
+              <div class="tc-pago">
+                <p class="tc-pago__concepto">${e(pago.concepto)}</p>
+                <p class="tc-pago__monto">${this.ui.formatearMonto(pago.monto_clp)} CLP</p>
+                <p class="tc-pago__meta">
+                  ${e(pago.fecha || "")} · ${e(pago.marca)} •••• ${e(pago.ultimos4)} ·
+                  ${aprobado ? `Autorización ${e(pago.codigo_autorizacion)}` : e(pago.motivo_rechazo || "Rechazado")} · ${e(pago.transaccion)}
+                </p>
+                <span class="tc-pago__estado ${aprobado ? "" : "tc-pago__estado--rechazado"}">${aprobado ? "Aprobado" : "Rechazado"}</span>
+              </div>`;
+            })
+            .join("")}
+        </div>`;
+    }
+
     encabezadoSeccion(titulo, cantidad) {
       return `
         <div class="tc-panel-seccion" data-reveal="left">
@@ -164,7 +189,7 @@
           html += this.encabezadoSeccion("Planes de abastecimiento", planes.length);
           html += planes.map((pedido) => this.plantillaPlan(pedido)).join("");
         }
-        contenedor.innerHTML = html;
+        contenedor.innerHTML = html + this.plantillaPagos();
       }
 
       if (AgroColab.efectos) AgroColab.efectos.observar(contenedor);
@@ -183,10 +208,12 @@
       try {
         /* Los planes de abastecimiento se guardan como pedidos: antes el panel
            solo consultaba las suscripciones y los planes nunca aparecían. */
-        const [datosArboles, pedidos] = await Promise.all([
+        const [datosArboles, pedidos, datosPagos] = await Promise.all([
           api.obtenerMisArboles(sesion.id),
-          api.obtenerPedidos()
+          api.obtenerPedidos(),
+          api.obtenerPagos().catch(() => null)
         ]);
+        this.pagos = datosPagos && datosPagos.status === "success" ? (datosPagos.pagos || []) : [];
         this.arboles = datosArboles && datosArboles.status === "success" ? (datosArboles.arboles || []) : [];
         this.pedidos = Array.isArray(pedidos) ? pedidos : [];
         this.pintar();

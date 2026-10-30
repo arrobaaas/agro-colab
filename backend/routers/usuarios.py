@@ -13,7 +13,7 @@ from core import (
     limitar, es_cuenta_demo,
 )
 from seguridad import registrar_evento
-from database import Usuario, Arbol, Suscripcion, Pedido, SessionLocal, es_hash_bcrypt
+from database import Usuario, Arbol, Suscripcion, Pedido, Pago, SessionLocal, es_hash_bcrypt
 
 router = APIRouter()
 
@@ -290,8 +290,9 @@ def eliminar_usuario(
     if ids_arboles:
         db.query(Suscripcion).filter(Suscripcion.arbol_id.in_(ids_arboles)).delete(synchronize_session=False)
 
-    # Eliminar pedidos del usuario
+    # Eliminar pedidos y comprobantes de pago del usuario
     db.query(Pedido).filter(Pedido.cliente_id == usuario.id).delete()
+    db.query(Pago).filter(Pago.usuario_id == usuario.id).delete()
 
     # Eliminar árboles publicados por el usuario (si es agricultor)
     db.query(Arbol).filter(Arbol.productor_id == usuario.id).delete()

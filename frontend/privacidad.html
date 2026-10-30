@@ -9,11 +9,11 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261031k">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261031k">
-  <script src="js/efectos.js?v=20261031k" defer></script>
-  <script src="js/constelacion.js?v=20261031k" defer></script>
-  <script src="js/legal.js?v=20261031k" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261031l">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031l">
+  <script src="js/efectos.js?v=20261031l" defer></script>
+  <script src="js/constelacion.js?v=20261031l" defer></script>
+  <script src="js/legal.js?v=20261031l" defer></script>
 </head>
 <body class="tema-comprador">
 
@@ -77,8 +77,8 @@
           </dl>
           <p class="tc-aviso">
             <strong>Prototipo académico.</strong> Agro-Colab es un proyecto del curso INGT1003 de la
-            Universidad Mayor. En esta versión los pagos son simulados y la plataforma no almacena datos
-            de tarjetas ni cuentas bancarias.
+            Universidad Mayor. En esta versión los pagos son simulados: la pasarela solo acepta tarjetas
+            de prueba y nunca guarda el número completo de una tarjeta ni su código de seguridad.
           </p>
         </section>
 
@@ -103,6 +103,7 @@
               <tr><td>Perfil</td><td>Teléfono y dirección (opcionales).</td><td>Tú, en tu perfil.</td></tr>
               <tr><td>Adopciones</td><td>Árboles adoptados y fecha de cada adopción.</td><td>Tu actividad.</td></tr>
               <tr><td>Despachos</td><td>Plan, monto, tipo de destino, dirección, comuna, frecuencia y, en planes comerciales, razón social y RUT de la empresa.</td><td>Tú, al configurar un despacho.</td></tr>
+              <tr><td>Pagos</td><td>Concepto, monto, estado (aprobado o rechazado), marca y últimos 4 dígitos de la tarjeta, código de autorización y fecha. Nunca el número completo ni el código de seguridad (CVV).</td><td>Tú, al pagar.</td></tr>
               <tr><td>Seguridad</td><td>Dirección IP, correo asociado, acción realizada (por ejemplo, un inicio de sesión fallido) y fecha.</td><td>Generado al usar el servicio.</td></tr>
               <tr><td>Agricultores</td><td>Además de su cuenta, los datos de los árboles que publican.</td><td>El agricultor.</td></tr>
             </tbody>

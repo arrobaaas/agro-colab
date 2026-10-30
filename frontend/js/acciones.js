@@ -19,7 +19,7 @@
 class AccionesService {
   constructor() {
     /* Solo se pueden invocar métodos de estos servicios */
-    this.modulos = ["parcelas", "views", "perfil", "login", "dashboard", "agricultor", "autocomplete"];
+    this.modulos = ["parcelas", "views", "perfil", "login", "dashboard", "agricultor", "autocomplete", "pago"];
     this.reportesCSP = 0;
   }
 

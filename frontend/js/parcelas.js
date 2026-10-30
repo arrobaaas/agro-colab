@@ -342,7 +342,10 @@
       this.arbolParaAdoptar = null;
     }
 
-    /* Pago desde la canasta: ejecuta la suscripción del árbol y abre la logística. */
+    /* Pago desde la canasta: abre la pasarela y, con el pago aprobado, la
+       logística. La adopción del árbol la confirma el servidor junto con el
+       pago. Un plan ya pagado (pago_id) cuyo despacho quedó pendiente pasa
+       directo a la logística, sin volver a cobrar. */
     async pagarSuscripcion(index) {
       const item = this.carrito[index];
       if (!item) return;
@@ -351,12 +354,15 @@
       if (!sesion) return;
 
       try {
-        if (item.tipo !== "plan") {
-          const data = await api.suscribirArbol(sesion, item.id);
-          if (data.status !== "success") {
-            AgroColab.dialogo.avisar(data.mensaje || "No se pudo completar el pago.", { tipo: "error", titulo: "Pago no completado" });
+        if (!item.pago_id) {
+          this.cerrarCanasta();
+          const pago = await AgroColab.pago.cobrar(item);
+          if (!pago) {
+            this.abrirCanasta();
             return;
           }
+          item.pago_id = pago.id;
+          this.guardarCarrito();
         }
 
         // El producto sale de la canasta mientras se configura su despacho.
@@ -526,7 +532,7 @@
         return;
       }
 
-      const pendientes = this.carrito.filter((item) => item.estado !== "comprado");
+      const pendientes = this.carrito.filter((item) => item.estado !== "comprado" && !item.pago_id);
       const totalPendiente = pendientes.reduce((total, item) => total + (Number(item.precio) || 0), 0);
       resumen.textContent = `${this.carrito.length} producto${this.carrito.length === 1 ? "" : "s"} · ${pendientes.length} por pagar`;
 
@@ -538,9 +544,12 @@
             : `<i class="fa-solid ${item.tipo === "plan" ? "fa-basket-shopping" : "fa-tree"}"></i>`;
           const accion = comprado
             ? `<button type="button" class="canasta-accion canasta-accion--peligro" data-accion="parcelas.cancelarCompra" data-args='[${Number(index)}]'>Cancelar</button>`
-            : `<button type="button" class="canasta-accion" data-accion="parcelas.quitarDelCarrito" data-args='[${Number(index)}]'>Quitar</button>`;
+            : item.pago_id
+              ? ""
+              : `<button type="button" class="canasta-accion" data-accion="parcelas.quitarDelCarrito" data-args='[${Number(index)}]'>Quitar</button>`;
+          const pagado = !comprado && Boolean(item.pago_id);
           const pagar = !comprado && (item.tipo === "arbol" || item.tipo === "plan")
-            ? `<button type="button" class="btn-suscribir btn-suscribir--activo" data-accion="parcelas.pagarSuscripcion" data-args='[${Number(index)}]'><i class="fa-solid fa-lock"></i> Pagar</button>`
+            ? `<button type="button" class="btn-suscribir btn-suscribir--activo" data-accion="parcelas.pagarSuscripcion" data-args='[${Number(index)}]'>${pagado ? '<i class="fa-solid fa-truck-fast"></i> Completar despacho' : '<i class="fa-solid fa-lock"></i> Pagar'}</button>`
             : "";
 
           return `
@@ -550,7 +559,7 @@
                 <div class="flex items-start justify-between gap-2">
                   <p class="font-bold text-sm text-stone-900 truncate">${e(item.nombre)}</p>
                   <span class="canasta-estado ${comprado ? "canasta-estado--comprado" : ""}">
-                    <i class="fa-solid ${comprado ? "fa-circle-check" : "fa-clock"}"></i> ${comprado ? "Comprado" : "Por pagar"}
+                    <i class="fa-solid ${comprado || pagado ? "fa-circle-check" : "fa-clock"}"></i> ${comprado ? "Comprado" : pagado ? "Pagado" : "Por pagar"}
                   </span>
                 </div>
                 <p class="text-xs text-stone-500 truncate mt-0.5">${e(item.descripcion)}</p>
@@ -783,6 +792,7 @@
           const esArbol = Boolean(item && item.tipo === "arbol");
           data = await this.api.crearPedido({
             ...datos,
+            pago_id: item && !esArbol ? item.pago_id : null,
             plan_nombre: item ? (esArbol ? `Cosecha de ${item.nombre}` : item.nombre) : this.planActual.nombre,
             monto_clp: item ? item.precio : this.planActual.precio,
             cliente_nombre: document.getElementById("modal-dest-nombre").value.trim(),
