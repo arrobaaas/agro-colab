@@ -27,7 +27,8 @@ if [ ! -x "$CACHE/$BINARIO-$VERSION" ]; then
   curl -sSfL -o "$CACHE/$BINARIO-$VERSION" "$URL/$BINARIO"
   curl -sSfL -o "$CACHE/sha256sums-$VERSION.txt" "$URL/sha256sums.txt"
 
-  ESPERADO="$(grep " $BINARIO\$" "$CACHE/sha256sums-$VERSION.txt" | cut -d' ' -f1)"
+  # El archivo oficial lista los nombres con o sin "./" delante
+  ESPERADO="$(grep -E " (\./)?$BINARIO\$" "$CACHE/sha256sums-$VERSION.txt" | cut -d' ' -f1 || true)"
   OBTENIDO="$(sha256sum "$CACHE/$BINARIO-$VERSION" | cut -d' ' -f1)"
   if [ -z "$ESPERADO" ] || [ "$ESPERADO" != "$OBTENIDO" ]; then
     echo "ERROR: el checksum no coincide. No se ejecuta el binario."

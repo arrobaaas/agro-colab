@@ -112,7 +112,10 @@ agro-colab/
 │   ├── index.html             # SPA: login y vistas de comprador y agricultor
 │   ├── privacidad.html        # Política de privacidad (Ley 21.719)
 │   ├── terminos.html          # Términos y condiciones
-│   ├── css/styles.css
+│   ├── monitoreo.html         # Panel de monitoreo de seguridad (con token)
+│   ├── css/
+│   │   ├── styles.css         # Estilos propios
+│   │   └── tailwind.css       # Tailwind compilado (scripts/compilar-css.sh)
 │   └── js/
 │       ├── config.js          # URL de la API y vistas por rol
 │       ├── api.js             # Cliente HTTP: adjunta el token de sesión
@@ -125,17 +128,23 @@ agro-colab/
 │       ├── catalogo.js        # Selector de especies y galería de fotos
 │       ├── autocomplete.js    # Autocompletado de direcciones (Photon)
 │       ├── perfil.js          # Perfil de usuario
-│       ├── ui.js              # Alertas y formato de montos
+│       ├── ui.js              # Alertas, formato de montos y escape de HTML
+│       ├── acciones.js        # Delegación de eventos (sin onclick en el HTML)
+│       ├── efectos.js         # Animaciones de scroll e inclinación 3D
+│       ├── monitoreo.js       # Panel de monitoreo de seguridad
 │       └── app.js             # Arranque de la aplicación
 ├── backend/
 │   ├── main.py                # Aplicación FastAPI, CORS y registro de routers
 │   ├── core.py                # Esquemas, tokens de sesión y lógica compartida
 │   ├── database.py            # Modelos SQLAlchemy y migraciones
 │   ├── catalogo.py            # Catálogo cerrado de especies con fotos atribuidas
-│   ├── routers/               # arboles, especies, suscripciones, pedidos, usuarios
+│   ├── seguridad.py           # Registro de eventos, reglas de alerta y alertas
+│   ├── notificaciones.py      # Envío de correos (Brevo)
+│   ├── routers/               # arboles, especies, suscripciones, pedidos, usuarios, monitoreo
 │   └── requirements.txt
 ├── Informe.pdf                # Informe del proyecto
 ├── Presentacion.pptx          # Presentación del proyecto
+├── scripts/compilar-css.sh    # Compila Tailwind localmente (verifica el checksum)
 ├── LICENSE
 └── THIRD_PARTY_NOTICES.md
 ```
@@ -164,6 +173,14 @@ En otra terminal:
 # Frontend (http://localhost:3000)
 cd frontend
 python3 -m http.server 3000
+```
+
+Los estilos de Tailwind ya vienen compilados en `frontend/css/tailwind.css`. Si agregas
+clases nuevas al HTML o al JavaScript, vuelve a compilarlos (no requiere Node; descarga
+el ejecutable oficial y verifica su checksum antes de usarlo):
+
+```bash
+bash scripts/compilar-css.sh
 ```
 
 La base de datos SQLite (`backend/agrocolab.db`) se crea sola al primer arranque, con las
