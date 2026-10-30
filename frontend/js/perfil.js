@@ -91,22 +91,22 @@
       const sesion = this.auth.leerSesion();
       if (!sesion) return;
 
-      if (!window.confirm("¿Estás seguro de eliminar tu cuenta? Esta acción es IRREVERSIBLE y borrará todos tus datos personales, suscripciones y pedidos.")) {
+      if (!(await AgroColab.dialogo.confirmar("Se borrarán para siempre tus datos personales, tus adopciones y tus pedidos. Esta acción no se puede deshacer.", { titulo: "¿Eliminar tu cuenta?", aceptar: "Eliminar mi cuenta", peligro: true }))) {
         return;
       }
 
       try {
         const data = await window.AgroColab.api.eliminarCuenta(sesion.email);
         if (data.status === "success") {
-          window.alert(data.mensaje);
+          AgroColab.dialogo.avisar(data.mensaje, { tipo: "exito", titulo: "Cuenta eliminada" });
           this.auth.eliminarSesion();
           this.cerrar();
           window.AgroColab.views.mostrarVista("login");
         } else {
-          window.alert(data.mensaje || "No se pudo eliminar la cuenta.");
+          AgroColab.dialogo.avisar(data.mensaje || "No se pudo eliminar la cuenta.", { tipo: "error" });
         }
       } catch (error) {
-        window.alert("Error de comunicación con el backend.");
+        AgroColab.dialogo.avisar("No hay conexión con el servidor. Intenta nuevamente en unos segundos.", { tipo: "error" });
       }
     }
 

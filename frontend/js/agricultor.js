@@ -202,20 +202,20 @@
     /* ---------- Eliminar árbol ---------- */
 
     async eliminarArbol(arbolId) {
-      if (!window.confirm("¿Estás seguro de eliminar este árbol? Esta acción no se puede deshacer.")) {
+      if (!(await AgroColab.dialogo.confirmar("Se quitará del catálogo y sus suscriptores perderán su cupo. Esta acción no se puede deshacer.", { titulo: "¿Eliminar este árbol?", aceptar: "Eliminar árbol", peligro: true }))) {
         return;
       }
 
       try {
         const data = await this.api.eliminarArbol(arbolId);
         if (data.status === "success") {
-          window.alert(data.mensaje);
+          AgroColab.dialogo.avisar(data.mensaje, { tipo: "exito", titulo: "Árbol eliminado" });
           await this.cargarArbolesAgricultor();
         } else {
-          window.alert(data.mensaje || "No se pudo eliminar el árbol.");
+          AgroColab.dialogo.avisar(data.mensaje || "No se pudo eliminar el árbol.", { tipo: "error" });
         }
       } catch (error) {
-        window.alert("Error de comunicación con el backend.");
+        AgroColab.dialogo.avisar("No hay conexión con el servidor. Intenta nuevamente en unos segundos.", { tipo: "error" });
       }
     }
 
@@ -276,9 +276,25 @@
 
         this.renderizarListaArboles();
         this.actualizarEstadisticas();
+        this.pintarGraficos(sesion);
       } catch (error) {
         container.innerHTML = '<p class="tc-cuerpo-sm">No se pudieron cargar tus árboles. Intenta nuevamente.</p>';
       }
+    }
+
+    /* Gráficos del huerto: los de ingresos y cupos salen de los árboles; el
+       de adopciones por mes necesita las fechas de cada suscripción */
+    async pintarGraficos(sesion) {
+      const graficos = AgroColab.graficos;
+      if (!graficos) return;
+      graficos.pintarHuerto(this.arbolesAgricultor);
+      if (!sesion || !this.arbolesAgricultor.length) return;
+      try {
+        graficos.pintarAdopciones(await this.api.obtenerSuscriptores(sesion.id));
+      } catch (error) {
+        graficos.pintarAdopciones(null);
+      }
+      graficos.animarAlEntrar();
     }
 
     /* ---------- Suscriptores ---------- */
@@ -371,41 +387,42 @@
       try {
         const usuario = await this.api.obtenerUsuario(usuarioId);
         if (usuario && usuario.id) {
-          window.alert(
-            `Perfil del usuario:\n\n` +
-            `Nombre: ${usuario.nombre}\n` +
-            `Email: ${usuario.email}\n` +
-            `Teléfono: ${usuario.telefono || 'No registrado'}\n` +
-            `Dirección: ${usuario.direccion || 'No registrada'}\n` +
-            `Rol: ${usuario.rol}\n` +
-            `Cuenta verificada: ${usuario.verificado ? 'Sí' : 'No'}`
-          );
+          AgroColab.dialogo.avisar("", {
+            titulo: usuario.nombre,
+            aceptar: "Cerrar",
+            datos: [
+              ["Correo", usuario.email],
+              ["Teléfono", usuario.telefono || "No registrado"],
+              ["Dirección", usuario.direccion || "No registrada"],
+              ["Cuenta verificada", usuario.verificado ? "Sí" : "No"]
+            ]
+          });
         } else {
-          window.alert((usuario && usuario.mensaje) || "No se pudo cargar el perfil del usuario.");
+          AgroColab.dialogo.avisar((usuario && usuario.mensaje) || "No se pudo cargar el perfil del usuario.", { tipo: "error" });
         }
       } catch (error) {
-        window.alert("Error al cargar el perfil del usuario.");
+        AgroColab.dialogo.avisar("No se pudo cargar el perfil del usuario.", { tipo: "error" });
       }
     }
 
     async expulsarSuscriptor(suscripcionId) {
-      if (!window.confirm("¿Estás seguro de expulsar a este suscriptor? Se liberará su cupo.")) {
+      if (!(await AgroColab.dialogo.confirmar("Su cupo quedará libre para otro comprador. Hazlo solo con una causa justificada, como indican los términos.", { titulo: "¿Expulsar a este suscriptor?", aceptar: "Expulsar", peligro: true }))) {
         return;
       }
 
       try {
         const data = await this.api.expulsarSuscriptor(suscripcionId);
         if (data.status === "success") {
-          window.alert(data.mensaje);
+          AgroColab.dialogo.avisar(data.mensaje, { tipo: "exito", titulo: "Suscriptor expulsado" });
           if (this.arbolSuscriptoresActual) {
             await this.cargarSuscriptores(this.arbolSuscriptoresActual.id);
           }
           await this.cargarArbolesAgricultor();
         } else {
-          window.alert(data.mensaje || "No se pudo expulsar al suscriptor.");
+          AgroColab.dialogo.avisar(data.mensaje || "No se pudo expulsar al suscriptor.", { tipo: "error" });
         }
       } catch (error) {
-        window.alert("Error de comunicación con el backend.");
+        AgroColab.dialogo.avisar("No hay conexión con el servidor. Intenta nuevamente en unos segundos.", { tipo: "error" });
       }
     }
 

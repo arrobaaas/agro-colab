@@ -174,7 +174,7 @@ class LoginService {
         this.ui.mostrarAlerta(alerta, "exito", data.mensaje);
         setTimeout(() => {
           this.cerrarVerificacion();
-          window.alert("Tu cuenta ha sido verificada. Ahora puedes iniciar sesión.");
+          AgroColab.dialogo.avisar("Ya puedes iniciar sesión con tu correo y contraseña.", { tipo: "exito", titulo: "Cuenta verificada" });
         }, 1500);
       } else {
         this.ui.mostrarAlerta(alerta, "error", data.mensaje);
