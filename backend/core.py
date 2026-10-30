@@ -287,6 +287,31 @@ def Texto(maximo: int, minimo: int = 1):
     ]
 
 
+def normalizar_rut(valor):
+    """Valida un RUT chileno con su dígito verificador (módulo 11) y lo
+    devuelve con formato 76.123.456-0. Acepta puntos, guion y espacios."""
+    if valor is None or valor == "":
+        return None
+    limpio = valor.replace(".", "").replace("-", "").replace(" ", "").upper()
+    cuerpo, dv = limpio[:-1], limpio[-1:]
+    if not cuerpo.isdigit() or not 7 <= len(cuerpo) <= 8 or dv not in "0123456789K":
+        raise ValueError("el formato debe ser como 76.123.456-0")
+
+    suma, factor = 0, 2
+    for digito in reversed(cuerpo):
+        suma += int(digito) * factor
+        factor = 2 if factor == 7 else factor + 1
+    resto = 11 - suma % 11
+    esperado = "0" if resto == 11 else "K" if resto == 10 else str(resto)
+    if dv != esperado:
+        raise ValueError("el dígito verificador no corresponde")
+
+    con_puntos = f"{int(cuerpo):,}".replace(",", ".")
+    return f"{con_puntos}-{dv}"
+
+
+Rut = Annotated[str, StringConstraints(strip_whitespace=True, max_length=15), AfterValidator(normalizar_rut)]
+
 Correo = Annotated[str, StringConstraints(
     strip_whitespace=True, max_length=120, pattern=r"^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$"
 )]
@@ -317,7 +342,7 @@ class PedidoRequest(BaseModel):
     cliente_id: Optional[int] = None  # ignorado: el cliente sale de la sesión
     tipo_destino: TipoDestino
     razon_social: Optional[Texto(120, 0)] = None
-    rut: Optional[Texto(20, 0)] = None
+    rut: Optional[Rut] = None
     direccion: Texto(200)
     comuna: Texto(80)
     frecuencia_entrega: Frecuencia
@@ -328,7 +353,7 @@ class LogisticaRequest(BaseModel):
     """Datos de despacho que se pueden modificar en un pedido existente."""
     tipo_destino: TipoDestino
     razon_social: Optional[Texto(120, 0)] = None
-    rut: Optional[Texto(20, 0)] = None
+    rut: Optional[Rut] = None
     direccion: Texto(200)
     comuna: Texto(80)
     frecuencia_entrega: Frecuencia
@@ -342,7 +367,9 @@ class ArbolRequest(BaseModel):
     tipo_suscripcion: Literal["Compartido", "Exclusivo"]
     cupos_totales: int = Field(ge=1, le=50)
     precio_mensual_clp: int = Field(ge=0, le=10_000_000)
-    estimacion_cosecha: Texto(80)
+    # Solo el número de kilos: el servidor arma el texto ("45 kg anuales")
+    # para que no haya ambigüedad de unidades (kg, gramos, cajas...)
+    estimacion_cosecha_kg: int = Field(ge=1, le=100_000)
     imagen: Texto(500)
     productor: Optional[str] = None  # ignorado: el productor sale de la sesión
 
@@ -373,6 +400,11 @@ class VerificacionRequest(BaseModel):
 
 
 # ----------------- VALIDACIÓN DE ESPECIES E IMAGEN -----------------
+
+def texto_cosecha(kilos: int) -> str:
+    """Texto que se guarda y se muestra para la cosecha estimada."""
+    return f"{kilos:,}".replace(",", ".") + " kg anuales"
+
 
 def validar_imagen(imagen: str, especie_id: str):
     """Revisa la imagen enviada por el agricultor.

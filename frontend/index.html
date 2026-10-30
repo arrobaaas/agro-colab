@@ -20,23 +20,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261030e">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261030e">
-  <script src="js/config.js?v=20261030e" defer></script>
-  <script src="js/ui.js?v=20261030e" defer></script>
-  <script src="js/api.js?v=20261030e" defer></script>
-  <script src="js/auth.js?v=20261030e" defer></script>
-  <script src="js/parcelas.js?v=20261030e" defer></script>
-  <script src="js/catalogo.js?v=20261030e" defer></script>
-  <script src="js/agricultor.js?v=20261030e" defer></script>
-  <script src="js/perfil.js?v=20261030e" defer></script>
-  <script src="js/autocomplete.js?v=20261030e" defer></script>
-  <script src="js/dashboard.js?v=20261030e" defer></script>
-  <script src="js/efectos.js?v=20261030e" defer></script>
-  <script src="js/views.js?v=20261030e" defer></script>
-  <script src="js/login.js?v=20261030e" defer></script>
-  <script src="js/acciones.js?v=20261030e" defer></script>
-  <script src="js/app.js?v=20261030e" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261031a">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031a">
+  <script src="js/config.js?v=20261031a" defer></script>
+  <script src="js/ui.js?v=20261031a" defer></script>
+  <script src="js/api.js?v=20261031a" defer></script>
+  <script src="js/auth.js?v=20261031a" defer></script>
+  <script src="js/parcelas.js?v=20261031a" defer></script>
+  <script src="js/catalogo.js?v=20261031a" defer></script>
+  <script src="js/agricultor.js?v=20261031a" defer></script>
+  <script src="js/perfil.js?v=20261031a" defer></script>
+  <script src="js/autocomplete.js?v=20261031a" defer></script>
+  <script src="js/dashboard.js?v=20261031a" defer></script>
+  <script src="js/efectos.js?v=20261031a" defer></script>
+  <script src="js/views.js?v=20261031a" defer></script>
+  <script src="js/login.js?v=20261031a" defer></script>
+  <script src="js/acciones.js?v=20261031a" defer></script>
+  <script src="js/app.js?v=20261031a" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -654,7 +654,8 @@
               </div>
               <div>
                 <label for="com-rut" class="block text-xs font-semibold text-stone-700 mb-1">RUT Empresa</label>
-                <input type="text" id="com-rut" placeholder="76.123.456-7" class="input">
+                <input type="text" id="com-rut" placeholder="76.123.456-0" maxlength="12" inputmode="text" autocomplete="off" class="input" data-al-escribir="parcelas.formatearCampoRut">
+                <p class="campo-ayuda" data-ayuda-rut>Con dígito verificador, ej: 76.123.456-0</p>
               </div>
             </div>
           </div>
@@ -989,7 +990,10 @@
                 </div>
                 <div>
                   <label for="arbol-cosecha" class="campo-etiqueta">Estimación de cosecha</label>
-                  <input type="text" id="arbol-cosecha" required placeholder="Ej: 50 kg por temporada" class="input">
+                  <div class="campo-unidad">
+                    <input type="number" id="arbol-cosecha" required min="1" max="100000" step="1" inputmode="numeric" placeholder="Ej: 50" class="input">
+                    <span>kg al año</span>
+                  </div>
                 </div>
               </div>
             </fieldset>
@@ -1152,8 +1156,11 @@
           <input type="number" id="editar-precio" required min="0" class="input">
         </div>
         <div>
-          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Estimación de Cosecha</label>
-          <input type="text" id="editar-cosecha" required class="input">
+          <label for="editar-cosecha" class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Estimación de Cosecha</label>
+          <div class="campo-unidad">
+            <input type="number" id="editar-cosecha" required min="1" max="100000" step="1" inputmode="numeric" class="input">
+            <span>kg al año</span>
+          </div>
         </div>
         <div>
           <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Foto del Árbol</label>
@@ -1360,7 +1367,8 @@
               </div>
               <div>
                 <label for="modal-com-rut" class="block text-xs font-semibold text-stone-700 mb-1">RUT Empresa</label>
-                <input type="text" id="modal-com-rut" placeholder="76.123.456-7" class="input">
+                <input type="text" id="modal-com-rut" placeholder="76.123.456-0" maxlength="12" inputmode="text" autocomplete="off" class="input" data-al-escribir="parcelas.formatearCampoRut">
+                <p class="campo-ayuda" data-ayuda-rut>Con dígito verificador, ej: 76.123.456-0</p>
               </div>
             </div>
           </div>

@@ -1276,6 +1276,62 @@ h1, h2, h3, h4 {
   animation: seccion-entrar 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* ---------- Campos con unidad y ayuda ---------- */
+.campo-unidad {
+  position: relative;
+}
+
+.campo-unidad .input {
+  padding-right: 6.5rem;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Sin flechitas: se escribe la cantidad directamente */
+.campo-unidad .input::-webkit-inner-spin-button,
+.campo-unidad .input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.campo-unidad span {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 0.9rem;
+  border-left: 1px solid var(--stone-200);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--emerald-800);
+  pointer-events: none;
+}
+
+.campo-ayuda {
+  margin-top: 0.35rem;
+  font-size: 0.6875rem;
+  color: var(--stone-400);
+}
+
+.campo-ayuda--error {
+  color: var(--rose-700);
+  font-weight: 600;
+}
+
+.campo-ayuda--ok {
+  color: var(--emerald-700);
+  font-weight: 600;
+}
+
+/* Más específico que .input:focus, para que el error se vea al escribir */
+.input.input--invalido,
+.input.input--invalido:focus {
+  border-color: var(--rose-700);
+  box-shadow: 0 0 0 2px var(--rose-200);
+}
+
 /* ---------- Animaciones (efectos.js) ---------- */
 html {
   scroll-behavior: smooth;

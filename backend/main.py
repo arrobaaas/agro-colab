@@ -29,6 +29,7 @@ CAMPOS = {
     "plan": "el plan", "tipo_suscripcion": "el tipo de suscripción",
     "tipo_destino": "el tipo de destino", "frecuencia_entrega": "la frecuencia",
     "codigo": "el código", "identificador": "el número del árbol",
+    "estimacion_cosecha_kg": "la estimación de cosecha (kg)",
 }
 
 
@@ -43,11 +44,13 @@ async def error_de_validacion(request: Request, exc: RequestValidationError):
     if tipo == "string_too_short" and campo == "password":
         mensaje = "La contraseña debe tener al menos 8 caracteres."
     elif tipo == "value_error":
-        mensaje = f"Revisa {nombre}: no puede contener los caracteres < o >."
-        # Ningún uso legítimo necesita < o > en estos campos: es casi
-        # siempre un intento de XSS
-        muestra = str(errores[0].get("input", ""))[:120]
-        registrar_evento("entrada_html", "critica", detalle=f"campo {campo}: {muestra}")
+        motivo = str(errores[0].get("msg", "")).removeprefix("Value error, ")
+        mensaje = f"Revisa {nombre}: {motivo}."
+        if "< o >" in motivo:
+            # Ningún uso legítimo necesita < o > en estos campos: es casi
+            # siempre un intento de XSS
+            muestra = str(errores[0].get("input", ""))[:120]
+            registrar_evento("entrada_html", "critica", detalle=f"campo {campo}: {muestra}")
     else:
         mensaje = f"Revisa {nombre}: el valor no es válido."
     return JSONResponse(status_code=422, content={"status": "error", "mensaje": mensaje})

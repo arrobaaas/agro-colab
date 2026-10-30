@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from core import (
     ArbolRequest, validar_imagen, buscar_especie, componer_nombre,
     normalizar_identificador, serializar_arbol, cupos_ocupados_de, get_db,
-    usuario_actual, es_cuenta_demo,
+    usuario_actual, es_cuenta_demo, texto_cosecha,
 )
 from seguridad import registrar_evento
 from database import Arbol, Pedido, Suscripcion, Usuario
@@ -63,7 +63,7 @@ def crear_arbol(
         cupos_totales=data.cupos_totales,
         cupos_ocupados=0,
         precio_mensual_clp=data.precio_mensual_clp,
-        estimacion_cosecha=data.estimacion_cosecha,
+        estimacion_cosecha=texto_cosecha(data.estimacion_cosecha_kg),
         imagen=imagen,
         imagen_origen=origen,
         productor_id=productor.id
@@ -113,7 +113,7 @@ def actualizar_arbol(
     arbol.tipo_suscripcion = data.tipo_suscripcion
     arbol.cupos_totales = data.cupos_totales
     arbol.precio_mensual_clp = data.precio_mensual_clp
-    arbol.estimacion_cosecha = data.estimacion_cosecha
+    arbol.estimacion_cosecha = texto_cosecha(data.estimacion_cosecha_kg)
     arbol.imagen = imagen
     arbol.imagen_origen = origen
 
