@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#040806">
   <!-- Content-Security-Policy: solo se cargan recursos de los dominios que la
        app usa. Si se colara un XSS, no podría enviar datos a otro servidor
        (connect-src / img-src) ni cargar scripts externos. script-src no
@@ -20,24 +21,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261031e">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261031e">
-  <script src="js/config.js?v=20261031e" defer></script>
-  <script src="js/ui.js?v=20261031e" defer></script>
-  <script src="js/api.js?v=20261031e" defer></script>
-  <script src="js/auth.js?v=20261031e" defer></script>
-  <script src="js/parcelas.js?v=20261031e" defer></script>
-  <script src="js/catalogo.js?v=20261031e" defer></script>
-  <script src="js/agricultor.js?v=20261031e" defer></script>
-  <script src="js/perfil.js?v=20261031e" defer></script>
-  <script src="js/autocomplete.js?v=20261031e" defer></script>
-  <script src="js/dashboard.js?v=20261031e" defer></script>
-  <script src="js/efectos.js?v=20261031e" defer></script>
-  <script src="js/constelacion.js?v=20261031e" defer></script>
-  <script src="js/views.js?v=20261031e" defer></script>
-  <script src="js/login.js?v=20261031e" defer></script>
-  <script src="js/acciones.js?v=20261031e" defer></script>
-  <script src="js/app.js?v=20261031e" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261031h">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031h">
+  <script src="js/config.js?v=20261031h" defer></script>
+  <script src="js/ui.js?v=20261031h" defer></script>
+  <script src="js/api.js?v=20261031h" defer></script>
+  <script src="js/auth.js?v=20261031h" defer></script>
+  <script src="js/parcelas.js?v=20261031h" defer></script>
+  <script src="js/catalogo.js?v=20261031h" defer></script>
+  <script src="js/agricultor.js?v=20261031h" defer></script>
+  <script src="js/perfil.js?v=20261031h" defer></script>
+  <script src="js/autocomplete.js?v=20261031h" defer></script>
+  <script src="js/dashboard.js?v=20261031h" defer></script>
+  <script src="js/efectos.js?v=20261031h" defer></script>
+  <script src="js/constelacion.js?v=20261031h" defer></script>
+  <script src="js/views.js?v=20261031h" defer></script>
+  <script src="js/login.js?v=20261031h" defer></script>
+  <script src="js/acciones.js?v=20261031h" defer></script>
+  <script src="js/app.js?v=20261031h" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -285,8 +286,8 @@
       <div class="tc-contenedor tc-nav__fila">
         <span class="tc-marca"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado-a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado-a)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</span>
         <nav class="tc-nav__enlaces" aria-label="Navegación principal">
-          <button type="button" class="nav-pill" data-accion="views.mostrarVista" data-args='["dashboard-comprador"]'>
-            <span>Mi panel</span>
+          <button type="button" class="nav-pill" data-accion="views.mostrarVista" data-args='["dashboard-comprador"]' title="Mi panel" aria-label="Mi panel">
+            <i class="fa-regular fa-chart-bar"></i><span class="tc-solo-escritorio">Mi panel</span>
           </button>
           <button type="button" class="nav-icono" data-accion="parcelas.abrirCanasta" title="Mi canasta" aria-label="Mi canasta">
             <i class="fa-solid fa-bag-shopping"></i>
@@ -678,7 +679,7 @@
         <span class="tc-marca"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado-c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado-c)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</span>
         <nav class="tc-nav__enlaces" aria-label="Navegación principal">
           <button type="button" class="nav-pill" data-accion="views.mostrarVista" data-args='["parcelas"]'>
-            <i class="fa-solid fa-arrow-left"></i><span>Catálogo</span>
+            <i class="fa-solid fa-arrow-left"></i><span class="tc-solo-escritorio">Catálogo</span>
           </button>
           <span class="nav-separador"></span>
           <div data-nav-sesion></div>
@@ -1072,70 +1073,75 @@
   </div>
 
   <!-- MODAL: PERFIL DE USUARIO (fuera de las vistas para funcionar en ambas) -->
-  <div id="modal-perfil" class="modal-animado fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/60" data-accion="perfil.cerrar"></div>
-    <div class="relative max-w-lg mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden">
-      <div class="bg-emerald-900 text-white p-6 flex justify-between items-center">
-        <div>
-          <h3 class="text-xl font-black">Mi Perfil</h3>
-          <p class="text-xs text-emerald-200">Gestiona tu información personal</p>
+  <div id="modal-perfil" class="modal-animado fixed inset-0 z-[100] hidden tema-comprador">
+    <div class="absolute inset-0" data-accion="perfil.cerrar"></div>
+    <div class="perfil-panel" role="dialog" aria-modal="true" aria-labelledby="perfil-nombre">
+      <div class="perfil-cabecera">
+        <span id="perfil-avatar" class="perfil-avatar">?</span>
+        <div class="perfil-identidad">
+          <p id="perfil-rol" class="tc-etiqueta tc-etiqueta--verde">--</p>
+          <h3 id="perfil-nombre" class="tc-titulo-sm">--</h3>
         </div>
-        <button type="button" data-accion="perfil.cerrar" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+        <button type="button" class="nav-icono" data-accion="perfil.cerrar" title="Cerrar" aria-label="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
-      <div class="p-6 max-h-[70vh] overflow-y-auto">
-        <div class="flex items-center gap-4 mb-6 pb-6 border-b border-stone-100">
-          <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
-            <i class="fa-solid fa-user text-emerald-700 text-2xl"></i>
-          </div>
-          <div>
-            <p id="perfil-nombre" class="font-black text-lg text-stone-900">--</p>
-            <p id="perfil-rol" class="text-xs text-emerald-700 font-bold uppercase">--</p>
-          </div>
-        </div>
-        <div>
-          <p class="text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Mis árboles adoptados</p>
-          <div id="perfil-mis-arboles" class="space-y-2">
-            <p class="text-stone-500 text-xs text-center py-6">Cargando tus árboles...</p>
-          </div>
-        </div>
 
-        <form id="form-perfil" class="space-y-4 mt-5">
-          <div>
-            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nombre completo</label>
-            <input type="text" id="perfil-input-nombre" class="input">
+      <div class="perfil-cuerpo">
+        <section id="perfil-seccion-arboles" class="perfil-seccion">
+          <p class="tc-etiqueta tc-etiqueta--gris">Mis árboles adoptados</p>
+          <div id="perfil-mis-arboles" class="perfil-arboles">
+            <p class="tc-cuerpo-sm">Cargando tus árboles...</p>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Correo electrónico</label>
-            <input type="email" id="perfil-input-email" class="input">
+        </section>
+
+        <form id="form-perfil" class="perfil-seccion">
+          <p class="tc-etiqueta tc-etiqueta--gris">Datos personales</p>
+          <div class="perfil-campos">
+            <div class="perfil-campo perfil-campo--ancho">
+              <label for="perfil-input-nombre">Nombre completo</label>
+              <input type="text" id="perfil-input-nombre" autocomplete="name" class="input">
+            </div>
+            <div class="perfil-campo perfil-campo--ancho">
+              <label for="perfil-input-email">Correo electrónico</label>
+              <input type="email" id="perfil-input-email" autocomplete="email" class="input" readonly>
+            </div>
+            <div class="perfil-campo">
+              <label for="perfil-input-telefono">Teléfono</label>
+              <input type="tel" id="perfil-input-telefono" autocomplete="tel" placeholder="+56 9 1234 5678" class="input">
+            </div>
+            <div class="perfil-campo">
+              <label for="perfil-input-direccion">Dirección</label>
+              <input type="text" id="perfil-input-direccion" autocomplete="street-address" placeholder="Av. Los Aromos 1234" class="input">
+            </div>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Teléfono</label>
-            <input type="tel" id="perfil-input-telefono" placeholder="+56 9 1234 5678" class="input">
+
+          <p class="tc-etiqueta tc-etiqueta--gris" style="margin-top:2rem">Seguridad</p>
+          <div class="perfil-campos">
+            <div class="perfil-campo">
+              <label for="perfil-input-password">Nueva contraseña</label>
+              <input type="password" id="perfil-input-password" placeholder="Mínimo 8 caracteres" autocomplete="new-password" minlength="8" class="input">
+            </div>
+            <div class="perfil-campo">
+              <label for="perfil-input-password-actual">Contraseña actual</label>
+              <input type="password" id="perfil-input-password-actual" placeholder="Solo si la cambias" autocomplete="current-password" class="input">
+            </div>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Dirección</label>
-            <input type="text" id="perfil-input-direccion" placeholder="Av. Los Aromos 1234" class="input">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Nueva contraseña (dejar vacío para no cambiar)</label>
-            <input type="password" id="perfil-input-password" placeholder="Mínimo 8 caracteres" autocomplete="new-password" minlength="8" class="input">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Contraseña actual (solo si la cambias)</label>
-            <input type="password" id="perfil-input-password-actual" placeholder="••••••••" autocomplete="current-password" class="input">
-          </div>
-          <div id="alerta-perfil" class="hidden"></div>
-          <button type="submit" class="btn-submit w-full">Guardar cambios</button>
+
+          <div id="alerta-perfil" class="hidden" style="margin-top:1.25rem"></div>
+          <button type="submit" class="tc-boton perfil-guardar">Guardar cambios</button>
         </form>
 
         <!-- Zona de peligro: eliminar cuenta (Ley 21.719) -->
-        <div class="pt-5 border-t border-stone-200">
-          <p class="text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Zona de peligro</p>
-          <button type="button" data-accion="perfil.eliminarCuenta" class="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 font-bold text-sm py-3 rounded-xl transition flex items-center justify-center gap-2">
-            <i class="fa-solid fa-trash"></i> Eliminar mi cuenta y todos mis datos
+        <section class="perfil-seccion perfil-peligro">
+          <div>
+            <p class="tc-etiqueta perfil-peligro__titulo">Zona de peligro</p>
+            <p class="tc-cuerpo-sm" style="margin-top:.5rem">Elimina tu cuenta y todos tus datos de forma permanente.</p>
+          </div>
+          <button type="button" data-accion="perfil.eliminarCuenta" class="perfil-eliminar">
+            Eliminar cuenta
           </button>
-          <p class="text-[10px] text-stone-400 text-center mt-2">Esta acción es irreversible. Derechos de eliminación (Ley 21.719, Art. 20).</p>
-        </div>
+        </section>
       </div>
     </div>
   </div>

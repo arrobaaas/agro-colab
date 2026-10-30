@@ -19,8 +19,12 @@
       const sesion = this.auth.leerSesion();
       if (!sesion) return;
 
+      const esComprador = sesion.rol === "comprador";
       document.getElementById("perfil-nombre").textContent = sesion.nombre;
-      document.getElementById("perfil-rol").textContent = sesion.rol;
+      document.getElementById("perfil-rol").textContent = esComprador ? "Comprador" : "Agricultor";
+      document.getElementById("perfil-avatar").textContent = (sesion.nombre || "?").trim().charAt(0).toUpperCase();
+      // Solo el comprador adopta árboles: al agricultor no se le muestra esa sección
+      document.getElementById("perfil-seccion-arboles").classList.toggle("hidden", !esComprador);
       document.getElementById("perfil-input-nombre").value = sesion.nombre || "";
       document.getElementById("perfil-input-email").value = sesion.email || "";
       document.getElementById("perfil-input-telefono").value = sesion.telefono || "";
@@ -29,7 +33,7 @@
       document.getElementById("perfil-input-password-actual").value = "";
 
       document.getElementById("modal-perfil").classList.remove("hidden");
-      this.cargarMisArboles();
+      if (esComprador) this.cargarMisArboles();
     }
 
     pintarMisArboles(arboles) {
@@ -37,58 +41,26 @@
       if (!contenedor) return;
 
       if (!arboles.length) {
-        contenedor.innerHTML =
-          '<p class="text-stone-500 text-xs text-center py-6 bg-stone-50 rounded-xl border border-stone-200">' +
-          "Todavía no has adoptado ningún árbol. " +
-          '<a href="#vista-parcelas" data-accion="views.mostrarVista:parcelas|perfil.cerrar" class="text-emerald-700 font-bold underline">Ver los árboles disponibles</a>' +
-          "</p>";
+        contenedor.innerHTML = `
+          <p class="tc-cuerpo-sm">
+            Todavía no has adoptado ningún árbol.
+            <a href="#vista-parcelas" class="perfil-enlace" data-accion="views.mostrarVista:parcelas|perfil.cerrar">Ver árboles disponibles</a>
+          </p>`;
         return;
       }
 
       contenedor.innerHTML = arboles
-        .map((arbol) => {
-          const cuposTotales = arbol.cupos_totales || 0;
-          const cuposOcupados = arbol.cupos_ocupados || 0;
-          const porcentaje = cuposTotales ? Math.min(100, Math.round((cuposOcupados / cuposTotales) * 100)) : 0;
-          // "Completo" se refiere a los cupos del árbol, no a la suscripción del usuario
-          const cuposCompletos = cuposTotales > 0 && cuposOcupados >= cuposTotales;
-          return `
-          <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
-            <div class="flex items-center gap-3">
-              <div class="w-14 h-14 rounded-lg overflow-hidden bg-stone-200 flex-shrink-0">
-                <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" class="w-full h-full object-cover" data-si-falla="ocultar">
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-bold text-sm text-stone-900 truncate">${e(arbol.nombre)}</p>
-                <p class="text-[11px] text-stone-500 truncate">
-                  <i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${e(arbol.ubicacion || "Ubicación no informada")}
-                </p>
-                <p class="text-[11px] text-stone-500 truncate">
-                  Plan <strong>${e(arbol.plan || "-")}</strong> · Cosecha <strong>${e(arbol.estimacion_cosecha || "-")}</strong>
-                </p>
-              </div>
-              <div class="text-right flex-shrink-0">
-                <p class="font-black text-emerald-900 text-sm">${this.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
-                <p class="text-[10px] text-stone-400">CLP / mes</p>
-              </div>
+        .map((arbol) => `
+          <div class="perfil-arbol">
+            <div class="perfil-arbol__foto">
+              <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" data-si-falla="ocultar">
             </div>
-
-            <div class="mt-2 flex items-center justify-between gap-2">
-              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                <i class="fa-solid fa-circle-check mr-1"></i>Activa${arbol.tipo_suscripcion ? ` · ${e(arbol.tipo_suscripcion)}` : ""}
-              </span>
-              <span class="text-[10px] ${cuposCompletos ? "text-amber-700 font-bold" : "text-stone-500"}">
-                ${cuposOcupados}/${cuposTotales} coparticipantes${cuposCompletos ? " · completo" : ""}
-              </span>
+            <div class="perfil-arbol__texto">
+              <p class="perfil-arbol__nombre">${e(arbol.nombre)}</p>
+              <p class="tc-cuerpo-sm">Plan ${e(arbol.plan || "-")} · ${e(arbol.estimacion_cosecha || "-")}</p>
             </div>
-
-            <div class="w-full bg-stone-200 h-1.5 rounded-full overflow-hidden mt-2">
-              <div class="${cuposCompletos ? "bg-amber-500" : "bg-emerald-600"} h-1.5 rounded-full" style="width: ${porcentaje}%"></div>
-            </div>
-            ${arbol.fecha_suscripcion ? `<p class="text-[10px] text-stone-400 mt-2">Adoptado el ${e(arbol.fecha_suscripcion)}</p>` : ""}
-          </div>
-        `;
-        })
+            <p class="perfil-arbol__precio">${this.ui.formatearMonto(arbol.precio_mensual_clp)}<small>/ mes</small></p>
+          </div>`)
         .join("");
     }
 
@@ -97,7 +69,7 @@
       const contenedor = document.getElementById("perfil-mis-arboles");
       if (!sesion || !contenedor) return;
 
-      contenedor.innerHTML = '<p class="text-stone-500 text-xs text-center py-6">Cargando tus árboles...</p>';
+      contenedor.innerHTML = '<p class="tc-cuerpo-sm">Cargando tus árboles...</p>';
 
       try {
         const data = await window.AgroColab.api.obtenerMisArboles(sesion.id);
@@ -107,7 +79,7 @@
           this.pintarMisArboles([]);
         }
       } catch (error) {
-        contenedor.innerHTML = '<p class="text-red-500 text-xs text-center py-6">No se pudieron cargar tus árboles adoptados.</p>';
+        contenedor.innerHTML = '<p class="tc-cuerpo-sm">No se pudieron cargar tus árboles adoptados.</p>';
       }
     }
 
