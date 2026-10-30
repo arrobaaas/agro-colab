@@ -3,169 +3,229 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notificación de Brechas y Privacidad - Agro-Colab</title>
+  <title>Política de privacidad | Agro-Colab</title>
+  <meta name="description" content="Cómo Agro-Colab trata tus datos personales conforme a la Ley N° 21.719: qué datos, para qué, con quién, por cuánto tiempo y cómo ejercer tus derechos.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css?v=20261031e">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261031e">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
+  <link rel="stylesheet" href="css/styles.css?v=20261031g">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031g">
 </head>
-<body class="bg-stone-100 text-stone-800 font-sans antialiased">
+<body class="tema-comprador">
 
-  <header class="bg-emerald-900 text-white shadow-md sticky top-0 z-50">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-3">
-        <span class="text-3xl">🌱</span>
-        <div>
-          <h1 class="text-xl font-extrabold tracking-tight">Agro-Colab</h1>
-          <p class="text-[11px] text-emerald-200">Notificación de Brechas y Privacidad</p>
-        </div>
-      </div>
-      <a href="index.html" class="text-emerald-200 hover:text-white text-sm font-semibold">
-        <i class="fa-solid fa-arrow-left mr-1"></i> Volver
-      </a>
+  <header class="tc-nav tc-nav--solida sticky top-0 z-50">
+    <div class="tc-contenedor tc-nav__fila">
+      <span class="tc-marca"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</span>
+      <nav class="tc-nav__enlaces">
+        <a href="index.html" class="tc-enlace tc-enlace--suave"><i class="fa-solid fa-arrow-left"></i> Volver</a>
+      </nav>
     </div>
   </header>
 
-  <main class="max-w-4xl mx-auto px-4 py-10">
-
-    <!-- Notificación de Brechas -->
-    <section class="bg-white rounded-2xl border border-stone-200 shadow-sm p-8 mb-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-          <i class="fa-solid fa-shield-halved text-red-600 text-xl"></i>
-        </div>
-        <div>
-          <h2 class="text-2xl font-black text-stone-900">Notificación de Brechas de Seguridad</h2>
-          <p class="text-xs text-stone-500">Protocolo según Ley 21.719, Art. 22</p>
-        </div>
+  <section class="tc-hero">
+    <div class="tc-contenedor tc-legal-portada">
+      <p class="tc-etiqueta">Legal</p>
+      <h1 class="tc-display" style="margin-top:1.5rem">Política de<br><span class="tc-tenue">privacidad.</span></h1>
+      <p class="tc-cuerpo" style="margin-top:2rem">
+        Qué datos tratamos, para qué, con quién los compartimos, cuánto tiempo los guardamos
+        y cómo puedes controlarlos.
+      </p>
+      <div class="tc-legal-meta">
+        <span>Versión 1.0</span>
+        <span>Vigente desde el 1 de noviembre de 2026</span>
+        <span>Ley N° 21.719 de Protección de Datos Personales</span>
       </div>
+    </div>
+  </section>
 
-      <div class="space-y-4 text-sm text-stone-700 leading-relaxed">
-        <p><strong>¿Qué es una brecha de seguridad?</strong></p>
-        <p>Una brecha de seguridad es cualquier incidente que comprometa la confidencialidad, integridad o disponibilidad de tus datos personales, como accesos no autorizados, pérdida de datos o filtraciones.</p>
+  <div class="tema-comprador" style="--luz:1">
+    <main class="tc-contenedor tc-legal">
+      <aside class="tc-indice" aria-label="Índice">
+        <p class="tc-etiqueta tc-etiqueta--gris">Contenido</p>
+        <ol>
+          <li><a href="#resumen">Resumen</a></li>
+          <li><a href="#responsable">Responsable</a></li>
+          <li><a href="#datos">Qué datos tratamos</a></li>
+          <li><a href="#finalidades">Para qué los usamos</a></li>
+          <li><a href="#destinatarios">Con quién los compartimos</a></li>
+          <li><a href="#navegador">Tu navegador</a></li>
+          <li><a href="#conservacion">Cuánto tiempo</a></li>
+          <li><a href="#seguridad">Seguridad y brechas</a></li>
+          <li><a href="#derechos">Tus derechos</a></li>
+          <li><a href="#cambios">Cambios</a></li>
+        </ol>
+      </aside>
 
-        <p><strong>¿Qué hacemos si ocurre una brecha?</strong></p>
-        <ul class="list-disc pl-5 space-y-2">
-          <li>Notificaremos a la <strong>Agencia de Protección de Datos</strong> dentro de <strong>72 horas</strong> de detectado el incidente.</li>
-          <li>Te informaremos directamente si tus datos pudieron verse comprometidos.</li>
-          <li>Tomaremos medidas inmediatas para contener y mitigar el daño.</li>
-          <li>Documentaremos el incidente para mejorar nuestras medidas de seguridad.</li>
-        </ul>
+      <article class="tc-prosa">
 
-        <p><strong>¿Qué datos NO se ven afectados?</strong></p>
-        <ul class="list-disc pl-5 space-y-2">
-          <li><strong>Contraseñas:</strong> Nunca se guardan en texto plano. Se almacenan con hash bcrypt.</li>
-          <li><strong>Datos de pago:</strong> No se almacenan en nuestros servidores.</li>
-        </ul>
+        <section id="resumen">
+          <h2>Resumen en simple</h2>
+          <dl class="tc-resumen">
+            <div><dt>Pedimos lo mínimo</dt><dd>Nombre, correo y contraseña para tu cuenta; teléfono y dirección solo para tus despachos.</dd></div>
+            <div><dt>No vendemos datos</dt><dd>Ni los arrendamos ni los usamos para publicidad. No usamos cookies de seguimiento.</dd></div>
+            <div><dt>Quién los ve</dt><dd>El agricultor de los árboles que adoptas, para coordinar la cosecha, y los proveedores que operan el servicio.</dd></div>
+            <div><dt>Tú decides</dt><dd>Puedes ver, corregir y eliminar tus datos desde tu perfil, o pedir una copia.</dd></div>
+          </dl>
+          <p class="tc-aviso">
+            <strong>Prototipo académico.</strong> Agro-Colab es un proyecto del curso INGT1003 de la
+            Universidad Mayor. En esta versión los pagos son simulados y la plataforma no almacena datos
+            de tarjetas ni cuentas bancarias.
+          </p>
+        </section>
+
+        <section id="responsable">
+          <h2>1. Responsable del tratamiento</h2>
+          <p>
+            El responsable de tus datos es el equipo de Agro-Colab. Para cualquier consulta sobre
+            privacidad o para ejercer tus derechos, contacta a nuestro Delegado de Protección de Datos:
+          </p>
+          <ul>
+            <li><strong>Delegado de Protección de Datos:</strong> Nicolas Reyes Orellana</li>
+            <li><strong>Contacto:</strong> <a href="https://github.com/arrobaaas" target="_blank" rel="noopener">@arrobaaas en GitHub</a></li>
+          </ul>
+        </section>
+
+        <section id="datos">
+          <h2>2. Qué datos tratamos</h2>
+          <table class="tc-tabla">
+            <thead><tr><th>Categoría</th><th>Datos</th><th>Origen</th></tr></thead>
+            <tbody>
+              <tr><td>Cuenta</td><td>Nombre, correo, contraseña (guardada solo como hash bcrypt), rol y fecha de tus consentimientos.</td><td>Tú, al registrarte.</td></tr>
+              <tr><td>Perfil</td><td>Teléfono y dirección (opcionales).</td><td>Tú, en tu perfil.</td></tr>
+              <tr><td>Adopciones</td><td>Árboles adoptados y fecha de cada adopción.</td><td>Tu actividad.</td></tr>
+              <tr><td>Despachos</td><td>Plan, monto, tipo de destino, dirección, comuna, frecuencia y, en planes comerciales, razón social y RUT de la empresa.</td><td>Tú, al configurar un despacho.</td></tr>
+              <tr><td>Seguridad</td><td>Dirección IP, correo asociado, acción realizada (por ejemplo, un inicio de sesión fallido) y fecha.</td><td>Generado al usar el servicio.</td></tr>
+              <tr><td>Agricultores</td><td>Además de su cuenta, los datos de los árboles que publican.</td><td>El agricultor.</td></tr>
+            </tbody>
+          </table>
+          <p>No tratamos datos sensibles (salud, origen étnico, opiniones políticas u otros) ni datos de menores de edad.</p>
+        </section>
+
+        <section id="finalidades">
+          <h2>3. Para qué los usamos</h2>
+          <table class="tc-tabla">
+            <thead><tr><th>Finalidad</th><th>Base de licitud</th></tr></thead>
+            <tbody>
+              <tr><td>Crear y proteger tu cuenta, verificar tu correo</td><td>Ejecución del contrato</td></tr>
+              <tr><td>Gestionar adopciones, planes, pagos y despachos</td><td>Ejecución del contrato</td></tr>
+              <tr><td>Avisarte de cambios en tu pedido, precios o términos</td><td>Ejecución del contrato</td></tr>
+              <tr><td>Detectar fraudes y ataques (registro de seguridad)</td><td>Interés legítimo en proteger el servicio y a sus usuarios</td></tr>
+              <tr><td>Cumplir obligaciones tributarias y legales</td><td>Obligación legal</td></tr>
+            </tbody>
+          </table>
+          <p>No tomamos decisiones automatizadas que te afecten de forma significativa ni elaboramos perfiles con fines comerciales.</p>
+        </section>
+
+        <section id="destinatarios">
+          <h2>4. Con quién los compartimos</h2>
+          <h3>El agricultor de tus árboles</h3>
+          <p>
+            Cuando adoptas un árbol, su agricultor ve tu nombre, correo, teléfono y dirección para coordinar
+            la cosecha y el despacho. Solo puede verlos mientras tengas una adopción activa con él, y no
+            puede usarlos para otros fines.
+          </p>
+          <h3>Proveedores que operan el servicio</h3>
+          <p>Trabajan por encargo nuestro y solo con los datos necesarios para su función:</p>
+          <table class="tc-tabla">
+            <thead><tr><th>Proveedor</th><th>Para qué</th><th>Qué datos recibe</th></tr></thead>
+            <tbody>
+              <tr><td>Render</td><td>Servidor y base de datos</td><td>Todos los datos de la plataforma</td></tr>
+              <tr><td>GitHub Pages</td><td>Publicación del sitio web</td><td>Datos técnicos de la visita (IP)</td></tr>
+              <tr><td>Brevo</td><td>Correo de verificación y alertas de seguridad</td><td>Tu nombre y correo</td></tr>
+              <tr><td>Photon (Komoot)</td><td>Sugerir direcciones mientras escribes</td><td>El texto que escribes en el campo de dirección</td></tr>
+              <tr><td>Google Fonts, cdnjs y Wikimedia</td><td>Tipografías, íconos e imágenes del catálogo</td><td>Datos técnicos de la visita (IP)</td></tr>
+            </tbody>
+          </table>
+          <p>
+            Algunos de estos proveedores tienen servidores fuera de Chile, por lo que tus datos pueden
+            transferirse internacionalmente. Solo trabajamos con proveedores que ofrecen garantías
+            adecuadas de protección.
+          </p>
+          <p><strong>Nunca vendemos ni arrendamos tus datos</strong>, ni los compartimos con fines publicitarios.</p>
+        </section>
+
+        <section id="navegador">
+          <h2>5. Lo que se guarda en tu navegador</h2>
+          <ul>
+            <li><strong>Tu sesión, tu canasta y la última vista</strong> se guardan en el almacenamiento de la pestaña (sessionStorage). Se borran solos al cerrar la pestaña o al cerrar sesión.</li>
+            <li><strong>El último plan de abastecimiento que elegiste</strong> se guarda en tu navegador para recordarlo en tu próxima visita.</li>
+            <li><strong>No usamos cookies de seguimiento, de publicidad ni de analítica.</strong></li>
+          </ul>
+        </section>
+
+        <section id="conservacion">
+          <h2>6. Cuánto tiempo los guardamos</h2>
+          <table class="tc-tabla">
+            <thead><tr><th>Datos</th><th>Plazo</th></tr></thead>
+            <tbody>
+              <tr><td>Cuenta, perfil y adopciones</td><td>Mientras tu cuenta esté activa. Se eliminan al borrarla.</td></tr>
+              <tr><td>Pedidos y despachos</td><td>Mientras estén activos y, en operación real, el plazo que exija la normativa tributaria. En esta versión de demostración se borran junto con la cuenta.</td></tr>
+              <tr><td>Registro de seguridad</td><td>30 días. Luego se elimina automáticamente.</td></tr>
+              <tr><td>Códigos de verificación</td><td>30 minutos.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="seguridad">
+          <h2>7. Seguridad y brechas</h2>
+          <p>Protegemos tus datos con medidas técnicas, entre ellas:</p>
+          <ul>
+            <li>Contraseñas guardadas solo como hash bcrypt, nunca en texto plano.</li>
+            <li>Conexiones cifradas (HTTPS) y sesiones firmadas que caducan.</li>
+            <li>Cada usuario solo puede ver y modificar sus propios datos.</li>
+            <li>Límite de intentos en el inicio de sesión y monitoreo de eventos sospechosos con alertas.</li>
+            <li>Protección contra la inyección de código (Content-Security-Policy y escape de datos).</li>
+          </ul>
+          <h3>Si ocurre una brecha</h3>
+          <p>
+            Si un incidente compromete tus datos, lo notificaremos a la Agencia de Protección de Datos
+            Personales y te avisaremos directamente si tus datos pudieron verse afectados, con la mayor
+            prontitud posible y dentro de las 72 horas siguientes a su detección. También tomaremos medidas
+            inmediatas para contenerlo y lo documentaremos.
+          </p>
+        </section>
+
+        <section id="derechos">
+          <h2>8. Tus derechos</h2>
+          <p>La Ley N° 21.719 te reconoce los siguientes derechos sobre tus datos:</p>
+          <table class="tc-tabla">
+            <thead><tr><th>Derecho</th><th>Qué significa</th><th>Cómo ejercerlo</th></tr></thead>
+            <tbody>
+              <tr><td>Acceso</td><td>Saber qué datos tenemos sobre ti</td><td>En tu perfil, o pidiéndolo al Delegado</td></tr>
+              <tr><td>Rectificación</td><td>Corregir datos inexactos</td><td>En tu perfil</td></tr>
+              <tr><td>Supresión</td><td>Eliminar tus datos</td><td>Botón "Eliminar mi cuenta" en tu perfil</td></tr>
+              <tr><td>Oposición</td><td>Oponerte a un tratamiento</td><td>Contactando al Delegado</td></tr>
+              <tr><td>Portabilidad</td><td>Recibir tus datos en un formato estructurado</td><td>Contactando al Delegado</td></tr>
+              <tr><td>Bloqueo</td><td>Suspender temporalmente un tratamiento</td><td>Contactando al Delegado</td></tr>
+            </tbody>
+          </table>
+          <p>
+            Respondemos en un plazo máximo de 30 días corridos y de forma gratuita. Si consideras que no
+            atendimos bien tu solicitud, puedes reclamar ante la Agencia de Protección de Datos Personales.
+          </p>
+        </section>
+
+        <section id="cambios">
+          <h2>9. Cambios en esta política</h2>
+          <p>
+            Si cambiamos esta política de forma relevante, te lo avisaremos con anticipación en la plataforma.
+            La versión vigente estará siempre en esta página. Consulta también los
+            <a href="terminos.html">Términos y condiciones</a>.
+          </p>
+        </section>
+
+      </article>
+    </main>
+
+    <footer class="tc-footer">
+      <div class="tc-contenedor tc-footer__base" style="border-top:0">
+        <span>© 2026 Agro-Colab</span>
+        <span style="display:flex;gap:1.5rem">
+          <a href="terminos.html">Términos y condiciones</a>
+          <a href="index.html">Volver a Agro-Colab</a>
+        </span>
       </div>
-    </section>
-
-    <!-- Privacidad y Tratamiento de Datos -->
-    <section class="bg-white rounded-2xl border border-stone-200 shadow-sm p-8 mb-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-          <i class="fa-solid fa-lock text-emerald-600 text-xl"></i>
-        </div>
-        <div>
-          <h2 class="text-2xl font-black text-stone-900">Privacidad y Tratamiento de Datos</h2>
-          <p class="text-xs text-stone-500">Registro de actividades según Ley 21.719, Art. 16</p>
-        </div>
-      </div>
-
-      <div class="space-y-4 text-sm text-stone-700 leading-relaxed">
-        <p><strong>¿Qué datos recopilamos?</strong></p>
-        <ul class="list-disc pl-5 space-y-2">
-          <li><strong>Nombre completo:</strong> Para identificarte en la plataforma.</li>
-          <li><strong>Correo electrónico:</strong> Para autenticación y comunicaciones.</li>
-          <li><strong>Contraseña:</strong> Almacenada con hash bcrypt (nunca en texto plano).</li>
-          <li><strong>Teléfono y dirección:</strong> Para entregas y contacto.</li>
-        </ul>
-
-        <p><strong>¿Cómo usamos tus datos?</strong></p>
-        <ul class="list-disc pl-5 space-y-2">
-          <li>Gestionar tu cuenta y autenticación.</li>
-          <li>Procesar suscripciones a árboles y pedidos de abastecimiento.</li>
-          <li>Coordinar entregas logísticas.</li>
-          <li>Enviar comunicaciones sobre tus pedidos.</li>
-        </ul>
-
-        <p><strong>¿Compartimos tus datos?</strong></p>
-        <ul class="list-disc pl-5 space-y-2">
-          <li><strong>No compartimos</strong> tus datos personales con terceros.</li>
-          <li>Los datos se almacenan únicamente en nuestra base de datos.</li>
-          <li>No vendemos ni alquilamos tus datos a nadie.</li>
-        </ul>
-
-        <p><strong>¿Dónde se guardan tus datos?</strong></p>
-        <ul class="list-disc pl-5 space-y-2">
-          <li>Base de datos en el servidor backend (Render).</li>
-          <li>Tu sesión se guarda solo en tu navegador (localStorage).</li>
-          <li>No se guardan datos en texto plano.</li>
-        </ul>
-
-        <p><strong>¿Cuánto tiempo guardamos tus datos?</strong></p>
-        <p>Hasta que decidas eliminar tu cuenta. Todos tus datos se borran permanentemente cuando lo solicitas.</p>
-      </div>
-    </section>
-
-    <!-- Tus Derechos -->
-    <section class="bg-white rounded-2xl border border-stone-200 shadow-sm p-8 mb-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-          <i class="fa-solid fa-user-shield text-amber-600 text-xl"></i>
-        </div>
-        <div>
-          <h2 class="text-2xl font-black text-stone-900">Tus Derechos (Ley 21.719, Art. 20)</h2>
-          <p class="text-xs text-stone-500">Cómo ejercerlos</p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-stone-50 rounded-xl p-4">
-          <h3 class="font-bold text-stone-900 mb-2"><i class="fa-solid fa-eye text-emerald-600 mr-2"></i>Acceso</h3>
-          <p class="text-xs text-stone-600">Puedes ver todos tus datos guardados en tu perfil de usuario.</p>
-        </div>
-        <div class="bg-stone-50 rounded-xl p-4">
-          <h3 class="font-bold text-stone-900 mb-2"><i class="fa-solid fa-pen text-emerald-600 mr-2"></i>Rectificación</h3>
-          <p class="text-xs text-stone-600">Puedes actualizar tu nombre, correo, teléfono y dirección en el perfil.</p>
-        </div>
-        <div class="bg-stone-50 rounded-xl p-4">
-          <h3 class="font-bold text-stone-900 mb-2"><i class="fa-solid fa-trash text-red-600 mr-2"></i>Eliminación</h3>
-          <p class="text-xs text-stone-600">Puedes borrar tu cuenta y todos tus datos desde el perfil.</p>
-        </div>
-        <div class="bg-stone-50 rounded-xl p-4">
-          <h3 class="font-bold text-stone-900 mb-2"><i class="fa-solid fa-ban text-amber-600 mr-2"></i>Oposición</h3>
-          <p class="text-xs text-stone-600">Puedes contactar al DPO para oponerte a algún tratamiento.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- DPO -->
-    <section class="bg-white rounded-2xl border border-stone-200 shadow-sm p-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-          <i class="fa-solid fa-user-tie text-emerald-600 text-xl"></i>
-        </div>
-        <div>
-          <h2 class="text-2xl font-black text-stone-900">Delegado de Protección de Datos</h2>
-          <p class="text-xs text-stone-500">Contacto directo</p>
-        </div>
-      </div>
-
-      <div class="space-y-4 text-sm text-stone-700 leading-relaxed">
-        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-          <p class="font-bold text-stone-900">DPO: Nicolas Reyes Orellana</p>
-          <p class="text-xs text-stone-600 mt-1">GitHub: <a href="https://github.com/arrobaaas" class="text-emerald-700 hover:underline">@arrobaaas</a></p>
-        </div>
-        <p>Para cualquier consulta sobre privacidad, tratamiento de datos o ejercer tus derechos, contacta al DPO.</p>
-      </div>
-    </section>
-
-  </main>
-
-  <footer class="bg-stone-900 text-stone-400 text-xs py-8 text-center">
-    <p>© 2026 Agro-Colab - Cumplimiento Ley 21.719 de Protección de Datos Personales</p>
-  </footer>
-
+    </footer>
+  </div>
 </body>
 </html>
