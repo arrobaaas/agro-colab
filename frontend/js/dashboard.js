@@ -198,18 +198,18 @@
     async cancelarSuscripcionArbol(arbolId) {
       const arbol = this.arboles.find((a) => String(a.arbol_id) === String(arbolId));
       const nombre = arbol ? arbol.nombre : "este árbol";
-      if (!window.confirm(`¿Cancelar tu suscripción a ${nombre}? Se liberará tu cupo.`)) return null;
+      if (!(await AgroColab.dialogo.confirmar(`Tu cupo en ${nombre} quedará libre para otro comprador.`, { titulo: "¿Cancelar tu adopción?", aceptar: "Cancelar adopción", cancelar: "Mantener", peligro: true }))) return null;
 
       try {
         const data = await api.cancelarSuscripcion(auth.leerSesion(), arbolId);
         if (data.status === "success") {
           await this.cargar();
         } else {
-          window.alert(data.mensaje || "No se pudo cancelar la suscripción.");
+          AgroColab.dialogo.avisar(data.mensaje || "No se pudo cancelar la suscripción.", { tipo: "error" });
         }
         return data;
       } catch (error) {
-        window.alert("No se pudo cancelar la suscripción. Intenta nuevamente.");
+        AgroColab.dialogo.avisar("No se pudo cancelar la suscripción. Intenta nuevamente.", { tipo: "error" });
         return null;
       }
     }
@@ -217,17 +217,17 @@
     async cancelarPlan(pedidoId) {
       const pedido = this.pedidos.find((p) => String(p.id) === String(pedidoId));
       if (!pedido) return;
-      if (!window.confirm(`¿Cancelar el plan ${pedido.plan_nombre} (${pedido.codigo_seguimiento})? Dejarás de recibir sus despachos.`)) return;
+      if (!(await AgroColab.dialogo.confirmar(`Dejarás de recibir los despachos de ${pedido.plan_nombre} (${pedido.codigo_seguimiento}).`, { titulo: "¿Cancelar este plan?", aceptar: "Cancelar plan", cancelar: "Mantener", peligro: true }))) return;
 
       try {
         const data = await api.cancelarPlan(pedidoId);
         if (data.status === "success") {
           await this.cargar();
         } else {
-          window.alert(data.mensaje || "No se pudo cancelar el plan.");
+          AgroColab.dialogo.avisar(data.mensaje || "No se pudo cancelar el plan.", { tipo: "error" });
         }
       } catch (error) {
-        window.alert("No se pudo cancelar el plan. Intenta nuevamente.");
+        AgroColab.dialogo.avisar("No se pudo cancelar el plan. Intenta nuevamente.", { tipo: "error" });
       }
     }
 

@@ -21,24 +21,26 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261031j">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261031j">
-  <script src="js/config.js?v=20261031j" defer></script>
-  <script src="js/ui.js?v=20261031j" defer></script>
-  <script src="js/api.js?v=20261031j" defer></script>
-  <script src="js/auth.js?v=20261031j" defer></script>
-  <script src="js/parcelas.js?v=20261031j" defer></script>
-  <script src="js/catalogo.js?v=20261031j" defer></script>
-  <script src="js/agricultor.js?v=20261031j" defer></script>
-  <script src="js/perfil.js?v=20261031j" defer></script>
-  <script src="js/autocomplete.js?v=20261031j" defer></script>
-  <script src="js/dashboard.js?v=20261031j" defer></script>
-  <script src="js/efectos.js?v=20261031j" defer></script>
-  <script src="js/constelacion.js?v=20261031j" defer></script>
-  <script src="js/views.js?v=20261031j" defer></script>
-  <script src="js/login.js?v=20261031j" defer></script>
-  <script src="js/acciones.js?v=20261031j" defer></script>
-  <script src="js/app.js?v=20261031j" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261031k">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031k">
+  <script src="js/config.js?v=20261031k" defer></script>
+  <script src="js/ui.js?v=20261031k" defer></script>
+  <script src="js/dialogo.js?v=20261031k" defer></script>
+  <script src="js/api.js?v=20261031k" defer></script>
+  <script src="js/auth.js?v=20261031k" defer></script>
+  <script src="js/parcelas.js?v=20261031k" defer></script>
+  <script src="js/catalogo.js?v=20261031k" defer></script>
+  <script src="js/agricultor.js?v=20261031k" defer></script>
+  <script src="js/graficos.js?v=20261031k" defer></script>
+  <script src="js/perfil.js?v=20261031k" defer></script>
+  <script src="js/autocomplete.js?v=20261031k" defer></script>
+  <script src="js/dashboard.js?v=20261031k" defer></script>
+  <script src="js/efectos.js?v=20261031k" defer></script>
+  <script src="js/constelacion.js?v=20261031k" defer></script>
+  <script src="js/views.js?v=20261031k" defer></script>
+  <script src="js/login.js?v=20261031k" defer></script>
+  <script src="js/acciones.js?v=20261031k" defer></script>
+  <script src="js/app.js?v=20261031k" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -790,6 +792,37 @@
                 <p class="tc-kpi__etiqueta">Ingresos mensuales estimados</p>
                 <p class="tc-kpi__valor" id="stat-ingresos">$0</p>
               </div>
+            </div>
+
+            <!-- Gráficos (los pinta graficos.js) -->
+            <div id="graficos-huerto" class="tc-graficos hidden">
+              <figure class="tc-grafico tc-grafico--ancho" data-reveal>
+                <figcaption>
+                  <p class="tc-grafico__titulo">Ingreso mensual por árbol</p>
+                  <p class="tc-grafico__leyenda">
+                    <span><i class="tc-clave tc-clave--lleno"></i>Ingreso actual</span>
+                    <span><i class="tc-clave tc-clave--pista"></i>Con todos los cupos ocupados</span>
+                  </p>
+                </figcaption>
+                <div id="grafico-ingresos"></div>
+              </figure>
+              <figure class="tc-grafico" data-reveal style="--reveal-delay:120ms">
+                <figcaption>
+                  <p class="tc-grafico__titulo">Cupos ocupados por árbol</p>
+                  <p class="tc-grafico__leyenda">
+                    <span><i class="tc-clave tc-clave--lleno"></i>Ocupado</span>
+                    <span><i class="tc-clave tc-clave--pista"></i>Libre</span>
+                  </p>
+                </figcaption>
+                <div id="grafico-cupos"></div>
+              </figure>
+              <figure class="tc-grafico" data-reveal style="--reveal-delay:240ms">
+                <figcaption>
+                  <p class="tc-grafico__titulo">Adopciones por mes</p>
+                  <p class="tc-grafico__leyenda"><span>Suscripciones activas según el mes en que comenzaron</span></p>
+                </figcaption>
+                <div id="grafico-adopciones"><p class="tc-cuerpo-sm">Cargando...</p></div>
+              </figure>
             </div>
           </div>
         </div>

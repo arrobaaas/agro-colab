@@ -246,7 +246,7 @@
       try {
         const datos = await api.obtenerArboles();
         const arbol = (datos || []).find(function (a) { return a.id === treeId; });
-        if (!arbol) { window.alert("No se encontró el árbol."); return; }
+        if (!arbol) { AgroColab.dialogo.avisar("Este árbol ya no está disponible en el catálogo.", { tipo: "error", titulo: "Árbol no encontrado" }); return; }
 
         // Un mismo usuario no puede adoptar más de una vez el mismo árbol.
         const existente = this.carrito.find(function (c) {
@@ -263,13 +263,13 @@
           } catch (error) { /* el backend validará al momento del pago */ }
         }
         if (yaSuscripto) {
-          window.alert(`Ya tienes una suscripción activa para "${arbol.nombre}". No puedes adoptar más de una vez.`);
+          AgroColab.dialogo.avisar(`Ya tienes un cupo en ${arbol.nombre}. Cada persona puede adoptar un mismo árbol una sola vez; puedes verlo en tu panel o elegir otro árbol del catálogo.`, { titulo: "Ya adoptaste este árbol" });
           return;
         }
 
         this.abrirModalConfirmacionArbol(arbol);
       } catch (error) {
-        window.alert("Error de comunicación con el backend");
+        AgroColab.dialogo.avisar("No hay conexión con el servidor. Intenta nuevamente en unos segundos.", { tipo: "error" });
       }
     }
 
@@ -354,7 +354,7 @@
         if (item.tipo !== "plan") {
           const data = await api.suscribirArbol(sesion, item.id);
           if (data.status !== "success") {
-            window.alert(data.mensaje || "No se pudo completar el pago.");
+            AgroColab.dialogo.avisar(data.mensaje || "No se pudo completar el pago.", { tipo: "error", titulo: "Pago no completado" });
             return;
           }
         }
@@ -367,7 +367,7 @@
         this.cerrarCanasta();
         this.abrirLogistica(item);
       } catch (error) {
-        window.alert("Error de comunicación con el backend");
+        AgroColab.dialogo.avisar("No hay conexión con el servidor. Intenta nuevamente en unos segundos.", { tipo: "error" });
       }
     }
 
@@ -587,22 +587,22 @@
       const item = this.carrito[index];
       if (!item) return;
 
-      if (window.confirm(`¿Estás seguro de cancelar "${item.nombre}"?`)) {
+      if (await AgroColab.dialogo.confirmar(`${item.nombre} saldrá de tu canasta${item.tipo === "arbol" ? " y su cupo quedará libre para otro comprador" : ""}.`, { titulo: "¿Cancelar este producto?", aceptar: "Cancelar", cancelar: "Mantener", peligro: true })) {
         // Si es un árbol, cancelar la suscripción en el backend
         if (item.tipo === "arbol") {
           try {
             const sesion = auth.leerSesion();
             const data = await api.cancelarSuscripcion(sesion, item.id);
             if (data.status === "success") {
-              window.alert(data.mensaje);
+              AgroColab.dialogo.avisar(data.mensaje, { tipo: "exito", titulo: "Adopción cancelada" });
               await this.cargarArboles();
             } else {
-              window.alert(data.mensaje || "No se pudo cancelar la suscripción.");
+              AgroColab.dialogo.avisar(data.mensaje || "No se pudo cancelar la suscripción.", { tipo: "error" });
               return;
             }
           } catch (error) {
             console.error("Error al cancelar:", error);
-            window.alert("Error de comunicación con el backend");
+            AgroColab.dialogo.avisar("No hay conexión con el servidor. Intenta nuevamente en unos segundos.", { tipo: "error" });
             return;
           }
         }

@@ -2547,6 +2547,245 @@ html {
   border-color: var(--tc-linea-fuerte);
 }
 
+/* ----- Gráficos del huerto (graficos.js) ----- */
+.tc-graficos {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .tc-graficos { grid-template-columns: 1fr 1fr; }
+  .tc-grafico--ancho { grid-column: 1 / -1; }
+}
+
+.tc-grafico {
+  min-width: 0;
+  padding: 1.75rem 1.5rem 1.25rem;
+  border-radius: 24px;
+  border: 1px solid var(--tc-linea);
+  background-color: var(--tc-superficie);
+}
+
+.tc-grafico figcaption {
+  margin-bottom: 1.5rem;
+}
+
+.tc-grafico__titulo {
+  font-size: 1.125rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.tc-grafico__leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--tc-texto-3);
+}
+
+.tc-grafico__leyenda span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.tc-clave {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* El color de la marca es el acento del tema; la pista es un paso más claro
+   del mismo tono, para que el total se lea junto a lo ocupado */
+.tc-grafico {
+  --grafico-marca: var(--tc-accion);
+  --grafico-pista: color-mix(in srgb, var(--tc-accion) 18%, transparent);
+}
+
+.tc-clave--lleno { background-color: var(--grafico-marca); }
+.tc-clave--pista { background-color: var(--grafico-pista); }
+
+.grafico-filas {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.grafico-fila {
+  display: grid;
+  grid-template-columns: minmax(6rem, 11rem) 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.45rem 0.5rem;
+  margin: 0 -0.5rem;
+  border-radius: 10px;
+  outline: none;
+  transition: background-color 0.2s ease;
+}
+
+.grafico-fila:hover,
+.grafico-fila:focus-visible {
+  background-color: var(--tc-superficie-2);
+}
+
+.grafico-fila__nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: var(--tc-texto-2);
+}
+
+.grafico-fila__valor {
+  min-width: 4.5rem;
+  text-align: right;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--tc-texto);
+}
+
+.grafico-barra__pista {
+  height: 12px;
+  border-radius: 0 4px 4px 0;
+  background-color: var(--grafico-pista);
+  overflow: hidden;
+}
+
+.grafico-barra__relleno {
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  background-color: var(--grafico-marca);
+  transform-origin: left;
+  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
+}
+
+.grafico-cupos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.grafico-cupo {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background-color: var(--grafico-pista);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.grafico-cupo--ocupado { background-color: var(--grafico-marca); }
+
+.grafico-columnas {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  height: 13rem;
+}
+
+.grafico-columna {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px 10px 0 0;
+  outline: none;
+  transition: background-color 0.2s ease;
+}
+
+.grafico-columna:hover,
+.grafico-columna:focus-visible {
+  background-color: var(--tc-superficie-2);
+}
+
+.grafico-columna__area {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.35rem;
+  border-bottom: 1px solid var(--tc-linea-fuerte);
+}
+
+.grafico-columna__valor {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--tc-texto);
+}
+
+.grafico-columna__barra {
+  width: min(24px, 60%);
+  border-radius: 4px 4px 0 0;
+  background-color: var(--grafico-marca);
+  transform-origin: bottom;
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
+}
+
+.grafico-columna__mes {
+  padding: 0.6rem 0 0.4rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--tc-texto-3);
+}
+
+
+/* Antes de entrar en pantalla las marcas están en cero */
+.tc-grafico:not(.tc-grafico--visible) .grafico-barra__relleno { transform: scaleX(0); }
+.tc-grafico:not(.tc-grafico--visible) .grafico-columna__barra { transform: scaleY(0); }
+.tc-grafico:not(.tc-grafico--visible) .grafico-cupo { transform: scale(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .grafico-barra__relleno,
+  .grafico-columna__barra,
+  .grafico-cupo { transition: none; transform: none !important; }
+}
+
+.tc-grafico__tabla {
+  margin-top: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--tc-texto-3);
+}
+
+.tc-grafico__tabla summary {
+  cursor: pointer;
+  width: max-content;
+}
+
+.tc-grafico__tabla summary:hover { color: var(--tc-texto); }
+.tc-grafico__tabla .tc-tabla { margin-top: 0.75rem; }
+
+.tc-tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  display: grid;
+  gap: 0.15rem;
+  max-width: 16rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  background-color: #0c1410;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 30px -12px rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-size: 0.8125rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.tc-tooltip--visible { opacity: 1; }
+.tc-tooltip strong { font-size: 0.9375rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.tc-tooltip span { color: #c8cdca; }
+.tc-tooltip small { color: #8b938f; font-size: 0.75rem; }
+.tc-tooltip small:empty { display: none; }
+
+@media (max-width: 479px) {
+  .grafico-fila { grid-template-columns: 1fr auto; gap: 0.35rem 0.75rem; }
+  .grafico-fila__area { grid-column: 1 / -1; grid-row: 2; }
+}
+
 /* En modo formulario la portada es solo un encabezado: sin árbol ni alto
    de pantalla completa */
 #vista-agricultor.modo-formulario .tc-hero__grid {
@@ -2856,6 +3095,115 @@ html {
     order: -1;
     width: min(100%, 260px);
   }
+}
+
+/* ----- Diálogos propios (dialogo.js) ----- */
+.dialogo {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.dialogo.hidden { display: none; }
+
+.dialogo__fondo {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(2, 6, 4, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: dialogo-fundido 0.2s ease;
+}
+
+.dialogo__panel {
+  position: relative;
+  width: 100%;
+  max-width: 26rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: 2rem;
+  border-radius: 24px;
+  background-color: var(--tc-superficie);
+  border: 1px solid var(--tc-linea-fuerte);
+  color: var(--tc-texto);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8);
+  animation: dialogo-entrada 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes dialogo-fundido { from { opacity: 0; } }
+
+@keyframes dialogo-entrada {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialogo__fondo,
+  .dialogo__panel { animation: none; }
+}
+
+.dialogo__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 1.25rem;
+  border-radius: 9999px;
+  font-size: 1.125rem;
+  color: var(--tc-accion);
+  background-color: color-mix(in srgb, var(--tc-accion) 14%, transparent);
+}
+
+.dialogo__panel[data-tipo="error"] .dialogo__icono,
+.dialogo__panel[data-tipo="peligro"] .dialogo__icono {
+  color: var(--tc-peligro);
+  background-color: color-mix(in srgb, var(--tc-peligro) 14%, transparent);
+}
+
+.dialogo__panel .tc-cuerpo-sm {
+  margin-top: 0.6rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.dialogo__datos {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem 1.25rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--tc-linea);
+  font-size: 0.875rem;
+}
+
+.dialogo__datos dt { color: var(--tc-texto-3); }
+.dialogo__datos dd { color: var(--tc-texto); overflow-wrap: anywhere; }
+
+.dialogo__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 479px) {
+  .dialogo__acciones { flex-direction: column-reverse; }
+  .dialogo__acciones .tc-boton { width: 100%; }
+}
+
+.tc-boton--peligro {
+  background-color: var(--tc-peligro);
+  color: color-mix(in srgb, #2a0707 var(--tc-mezcla), #ffffff);
+}
+
+.tc-boton--peligro:hover {
+  background-color: var(--tc-peligro);
+  filter: brightness(1.08);
 }
 
 /* ----- Celular ----- */
