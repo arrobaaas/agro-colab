@@ -21,26 +21,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261031k">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261031k">
-  <script src="js/config.js?v=20261031k" defer></script>
-  <script src="js/ui.js?v=20261031k" defer></script>
-  <script src="js/dialogo.js?v=20261031k" defer></script>
-  <script src="js/api.js?v=20261031k" defer></script>
-  <script src="js/auth.js?v=20261031k" defer></script>
-  <script src="js/parcelas.js?v=20261031k" defer></script>
-  <script src="js/catalogo.js?v=20261031k" defer></script>
-  <script src="js/agricultor.js?v=20261031k" defer></script>
-  <script src="js/graficos.js?v=20261031k" defer></script>
-  <script src="js/perfil.js?v=20261031k" defer></script>
-  <script src="js/autocomplete.js?v=20261031k" defer></script>
-  <script src="js/dashboard.js?v=20261031k" defer></script>
-  <script src="js/efectos.js?v=20261031k" defer></script>
-  <script src="js/constelacion.js?v=20261031k" defer></script>
-  <script src="js/views.js?v=20261031k" defer></script>
-  <script src="js/login.js?v=20261031k" defer></script>
-  <script src="js/acciones.js?v=20261031k" defer></script>
-  <script src="js/app.js?v=20261031k" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261031l">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031l">
+  <script src="js/config.js?v=20261031l" defer></script>
+  <script src="js/ui.js?v=20261031l" defer></script>
+  <script src="js/dialogo.js?v=20261031l" defer></script>
+  <script src="js/api.js?v=20261031l" defer></script>
+  <script src="js/auth.js?v=20261031l" defer></script>
+  <script src="js/pago.js?v=20261031l" defer></script>
+  <script src="js/parcelas.js?v=20261031l" defer></script>
+  <script src="js/catalogo.js?v=20261031l" defer></script>
+  <script src="js/agricultor.js?v=20261031l" defer></script>
+  <script src="js/graficos.js?v=20261031l" defer></script>
+  <script src="js/perfil.js?v=20261031l" defer></script>
+  <script src="js/autocomplete.js?v=20261031l" defer></script>
+  <script src="js/dashboard.js?v=20261031l" defer></script>
+  <script src="js/efectos.js?v=20261031l" defer></script>
+  <script src="js/constelacion.js?v=20261031l" defer></script>
+  <script src="js/views.js?v=20261031l" defer></script>
+  <script src="js/login.js?v=20261031l" defer></script>
+  <script src="js/acciones.js?v=20261031l" defer></script>
+  <script src="js/app.js?v=20261031l" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -1172,6 +1173,109 @@
       </div>
     </div>
   </div>
+
+    <!-- MODAL: PASARELA DE PAGO SIMULADA (pago.js) -->
+    <div id="modal-pago" class="modal-animado fixed inset-0 z-[120] hidden tema-comprador" data-paso="formulario">
+      <div class="absolute inset-0" data-accion="pago.cerrar"></div>
+      <div class="pago-panel" role="dialog" aria-modal="true" aria-labelledby="pago-titulo">
+
+        <!-- Resumen del pedido -->
+        <aside class="pago-resumen">
+          <span class="tc-marca"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado-p" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado-p)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</span>
+          <p class="tc-etiqueta tc-etiqueta--gris" style="margin-top:2.5rem">Estás pagando</p>
+          <p id="pago-concepto" class="pago-resumen__concepto">--</p>
+          <p id="pago-detalle" class="tc-cuerpo-sm" style="margin-top:.5rem"></p>
+          <div class="pago-resumen__total">
+            <span>Total hoy</span>
+            <strong><span id="pago-total">$0</span> <small>CLP</small></strong>
+          </div>
+          <p class="pago-resumen__seguro"><i class="fa-solid fa-lock"></i> Pasarela de prueba: no se realizan cobros reales.</p>
+        </aside>
+
+        <div class="pago-cuerpo">
+          <button type="button" class="nav-icono pago-cerrar" data-accion="pago.cerrar" title="Cerrar" aria-label="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+
+          <!-- Paso 1: datos de la tarjeta -->
+          <div data-paso-pago="formulario">
+            <h3 id="pago-titulo" class="tc-titulo-sm">Pago con tarjeta</h3>
+
+            <div id="pago-tarjeta" class="pago-tarjeta" aria-hidden="true">
+              <div class="pago-tarjeta__fila">
+                <span class="pago-tarjeta__chip"></span>
+                <span id="pago-vista-marca" class="pago-tarjeta__marca"></span>
+              </div>
+              <p id="pago-vista-numero" class="pago-tarjeta__numero">•••• •••• •••• ••••</p>
+              <div class="pago-tarjeta__fila">
+                <span id="pago-vista-titular" class="pago-tarjeta__titular">NOMBRE DEL TITULAR</span>
+                <span id="pago-vista-vence">MM/AA</span>
+              </div>
+            </div>
+
+            <form id="form-pago" class="pago-formulario" novalidate>
+              <div class="perfil-campo">
+                <label for="pago-numero">Número de la tarjeta</label>
+                <input type="text" id="pago-numero" class="input" inputmode="numeric" autocomplete="off" placeholder="4242 4242 4242 4242" maxlength="23" data-al-escribir="pago.formatearNumero">
+              </div>
+              <div class="perfil-campo">
+                <label for="pago-titular">Titular</label>
+                <input type="text" id="pago-titular" class="input" autocomplete="off" maxlength="80" placeholder="Como aparece en la tarjeta">
+              </div>
+              <div class="pago-formulario__fila">
+                <div class="perfil-campo">
+                  <label for="pago-vencimiento">Vencimiento</label>
+                  <input type="text" id="pago-vencimiento" class="input" inputmode="numeric" autocomplete="off" placeholder="MM/AA" maxlength="5" data-al-escribir="pago.formatearVencimiento">
+                </div>
+                <div class="perfil-campo">
+                  <label for="pago-cvv">CVV</label>
+                  <input type="password" id="pago-cvv" class="input" inputmode="numeric" autocomplete="off" placeholder="123" maxlength="4" data-al-escribir="pago.formatearCvv">
+                </div>
+              </div>
+
+              <div class="pago-prueba">
+                <p><i class="fa-solid fa-flask"></i> Modo de prueba. No ingreses una tarjeta real: usa una de estas.</p>
+                <div class="pago-prueba__chips">
+                  <button type="button" data-accion="pago.usarTarjetaPrueba" data-args='["4242424242424242"]'><span class="pago-punto pago-punto--ok"></span>Visa aprobada</button>
+                  <button type="button" data-accion="pago.usarTarjetaPrueba" data-args='["5555555555554444"]'><span class="pago-punto pago-punto--ok"></span>Mastercard aprobada</button>
+                  <button type="button" data-accion="pago.usarTarjetaPrueba" data-args='["4000000000000002"]'><span class="pago-punto pago-punto--error"></span>Sin fondos</button>
+                  <button type="button" data-accion="pago.usarTarjetaPrueba" data-args='["4000000000009995"]'><span class="pago-punto pago-punto--error"></span>Bloqueada</button>
+                </div>
+              </div>
+
+              <div id="pago-alerta" class="hidden"></div>
+              <button type="submit" class="tc-boton pago-pagar"><i class="fa-solid fa-lock"></i> Pagar <span id="pago-boton-monto">$0</span></button>
+            </form>
+          </div>
+
+          <!-- Paso 2: procesando -->
+          <div data-paso-pago="procesando" class="pago-estado hidden" role="status" aria-live="polite">
+            <span class="pago-cargando" aria-hidden="true"></span>
+            <h3 class="tc-titulo-sm">Procesando tu pago...</h3>
+            <p class="tc-cuerpo-sm">Estamos autorizando la tarjeta con el banco emisor. No cierres esta ventana.</p>
+          </div>
+
+          <!-- Paso 3a: aprobado -->
+          <div data-paso-pago="aprobado" class="pago-estado hidden" role="status" aria-live="polite">
+            <span class="pago-sello pago-sello--ok" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+            <h3 class="tc-titulo-sm">Pago aprobado</h3>
+            <p class="tc-cuerpo-sm">Guarda este comprobante; también queda en tu panel, en "Historial de pagos".</p>
+            <dl id="pago-comprobante" class="pago-comprobante"></dl>
+            <button type="button" id="pago-continuar" class="tc-boton pago-pagar" data-accion="pago.cerrar">Continuar con el despacho</button>
+          </div>
+
+          <!-- Paso 3b: rechazado -->
+          <div data-paso-pago="rechazado" class="pago-estado hidden" role="alert">
+            <span class="pago-sello pago-sello--error" aria-hidden="true"><i class="fa-solid fa-xmark"></i></span>
+            <h3 class="tc-titulo-sm">Pago no realizado</h3>
+            <p id="pago-motivo" class="tc-cuerpo-sm"></p>
+            <p class="tc-cuerpo-sm">No se realizó ningún cobro.</p>
+            <button type="button" class="tc-boton pago-pagar" data-accion="pago.reintentar">Intentar con otra tarjeta</button>
+            <button type="button" class="tc-enlace tc-enlace--suave" style="margin-top:1rem" data-accion="pago.cerrar">Volver a la canasta</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- MODAL: CONFIRMACION DE ADOPCION DE ARBOL -->
     <div id="modal-confirmacion-adopcion" class="modal-animado fixed inset-0 z-[120] hidden tema-comprador">

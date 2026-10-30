@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 
 from core import datos_iniciales, ip_cliente
 from database import engine, Base, asegurar_columnas, migrar_cuentas_antiguas
-from routers import arboles, especies, monitoreo, pedidos, suscripciones, usuarios
+from routers import arboles, especies, monitoreo, pagos, pedidos, suscripciones, usuarios
 from seguridad import peticion_actual, registrar_evento
 
 app = FastAPI(
@@ -99,4 +99,5 @@ app.include_router(arboles.router)
 app.include_router(suscripciones.router)
 app.include_router(usuarios.router)
 app.include_router(pedidos.router)
+app.include_router(pagos.router)
 app.include_router(monitoreo.router)

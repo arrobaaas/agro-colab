@@ -348,6 +348,8 @@ class PedidoRequest(BaseModel):
     frecuencia_entrega: Frecuencia
     tipo: Literal["abastecimiento", "arbol"] = "abastecimiento"
     arbol_id: Optional[int] = None
+    # Plan de abastecimiento: pago aprobado de la pasarela (routers/pagos.py)
+    pago_id: Optional[int] = None
 
 class LogisticaRequest(BaseModel):
     """Datos de despacho que se pueden modificar en un pedido existente."""

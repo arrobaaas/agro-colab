@@ -3206,6 +3206,313 @@ html {
   filter: brightness(1.08);
 }
 
+/* ----- Pasarela de pago simulada (pago.js) ----- */
+.pago-panel {
+  position: relative;
+  display: grid;
+  width: calc(100% - 2rem);
+  max-width: 56rem;
+  max-height: calc(100vh - 2rem);
+  margin: 1rem auto 0;
+  overflow-y: auto;
+  border-radius: 28px;
+  border: 1px solid var(--tc-linea-fuerte);
+  background-color: var(--tc-superficie);
+  color: var(--tc-texto);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8);
+}
+
+@media (min-width: 820px) {
+  .pago-panel {
+    grid-template-columns: 20rem 1fr;
+    margin-top: 6vh;
+  }
+}
+
+/* El resumen es siempre oscuro, como la portada */
+.pago-resumen {
+  --tc-texto: #ffffff;
+  --tc-texto-2: #c8cdca;
+  --tc-texto-3: #8b938f;
+  --tc-linea: rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  background: radial-gradient(120% 80% at 0% 0%, rgba(21, 132, 110, 0.35), transparent 60%), #040806;
+  color: var(--tc-texto);
+}
+
+.pago-resumen__concepto {
+  margin-top: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.pago-resumen__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--tc-linea);
+  color: var(--tc-texto-3);
+  font-size: 0.875rem;
+}
+
+.pago-resumen__total strong {
+  color: var(--tc-texto);
+  font-size: 1.75rem;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.pago-resumen__total small {
+  font-size: 0.8125rem;
+  color: var(--tc-texto-3);
+}
+
+.pago-resumen__seguro {
+  margin-top: auto;
+  padding-top: 2rem;
+  font-size: 0.75rem;
+  color: var(--tc-texto-3);
+}
+
+.pago-resumen__seguro i { margin-right: 0.35rem; color: #34d399; }
+
+@media (max-width: 819px) {
+  .pago-resumen { padding: 1.5rem; }
+  .pago-resumen .tc-etiqueta { margin-top: 1.5rem !important; }
+  .pago-resumen__seguro { padding-top: 1.25rem; }
+}
+
+.pago-cuerpo {
+  position: relative;
+  padding: 2rem;
+}
+
+@media (max-width: 479px) {
+  .pago-cuerpo { padding: 1.5rem 1.25rem; }
+}
+
+.pago-cerrar {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+}
+
+/* Vista previa de la tarjeta */
+.pago-tarjeta {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  aspect-ratio: 1.586;
+  max-width: 21rem;
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.4rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #15846e, #0b3d32 55%, #040806);
+  color: #ffffff;
+  box-shadow: 0 24px 40px -20px rgba(4, 8, 6, 0.8);
+  font-variant-numeric: tabular-nums;
+  transition: background 0.4s ease;
+}
+
+.pago-tarjeta[data-marca="visa"] { background: linear-gradient(135deg, #1f4ea3, #12305f 55%, #070d1c); }
+.pago-tarjeta[data-marca="mastercard"] { background: linear-gradient(135deg, #8a3b12, #3d1c0c 55%, #120804); }
+.pago-tarjeta[data-marca="amex"] { background: linear-gradient(135deg, #2d6f86, #173a47 55%, #071216); }
+
+.pago-tarjeta__fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.pago-tarjeta__chip {
+  width: 2.25rem;
+  height: 1.6rem;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f4d58d, #c9a24a);
+}
+
+.pago-tarjeta__marca {
+  font-size: 1rem;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.pago-tarjeta__numero {
+  font-size: clamp(1.05rem, 4.5vw, 1.35rem);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.pago-tarjeta__titular {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pago-formulario {
+  display: grid;
+  gap: 1rem;
+}
+
+.pago-formulario__fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pago-prueba {
+  padding: 1rem;
+  border-radius: 16px;
+  background-color: var(--tc-superficie-2);
+  border: 1px dashed var(--tc-linea-fuerte);
+  font-size: 0.8125rem;
+  color: var(--tc-texto-2);
+}
+
+.pago-prueba i { margin-right: 0.35rem; color: var(--tc-acento); }
+
+.pago-prueba__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.pago-prueba__chips button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--tc-linea-fuerte);
+  font-size: 0.75rem;
+  color: var(--tc-texto);
+  transition: background-color 0.2s ease;
+}
+
+.pago-prueba__chips button:hover { background-color: var(--tc-superficie); }
+
+.pago-punto {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+}
+
+.pago-punto--ok { background-color: var(--tc-accion); }
+.pago-punto--error { background-color: var(--tc-peligro); }
+
+.pago-pagar {
+  width: 100%;
+  margin-top: 0.5rem;
+  gap: 0.5rem;
+}
+
+/* Procesando, aprobado y rechazado */
+.pago-estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.5rem 0 1rem;
+}
+
+.pago-estado.hidden { display: none; }
+.pago-estado .tc-titulo-sm { margin-top: 1.5rem; }
+.pago-estado .tc-cuerpo-sm { margin-top: 0.5rem; max-width: 24rem; }
+
+.pago-cargando {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 9999px;
+  border: 3px solid var(--tc-linea-fuerte);
+  border-top-color: var(--tc-accion);
+  animation: pago-girar 0.8s linear infinite;
+}
+
+@keyframes pago-girar { to { transform: rotate(360deg); } }
+
+.pago-sello {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 9999px;
+  font-size: 1.5rem;
+  animation: pago-sello 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pago-sello--ok {
+  background-color: var(--tc-accion);
+  color: var(--tc-sobre-accion);
+}
+
+.pago-sello--error {
+  background-color: color-mix(in srgb, var(--tc-peligro) 18%, transparent);
+  color: var(--tc-peligro);
+}
+
+@keyframes pago-sello { from { transform: scale(0.4); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pago-cargando { animation-duration: 2.4s; }
+  .pago-sello { animation: none; }
+}
+
+.pago-comprobante {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem 1.25rem;
+  width: 100%;
+  margin: 1.75rem 0 1rem;
+  padding: 1.25rem;
+  border-radius: 16px;
+  background-color: var(--tc-superficie-2);
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.pago-comprobante dt { color: var(--tc-texto-3); }
+.pago-comprobante dd { overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+
+/* Historial de pagos (panel del comprador) */
+.tc-pagos {
+  display: grid;
+}
+
+.tc-pago {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem 1.5rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--tc-linea);
+}
+
+.tc-pago__concepto { font-size: 0.9375rem; }
+.tc-pago__monto { text-align: right; font-variant-numeric: tabular-nums; }
+.tc-pago__meta { font-size: 0.8125rem; color: var(--tc-texto-3); }
+
+.tc-pago__estado {
+  justify-self: end;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tc-accion);
+}
+
+.tc-pago__estado--rechazado { color: var(--tc-peligro); }
+
 /* ----- Celular ----- */
 /* Ninguna vista puede ensanchar la página: si algo se salía (la barra
    superior, o una tarjeta que espera su animación de entrada), el navegador

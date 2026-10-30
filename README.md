@@ -221,7 +221,8 @@ petición.
 | `POST` | `/api/arboles` 🔒 | Publica un árbol (solo agricultores) |
 | `PUT` | `/api/arboles/{id}` 🔒 | Edita un árbol (solo su productor) |
 | `DELETE` | `/api/arboles/{id}` 🔒 | Elimina un árbol y sus suscripciones (solo su productor) |
-| `POST` | `/api/suscribir` 🔒 | Adopta un árbol reservando un cupo de forma atómica |
+| `POST` | `/api/pagos` 🔒 | Pasarela simulada: valida la tarjeta de prueba y, si se aprueba, adopta el árbol reservando el cupo de forma atómica |
+| `GET` | `/api/pagos` 🔒 | Historial de pagos del comprador (marca y últimos 4 dígitos) |
 | `POST` | `/api/cancelar-suscripcion` 🔒 | Cancela la suscripción propia y libera el cupo |
 | `GET` | `/api/suscripciones/usuario/{id}` 🔒 | Árboles adoptados por el usuario |
 | `GET` | `/api/mis-arboles/{id}/suscriptores` 🔒 | Suscriptores de los árboles del productor |
@@ -329,7 +330,7 @@ consentimiento y el derecho a eliminación.
 - [x] Panel del comprador y panel del agricultor
 - [x] Persistencia con SQLAlchemy y SQLite
 - [x] Autenticación con tokens y autorización por recurso
-- [ ] Pasarela de pago (simulada)
+- [x] Pasarela de pago (simulada)
 - [ ] Migración a PostgreSQL
 - [ ] Envío real del correo de verificación
 - [ ] Fotos propias del productor con flujo de moderación

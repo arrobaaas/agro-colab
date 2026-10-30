@@ -160,6 +160,33 @@ class Pedido(Base):
     cliente = relationship("Usuario", back_populates="pedidos")
 
 
+class Pago(Base):
+    """Pago de la pasarela simulada.
+
+    De la tarjeta solo se guardan la marca y los últimos 4 dígitos: el número
+    completo y el CVV nunca se almacenan ni se registran. arbol_id y pedido_id
+    no son claves foráneas para que el comprobante sobreviva si el agricultor
+    elimina el árbol; concepto guarda el nombre tal como se pagó.
+    """
+    __tablename__ = "pagos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), index=True)
+    tipo = Column(String)  # "arbol" (adopción) o "plan" (abastecimiento)
+    arbol_id = Column(Integer, nullable=True)
+    plan_nombre = Column(String, nullable=True)
+    concepto = Column(String)
+    monto_clp = Column(Integer)
+    estado = Column(String)  # "aprobado" o "rechazado"
+    motivo_rechazo = Column(String, nullable=True)
+    marca = Column(String)
+    ultimos4 = Column(String)
+    codigo_autorizacion = Column(String, nullable=True)
+    transaccion = Column(String, unique=True)
+    pedido_id = Column(Integer, nullable=True)  # plan: pedido que usó el pago
+    fecha = Column(DateTime, default=datetime.utcnow)
+
+
 # ----------------- MIGRACIONES LIGERAS -----------------
 # create_all() no modifica las tablas que ya existen en el archivo SQLite, por eso
 # se comparan los modelos con el esquema real y se completan las columnas faltantes.
@@ -249,4 +276,4 @@ def migrar_cuentas_antiguas():
 
         db.commit()
     finally:
-        db.close()
+        db.close()

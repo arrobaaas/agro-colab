@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from core import PedidoRequest, LogisticaRequest, get_db, usuario_actual
 from seguridad import registrar_evento
-from database import Arbol, Pedido, Suscripcion, Usuario
+from database import Arbol, Pago, Pedido, Suscripcion, Usuario
 
 router = APIRouter()
 
@@ -80,6 +80,20 @@ def registrar_pedido(
         plan_nombre = pedido.plan_nombre
         monto = PLANES_ABASTECIMIENTO[plan_nombre]
 
+        # Un plan solo se registra con un pago aprobado, propio, de ese mismo
+        # plan y que no se haya usado en otro pedido
+        pago = db.query(Pago).filter(
+            Pago.id == pedido.pago_id,
+            Pago.usuario_id == cliente.id,
+            Pago.tipo == "plan",
+            Pago.estado == "aprobado",
+            Pago.plan_nombre == plan_nombre,
+            Pago.pedido_id.is_(None),
+        ).first() if pedido.pago_id else None
+        if not pago:
+            registrar_evento("acceso_denegado", "advertencia", usuario=cliente, detalle=f"plan sin pago válido (pago {pedido.pago_id})")
+            return {"status": "error", "mensaje": "Para contratar el plan primero debes pagarlo."}
+
     # El cliente es el usuario de la sesión, no el id o correo del formulario
     nuevo_pedido = Pedido(
         cliente_id=cliente.id,
@@ -100,6 +114,8 @@ def registrar_pedido(
     # El código sale del id: con count() + 1 se repetía tras borrar pedidos
     # (la columna es única y el insert fallaba con un error 500).
     nuevo_pedido.codigo_seguimiento = f"AGRO-{nuevo_pedido.id:04d}"
+    if pedido.tipo != "arbol":
+        pago.pedido_id = nuevo_pedido.id
     db.commit()
     db.refresh(nuevo_pedido)
 

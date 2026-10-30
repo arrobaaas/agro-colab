@@ -28,30 +28,33 @@ def borrar_despacho_del_arbol(db: Session, usuario_id: int, arbol_id: int):
     ).delete(synchronize_session=False)
 
 
-@router.post("/api/suscribir")
-def suscribir(
-    data: SuscripcionRequest,
-    usuario: Usuario = Depends(usuario_actual),
-    db: Session = Depends(get_db),
-):
-    if usuario.rol != "comprador":
-        registrar_evento("acceso_denegado", "advertencia", usuario=usuario, detalle="adoptar sin ser comprador")
-        return {"status": "error", "mensaje": "Solo los compradores pueden adoptar árboles."}
-
-    arbol = db.query(Arbol).filter(Arbol.id == data.tree_id).first()
-    if not arbol:
-        return {"status": "error", "mensaje": "Árbol no encontrado."}
-
-    # Un mismo usuario no puede ocupar dos cupos del mismo árbol
+def puede_adoptar(db: Session, usuario: Usuario, arbol: Arbol) -> str:
+    """Revisa, antes de cobrar, si el usuario puede adoptar el árbol.
+    Devuelve el motivo si no puede, o cadena vacía."""
     ya_suscrito = db.query(Suscripcion).filter(
         Suscripcion.arbol_id == arbol.id,
         Suscripcion.usuario_id == usuario.id
     ).first()
     if ya_suscrito:
-        return {
-            "status": "error",
-            "mensaje": f"Ya estás suscrito a {arbol.nombre}. No puedes ocupar dos cupos del mismo árbol."
-        }
+        return f"Ya estás suscrito a {arbol.nombre}. No puedes ocupar dos cupos del mismo árbol."
+    if cupos_ocupados_de(arbol, db) >= arbol.cupos_totales:
+        return "Cupos agotados para este árbol."
+    return ""
+
+
+def reservar_cupo(db: Session, usuario: Usuario, arbol: Arbol) -> str:
+    """Crea la suscripción del usuario al árbol, sin confirmar la transacción.
+    Devuelve el motivo si no se pudo (y deshace la transacción), o cadena
+    vacía. Se llama antes de agregar nada más a la sesión.
+
+    La usa la pasarela de pago (routers/pagos.py): el cupo se reserva en la
+    misma transacción que registra el pago aprobado. Antes existía
+    POST /api/suscribir, que adoptaba sin pagar.
+    """
+    # Un mismo usuario no puede ocupar dos cupos del mismo árbol
+    motivo = puede_adoptar(db, usuario, arbol)
+    if motivo.startswith("Ya estás"):
+        return motivo
 
     # Reserva atómica del cupo: el UPDATE condicional bloquea la fila, así dos
     # compras simultáneas no pueden quedarse con el último cupo a la vez.
@@ -63,7 +66,7 @@ def suscribir(
     ).rowcount
     if not reservado:
         db.rollback()
-        return {"status": "error", "mensaje": "Cupos agotados para este árbol."}
+        return "Cupos agotados para este árbol."
 
     try:
         db.add(Suscripcion(usuario_id=usuario.id, arbol_id=arbol.id))
@@ -71,20 +74,11 @@ def suscribir(
     except IntegrityError:
         # Otra petición del mismo usuario se adelantó (índice único)
         db.rollback()
-        return {
-            "status": "error",
-            "mensaje": f"Ya estás suscrito a {arbol.nombre}. No puedes ocupar dos cupos del mismo árbol."
-        }
+        return f"Ya estás suscrito a {arbol.nombre}. No puedes ocupar dos cupos del mismo árbol."
 
     db.refresh(arbol)
     arbol.cupos_ocupados = cupos_ocupados_de(arbol, db)
-    db.commit()
-
-    return {
-        "status": "success",
-        "mensaje": f"¡Suscripción confirmada para {usuario.nombre} en {arbol.nombre}!",
-        "arbol": serializar_arbol(arbol, db)
-    }
+    return ""
 
 
 @router.get("/api/mis-arboles/{productor_id}/suscriptores")
