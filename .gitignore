@@ -5,3 +5,6 @@ __pycache__/
 .DS_Store
 Guion(1).docx
 backend/agrocolab.db
+
+# Ejecutable de Tailwind descargado por scripts/compilar-css.sh
+.tailwind/

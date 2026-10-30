@@ -9,9 +9,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from core import datos_iniciales
+from core import datos_iniciales, ip_cliente
 from database import engine, Base, asegurar_columnas, migrar_cuentas_antiguas
-from routers import arboles, especies, pedidos, suscripciones, usuarios
+from routers import arboles, especies, monitoreo, pedidos, suscripciones, usuarios
+from seguridad import peticion_actual, registrar_evento
 
 app = FastAPI(
     title="Agro-Colab API",
@@ -43,6 +44,10 @@ async def error_de_validacion(request: Request, exc: RequestValidationError):
         mensaje = "La contraseña debe tener al menos 8 caracteres."
     elif tipo == "value_error":
         mensaje = f"Revisa {nombre}: no puede contener los caracteres < o >."
+        # Ningún uso legítimo necesita < o > en estos campos: es casi
+        # siempre un intento de XSS
+        muestra = str(errores[0].get("input", ""))[:120]
+        registrar_evento("entrada_html", "critica", detalle=f"campo {campo}: {muestra}")
     else:
         mensaje = f"Revisa {nombre}: el valor no es válido."
     return JSONResponse(status_code=422, content={"status": "error", "mensaje": mensaje})
@@ -50,6 +55,8 @@ async def error_de_validacion(request: Request, exc: RequestValidationError):
 
 @app.middleware("http")
 async def cabeceras_de_seguridad(request: Request, call_next):
+    # IP real y ruta disponibles para el registro de eventos de esta petición
+    peticion_actual.set({"ip": ip_cliente(request), "ruta": f"{request.method} {request.url.path}"})
     respuesta = await call_next(request)
     respuesta.headers["X-Content-Type-Options"] = "nosniff"
     respuesta.headers["X-Frame-Options"] = "DENY"
@@ -75,7 +82,7 @@ app.add_middleware(
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_headers=["Content-Type", "Authorization", "X-Monitoreo-Token"],
 )
 
 # Crear tablas y datos iniciales
@@ -89,3 +96,4 @@ app.include_router(arboles.router)
 app.include_router(suscripciones.router)
 app.include_router(usuarios.router)
 app.include_router(pedidos.router)
+app.include_router(monitoreo.router)

@@ -1,0 +1,5 @@
+/* Entrada de Tailwind: scripts/compilar-css.sh genera tailwind.css a partir
+   de este archivo y de las clases usadas en el HTML y el JS. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

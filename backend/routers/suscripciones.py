@@ -13,6 +13,7 @@ from core import (
     SuscripcionRequest, cupos_ocupados_de, serializar_arbol,
     get_db, especie_de_arbol, buscar_especie, usuario_actual, exigir_mismo_usuario,
 )
+from seguridad import registrar_evento
 from database import Arbol, Pedido, Suscripcion, Usuario
 
 router = APIRouter()
@@ -34,6 +35,7 @@ def suscribir(
     db: Session = Depends(get_db),
 ):
     if usuario.rol != "comprador":
+        registrar_evento("acceso_denegado", "advertencia", usuario=usuario, detalle="adoptar sin ser comprador")
         return {"status": "error", "mensaje": "Solo los compradores pueden adoptar árboles."}
 
     arbol = db.query(Arbol).filter(Arbol.id == data.tree_id).first()
@@ -196,6 +198,7 @@ def expulsar_suscriptor(
 
     arbol = db.query(Arbol).filter(Arbol.id == suscripcion.arbol_id).first()
     if not arbol or arbol.productor_id != usuario.id:
+        registrar_evento("acceso_denegado", "advertencia", usuario=usuario, detalle=f"expulsar en la suscripción {suscripcion_id}")
         return {"status": "error", "mensaje": "Solo el productor del árbol puede expulsar suscriptores."}
 
     borrar_despacho_del_arbol(db, suscripcion.usuario_id, arbol.id)

@@ -12,6 +12,7 @@ from core import (
     hash_password, verify_password, foto_de, get_db, MODO_DESARROLLO, limitar_por_ip, crear_token, usuario_actual,
     limitar, es_cuenta_demo,
 )
+from seguridad import registrar_evento
 from database import Usuario, Arbol, Suscripcion, Pedido, SessionLocal, es_hash_bcrypt
 
 router = APIRouter()
@@ -77,6 +78,7 @@ def registrar_usuario(data: RegistroRequest, db: Session = Depends(get_db)):
         db.commit()
         return {"status": "error", "mensaje": "No pudimos enviar el correo de verificación. Intenta nuevamente en unos minutos."}
 
+    registrar_evento("registro", "info", usuario=nuevo_usuario, detalle=f"rol {nuevo_usuario.rol}")
     respuesta = {"status": "success", "mensaje": MENSAJE_REGISTRO, "user": {"email": nuevo_usuario.email}}
     # El código solo se devuelve en desarrollo, para probar el flujo sin correo
     if MODO_DESARROLLO:
@@ -111,6 +113,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     ).first()
 
     if not usuario or not verify_password(data.password, usuario.password):
+        registrar_evento("login_fallido", "advertencia", email=data.email, detalle=f"rol {data.rol}")
         return {
             "status": "error",
             "mensaje": "Credenciales inválidas o el rol seleccionado no coincide."
@@ -123,6 +126,8 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(usuario)
         print(f"[migracion] contraseña re-hasheada para {usuario.email}")
+
+    registrar_evento("login_exitoso", "info", usuario=usuario)
 
     usuario_respuesta = {
         "id": usuario.id,
@@ -158,6 +163,7 @@ def verificar_cuenta(data: VerificacionRequest, db: Session = Depends(get_db)):
     if not usuario or usuario.verificado or not usuario.codigo_verificacion or not vigente or not hmac.compare_digest(
         usuario.codigo_verificacion, data.codigo
     ):
+        registrar_evento("verificacion_fallida", "info", email=data.email)
         return {"status": "error", "mensaje": "Código incorrecto o vencido. Puedes pedir uno nuevo."}
 
     usuario.verificado = 1
@@ -194,6 +200,7 @@ def obtener_usuario(
             .first()
         )
         if not es_su_productor:
+            registrar_evento("acceso_denegado", "advertencia", usuario=solicitante, detalle=f"perfil del usuario {usuario_id}")
             return {"status": "error", "mensaje": "No tienes permiso para ver este perfil."}
 
     return {
@@ -218,12 +225,15 @@ def actualizar_perfil(
     # Se edita siempre la cuenta de la sesión. Antes se buscaba por el correo
     # enviado, y cualquiera podía cambiar la contraseña de otra cuenta.
     if data.email != usuario.email:
+        registrar_evento("acceso_denegado", "advertencia", usuario=usuario, detalle=f"editar el perfil de {data.email}")
         return {"status": "error", "mensaje": "Solo puedes editar tu propio perfil."}
     if es_cuenta_demo(usuario):
+        registrar_evento("cuenta_demo", "advertencia", usuario=usuario, detalle="modificar perfil")
         return {"status": "error", "mensaje": "La cuenta de demostración no se puede modificar."}
 
     cambia_password = bool(cambios.get("password"))
     if cambia_password and not (data.password_actual and verify_password(data.password_actual, usuario.password)):
+        registrar_evento("cambio_password_fallido", "advertencia", usuario=usuario, detalle="contraseña actual incorrecta")
         return {"status": "error", "mensaje": "Para cambiar la contraseña ingresa tu contraseña actual."}
 
     # Actualizar campos
@@ -235,6 +245,7 @@ def actualizar_perfil(
         usuario.direccion = cambios["direccion"]
     if cambia_password:
         usuario.password = hash_password(cambios["password"])
+        registrar_evento("cambio_password", "info", usuario=usuario)
 
     db.commit()
     db.refresh(usuario)
@@ -267,8 +278,10 @@ def eliminar_usuario(
     """Derecho a la eliminación de datos (Art. 20 Ley 21.719)"""
     # Solo el titular puede borrar su cuenta
     if email != usuario.email:
+        registrar_evento("acceso_denegado", "advertencia", usuario=usuario, detalle=f"eliminar la cuenta {email}")
         return {"status": "error", "mensaje": "Solo puedes eliminar tu propia cuenta."}
     if es_cuenta_demo(usuario):
+        registrar_evento("cuenta_demo", "advertencia", usuario=usuario, detalle="eliminar cuenta")
         return {"status": "error", "mensaje": "La cuenta de demostración no se puede eliminar."}
 
     # Eliminar suscripciones del usuario y las de sus árboles publicados
@@ -282,6 +295,8 @@ def eliminar_usuario(
 
     # Eliminar árboles publicados por el usuario (si es agricultor)
     db.query(Arbol).filter(Arbol.productor_id == usuario.id).delete()
+
+    registrar_evento("cuenta_eliminada", "info", usuario=usuario)
 
     # Finalmente eliminar el usuario
     db.delete(usuario)

@@ -104,6 +104,25 @@ class Suscripcion(Base):
     usuario = relationship("Usuario", back_populates="suscripciones")
     arbol = relationship("Arbol", back_populates="suscriptores")
 
+class EventoSeguridad(Base):
+    """Registro de eventos de seguridad (auditoría y monitoreo).
+
+    Se conservan 30 días (Ley 21.719: los datos se guardan solo el tiempo
+    necesario para su finalidad, que aquí es detectar ataques).
+    """
+    __tablename__ = "eventos_seguridad"
+
+    id = Column(Integer, primary_key=True)
+    momento = Column(DateTime, default=datetime.utcnow, index=True)
+    tipo = Column(String, index=True)
+    severidad = Column(String)  # "info", "advertencia" o "critica"
+    ip = Column(String, index=True, nullable=True)
+    usuario_id = Column(Integer, nullable=True)
+    email = Column(String, nullable=True)
+    ruta = Column(String, nullable=True)
+    detalle = Column(String, nullable=True)
+
+
 class IntentoAcceso(Base):
     """Intentos registrados por el rate limiting (login, registro, verificación).
 
