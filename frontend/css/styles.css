@@ -1341,20 +1341,37 @@ h1, h2, h3, h4 {
    para la acción, ámbar para las etiquetas y verde profundo de fondo.
    Todo vive bajo .tema-comprador para no afectar al panel del agricultor.
    ===================================================================== */
+/* --luz (0 o 1) la fija efectos.js: arriba todo es oscuro y, al bajar más
+   allá de la portada, la página "se ilumina" hacia la paleta clara con un
+   fundido. Cada color es una mezcla entre su versión oscura y su versión
+   clara. Se anima en el tiempo y no ligado al scroll: con una mezcla
+   continua, a mitad de camino fondo y texto quedaban ambos grises. */
+@property --luz {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+html {
+  transition: --luz 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .tema-comprador {
-  --tc-vacio: #040806;
-  --tc-superficie: #0a110d;
-  --tc-superficie-2: #101a15;
-  --tc-linea: rgba(255, 255, 255, 0.08);
-  --tc-linea-fuerte: rgba(255, 255, 255, 0.14);
-  --tc-texto: #ffffff;
-  --tc-texto-2: #c8cdca;
-  --tc-texto-3: #8b938f;
-  --tc-accion: #34d399;
-  --tc-accion-hover: #6ee7b7;
-  --tc-acento: #fbbf24;
+  --tc-mezcla: calc((1 - var(--luz, 0)) * 100%);
+  --tc-vacio: color-mix(in srgb, #040806 var(--tc-mezcla), #f6f4ee);
+  --tc-superficie: color-mix(in srgb, #0a110d var(--tc-mezcla), #ffffff);
+  --tc-superficie-2: color-mix(in srgb, #101a15 var(--tc-mezcla), #edeae2);
+  --tc-linea: color-mix(in srgb, rgba(255, 255, 255, 0.08) var(--tc-mezcla), rgba(28, 25, 23, 0.1));
+  --tc-linea-fuerte: color-mix(in srgb, rgba(255, 255, 255, 0.14) var(--tc-mezcla), rgba(28, 25, 23, 0.18));
+  --tc-texto: color-mix(in srgb, #ffffff var(--tc-mezcla), #0c1410);
+  --tc-texto-2: color-mix(in srgb, #c8cdca var(--tc-mezcla), #3d4842);
+  --tc-texto-3: color-mix(in srgb, #8b938f var(--tc-mezcla), #67716b);
+  --tc-accion: color-mix(in srgb, #34d399 var(--tc-mezcla), #047857);
+  --tc-accion-hover: color-mix(in srgb, #6ee7b7 var(--tc-mezcla), #065f46);
+  --tc-sobre-accion: color-mix(in srgb, #03140c var(--tc-mezcla), #ffffff);
+  --tc-acento: color-mix(in srgb, #fbbf24 var(--tc-mezcla), #b45309);
   --tc-profundo: #15846e;
-  --tc-peligro: #fca5a5;
+  --tc-peligro: color-mix(in srgb, #fca5a5 var(--tc-mezcla), #b91c1c);
   --tc-fuente: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   background-color: var(--tc-vacio);
@@ -1452,7 +1469,7 @@ h1, h2, h3, h4 {
   padding: 0.9rem 1.5rem;
   border-radius: 9999px;
   background-color: var(--tc-accion);
-  color: #03140c;
+  color: var(--tc-sobre-accion);
   font-size: 0.8125rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -1510,7 +1527,7 @@ h1, h2, h3, h4 {
 
 /* ----- Navegación ----- */
 .tc-nav {
-  background-color: rgba(4, 8, 6, 0.78);
+  background-color: color-mix(in srgb, var(--tc-vacio) 82%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid transparent;
@@ -1576,14 +1593,35 @@ h1, h2, h3, h4 {
 
 .tema-comprador .nav-usuario__avatar {
   background: var(--tc-accion);
-  color: #03140c;
+  color: var(--tc-sobre-accion);
+}
+
+.tema-comprador .nav-icono,
+.tema-comprador .nav-usuario,
+.tema-comprador .nav-usuario .text-white {
+  color: var(--tc-texto);
+}
+
+.tema-comprador .nav-usuario .text-emerald-300 {
+  color: var(--tc-accion);
 }
 
 /* ----- Hero con constelación ----- */
+/* La portada conserva siempre la paleta oscura: es el escenario del árbol */
 .tc-hero {
+  --tc-vacio: #040806;
+  --tc-linea: rgba(255, 255, 255, 0.08);
+  --tc-texto: #ffffff;
+  --tc-texto-2: #c8cdca;
+  --tc-texto-3: #8b938f;
+  --tc-accion: #34d399;
+  --tc-accion-hover: #6ee7b7;
+  --tc-sobre-accion: #03140c;
+  --tc-acento: #fbbf24;
   position: relative;
   overflow: hidden;
   background-color: var(--tc-vacio);
+  color: var(--tc-texto);
 }
 
 .tc-hero > * {
@@ -2122,7 +2160,11 @@ h1, h2, h3, h4 {
 }
 
 /* ----- Footer ----- */
+/* relative + z-index: la portada es sticky y sin esto quedaba pintada
+   encima del footer, tapando Privacidad y Términos */
 .tc-footer {
+  position: relative;
+  z-index: 10;
   border-top: 1px solid var(--tc-linea);
   background-color: var(--tc-vacio);
   color: var(--tc-texto-3);
@@ -2220,7 +2262,7 @@ h1, h2, h3, h4 {
 
 .tema-comprador .btn-suscribir--activo {
   background-color: var(--tc-accion);
-  color: #03140c;
+  color: var(--tc-sobre-accion);
 }
 
 .tema-comprador .btn-suscribir--activo:hover {
