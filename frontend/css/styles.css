@@ -2449,6 +2449,237 @@ html {
 .tema-comprador .campo-ayuda--ok { color: var(--tc-accion); }
 .tema-comprador .campo-ayuda--error { color: var(--tc-peligro); }
 
+/* ----- Celular ----- */
+/* Ninguna vista puede ensanchar la página: si algo se salía (la barra
+   superior, o una tarjeta que espera su animación de entrada), el navegador
+   del celular ampliaba el ancho, todo se veía más grande y al alejar
+   aparecía una franja clara. clip, a diferencia de hidden, no rompe sticky. */
+[data-vista] {
+  overflow-x: clip;
+}
+
+/* Fondo del documento oscuro en las vistas oscuras: al alejar o al
+   arrastrar más allá del borde no debe asomar el fondo claro */
+html:has(body > .tema-comprador[data-vista]:not(.hidden)),
+body:has(> .tema-comprador[data-vista]:not(.hidden)),
+html:has(> body.tema-comprador) {
+  background-color: #040806;
+}
+
+.tc-solo-escritorio {
+  display: none;
+}
+
+@media (min-width: 480px) {
+  .tc-solo-escritorio { display: inline; }
+}
+
+@media (max-width: 479px) {
+  .tc-contenedor { padding: 0 18px; }
+  .tc-nav__enlaces { gap: 0.35rem; }
+}
+
+/* En celular el árbol va arriba del titular, enmarcado, para que se vea al
+   entrar (antes quedaba debajo de todo el texto, fuera de la pantalla) */
+@media (max-width: 899px) {
+  .tc-hero__grid {
+    min-height: auto;
+    gap: 0.25rem;
+    padding-top: 1rem;
+    padding-bottom: 4rem;
+  }
+
+  .tc-hero__visual {
+    order: -1;
+    width: min(100%, 360px);
+  }
+}
+
+/* ----- Perfil (modal) ----- */
+.perfil-panel {
+  position: relative;
+  width: calc(100% - 2rem);
+  max-width: 34rem;
+  max-height: 92vh;
+  margin: 4vh auto 0;
+  overflow-y: auto;
+  border-radius: 24px;
+  background-color: var(--tc-superficie);
+  border: 1px solid var(--tc-linea);
+  color: var(--tc-texto);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8);
+}
+
+.perfil-cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: var(--tc-superficie);
+  border-bottom: 1px solid var(--tc-linea);
+}
+
+.perfil-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  background-color: var(--tc-accion);
+  color: var(--tc-sobre-accion);
+  font-size: 1.375rem;
+  font-weight: 500;
+}
+
+.perfil-identidad {
+  flex: 1;
+  min-width: 0;
+}
+
+.perfil-identidad .tc-titulo-sm {
+  margin-top: 0.3rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perfil-cuerpo {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.perfil-seccion {
+  padding: 1.75rem 0;
+  border-bottom: 1px solid var(--tc-linea);
+}
+
+.perfil-seccion:last-child {
+  border-bottom: 0;
+}
+
+.perfil-campos {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 520px) {
+  .perfil-campos { grid-template-columns: 1fr 1fr; }
+  .perfil-campo--ancho { grid-column: 1 / -1; }
+}
+
+.perfil-campo label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--tc-texto-2);
+}
+
+.perfil-campo .input[readonly] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.perfil-guardar {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.perfil-arboles {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.perfil-arbol {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.perfil-arbol__foto {
+  flex-shrink: 0;
+  width: 3.25rem;
+  height: 3.25rem;
+  overflow: hidden;
+  border-radius: 12px;
+  background-color: var(--tc-superficie-2);
+}
+
+.perfil-arbol__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.perfil-arbol__texto {
+  flex: 1;
+  min-width: 0;
+}
+
+.perfil-arbol__nombre {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perfil-arbol__texto .tc-cuerpo-sm {
+  font-size: 0.8125rem;
+}
+
+.perfil-arbol__precio {
+  flex-shrink: 0;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.perfil-arbol__precio small {
+  margin-left: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--tc-texto-3);
+}
+
+.perfil-enlace {
+  color: var(--tc-accion);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.perfil-peligro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.perfil-peligro__titulo {
+  color: var(--tc-peligro);
+}
+
+.perfil-eliminar {
+  padding: 0.7rem 1.15rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--tc-peligro) 45%, transparent);
+  color: var(--tc-peligro);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: background-color 0.2s ease;
+}
+
+.perfil-eliminar:hover {
+  background-color: color-mix(in srgb, var(--tc-peligro) 12%, transparent);
+}
+
 /* ----- Páginas legales (privacidad y términos) ----- */
 .tc-legal-portada {
   padding-top: 5rem;
