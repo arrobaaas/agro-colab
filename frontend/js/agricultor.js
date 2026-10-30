@@ -37,7 +37,7 @@
             </div>
             <p class="text-lg font-extrabold text-stone-900">Todavía no publicas árboles</p>
             <p class="text-sm text-stone-500 mt-1 max-w-sm mx-auto">Publica tu primer árbol y empieza a recibir financiamiento directo de los compradores.</p>
-            <button type="button" class="btn-hero btn-hero--primario mt-6" onclick="AgroColab.agricultor.mostrarFormulario()">
+            <button type="button" class="btn-hero btn-hero--primario mt-6" data-accion="agricultor.mostrarFormulario">
               <i class="fa-solid fa-plus"></i> Publicar mi primer árbol
             </button>
           </div>`;
@@ -56,7 +56,7 @@
           return `
           <article class="arbol-card" data-reveal="flip" data-tilt style="--reveal-delay:${(indice % 3) * 150}ms">
             <div class="arbol-card__media">
-              <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" loading="lazy" onerror="this.style.display='none'">
+              <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" loading="lazy" data-si-falla="ocultar">
               <span class="arbol-card__plan">${e(arbol.plan)}</span>
               <span class="arbol-card__tipo ${exclusivo ? "arbol-card__tipo--exclusivo" : ""}">
                 <i class="fa-solid ${exclusivo ? "fa-crown" : "fa-users"}"></i> ${e(arbol.tipo_suscripcion || "")}
@@ -92,13 +92,13 @@
               </div>
 
               <div class="mt-auto pt-4 border-t border-stone-100 flex items-center gap-2">
-                <button type="button" class="accion-arbol flex-1" onclick="AgroColab.agricultor.abrirSuscriptores(${e(arbol.id)})">
+                <button type="button" class="accion-arbol flex-1" data-accion="agricultor.abrirSuscriptores" data-args='[${Number(arbol.id)}]'>
                   <i class="fa-solid fa-users"></i> Suscriptores <span class="accion-arbol__contador">${ocupados}</span>
                 </button>
-                <button type="button" class="accion-arbol accion-arbol--icono" onclick="AgroColab.agricultor.abrirEdicion(${e(arbol.id)})" title="Editar" aria-label="Editar ${e(arbol.nombre)}">
+                <button type="button" class="accion-arbol accion-arbol--icono" data-accion="agricultor.abrirEdicion" data-args='[${Number(arbol.id)}]' title="Editar" aria-label="Editar ${e(arbol.nombre)}">
                   <i class="fa-solid fa-pen"></i>
                 </button>
-                <button type="button" class="accion-arbol accion-arbol--icono accion-arbol--peligro" onclick="AgroColab.agricultor.eliminarArbol(${e(arbol.id)})" title="Eliminar" aria-label="Eliminar ${e(arbol.nombre)}">
+                <button type="button" class="accion-arbol accion-arbol--icono accion-arbol--peligro" data-accion="agricultor.eliminarArbol" data-args='[${Number(arbol.id)}]' title="Eliminar" aria-label="Eliminar ${e(arbol.nombre)}">
                   <i class="fa-solid fa-trash"></i>
                 </button>
               </div>
@@ -366,10 +366,10 @@
                 <p class="text-[10px] text-stone-400 mt-1">Suscrito el ${e(s.fecha_suscripcion)}</p>
               </div>
               <div class="flex gap-2">
-                <button type="button" onclick="AgroColab.agricultor.verPerfilUsuario(${e(s.usuario_id)})" class="text-emerald-600 hover:text-emerald-800 text-xs font-bold flex items-center gap-1">
+                <button type="button" data-accion="agricultor.verPerfilUsuario" data-args='[${Number(s.usuario_id)}]' class="text-emerald-600 hover:text-emerald-800 text-xs font-bold flex items-center gap-1">
                   <i class="fa-solid fa-id-card"></i> Ver perfil
                 </button>
-                <button type="button" onclick="AgroColab.agricultor.expulsarSuscriptor(${e(s.suscripcion_id)})" class="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1">
+                <button type="button" data-accion="agricultor.expulsarSuscriptor" data-args='[${Number(s.suscripcion_id)}]' class="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1">
                   <i class="fa-solid fa-user-minus"></i> Expulsar
                 </button>
               </div>

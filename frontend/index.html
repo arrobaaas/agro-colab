@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Content-Security-Policy: solo se cargan recursos de los dominios que la
        app usa. Si se colara un XSS, no podría enviar datos a otro servidor
-       (connect-src / img-src) ni cargar scripts externos. 'unsafe-inline' es
-       necesario por los onclick del HTML y los estilos que genera Tailwind. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://upload.wikimedia.org https://images.unsplash.com; connect-src 'self' http://127.0.0.1:8000 https://agro-colab.onrender.com https://photon.komoot.io; object-src 'none'; base-uri 'self'; form-action 'self'">
+       (connect-src / img-src) ni cargar scripts externos. script-src no
+       permite código inline: los eventos se conectan desde acciones.js, así
+       que un atributo onclick/onerror inyectado no se ejecutaría.
+       'unsafe-inline' queda solo en style-src, por los estilos que genera
+       Tailwind (un estilo no puede ejecutar código). -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://upload.wikimedia.org https://images.unsplash.com; connect-src 'self' http://127.0.0.1:8000 https://agro-colab.onrender.com https://photon.komoot.io; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Agro-Colab | Cosecha Colaborativa</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,21 +20,22 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261030b">
-  <script src="js/config.js?v=20261030b" defer></script>
-  <script src="js/ui.js?v=20261030b" defer></script>
-  <script src="js/api.js?v=20261030b" defer></script>
-  <script src="js/auth.js?v=20261030b" defer></script>
-  <script src="js/parcelas.js?v=20261030b" defer></script>
-  <script src="js/catalogo.js?v=20261030b" defer></script>
-  <script src="js/agricultor.js?v=20261030b" defer></script>
-  <script src="js/perfil.js?v=20261030b" defer></script>
-  <script src="js/autocomplete.js?v=20261030b" defer></script>
-  <script src="js/dashboard.js?v=20261030b" defer></script>
-  <script src="js/efectos.js?v=20261030b" defer></script>
-  <script src="js/views.js?v=20261030b" defer></script>
-  <script src="js/login.js?v=20261030b" defer></script>
-  <script src="js/app.js?v=20261030b" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261030c">
+  <script src="js/config.js?v=20261030c" defer></script>
+  <script src="js/ui.js?v=20261030c" defer></script>
+  <script src="js/api.js?v=20261030c" defer></script>
+  <script src="js/auth.js?v=20261030c" defer></script>
+  <script src="js/parcelas.js?v=20261030c" defer></script>
+  <script src="js/catalogo.js?v=20261030c" defer></script>
+  <script src="js/agricultor.js?v=20261030c" defer></script>
+  <script src="js/perfil.js?v=20261030c" defer></script>
+  <script src="js/autocomplete.js?v=20261030c" defer></script>
+  <script src="js/dashboard.js?v=20261030c" defer></script>
+  <script src="js/efectos.js?v=20261030c" defer></script>
+  <script src="js/views.js?v=20261030c" defer></script>
+  <script src="js/login.js?v=20261030c" defer></script>
+  <script src="js/acciones.js?v=20261030c" defer></script>
+  <script src="js/app.js?v=20261030c" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -88,18 +92,18 @@
             Tipo de Cuenta
           </label>
           <div class="grid grid-cols-2 gap-3 mb-6">
-            <button type="button" id="btn-comprador" class="rol-btn rol-btn--activo" onclick="AgroColab.login.setRol('comprador')">
+            <button type="button" id="btn-comprador" class="rol-btn rol-btn--activo" data-accion="login.setRol" data-args='["comprador"]'>
               <i class="fa-solid fa-basket-shopping text-base"></i>
               <span>Comprador</span>
             </button>
-            <button type="button" id="btn-agricultor" class="rol-btn rol-btn--inactivo" onclick="AgroColab.login.setRol('agricultor')">
+            <button type="button" id="btn-agricultor" class="rol-btn rol-btn--inactivo" data-accion="login.setRol" data-args='["agricultor"]'>
               <i class="fa-solid fa-tractor text-base"></i>
               <span>Agricultor</span>
             </button>
           </div>
 
           <!-- Formulario de Login -->
-          <form id="login-form" class="space-y-4" onsubmit="return false;">
+          <form id="login-form" class="space-y-4" data-sin-envio>
             <div>
               <label for="email" class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
               <div class="relative">
@@ -131,7 +135,7 @@
                   placeholder="••••••••"
                   class="input input-con-icono"
                 >
-                <button type="button" onclick="AgroColab.login.togglePassword('password', this)" class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-600">
+                <button type="button" data-accion="login.togglePassword" data-args='["password", "$el"]' class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-600">
                   <i class="fa-regular fa-eye"></i>
                 </button>
               </div>
@@ -139,11 +143,11 @@
 
             <div id="alert-box" class="hidden"></div>
 
-            <button type="button" class="btn-submit mt-2" onclick="AgroColab.login.iniciarSesion(null)">Acceder al Sistema</button>
+            <button type="button" class="btn-submit mt-2" data-accion="login.iniciarSesion" data-args='[null]'>Acceder al Sistema</button>
           </form>
 
           <!-- Formulario de Registro -->
-          <form id="register-form" class="space-y-4 hidden" onsubmit="return false;">
+          <form id="register-form" class="space-y-4 hidden" data-sin-envio>
             <div>
               <label for="reg-nombre" class="block text-xs font-semibold text-stone-700 mb-1">Nombre completo</label>
               <div class="relative">
@@ -193,7 +197,7 @@
                   placeholder="••••••••"
                   class="input input-con-icono"
                 >
-                <button type="button" onclick="AgroColab.login.togglePassword('reg-password', this)" class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-600">
+                <button type="button" data-accion="login.togglePassword" data-args='["reg-password", "$el"]' class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-600">
                   <i class="fa-regular fa-eye"></i>
                 </button>
               </div>
@@ -285,10 +289,10 @@
           </div>
         </div>
         <nav class="flex items-center gap-1.5 sm:gap-2" aria-label="Navegación principal">
-          <button type="button" class="nav-pill" onclick="AgroColab.views.mostrarVista('dashboard-comprador')">
+          <button type="button" class="nav-pill" data-accion="views.mostrarVista" data-args='["dashboard-comprador"]'>
             <i class="fa-regular fa-chart-bar"></i><span class="hidden sm:inline">Mi panel</span>
           </button>
-          <button type="button" class="nav-icono" onclick="AgroColab.parcelas.abrirCanasta()" title="Mi canasta" aria-label="Mi canasta">
+          <button type="button" class="nav-icono" data-accion="parcelas.abrirCanasta" title="Mi canasta" aria-label="Mi canasta">
             <i class="fa-solid fa-bag-shopping"></i>
             <span id="canasta-contador" class="canasta-contador hidden">0</span>
           </button>
@@ -322,10 +326,10 @@
             de cosecha con entrega programada. Tu pago llega directo al agricultor.
           </p>
           <div class="flex flex-wrap gap-3 mt-8">
-            <button type="button" class="btn-hero btn-hero--primario" onclick="AgroColab.parcelas.establecerLinea('adopcion')">
+            <button type="button" class="btn-hero btn-hero--primario" data-accion="parcelas.establecerLinea" data-args='["adopcion"]'>
               <i class="fa-solid fa-tree"></i> Adoptar un árbol
             </button>
-            <button type="button" class="btn-hero btn-hero--secundario" onclick="AgroColab.parcelas.establecerLinea('abastecimiento')">
+            <button type="button" class="btn-hero btn-hero--secundario" data-accion="parcelas.establecerLinea" data-args='["abastecimiento"]'>
               <i class="fa-solid fa-basket-shopping"></i> Ver canastas
             </button>
           </div>
@@ -682,7 +686,7 @@
               <div class="sm:col-span-2">
                 <label for="dest-direccion" class="block text-xs font-semibold text-stone-700 mb-1">Dirección (Calle, Número, Depto/Oficina)</label>
                 <div class="relative">
-                  <input type="text" id="dest-direccion" required placeholder="Av. Los Aromos 1234" autocomplete="off" class="input" oninput="AgroColab.autocomplete.buscarDireccion(this)">
+                  <input type="text" id="dest-direccion" required placeholder="Av. Los Aromos 1234" autocomplete="off" class="input" data-al-escribir="autocomplete.buscarDireccion">
                   <div id="sugerencias-direccion" class="sugerencias-lista hidden absolute left-0 right-0 z-20"></div>
                 </div>
                 <p class="text-[10px] text-stone-400 mt-1">Empieza a escribir y selecciona una dirección sugerida</p>
@@ -731,9 +735,9 @@
         <div>
           <p class="text-xs font-bold uppercase tracking-wider text-white mb-4">Explorar</p>
           <ul class="space-y-2 text-sm">
-            <li><button type="button" onclick="AgroColab.parcelas.establecerLinea('adopcion')">Adopción de árboles</button></li>
-            <li><button type="button" onclick="AgroColab.parcelas.establecerLinea('abastecimiento')">Canastas de abastecimiento</button></li>
-            <li><button type="button" onclick="AgroColab.views.mostrarVista('dashboard-comprador')">Mi panel</button></li>
+            <li><button type="button" data-accion="parcelas.establecerLinea" data-args='["adopcion"]'>Adopción de árboles</button></li>
+            <li><button type="button" data-accion="parcelas.establecerLinea" data-args='["abastecimiento"]'>Canastas de abastecimiento</button></li>
+            <li><button type="button" data-accion="views.mostrarVista" data-args='["dashboard-comprador"]'>Mi panel</button></li>
           </ul>
         </div>
         <div>
@@ -765,7 +769,7 @@
           </div>
         </div>
         <nav class="flex items-center gap-1.5 sm:gap-2" aria-label="Navegación principal">
-          <button type="button" class="nav-pill" onclick="AgroColab.views.mostrarVista('parcelas')">
+          <button type="button" class="nav-pill" data-accion="views.mostrarVista" data-args='["parcelas"]'>
             <i class="fa-solid fa-arrow-left"></i><span class="hidden sm:inline">Volver al catálogo</span>
           </button>
           <span class="nav-separador"></span>
@@ -943,7 +947,7 @@
               <div>
                 <label for="arbol-ubicacion" class="campo-etiqueta">Ubicación</label>
                 <div class="relative">
-                  <input type="text" id="arbol-ubicacion" required placeholder="Ej: Curicó, Maule" autocomplete="off" class="input" oninput="AgroColab.autocomplete.buscarDireccion(this)">
+                  <input type="text" id="arbol-ubicacion" required placeholder="Ej: Curicó, Maule" autocomplete="off" class="input" data-al-escribir="autocomplete.buscarDireccion">
                   <div id="sugerencias-arbol-ubicacion" class="sugerencias-lista hidden absolute left-0 right-0 z-20"></div>
                 </div>
                 <p class="text-[11px] text-stone-400 mt-1.5">Empieza a escribir y elige el lugar entre las sugerencias.</p>
@@ -1022,7 +1026,7 @@
 
   <!-- MODAL: SUSCRIPTORES DE UN ÁRBOL -->
   <div id="modal-suscriptores" class="modal-animado fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/60" onclick="AgroColab.agricultor.cerrarSuscriptores()"></div>
+    <div class="absolute inset-0 bg-black/60" data-accion="agricultor.cerrarSuscriptores"></div>
     <div class="relative max-w-2xl mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
       <div class="bg-gradient-to-br from-emerald-950 to-emerald-900 text-white p-6 flex justify-between items-start gap-4 sticky top-0 z-10">
         <div>
@@ -1030,7 +1034,7 @@
           <h3 class="text-2xl font-extrabold mt-3">Suscriptores</h3>
           <p class="text-sm text-emerald-200/80" id="suscriptores-arbol-nombre">Árbol</p>
         </div>
-        <button type="button" class="nav-icono" onclick="AgroColab.agricultor.cerrarSuscriptores()" title="Cerrar" aria-label="Cerrar">
+        <button type="button" class="nav-icono" data-accion="agricultor.cerrarSuscriptores" title="Cerrar" aria-label="Cerrar">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -1049,7 +1053,7 @@
 
   <!-- MODAL: VERIFICACIÓN DE CUENTA -->
   <div id="modal-verificacion" class="modal-animado fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/60" onclick="AgroColab.login.cerrarVerificacion()"></div>
+    <div class="absolute inset-0 bg-black/60" data-accion="login.cerrarVerificacion"></div>
     <div class="relative max-w-md mx-auto mt-20 bg-white rounded-3xl shadow-2xl overflow-hidden">
       <div class="bg-emerald-900 text-white p-6 text-center">
         <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -1059,11 +1063,11 @@
         <p class="text-xs text-emerald-200 mt-1">Te enviamos un código de 6 dígitos a tu correo</p>
       </div>
       <div class="p-6">
-        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4 text-center">
-          <p class="text-xs text-emerald-700 mb-1">Código de verificación (simulado):</p>
+        <div id="bloque-codigo-simulado" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4 text-center">
+          <p class="text-xs text-emerald-700 mb-1">Código de verificación (modo desarrollo):</p>
           <p id="codigo-simulado" class="text-2xl font-black text-emerald-900 tracking-widest">------</p>
         </div>
-        <form id="form-verificacion" class="space-y-4" onsubmit="return false;">
+        <form id="form-verificacion" class="space-y-4" data-sin-envio>
           <div>
             <label for="codigo-verificacion" class="block text-xs font-semibold text-stone-700 mb-1">Ingresa el código de 6 dígitos</label>
             <input
@@ -1079,7 +1083,7 @@
           <button type="submit" class="btn-submit w-full">Verificar Cuenta</button>
         </form>
         <div class="mt-4 text-center">
-          <button type="button" onclick="AgroColab.login.reenviarCodigo()" class="text-xs text-emerald-700 hover:text-emerald-900 font-semibold">
+          <button type="button" data-accion="login.reenviarCodigo" class="text-xs text-emerald-700 hover:text-emerald-900 font-semibold">
             Reenviar código
           </button>
         </div>
@@ -1089,7 +1093,7 @@
 
   <!-- MODAL: EDITAR ÁRBOL -->
   <div id="modal-editar-arbol" class="modal-animado fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/60" onclick="AgroColab.agricultor.cerrarEdicion()"></div>
+    <div class="absolute inset-0 bg-black/60" data-accion="agricultor.cerrarEdicion"></div>
     <div class="relative max-w-lg mx-auto mt-[5vh] bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
       <div class="bg-gradient-to-br from-emerald-950 to-emerald-900 text-white p-6 flex justify-between items-start gap-4 sticky top-0 z-10">
         <div>
@@ -1097,7 +1101,7 @@
           <h3 class="text-2xl font-extrabold mt-3">Editar árbol</h3>
           <p class="text-sm text-emerald-200/80">Los cambios se ven de inmediato en el catálogo.</p>
         </div>
-        <button type="button" class="nav-icono" onclick="AgroColab.agricultor.cerrarEdicion()" title="Cerrar" aria-label="Cerrar">
+        <button type="button" class="nav-icono" data-accion="agricultor.cerrarEdicion" title="Cerrar" aria-label="Cerrar">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -1119,7 +1123,7 @@
         <div>
           <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Ubicación</label>
           <div class="relative">
-            <input type="text" id="editar-ubicacion" required autocomplete="off" class="input" oninput="AgroColab.autocomplete.buscarDireccion(this)">
+            <input type="text" id="editar-ubicacion" required autocomplete="off" class="input" data-al-escribir="autocomplete.buscarDireccion">
             <div id="sugerencias-editar-ubicacion" class="sugerencias-lista hidden absolute left-0 right-0 z-20"></div>
           </div>
         </div>
@@ -1163,14 +1167,14 @@
 
   <!-- MODAL: PERFIL DE USUARIO (fuera de las vistas para funcionar en ambas) -->
   <div id="modal-perfil" class="modal-animado fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/60" onclick="AgroColab.perfil.cerrar()"></div>
+    <div class="absolute inset-0 bg-black/60" data-accion="perfil.cerrar"></div>
     <div class="relative max-w-lg mx-auto mt-16 bg-white rounded-3xl shadow-2xl overflow-hidden">
       <div class="bg-emerald-900 text-white p-6 flex justify-between items-center">
         <div>
           <h3 class="text-xl font-black">Mi Perfil</h3>
           <p class="text-xs text-emerald-200">Gestiona tu información personal</p>
         </div>
-        <button type="button" onclick="AgroColab.perfil.cerrar()" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+        <button type="button" data-accion="perfil.cerrar" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
       </div>
       <div class="p-6 max-h-[70vh] overflow-y-auto">
         <div class="flex items-center gap-4 mb-6 pb-6 border-b border-stone-100">
@@ -1221,7 +1225,7 @@
         <!-- Zona de peligro: eliminar cuenta (Ley 21.719) -->
         <div class="pt-5 border-t border-stone-200">
           <p class="text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Zona de peligro</p>
-          <button type="button" onclick="AgroColab.perfil.eliminarCuenta()" class="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 font-bold text-sm py-3 rounded-xl transition flex items-center justify-center gap-2">
+          <button type="button" data-accion="perfil.eliminarCuenta" class="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 font-bold text-sm py-3 rounded-xl transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-trash"></i> Eliminar mi cuenta y todos mis datos
           </button>
           <p class="text-[10px] text-stone-400 text-center mt-2">Esta acción es irreversible. Derechos de eliminación (Ley 21.719, Art. 20).</p>
@@ -1232,11 +1236,11 @@
 
     <!-- MODAL: CONFIRMACION DE ADOPCION DE ARBOL -->
     <div id="modal-confirmacion-adopcion" class="modal-animado fixed inset-0 z-[120] hidden">
-      <div class="absolute inset-0" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()"></div>
+      <div class="absolute inset-0" data-accion="parcelas.cerrarModalConfirmacionArbol"></div>
       <div class="confirmacion-panel" role="dialog" aria-modal="true" aria-labelledby="modal-confirmacion-titulo">
         <div class="confirmacion-media">
-          <img id="confirmacion-imagen" src="" alt="" onerror="this.style.display='none'">
-          <button type="button" class="nav-icono confirmacion-cerrar" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()" title="Cerrar" aria-label="Cerrar">
+          <img id="confirmacion-imagen" src="" alt="" data-si-falla="ocultar">
+          <button type="button" class="nav-icono confirmacion-cerrar" data-accion="parcelas.cerrarModalConfirmacionArbol" title="Cerrar" aria-label="Cerrar">
             <i class="fa-solid fa-xmark"></i>
           </button>
           <div class="confirmacion-media__texto">
@@ -1263,10 +1267,10 @@
           </p>
 
           <div class="mt-6 flex flex-col-reverse sm:flex-row gap-3">
-            <button type="button" class="confirmacion-secundario" onclick="AgroColab.parcelas.cerrarModalConfirmacionArbol()">
+            <button type="button" class="confirmacion-secundario" data-accion="parcelas.cerrarModalConfirmacionArbol">
               Cancelar
             </button>
-            <button type="button" class="btn-hero btn-hero--primario justify-center sm:flex-1" onclick="AgroColab.parcelas.confirmarAdopcion()">
+            <button type="button" class="btn-hero btn-hero--primario justify-center sm:flex-1" data-accion="parcelas.confirmarAdopcion">
               <i class="fa-solid fa-bag-shopping"></i> Agregar a mi canasta
             </button>
           </div>
@@ -1279,7 +1283,7 @@
          vista oculta quedaban invisibles). -->
     <!-- MODAL: CANASTA / MIS COMPRAS -->
     <div id="modal-canasta" class="modal-drawer fixed inset-0 z-[100] hidden">
-      <div class="modal-fondo" onclick="AgroColab.parcelas.cerrarCanasta()"></div>
+      <div class="modal-fondo" data-accion="parcelas.cerrarCanasta"></div>
       <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="canasta-titulo">
         <div class="drawer-cabecera">
           <div class="flex items-center gap-3">
@@ -1289,7 +1293,7 @@
               <p id="canasta-resumen" class="text-xs text-emerald-200/70">Tus árboles y planes</p>
             </div>
           </div>
-          <button type="button" class="nav-icono" onclick="AgroColab.parcelas.cerrarCanasta()" title="Cerrar" aria-label="Cerrar">
+          <button type="button" class="nav-icono" data-accion="parcelas.cerrarCanasta" title="Cerrar" aria-label="Cerrar">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -1302,10 +1306,10 @@
 
     <!-- MODAL: LOGÍSTICA Y DESPACHO (al suscribirse) -->
     <div id="modal-logistica" class="modal-animado fixed inset-0 z-[100] hidden">
-      <div class="absolute inset-0 bg-black/60" onclick="AgroColab.parcelas.cerrarLogistica()"></div>
+      <div class="absolute inset-0 bg-black/60" data-accion="parcelas.cerrarLogistica"></div>
       <div class="relative max-w-2xl mx-auto mt-10 bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         <div class="relative bg-gradient-to-br from-emerald-950 to-emerald-900 text-white p-6">
-          <button type="button" class="nav-icono absolute top-4 right-4" onclick="AgroColab.parcelas.cerrarLogistica()" title="Cerrar" aria-label="Cerrar">
+          <button type="button" class="nav-icono absolute top-4 right-4" data-accion="parcelas.cerrarLogistica" title="Cerrar" aria-label="Cerrar">
             <i class="fa-solid fa-xmark"></i>
           </button>
           <span class="hero__pill"><i class="fa-solid fa-truck-fast"></i> Logística y despacho</span>
@@ -1382,7 +1386,7 @@
               <div class="sm:col-span-2">
                 <label for="modal-dest-direccion" class="block text-xs font-semibold text-stone-700 mb-1">Dirección (Calle, Número, Depto/Oficina)</label>
                 <div class="relative">
-                  <input type="text" id="modal-dest-direccion" required placeholder="Av. Los Aromos 1234" autocomplete="off" class="input" oninput="AgroColab.autocomplete.buscarDireccion(this)">
+                  <input type="text" id="modal-dest-direccion" required placeholder="Av. Los Aromos 1234" autocomplete="off" class="input" data-al-escribir="autocomplete.buscarDireccion">
                   <div id="sugerencias-modal-direccion" class="sugerencias-lista hidden absolute left-0 right-0 z-20"></div>
                 </div>
                 <p class="text-[10px] text-stone-400 mt-1">Empieza a escribir y selecciona una dirección sugerida</p>

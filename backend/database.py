@@ -54,6 +54,7 @@ class Usuario(Base):
     direccion = Column(String, nullable=True)
     verificado = Column(Integer, default=0) # 0 = no verificado, 1 = verificado
     codigo_verificacion = Column(String, nullable=True)
+    codigo_expira = Column(DateTime, nullable=True)  # el código vale 30 minutos
     consentimiento_datos = Column(Integer, default=0) # 0 = no aceptado, 1 = aceptado
     fecha_consentimiento = Column(DateTime, nullable=True)
     acepta_terminos = Column(Integer, default=0) # 0 = no aceptado, 1 = aceptado
@@ -102,6 +103,19 @@ class Suscripcion(Base):
 
     usuario = relationship("Usuario", back_populates="suscripciones")
     arbol = relationship("Arbol", back_populates="suscriptores")
+
+class IntentoAcceso(Base):
+    """Intentos registrados por el rate limiting (login, registro, verificación).
+
+    Se guardan en la base y no en memoria: así sobreviven a un reinicio del
+    proceso y valen para todos los procesos del servidor.
+    """
+    __tablename__ = "intentos_acceso"
+
+    id = Column(Integer, primary_key=True)
+    clave = Column(String, index=True)
+    momento = Column(Float, index=True)  # time.time()
+
 
 class Pedido(Base):
     __tablename__ = "pedidos"

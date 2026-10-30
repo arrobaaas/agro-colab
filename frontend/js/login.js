@@ -126,8 +126,8 @@ class LoginService {
       });
 
       if (data.status === "success") {
+        // Sin guardar sesión: la cuenta aún no está verificada ni tiene token
         this.ui.mostrarAlerta(alerta, "exito", data.mensaje);
-        this.auth.guardarSesion(data.user);
         this.mostrarVerificacion(data.user.email, data.user.codigo_verificacion);
       } else {
         this.ui.mostrarAlerta(alerta, "error", data.mensaje);
@@ -141,7 +141,9 @@ class LoginService {
   mostrarVerificacion(email, codigo) {
     this.emailVerificacion = email;
     this.codigoVerificacion = codigo;
-    document.getElementById("codigo-simulado").textContent = codigo;
+    // El recuadro con el código solo existe en desarrollo (sin correo real)
+    document.getElementById("codigo-simulado").textContent = codigo || "";
+    document.getElementById("bloque-codigo-simulado").classList.toggle("hidden", !codigo);
     document.getElementById("modal-verificacion").classList.remove("hidden");
   }
 
@@ -185,20 +187,16 @@ class LoginService {
 
   async reenviarCodigo() {
     if (!this.emailVerificacion) return;
+    const alerta = document.getElementById("alerta-verificacion");
 
     try {
-      const data = await this.api.registrarUsuario({
-        nombre: "",
-        email: this.emailVerificacion,
-        password: "",
-        rol: "comprador"
-      });
-
-      if (data.status === "error" && data.mensaje.includes("ya está registrado")) {
-        window.alert("El código ha sido reenviado a tu correo (simulado).");
+      const data = await this.api.reenviarCodigo(this.emailVerificacion);
+      this.ui.mostrarAlerta(alerta, data.status === "success" ? "info" : "error", data.mensaje);
+      if (data.codigo_verificacion) {
+        document.getElementById("codigo-simulado").textContent = data.codigo_verificacion;
       }
     } catch (error) {
-      window.alert("Error al reenviar el código.");
+      this.ui.mostrarAlerta(alerta, "error", "No se pudo reenviar el código.");
     }
   }
 

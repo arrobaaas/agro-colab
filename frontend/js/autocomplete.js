@@ -50,7 +50,7 @@ class AutocompleteService {
             type="button"
             class="sugerencia-item"
             data-indice="${indice}"
-            onclick="AgroColab.autocomplete.seleccionarDireccion(${indice}, '${contenedor.id}')"
+            data-accion="autocomplete.seleccionarDireccion" data-args='[${indice}, "${contenedor.id}"]'
           >
             <i class="fa-solid fa-location-dot text-emerald-600 mr-2"></i>
             <span>${window.AgroColab.ui.escapar(this.formatearDireccion(lugar))}</span>

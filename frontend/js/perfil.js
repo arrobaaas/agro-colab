@@ -40,7 +40,7 @@
         contenedor.innerHTML =
           '<p class="text-stone-500 text-xs text-center py-6 bg-stone-50 rounded-xl border border-stone-200">' +
           "Todavía no has adoptado ningún árbol. " +
-          '<a href="#vista-parcelas" onclick="AgroColab.views.mostrarVista(\'parcelas\'); AgroColab.perfil.cerrar(); return false;" class="text-emerald-700 font-bold underline">Ver los árboles disponibles</a>' +
+          '<a href="#vista-parcelas" data-accion="views.mostrarVista:parcelas|perfil.cerrar" class="text-emerald-700 font-bold underline">Ver los árboles disponibles</a>' +
           "</p>";
         return;
       }
@@ -56,7 +56,7 @@
           <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
             <div class="flex items-center gap-3">
               <div class="w-14 h-14 rounded-lg overflow-hidden bg-stone-200 flex-shrink-0">
-                <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" class="w-full h-full object-cover" data-si-falla="ocultar">
               </div>
               <div class="flex-1 min-w-0">
                 <p class="font-bold text-sm text-stone-900 truncate">${e(arbol.nombre)}</p>

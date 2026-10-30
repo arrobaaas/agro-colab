@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="refresh" content="0; url=./frontend/index.html">
+  <!-- Página de redirección: no necesita scripts -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
   <title>Agro-Colab</title>
   <style>
     body {
@@ -19,8 +21,6 @@
 </head>
 <body>
   <p>Redirigiendo a Agro-Colab...</p>
-  <script>
-    window.location.replace("./frontend/index.html");
-  </script>
+  <p><a href="./frontend/index.html">Entrar a Agro-Colab</a></p>
 </body>
 </html>

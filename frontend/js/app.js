@@ -10,6 +10,7 @@ class AppService {
     this.login = window.AgroColab.login;
     this.autocomplete = window.AgroColab.autocomplete;
     this.dashboard = window.AgroColab.dashboard;
+    this.acciones = window.AgroColab.acciones;
     this.efectos = window.AgroColab.efectos;
   }
 
@@ -18,6 +19,7 @@ class AppService {
       /* Cada visita parte en el login: no se reutiliza una sesión guardada
          (por ejemplo, la de una cuenta de demostración que quedó abierta). */
       window.AgroColab.auth.eliminarSesion();
+      this.acciones.init();
 
       this.parcelas.init();
       this.agricultor.init();

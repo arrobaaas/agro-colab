@@ -176,6 +176,12 @@ queda en `http://127.0.0.1:8000/docs`.
 |---|---|---|
 | `AGROCOLAB_SECRET` | En producción | Clave para firmar los tokens de sesión. Si falta, se genera una al arrancar y las sesiones se cierran en cada reinicio. |
 | `AGROCOLAB_MOD_MODE` | No | `desarrollo` devuelve el código de verificación de cuenta en la respuesta, para probar el registro sin correo. Por defecto: `produccion`. |
+| `BREVO_API_KEY` | Para registrar cuentas en producción | Clave de la API de [Brevo](https://www.brevo.com) para enviar el código de verificación por correo (plan gratuito: 300 correos al día). |
+| `CORREO_REMITENTE` | Junto con `BREVO_API_KEY` | Correo verificado en Brevo desde el que se envía el código. |
+
+Sin `BREVO_API_KEY` y `CORREO_REMITENTE`, en producción el registro de cuentas nuevas
+avisa que no está disponible, en lugar de crear cuentas que nadie podría verificar.
+Las cuentas de demostración funcionan siempre.
 
 ---
 
@@ -217,9 +223,11 @@ petición.
 - **Tokens de sesión firmados con HMAC-SHA256**, con expiración de 7 días y ligados a la contraseña: al cambiarla, los tokens anteriores dejan de servir. Cambiar la contraseña exige la actual.
 - **Autorización por recurso:** cada usuario solo ve y modifica lo suyo, y solo el productor ve los datos de contacto de sus suscriptores. Solo los compradores adoptan y contratan planes.
 - **Precios fijados por el servidor:** el monto de un plan o de un árbol nunca se toma del navegador.
-- **Protección contra XSS:** todo dato se escapa antes de insertarse como HTML, el backend rechaza `<` y `>` en los textos y la página declara una **Content-Security-Policy** que limita a qué dominios puede conectarse.
+- **Protección contra XSS en tres capas:** todo dato se escapa antes de insertarse como HTML, el backend rechaza `<` y `>` en los textos y una **Content-Security-Policy estricta** prohíbe el JavaScript en línea (`script-src` sin `'unsafe-inline'`) y las conexiones a dominios ajenos. El HTML no tiene manejadores `onclick`: los eventos se conectan por delegación (`acciones.js`).
+- **Sesión solo en memoria:** el token no se guarda en `localStorage`, y cada visita parte en el login.
 - **Validación estricta de entrada** con Pydantic: largos máximos, valores permitidos (roles, planes, frecuencias) y rangos numéricos.
-- **Rate limiting** por IP real (detrás del proxy de Render) y por cuenta en login y verificación.
+- **Rate limiting** por IP real (detrás del proxy de Render) y por cuenta en login, registro y verificación, guardado en la base de datos para que sobreviva a reinicios.
+- **Verificación de cuenta por correo:** código de 6 dígitos generado con `secrets`, vigente por 30 minutos, con reenvío y sin revelar qué correos están registrados.
 - **Cuentas demo protegidas:** sus credenciales son públicas, así que no se pueden borrar, cambiarles la contraseña ni eliminar sus árboles.
 - **Integridad de cupos:** la reserva se hace con un `UPDATE` condicional atómico, y un índice único impide que un usuario ocupe dos cupos del mismo árbol.
 - **Cabeceras de seguridad** (`nosniff`, `X-Frame-Options`, `Referrer-Policy`, `no-store`) y **CORS** restringido a los orígenes, métodos y cabeceras que usa el frontend.

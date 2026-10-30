@@ -204,7 +204,7 @@
       return `
         <article class="arbol-card group" data-reveal="flip" data-tilt style="--reveal-delay:${(indice % 3) * 150}ms">
           <div class="arbol-card__media">
-            <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" loading="lazy" onerror="this.style.display='none'">
+            <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" loading="lazy" data-si-falla="ocultar">
             <span class="arbol-card__plan">${e(arbol.plan)}</span>
             <span class="arbol-card__tipo ${exclusivo ? "arbol-card__tipo--exclusivo" : ""}">
               <i class="fa-solid ${exclusivo ? "fa-crown" : "fa-users"}"></i> ${e(arbol.tipo_suscripcion || "")}
@@ -516,7 +516,7 @@
             </div>
             <p class="font-extrabold text-stone-900 text-lg">Tu canasta está vacía</p>
             <p class="text-sm text-stone-500 mt-1 max-w-xs mx-auto">Adopta un árbol o elige una canasta de abastecimiento para empezar.</p>
-            <button type="button" class="btn-hero btn-hero--primario mt-6" onclick="AgroColab.parcelas.cerrarCanasta(); AgroColab.parcelas.establecerLinea('adopcion')">
+            <button type="button" class="btn-hero btn-hero--primario mt-6" data-accion="parcelas.cerrarCanasta|parcelas.establecerLinea:adopcion">
               <i class="fa-solid fa-tree"></i> Explorar árboles
             </button>
           </div>`;
@@ -531,13 +531,13 @@
         .map((item, index) => {
           const comprado = item.estado === "comprado";
           const miniatura = item.imagen
-            ? `<img src="${e(item.imagen)}" alt="" class="w-full h-full object-cover" onerror="this.remove()">`
+            ? `<img src="${e(item.imagen)}" alt="" class="w-full h-full object-cover" data-si-falla="quitar">`
             : `<i class="fa-solid ${item.tipo === "plan" ? "fa-basket-shopping" : "fa-tree"}"></i>`;
           const accion = comprado
-            ? `<button type="button" class="canasta-accion canasta-accion--peligro" onclick="AgroColab.parcelas.cancelarCompra(${index})">Cancelar</button>`
-            : `<button type="button" class="canasta-accion" onclick="AgroColab.parcelas.quitarDelCarrito(${index})">Quitar</button>`;
+            ? `<button type="button" class="canasta-accion canasta-accion--peligro" data-accion="parcelas.cancelarCompra" data-args='[${Number(index)}]'>Cancelar</button>`
+            : `<button type="button" class="canasta-accion" data-accion="parcelas.quitarDelCarrito" data-args='[${Number(index)}]'>Quitar</button>`;
           const pagar = !comprado && (item.tipo === "arbol" || item.tipo === "plan")
-            ? `<button type="button" class="btn-suscribir btn-suscribir--activo" onclick="AgroColab.parcelas.pagarSuscripcion(${index})"><i class="fa-solid fa-lock"></i> Pagar</button>`
+            ? `<button type="button" class="btn-suscribir btn-suscribir--activo" data-accion="parcelas.pagarSuscripcion" data-args='[${Number(index)}]'><i class="fa-solid fa-lock"></i> Pagar</button>`
             : "";
 
           return `
@@ -567,7 +567,7 @@
             <p class="text-[11px] uppercase tracking-wider font-bold text-stone-500">Total por pagar</p>
             <p class="text-2xl font-extrabold text-emerald-900 leading-tight">${this.ui.formatearMonto(totalPendiente)} <span class="text-xs font-medium text-stone-500">CLP</span></p>
           </div>
-          <button type="button" class="nav-pill nav-pill--claro" onclick="AgroColab.parcelas.cerrarCanasta()">
+          <button type="button" class="nav-pill nav-pill--claro" data-accion="parcelas.cerrarCanasta">
             Seguir explorando <i class="fa-solid fa-arrow-right"></i>
           </button>
         </div>`;
