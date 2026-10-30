@@ -2801,6 +2801,63 @@ html {
   overflow-wrap: anywhere;
 }
 
+/* ----- Página 404 ----- */
+.error-pagina {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #040806;
+}
+
+.error-pagina__escenario {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.error-pagina__grid {
+  display: grid;
+  gap: 1.5rem;
+  align-items: center;
+  width: 100%;
+  padding-top: 2rem;
+  padding-bottom: 5rem;
+}
+
+@media (min-width: 900px) {
+  .error-pagina__grid {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 3rem;
+  }
+}
+
+/* El número queda detrás del árbol, como una marca de agua */
+.error-pagina__numero {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(7rem, 22vw, 15rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(52, 211, 153, 0.32);
+  user-select: none;
+  pointer-events: none;
+}
+
+.error-pagina__visual canvas {
+  position: relative;
+}
+
+@media (max-width: 899px) {
+  .error-pagina__visual {
+    order: -1;
+    width: min(100%, 260px);
+  }
+}
+
 /* ----- Celular ----- */
 /* Ninguna vista puede ensanchar la página: si algo se salía (la barra
    superior, o una tarjeta que espera su animación de entrada), el navegador
