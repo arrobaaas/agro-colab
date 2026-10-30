@@ -1332,6 +1332,1073 @@ h1, h2, h3, h4 {
   box-shadow: 0 0 0 2px var(--rose-200);
 }
 
+/* =====================================================================
+   TEMA DEL COMPRADOR
+   Inspirado en un sistema de diseño "dark void": lienzo casi negro, sin
+   cajas ni sombras, titulares enormes en peso 400 con tracking negativo,
+   cuerpo liviano, etiquetas en mayúscula con un acento cálido y un único
+   botón relleno por vista. Adaptado a la paleta de Agro-Colab: esmeralda
+   para la acción, ámbar para las etiquetas y verde profundo de fondo.
+   Todo vive bajo .tema-comprador para no afectar al panel del agricultor.
+   ===================================================================== */
+.tema-comprador {
+  --tc-vacio: #040806;
+  --tc-superficie: #0a110d;
+  --tc-superficie-2: #101a15;
+  --tc-linea: rgba(255, 255, 255, 0.08);
+  --tc-linea-fuerte: rgba(255, 255, 255, 0.14);
+  --tc-texto: #ffffff;
+  --tc-texto-2: #c8cdca;
+  --tc-texto-3: #8b938f;
+  --tc-accion: #34d399;
+  --tc-accion-hover: #6ee7b7;
+  --tc-acento: #fbbf24;
+  --tc-profundo: #15846e;
+  --tc-peligro: #fca5a5;
+  --tc-fuente: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  background-color: var(--tc-vacio);
+  color: var(--tc-texto);
+  font-family: var(--tc-fuente);
+  font-feature-settings: "ss01", "cv11";
+}
+
+.tema-comprador h1,
+.tema-comprador h2,
+.tema-comprador h3,
+.tema-comprador h4 {
+  font-family: var(--tc-fuente);
+}
+
+.tc-contenedor {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (min-width: 1024px) {
+  .tc-contenedor {
+    padding: 0 48px;
+  }
+}
+
+/* ----- Tipografía ----- */
+.tc-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tc-acento);
+}
+
+.tc-etiqueta--verde { color: var(--tc-accion); }
+.tc-etiqueta--gris { color: var(--tc-texto-3); }
+
+.tc-display {
+  font-size: clamp(2.75rem, 6vw, 5.75rem);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.tc-titulo {
+  font-size: clamp(2.25rem, 4.6vw, 4rem);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+}
+
+.tc-titulo-sm {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.tc-subtitulo {
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.tc-tenue { color: var(--tc-texto-3); }
+
+.tc-cuerpo {
+  max-width: 34rem;
+  font-size: 1.125rem;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--tc-texto-2);
+}
+
+.tc-cuerpo-sm {
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--tc-texto-3);
+}
+
+/* ----- Acciones ----- */
+.tc-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.5rem;
+  border-radius: 9999px;
+  background-color: var(--tc-accion);
+  color: #03140c;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.tc-boton:hover { background-color: var(--tc-accion-hover); }
+.tc-boton:active { transform: scale(0.98); }
+
+.tc-boton--contorno {
+  padding: 0.7rem 1.15rem;
+  background-color: transparent;
+  color: var(--tc-texto);
+  border: 1px solid var(--tc-linea-fuerte);
+}
+
+.tc-boton--contorno:hover {
+  background-color: transparent;
+  border-color: var(--tc-accion);
+  color: var(--tc-accion);
+}
+
+.tc-boton:disabled,
+.tc-boton[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: var(--tc-linea);
+  color: var(--tc-texto-3);
+}
+
+.tc-enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tc-texto);
+  cursor: pointer;
+  transition: color 0.2s ease, gap 0.2s ease;
+}
+
+.tc-enlace:hover {
+  color: var(--tc-accion);
+  gap: 0.8rem;
+}
+
+.tc-enlace--suave { color: var(--tc-texto-3); }
+.tc-enlace--peligro { color: var(--tc-texto-3); }
+.tc-enlace--peligro:hover { color: var(--tc-peligro); }
+
+/* ----- Navegación ----- */
+.tc-nav {
+  background-color: rgba(4, 8, 6, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid transparent;
+  color: var(--tc-texto);
+}
+
+.tema-comprador header.sticky.header--con-scroll {
+  box-shadow: none;
+  border-bottom-color: var(--tc-linea);
+}
+
+.tc-nav__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: 72px;
+}
+
+.tc-marca {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  gap: 0.7rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--tc-texto);
+}
+
+.tc-marca svg {
+  width: 22px;
+  height: 22px;
+}
+
+.tc-nav__enlaces {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tema-comprador .nav-pill {
+  background: transparent;
+  border-color: transparent;
+  color: var(--tc-texto-3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tema-comprador .nav-pill:hover {
+  background: transparent;
+  border-color: transparent;
+  color: var(--tc-texto);
+}
+
+.tema-comprador .nav-icono,
+.tema-comprador .nav-usuario {
+  background-color: transparent;
+  border-color: var(--tc-linea-fuerte);
+}
+
+.tema-comprador .nav-usuario__avatar {
+  background: var(--tc-accion);
+  color: #03140c;
+}
+
+/* ----- Hero con constelación ----- */
+.tc-hero {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--tc-vacio);
+}
+
+.tc-hero > * {
+  position: relative;
+  z-index: 2;
+}
+
+.tc-hero__grid {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+  min-height: calc(100vh - 72px);
+  padding-top: 3rem;
+  padding-bottom: 6rem;
+}
+
+@media (min-width: 900px) {
+  .tc-hero__grid {
+    grid-template-columns: 1.05fr 1fr;
+    gap: 3rem;
+  }
+}
+
+.tc-hero__visual {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  max-width: 640px;
+  justify-self: center;
+}
+
+.tc-hero__visual canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.tc-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.75rem;
+  margin-top: 2.5rem;
+}
+
+.tc-datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 3rem;
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--tc-linea);
+}
+
+.tc-datos dt {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tc-texto-3);
+}
+
+.tc-datos dd {
+  margin-top: 0.3rem;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--tc-texto);
+}
+
+/* La "hoja" que cubre la portada se funde con el lienzo */
+.tema-comprador .hoja {
+  margin-top: 0;
+  padding-bottom: 0;
+  border-radius: 0;
+  background-color: var(--tc-vacio);
+  box-shadow: none;
+  border-top: 1px solid var(--tc-linea);
+}
+
+/* ----- Secciones ----- */
+.tc-seccion {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
+
+@media (min-width: 1024px) {
+  .tc-seccion {
+    padding-top: 8.5rem;
+    padding-bottom: 8.5rem;
+  }
+}
+
+.tc-seccion + .tc-seccion {
+  border-top: 1px solid var(--tc-linea);
+}
+
+.tc-encabezado {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+@media (min-width: 900px) {
+  .tc-encabezado {
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+    gap: 4rem;
+  }
+}
+
+.tc-encabezado--accion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.tc-dos-columnas {
+  display: grid;
+  gap: 3rem;
+}
+
+@media (min-width: 900px) {
+  .tc-dos-columnas {
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+  }
+}
+
+/* Pasos */
+.tc-pasos {
+  list-style: none;
+  border-top: 1px solid var(--tc-linea);
+}
+
+.tc-pasos li {
+  display: grid;
+  grid-template-columns: 4rem 1fr;
+  gap: 1rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--tc-linea);
+}
+
+.tc-pasos__numero {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--tc-acento);
+  font-variant-numeric: tabular-nums;
+  padding-top: 0.45rem;
+}
+
+/* ----- Planes (adopción y abastecimiento) ----- */
+.tc-planes {
+  display: grid;
+  border-top: 1px solid var(--tc-linea);
+}
+
+@media (min-width: 900px) {
+  .tc-planes {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.tema-comprador .plan-adopcion-card,
+.tema-comprador .tc-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 2.5rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--tc-linea);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--tc-texto);
+  transition: box-shadow 0.3s ease;
+}
+
+@media (min-width: 900px) {
+  .tema-comprador .plan-adopcion-card,
+  .tema-comprador .tc-plan {
+    padding: 2.5rem 2.5rem 2.5rem 0;
+    border-bottom: 0;
+  }
+
+  .tema-comprador .tc-planes > * + * {
+    padding-left: 2.5rem;
+    border-left: 1px solid var(--tc-linea);
+  }
+}
+
+.tema-comprador .plan-adopcion-card:hover {
+  box-shadow: none;
+}
+
+/* Plan que está filtrando el catálogo: una línea esmeralda arriba */
+.tema-comprador .plan-adopcion-card--activo {
+  box-shadow: inset 0 2px 0 var(--tc-accion);
+}
+
+.tema-comprador .plan-adopcion-card--activo .tc-plan__nombre {
+  color: var(--tc-accion);
+}
+
+.tc-plan__nombre {
+  margin-top: 1rem;
+  font-size: 1.6875rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  transition: color 0.2s ease;
+}
+
+.tc-plan__cifra {
+  margin-top: 2rem;
+  font-size: clamp(2.75rem, 4vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+}
+
+.tc-plan__cifra small {
+  margin-left: 0.4rem;
+  font-size: 0.9375rem;
+  font-weight: 300;
+  letter-spacing: 0;
+  color: var(--tc-texto-3);
+}
+
+.tc-plan--destacado .tc-plan__cifra { color: var(--tc-accion); }
+
+.tc-plan__descripcion {
+  margin-top: 1rem;
+  max-width: 22rem;
+}
+
+.tc-lista {
+  list-style: none;
+  margin: 2rem 0 2.5rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.tc-lista li {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 300;
+  color: var(--tc-texto-2);
+}
+
+.tc-lista i {
+  margin-top: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--tc-accion);
+}
+
+.tc-plan .tc-enlace,
+.plan-adopcion-card .tc-enlace {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+/* ----- Catálogo de árboles ----- */
+.tc-arboles {
+  display: grid;
+  gap: 4rem 2rem;
+}
+
+@media (min-width: 640px) {
+  .tc-arboles { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .tc-arboles { grid-template-columns: repeat(3, 1fr); }
+}
+
+.tc-arbol {
+  display: flex;
+  flex-direction: column;
+}
+
+.tc-arbol__foto {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--tc-superficie-2), var(--tc-superficie));
+}
+
+.tc-arbol__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tc-arbol:hover .tc-arbol__foto img {
+  transform: scale(1.05);
+}
+
+.tc-arbol__cuerpo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding-top: 1.5rem;
+}
+
+.tc-arbol__nombre {
+  margin-top: 0.6rem;
+  font-size: 1.6875rem;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.tc-meta {
+  list-style: none;
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 300;
+  color: var(--tc-texto-3);
+}
+
+.tc-meta strong {
+  font-weight: 400;
+  color: var(--tc-texto-2);
+}
+
+.tc-barra {
+  height: 2px;
+  margin-top: 1.5rem;
+  background-color: var(--tc-linea);
+  overflow: hidden;
+}
+
+.tc-barra > div {
+  height: 100%;
+  background-color: var(--tc-accion);
+}
+
+.tc-barra--llena > div { background-color: var(--tc-acento); }
+
+.tc-barra__texto {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.6rem;
+  font-size: 0.75rem;
+  color: var(--tc-texto-3);
+}
+
+.tc-arbol__pie {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1.75rem;
+}
+
+.tc-precio {
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.tc-precio small {
+  margin-left: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 300;
+  letter-spacing: 0;
+  color: var(--tc-texto-3);
+}
+
+/* ----- Panel del comprador ----- */
+.tc-panel-cabecera {
+  padding-top: 6rem;
+  padding-bottom: 4rem;
+}
+
+.tc-panel-seccion {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 3.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--tc-linea);
+}
+
+.tc-contador {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--tc-texto-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.tc-item {
+  display: grid;
+  gap: 2rem;
+  padding: 2.5rem 0;
+  border-bottom: 1px solid var(--tc-linea);
+}
+
+@media (min-width: 900px) {
+  .tc-item {
+    grid-template-columns: 18rem 1fr;
+    gap: 3rem;
+  }
+}
+
+.tc-item__foto {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--tc-superficie-2);
+}
+
+.tc-item__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tc-item__icono {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+  color: var(--tc-accion);
+  font-size: 2rem;
+}
+
+.tc-item__icono span {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--tc-texto-3);
+}
+
+.tc-item__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.tc-item__nombre {
+  margin-top: 0.5rem;
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.tc-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tc-accion);
+}
+
+.tc-estado::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: currentColor;
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.15);
+}
+
+.tc-datos-item {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 2rem;
+  margin-top: 1.75rem;
+}
+
+@media (min-width: 640px) {
+  .tc-datos-item { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.tc-datos-item dt {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tc-texto-3);
+}
+
+.tc-datos-item dd {
+  margin-top: 0.3rem;
+  font-size: 0.9375rem;
+  font-weight: 300;
+  color: var(--tc-texto-2);
+  overflow-wrap: anywhere;
+}
+
+.tc-despacho {
+  margin-top: 1.75rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  background-color: var(--tc-superficie);
+  border: 1px solid var(--tc-linea);
+}
+
+.tc-despacho--vacio {
+  border-style: dashed;
+  background: none;
+}
+
+.tc-item__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 1.75rem;
+}
+
+/* Vista previa del agricultor: la tarjeta del catálogo sobre su lienzo */
+.vista-previa-oscura {
+  padding: 1.5rem;
+  border-radius: 24px;
+}
+
+.tc-vacio {
+  padding: 6rem 0;
+  text-align: center;
+}
+
+/* ----- Footer ----- */
+.tc-footer {
+  border-top: 1px solid var(--tc-linea);
+  background-color: var(--tc-vacio);
+  color: var(--tc-texto-3);
+}
+
+.tc-footer__grid {
+  display: grid;
+  gap: 3rem;
+  padding-top: 5rem;
+  padding-bottom: 4rem;
+}
+
+@media (min-width: 768px) {
+  .tc-footer__grid { grid-template-columns: 2fr 1fr 1fr; }
+}
+
+.tc-footer h4 {
+  margin-bottom: 1.25rem;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tc-texto-3);
+}
+
+.tc-footer ul {
+  list-style: none;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tc-footer a,
+.tc-footer button {
+  font-size: 0.9375rem;
+  font-weight: 300;
+  color: var(--tc-texto-2);
+  transition: color 0.2s ease;
+}
+
+.tc-footer a:hover,
+.tc-footer button:hover {
+  color: var(--tc-texto);
+}
+
+.tc-footer__base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  padding-bottom: 2.5rem;
+  border-top: 1px solid var(--tc-linea);
+  font-size: 0.8125rem;
+}
+
+/* ----- Modales del comprador (canasta, confirmación y logística) -----
+   Traducen a oscuro las utilidades de Tailwind que usan por dentro */
+.tema-comprador .bg-white { background-color: var(--tc-superficie); }
+.tema-comprador .bg-stone-50,
+.tema-comprador .bg-stone-100 { background-color: var(--tc-superficie-2); }
+.tema-comprador .text-stone-900,
+.tema-comprador .text-stone-800 { color: var(--tc-texto); }
+.tema-comprador .text-stone-700,
+.tema-comprador .text-stone-600 { color: var(--tc-texto-2); }
+.tema-comprador .text-stone-500,
+.tema-comprador .text-stone-400 { color: var(--tc-texto-3); }
+.tema-comprador .border-stone-100,
+.tema-comprador .border-stone-200,
+.tema-comprador .border-stone-300 { border-color: var(--tc-linea-fuerte); }
+.tema-comprador .text-emerald-600,
+.tema-comprador .text-emerald-700,
+.tema-comprador .text-emerald-800,
+.tema-comprador .text-emerald-900 { color: var(--tc-accion); }
+.tema-comprador .bg-emerald-50,
+.tema-comprador .bg-emerald-100 { background-color: rgba(52, 211, 153, 0.1); }
+.tema-comprador .text-amber-700,
+.tema-comprador .text-amber-800,
+.tema-comprador .text-amber-900 { color: var(--tc-acento); }
+.tema-comprador .bg-amber-50,
+.tema-comprador .bg-amber-50\/70 { background-color: rgba(251, 191, 36, 0.06); }
+.tema-comprador .border-amber-200 { border-color: rgba(251, 191, 36, 0.25); }
+/* Sin degradados en la interfaz (solo en el logo y la constelación) */
+.tema-comprador .bg-gradient-to-br {
+  background-image: none;
+  background-color: var(--tc-superficie);
+  border-bottom: 1px solid var(--tc-linea);
+}
+
+/* Titulares en peso medio: la jerarquía la da el tamaño, no el grosor */
+.tema-comprador .font-extrabold,
+.tema-comprador .font-black {
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.tema-comprador .btn-suscribir--activo {
+  background-color: var(--tc-accion);
+  color: #03140c;
+}
+
+.tema-comprador .btn-suscribir--activo:hover {
+  background-color: var(--tc-accion-hover);
+}
+
+.tema-comprador .btn-hero--primario {
+  box-shadow: none;
+}
+
+.tema-comprador .logo-marca {
+  background: var(--tc-superficie-2);
+  color: var(--tc-accion);
+  box-shadow: none;
+}
+
+.tema-comprador .shadow-2xl,
+.tema-comprador .shadow-xl { box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8); }
+
+/* La raíz de un modal cubre toda la pantalla: no debe pintar el lienzo */
+.tema-comprador.modal-drawer,
+.tema-comprador.modal-animado {
+  background-color: transparent;
+}
+
+.tema-comprador .modal-fondo,
+.tema-comprador.modal-animado > :first-child {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.tema-comprador .drawer-panel {
+  background-color: var(--tc-superficie);
+  border-left: 1px solid var(--tc-linea);
+  box-shadow: none;
+}
+
+.tema-comprador .drawer-cabecera {
+  background: none;
+  border-bottom: 1px solid var(--tc-linea);
+}
+
+.tema-comprador .drawer-pie {
+  background-color: var(--tc-superficie);
+  border-top-color: var(--tc-linea);
+}
+
+.tema-comprador .canasta-item,
+.tema-comprador .confirmacion-dato {
+  background-color: var(--tc-superficie-2);
+  border-color: var(--tc-linea);
+}
+
+.tema-comprador .canasta-item:hover {
+  border-color: rgba(52, 211, 153, 0.35);
+  box-shadow: none;
+}
+
+.tema-comprador .canasta-item__miniatura {
+  background: var(--tc-superficie);
+  color: var(--tc-accion);
+}
+
+.tema-comprador .canasta-estado {
+  background-color: rgba(251, 191, 36, 0.12);
+  color: var(--tc-acento);
+}
+
+.tema-comprador .canasta-estado--comprado {
+  background-color: rgba(52, 211, 153, 0.12);
+  color: var(--tc-accion);
+}
+
+.tema-comprador .canasta-accion { color: var(--tc-texto-3); }
+.tema-comprador .canasta-accion:hover { color: var(--tc-texto); }
+
+.tema-comprador .confirmacion-panel {
+  background-color: var(--tc-superficie);
+  border: 1px solid var(--tc-linea);
+}
+
+.tema-comprador .confirmacion-precio {
+  background: var(--tc-superficie-2);
+  border-color: var(--tc-linea);
+}
+
+.tema-comprador .confirmacion-secundario {
+  background-color: transparent;
+  border: 1px solid var(--tc-linea-fuerte);
+  color: var(--tc-texto-2);
+}
+
+.tema-comprador .confirmacion-secundario:hover {
+  background-color: transparent;
+  color: var(--tc-texto);
+}
+
+.tema-comprador .eyebrow {
+  background-color: rgba(52, 211, 153, 0.1);
+  color: var(--tc-accion);
+}
+
+.tema-comprador .nav-pill--claro {
+  background-color: transparent;
+  border: 1px solid var(--tc-linea-fuerte);
+  color: var(--tc-texto);
+}
+
+.tema-comprador .input {
+  background-color: var(--tc-superficie-2);
+  border-color: var(--tc-linea-fuerte);
+  color: var(--tc-texto);
+}
+
+.tema-comprador .input::placeholder { color: var(--tc-texto-3); }
+
+.tema-comprador .input:focus {
+  border-color: var(--tc-accion);
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.3);
+}
+
+.tema-comprador .destino-card--inactivo {
+  background-color: var(--tc-superficie-2);
+  border-color: var(--tc-linea-fuerte);
+}
+
+.tema-comprador .destino-card--activo-particular {
+  background-color: rgba(52, 211, 153, 0.08);
+  border-color: var(--tc-accion);
+}
+
+.tema-comprador .destino-card--activo-comercial {
+  background-color: rgba(251, 191, 36, 0.08);
+  border-color: var(--tc-acento);
+}
+
+.tema-comprador .alerta--exito,
+.tema-comprador .alerta--exito-lg {
+  background-color: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.3);
+  color: var(--tc-accion-hover);
+}
+
+.tema-comprador .alerta--error,
+.tema-comprador .alerta--error-lg {
+  background-color: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: var(--tc-peligro);
+}
+
+.tema-comprador .alerta--info,
+.tema-comprador .alerta--info-lg {
+  background-color: var(--tc-superficie-2);
+  border-color: var(--tc-linea-fuerte);
+  color: var(--tc-texto-2);
+}
+
+.tema-comprador .sugerencias-lista {
+  background-color: var(--tc-superficie-2);
+  border-color: var(--tc-linea-fuerte);
+}
+
+.tema-comprador .sugerencia-item {
+  color: var(--tc-texto-2);
+  border-bottom-color: var(--tc-linea);
+}
+
+.tema-comprador .sugerencia-item:hover {
+  background-color: rgba(52, 211, 153, 0.08);
+}
+
+.tema-comprador .campo-unidad span {
+  border-left-color: var(--tc-linea-fuerte);
+  color: var(--tc-accion);
+}
+
+.tema-comprador .campo-ayuda--ok { color: var(--tc-accion); }
+.tema-comprador .campo-ayuda--error { color: var(--tc-peligro); }
+
 /* ---------- Animaciones (efectos.js) ---------- */
 html {
   scroll-behavior: smooth;
@@ -1514,13 +2581,6 @@ header.sticky.header--con-scroll {
 .hero__contenido > div > :nth-child(4) { animation-delay: 0.3s; }
 .hero__contenido > div > :nth-child(5) { animation-delay: 0.4s; }
 
-/* Tarjetas del panel del comprador: entran en cascada */
-#dashboard-comprador > article {
-  animation: subir-aparecer 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-}
-
-#dashboard-comprador > article:nth-child(2) { animation-delay: 0.08s; }
-#dashboard-comprador > article:nth-child(3) { animation-delay: 0.16s; }
 
 /* ----- Apertura y cierre de modales ----- */
 @keyframes fondo-aparecer {

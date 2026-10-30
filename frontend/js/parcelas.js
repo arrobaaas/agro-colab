@@ -206,43 +206,28 @@
          devolvía solo el innerHTML: se perdía el envoltorio y la foto y los
          datos quedaban como celdas sueltas de la grilla. */
       return `
-        <article class="arbol-card group" data-reveal="flip" data-tilt style="--reveal-delay:${(indice % 3) * 150}ms">
-          <div class="arbol-card__media">
+        <article class="tc-arbol" data-reveal="flip" style="--reveal-delay:${(indice % 3) * 150}ms">
+          <div class="tc-arbol__foto">
             <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" loading="lazy" data-si-falla="ocultar">
-            <span class="arbol-card__plan">${e(arbol.plan)}</span>
-            <span class="arbol-card__tipo ${exclusivo ? "arbol-card__tipo--exclusivo" : ""}">
-              <i class="fa-solid ${exclusivo ? "fa-crown" : "fa-users"}"></i> ${e(arbol.tipo_suscripcion || "")}
-            </span>
-            <div class="arbol-card__titulo">
-              ${arbol.especie_nombre ? `<p class="arbol-card__especie">${e(arbol.especie_nombre)}</p>` : ""}
-              <h4>${e(arbol.nombre)}</h4>
-            </div>
           </div>
-
-          <div class="p-5 flex flex-col gap-4 flex-1">
-            <ul class="space-y-1.5 text-xs text-stone-600">
-              <li class="flex items-center gap-2 truncate"><i class="fa-solid fa-location-dot text-rose-500 w-4 text-center"></i> ${e(arbol.ubicacion)}</li>
-              <li class="flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-emerald-600 w-4 text-center"></i> Cosecha estimada: <strong class="text-stone-800">${e(arbol.estimacion_cosecha)}</strong></li>
-              ${arbol.productor ? `<li class="flex items-center gap-2 truncate"><i class="fa-solid fa-tractor text-amber-600 w-4 text-center"></i> ${e(arbol.productor)}</li>` : ""}
+          <div class="tc-arbol__cuerpo">
+            <p class="tc-etiqueta tc-etiqueta--verde">
+              ${e(arbol.especie_nombre || "Árbol frutal")} · Plan ${e(arbol.plan)}${exclusivo ? " · Exclusivo" : ""}
+            </p>
+            <h3 class="tc-arbol__nombre">${e(arbol.nombre)}</h3>
+            <ul class="tc-meta">
+              <li>${e(arbol.ubicacion)}</li>
+              <li>Cosecha estimada <strong>${e(arbol.estimacion_cosecha)}</strong></li>
+              ${arbol.productor ? `<li>Productor <strong>${e(arbol.productor)}</strong></li>` : ""}
             </ul>
 
-            <div>
-              <div class="flex justify-between text-[11px] mb-1.5">
-                <span class="${disponible ? "text-stone-500" : "text-rose-600 font-bold"}">${textoCupos}</span>
-                <span class="font-bold text-stone-700">${porcentaje}% adoptado</span>
-              </div>
-              <div class="h-1.5 rounded-full bg-stone-100 overflow-hidden">
-                <div class="h-full rounded-full ${disponible ? "bg-emerald-500" : "bg-rose-400"}" style="width: ${porcentaje}%"></div>
-              </div>
-            </div>
+            <div class="tc-barra ${disponible ? "" : "tc-barra--llena"}"><div style="width:${porcentaje}%"></div></div>
+            <p class="tc-barra__texto"><span>${e(textoCupos)}</span><span>${porcentaje}% adoptado</span></p>
 
-            <div class="mt-auto pt-4 border-t border-stone-100 flex items-center justify-between gap-3">
-              <div>
-                <p class="text-xl font-black text-emerald-900 leading-none">${this.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
-                <p class="text-[10px] text-stone-500 mt-1">CLP por mes</p>
-              </div>
-              <button type="button" class="btn-suscribir ${disponible ? "btn-suscribir--activo" : "btn-suscribir--bloqueado"}" data-suscribir-id="${e(arbol.id)}" ${disponible ? "" : "disabled"}>
-                <i class="fa-solid ${disponible ? "fa-cart-plus" : "fa-lock"}"></i> ${disponible ? "Adoptar" : "Completo"}
+            <div class="tc-arbol__pie">
+              <p class="tc-precio">${this.ui.formatearMonto(arbol.precio_mensual_clp)}<small>CLP / mes</small></p>
+              <button type="button" class="tc-boton tc-boton--contorno" data-suscribir-id="${Number(arbol.id)}" ${disponible ? "" : "disabled"}>
+                ${disponible ? "Adoptar" : "Completo"}
               </button>
             </div>
           </div>
