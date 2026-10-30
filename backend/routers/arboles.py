@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from core import (
     ArbolRequest, validar_imagen, buscar_especie, componer_nombre,
     normalizar_identificador, serializar_arbol, cupos_ocupados_de, get_db,
-    usuario_actual,
+    usuario_actual, es_cuenta_demo,
 )
 from database import Arbol, Pedido, Suscripcion, Usuario
 
@@ -133,6 +133,10 @@ def eliminar_arbol(
     arbol, error = _arbol_propio(db, arbol_id, usuario)
     if error:
         return error
+    # Las credenciales demo son públicas: borrar los árboles dejaría la demo
+    # vacía para todos
+    if es_cuenta_demo(usuario):
+        return {"status": "error", "mensaje": "La cuenta de demostración no puede eliminar árboles."}
 
     # Sin esto las suscripciones y sus despachos quedaban apuntando a un
     # árbol inexistente

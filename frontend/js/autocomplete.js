@@ -41,6 +41,8 @@ class AutocompleteService {
       return;
     }
 
+    /* Los nombres vienen de OpenStreetMap, que cualquiera puede editar: se
+       escapan para que no se pueda inyectar HTML a través de una dirección. */
     contenedor.innerHTML = lugares
       .map((lugar, indice) => {
         return `
@@ -51,7 +53,7 @@ class AutocompleteService {
             onclick="AgroColab.autocomplete.seleccionarDireccion(${indice}, '${contenedor.id}')"
           >
             <i class="fa-solid fa-location-dot text-emerald-600 mr-2"></i>
-            <span>${this.formatearDireccion(lugar)}</span>
+            <span>${window.AgroColab.ui.escapar(this.formatearDireccion(lugar))}</span>
           </button>
         `;
       })

@@ -3,12 +3,13 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from datetime import datetime
-import random
-import string
+import hmac
+import secrets
 
 from core import (
     LoginRequest, RegistroRequest, VerificacionRequest, PerfilRequest,
     hash_password, verify_password, foto_de, get_db, MODO_DESARROLLO, limitar_por_ip, crear_token, usuario_actual,
+    limitar, es_cuenta_demo,
 )
 from database import Usuario, Arbol, Suscripcion, Pedido, SessionLocal, es_hash_bcrypt
 
@@ -23,7 +24,8 @@ def registrar_usuario(data: RegistroRequest, db: Session = Depends(get_db)):
         return {"status": "error", "mensaje": "El correo electrónico ya está registrado."}
 
     # Generar código de verificación de 6 dígitos
-    codigo = ''.join(random.choices(string.digits, k=6))
+    # secrets y no random: random es predecible y no sirve para códigos
+    codigo = f"{secrets.randbelow(1_000_000):06d}"
 
     nuevo_usuario = Usuario(
         nombre=data.nombre,
@@ -68,6 +70,10 @@ def registrar_usuario(data: RegistroRequest, db: Session = Depends(get_db)):
 
 @router.post("/api/login", dependencies=[Depends(limitar_por_ip(maximo=8, ventana_segundos=300))])
 def login(data: LoginRequest, db: Session = Depends(get_db)):
+    # Además del límite por IP, un límite por cuenta frena la fuerza bruta
+    # repartida entre muchas IPs contra un mismo correo
+    limitar(f"login:{data.email.lower()}", maximo=10, ventana_segundos=900)
+
     usuario = db.query(Usuario).filter(
         Usuario.email == data.email,
         Usuario.rol == data.rol
@@ -100,7 +106,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
         usuario_respuesta["codigo_verificacion"] = usuario.codigo_verificacion
     # Solo una cuenta verificada recibe token para operar con la API
     if usuario.verificado:
-        usuario_respuesta["token"] = crear_token(usuario.id)
+        usuario_respuesta["token"] = crear_token(usuario)
 
     return {
         "status": "success",
@@ -111,15 +117,16 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
 @router.post("/api/verificar-cuenta", dependencies=[Depends(limitar_por_ip(maximo=10, ventana_segundos=3600))])
 def verificar_cuenta(data: VerificacionRequest, db: Session = Depends(get_db)):
+    # Un código de 6 dígitos se adivinaría por fuerza bruta sin un límite por cuenta
+    limitar(f"verificar:{data.email.lower()}", maximo=5, ventana_segundos=3600)
+
     usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
-    if not usuario:
-        return {"status": "error", "mensaje": "Usuario no encontrado."}
-
-    if usuario.verificado:
-        return {"status": "error", "mensaje": "La cuenta ya está verificada."}
-
-    if usuario.codigo_verificacion != data.codigo:
-        return {"status": "error", "mensaje": "Código de verificación incorrecto."}
+    # Mismo mensaje para cuenta inexistente o código incorrecto: no revela
+    # qué correos están registrados
+    if not usuario or usuario.verificado or not usuario.codigo_verificacion or not hmac.compare_digest(
+        usuario.codigo_verificacion, data.codigo
+    ):
+        return {"status": "error", "mensaje": "Código de verificación incorrecto o cuenta ya verificada."}
 
     usuario.verificado = 1
     usuario.codigo_verificacion = None
@@ -179,6 +186,12 @@ def actualizar_perfil(
     # enviado, y cualquiera podía cambiar la contraseña de otra cuenta.
     if data.email != usuario.email:
         return {"status": "error", "mensaje": "Solo puedes editar tu propio perfil."}
+    if es_cuenta_demo(usuario):
+        return {"status": "error", "mensaje": "La cuenta de demostración no se puede modificar."}
+
+    cambia_password = bool(cambios.get("password"))
+    if cambia_password and not (data.password_actual and verify_password(data.password_actual, usuario.password)):
+        return {"status": "error", "mensaje": "Para cambiar la contraseña ingresa tu contraseña actual."}
 
     # Actualizar campos
     if "nombre" in cambios:
@@ -187,23 +200,28 @@ def actualizar_perfil(
         usuario.telefono = cambios["telefono"]
     if "direccion" in cambios:
         usuario.direccion = cambios["direccion"]
-    if "password" in cambios and cambios["password"]:
+    if cambia_password:
         usuario.password = hash_password(cambios["password"])
 
     db.commit()
     db.refresh(usuario)
 
+    respuesta_usuario = {
+        "id": usuario.id,
+        "nombre": usuario.nombre,
+        "email": usuario.email,
+        "rol": usuario.rol,
+        "telefono": usuario.telefono,
+        "direccion": usuario.direccion
+    }
+    # Cambiar la contraseña invalida los tokens anteriores: se entrega uno nuevo
+    if cambia_password:
+        respuesta_usuario["token"] = crear_token(usuario)
+
     return {
         "status": "success",
         "mensaje": "Perfil actualizado correctamente.",
-        "user": {
-            "id": usuario.id,
-            "nombre": usuario.nombre,
-            "email": usuario.email,
-            "rol": usuario.rol,
-            "telefono": usuario.telefono,
-            "direccion": usuario.direccion
-        }
+        "user": respuesta_usuario
     }
 
 
@@ -217,6 +235,8 @@ def eliminar_usuario(
     # Solo el titular puede borrar su cuenta
     if email != usuario.email:
         return {"status": "error", "mensaje": "Solo puedes eliminar tu propia cuenta."}
+    if es_cuenta_demo(usuario):
+        return {"status": "error", "mensaje": "La cuenta de demostración no se puede eliminar."}
 
     # Eliminar suscripciones del usuario y las de sus árboles publicados
     db.query(Suscripcion).filter(Suscripcion.usuario_id == usuario.id).delete()

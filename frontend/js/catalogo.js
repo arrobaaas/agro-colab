@@ -105,7 +105,7 @@ class CatalogoService {
       }
 
       boton.innerHTML =
-        '<img src="' + foto.url + '" alt="' + foto.titulo + '" loading="lazy" class="w-full h-full object-cover">';
+        '<img src="' + window.AgroColab.ui.escapar(foto.url) + '" alt="' + window.AgroColab.ui.escapar(foto.titulo) + '" loading="lazy" class="w-full h-full object-cover">';
 
       boton.addEventListener("click", () => {
         contenedor.querySelectorAll(".foto-opcion").forEach((otra) => {
@@ -131,8 +131,8 @@ class CatalogoService {
 
     contenedor.innerHTML =
       '<i class="fa-solid fa-camera text-stone-400 mr-1"></i>' +
-      "Foto: " + foto.autor + " · " + foto.licencia + " · " +
-      '<a href="' + foto.fuente + '" target="_blank" rel="noopener" class="underline hover:text-emerald-700">Wikimedia Commons</a>';
+      "Foto: " + window.AgroColab.ui.escapar(foto.autor) + " · " + window.AgroColab.ui.escapar(foto.licencia) + " · " +
+      '<a href="' + window.AgroColab.ui.escapar(foto.fuente) + '" target="_blank" rel="noopener" class="underline hover:text-emerald-700">Wikimedia Commons</a>';
   }
 }
 

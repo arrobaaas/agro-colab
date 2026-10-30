@@ -5,7 +5,7 @@ modelos Pydantic de entrada y las funciones de negocio/serialización que
 eran compartidas dentro de la aplicacion FastAPI.
 """
 
-from typing import Optional
+from typing import Annotated, Literal, Optional
 from datetime import datetime
 
 import os
@@ -17,12 +17,13 @@ from collections import defaultdict
 
 from fastapi import Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import AfterValidator, BaseModel, Field, StringConstraints
 from sqlalchemy.orm import Session
 
 from database import (
     engine, SessionLocal, Base, Usuario, Arbol, Suscripcion, Pedido,
     hash_password, verify_password, asegurar_columnas, migrar_cuentas_antiguas,
+    CUENTAS_DEMO,
 )
 from catalogo import (
     CATALOGO_ESPECIES, listar_especies, buscar_especie, fotos_permitidas,
@@ -37,25 +38,49 @@ from catalogo import (
 # En producción jamás se debe exponer el código de verificación.
 MODO_DESARROLLO = os.getenv("AGROCOLAB_MOD_MODE", "produccion").lower() == "desarrollo"
 
-_intentos_por_ip: dict = defaultdict(list)
+_intentos: dict = defaultdict(list)
 
-def _limitar_intento(ip: str, maximo: int, ventana_segundos: int) -> bool:
-    """Registra un intento fallido-ish de autenticación y decide si se permite.
-    Es un contador simple en memoria por IP (suficiente para este proyecto)."""
+def _limitar_intento(clave: str, maximo: int, ventana_segundos: int) -> bool:
+    """Registra un intento y decide si se permite. Contador simple en memoria
+    (suficiente para este proyecto); la clave puede ser una IP o una cuenta."""
     ahora = time.monotonic()
-    ventana = [t for t in _intentos_por_ip.get(ip, []) if ahora - t < ventana_segundos]
+    ventana = [t for t in _intentos.get(clave, []) if ahora - t < ventana_segundos]
     if len(ventana) >= maximo:
+        _intentos[clave] = ventana
         return False
-    _intentos_por_ip[ip] = ventana + [ahora]
+    _intentos[clave] = ventana + [ahora]
     return True
 
+
+def ip_cliente(request: Request) -> str:
+    """IP real del cliente.
+
+    En Render la petición llega a través de un proxy: request.client.host es
+    la IP del proxy y todos los usuarios compartían el mismo contador (bastaba
+    un atacante para bloquear el login de todos). El proxy agrega la IP real
+    al final de X-Forwarded-For; los valores anteriores los puede inventar el
+    cliente, por eso se toma el último.
+    """
+    reenviada = request.headers.get("X-Forwarded-For", "")
+    if reenviada:
+        return reenviada.split(",")[-1].strip()
+    return request.client.host if request.client else "0.0.0.0"
+
+
+def demasiados_intentos():
+    return HTTPException(status_code=429, detail={"status": "error", "mensaje": "Demasiados intentos. Intenta más tarde."})
+
+
+def limitar(clave: str, maximo: int, ventana_segundos: int):
+    """Corta la petición si la clave superó el máximo de intentos."""
+    if not _limitar_intento(clave, maximo, ventana_segundos):
+        raise demasiados_intentos()
+
+
 def limitar_por_ip(maximo: int = 10, ventana_segundos: int = 300):
-    """Dependencia de FastAPI que aplica rate limiting a una ruta."""
+    """Dependencia de FastAPI que aplica rate limiting por IP a una ruta."""
     def _limiter(request: Request):
-        ip = request.client.host if request.client else "0.0.0.0"
-        if not _limitar_intento(ip, maximo, ventana_segundos):
-            raise HTTPException(status_code=429, detail={"status": "error", "mensaje": "Demasiados intentos. Intenta más tarde."})
-        return None
+        limitar(f"ip:{ip_cliente(request)}:{request.url.path}", maximo, ventana_segundos)
     return _limiter
 
 
@@ -71,20 +96,19 @@ DURACION_TOKEN_SEGUNDOS = 7 * 24 * 3600
 def _firmar(carga: str) -> str:
     return hmac.new(SECRETO_TOKENS.encode(), carga.encode(), hashlib.sha256).hexdigest()
 
-def crear_token(usuario_id: int) -> str:
+def crear_token(usuario) -> str:
+    """Token firmado que incluye el hash de la contraseña del usuario: al
+    cambiarla, todos los tokens anteriores dejan de servir."""
     expira = int(time.time()) + DURACION_TOKEN_SEGUNDOS
-    carga = f"{usuario_id}.{expira}"
-    return f"{carga}.{_firmar(carga)}"
+    carga = f"{usuario.id}.{expira}"
+    return f"{carga}.{_firmar(f'{carga}.{usuario.password}')}"
 
-def leer_token(token: str) -> Optional[int]:
-    """Devuelve el id del usuario si el token es válido y no ha expirado."""
+
+def _partes_token(token: str):
+    """Devuelve (usuario_id, expira, firma) o None si el formato no sirve."""
     try:
         usuario_id, expira, firma = token.split(".")
-        if not hmac.compare_digest(firma, _firmar(f"{usuario_id}.{expira}")):
-            return None
-        if int(expira) < time.time():
-            return None
-        return int(usuario_id)
+        return int(usuario_id), int(expira), firma
     except (ValueError, AttributeError):
         return None
 
@@ -106,12 +130,23 @@ def get_db():
 def usuario_actual(request: Request, db: Session = Depends(get_db)) -> Usuario:
     """Dependencia de FastAPI: usuario autenticado según el header Authorization."""
     cabecera = request.headers.get("Authorization", "")
-    token = cabecera[7:] if cabecera.startswith("Bearer ") else ""
-    usuario_id = leer_token(token) if token else None
-    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first() if usuario_id else None
+    partes = _partes_token(cabecera[7:]) if cabecera.startswith("Bearer ") else None
+    usuario = None
+    if partes and partes[1] >= time.time():
+        usuario_id, expira, firma = partes
+        candidato = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+        esperada = _firmar(f"{usuario_id}.{expira}.{candidato.password}") if candidato else ""
+        if candidato and hmac.compare_digest(firma, esperada):
+            usuario = candidato
     if not usuario:
         raise _no_autorizado("Tu sesión expiró. Inicia sesión nuevamente.")
     return usuario
+
+
+def es_cuenta_demo(usuario: Usuario) -> bool:
+    """Las credenciales demo están publicadas en el README: cualquiera puede
+    usarlas, así que no se permite que las dañen para los demás."""
+    return usuario.email in CUENTAS_DEMO
 
 
 def exigir_mismo_usuario(usuario: Usuario, usuario_id: int):
@@ -203,71 +238,102 @@ def datos_iniciales():
 
 # ----------------- MODELOS DE DATOS (ESQUEMAS) -----------------
 
+def _sin_html(valor):
+    """Defensa en profundidad contra XSS: ningún texto de usuario necesita < o >."""
+    if valor is not None and ("<" in valor or ">" in valor):
+        raise ValueError("no puede contener los caracteres < o >")
+    return valor
+
+
+def Texto(maximo: int, minimo: int = 1):
+    """Texto libre: sin espacios sobrantes, con largo acotado y sin HTML."""
+    return Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, min_length=minimo, max_length=maximo),
+        AfterValidator(_sin_html),
+    ]
+
+
+Correo = Annotated[str, StringConstraints(
+    strip_whitespace=True, max_length=120, pattern=r"^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$"
+)]
+Contrasena = Annotated[str, StringConstraints(min_length=8, max_length=128)]
+Rol = Literal["comprador", "agricultor"]
+TipoDestino = Literal["particular", "comercial"]
+Frecuencia = Literal["semanal", "quincenal", "mensual"]
+
+
 class SuscripcionRequest(BaseModel):
     # El usuario sale del token de sesión; el cuerpo solo indica el árbol
-    tree_id: int
+    tree_id: int = Field(gt=0)
 
 class LoginRequest(BaseModel):
-    email: str
-    password: str
-    rol: str
+    # Sin largo mínimo: las cuentas demo usan una contraseña corta
+    email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)]
+    password: Annotated[str, StringConstraints(max_length=128)]
+    rol: Rol
 
 class PedidoRequest(BaseModel):
-    plan_nombre: str
-    monto_clp: int
-    cliente_nombre: str
-    telefono: str
-    email: str
+    # plan_nombre y monto_clp los fija el servidor (catálogo de planes o
+    # precio del árbol); los del cliente se ignoran
+    plan_nombre: Texto(120)
+    monto_clp: int = 0
+    cliente_nombre: Texto(80)
+    telefono: Texto(30)
+    email: Correo
     cliente_id: Optional[int] = None  # ignorado: el cliente sale de la sesión
-    tipo_destino: str  # "particular" o "comercial"
-    razon_social: Optional[str] = None
-    rut: Optional[str] = None
-    direccion: str
-    comuna: str
-    frecuencia_entrega: str
-    tipo: str = "abastecimiento"  # "abastecimiento" o "arbol"
+    tipo_destino: TipoDestino
+    razon_social: Optional[Texto(120, 0)] = None
+    rut: Optional[Texto(20, 0)] = None
+    direccion: Texto(200)
+    comuna: Texto(80)
+    frecuencia_entrega: Frecuencia
+    tipo: Literal["abastecimiento", "arbol"] = "abastecimiento"
     arbol_id: Optional[int] = None
 
 class LogisticaRequest(BaseModel):
     """Datos de despacho que se pueden modificar en un pedido existente."""
-    tipo_destino: str
-    razon_social: Optional[str] = None
-    rut: Optional[str] = None
-    direccion: str
-    comuna: str
-    frecuencia_entrega: str
+    tipo_destino: TipoDestino
+    razon_social: Optional[Texto(120, 0)] = None
+    rut: Optional[Texto(20, 0)] = None
+    direccion: Texto(200)
+    comuna: Texto(80)
+    frecuencia_entrega: Frecuencia
 
 class ArbolRequest(BaseModel):
     nombre: Optional[str] = None  # se compone desde especie + identificador
-    especie: str
-    identificador: Optional[str] = None
-    ubicacion: str
-    plan: str
-    tipo_suscripcion: str
-    cupos_totales: int
-    precio_mensual_clp: int
-    estimacion_cosecha: str
-    imagen: str
+    especie: Texto(40)
+    identificador: Optional[Texto(12, 0)] = None
+    ubicacion: Texto(150)
+    plan: Literal["Básico", "Intermedio", "Premium"]
+    tipo_suscripcion: Literal["Compartido", "Exclusivo"]
+    cupos_totales: int = Field(ge=1, le=50)
+    precio_mensual_clp: int = Field(ge=0, le=10_000_000)
+    estimacion_cosecha: Texto(80)
+    imagen: Texto(500)
     productor: Optional[str] = None  # ignorado: el productor sale de la sesión
 
 class PerfilRequest(BaseModel):
-    nombre: str
-    email: str
-    telefono: Optional[str] = None
-    direccion: Optional[str] = None
-    password: Optional[str] = None
+    nombre: Texto(80, 2)
+    email: Correo
+    telefono: Optional[Texto(30, 0)] = None
+    direccion: Optional[Texto(200, 0)] = None
+    password: Optional[Contrasena] = None
+    # Obligatoria para cambiar la contraseña: con solo el token (por ejemplo,
+    # robado) no se puede secuestrar la cuenta
+    password_actual: Optional[Annotated[str, StringConstraints(max_length=128)]] = None
 
 class RegistroRequest(BaseModel):
-    nombre: str
-    email: str
-    password: str
-    rol: str
-    telefono: Optional[str] = None
-    direccion: Optional[str] = None
+    nombre: Texto(80, 2)
+    email: Correo
+    password: Contrasena
+    rol: Rol
+    telefono: Optional[Texto(30, 0)] = None
+    direccion: Optional[Texto(200, 0)] = None
 
 class VerificacionRequest(BaseModel):
-    email: str
-    codigo: str
+    email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)]
+    codigo: Annotated[str, StringConstraints(pattern=r"^\d{6}$")]
 
 
 # ----------------- VALIDACIÓN DE ESPECIES E IMAGEN -----------------

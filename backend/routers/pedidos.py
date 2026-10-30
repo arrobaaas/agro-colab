@@ -4,11 +4,17 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from core import PedidoRequest, LogisticaRequest, get_db, usuario_actual
-from database import Pedido, Suscripcion, Usuario
+from database import Arbol, Pedido, Suscripcion, Usuario
 
 router = APIRouter()
 
-TIPOS_PEDIDO = ("abastecimiento", "arbol")
+# Precio de cada plan de abastecimiento. Lo fija el servidor: antes el monto
+# venía del navegador y se podía contratar el plan B2B por $1.
+PLANES_ABASTECIMIENTO = {
+    "Canasta Huerto Esencial": 19900,
+    "Cosecha Completa Familiar": 34900,
+    "Lote Gastronómico B2B": 89000,
+}
 
 
 def serializar_pedido(p: Pedido) -> dict:
@@ -31,9 +37,8 @@ def serializar_pedido(p: Pedido) -> dict:
 
 
 def validar_logistica(datos) -> str:
-    """Devuelve un mensaje de error, o cadena vacía si los datos son válidos."""
-    if datos.tipo_destino not in ("particular", "comercial"):
-        return "El tipo de destino debe ser particular o comercial."
+    """Devuelve un mensaje de error, o cadena vacía si los datos son válidos.
+    Los tipos y largos ya los valida el esquema (core.py)."""
     if datos.tipo_destino == "comercial" and not (datos.razon_social and datos.rut):
         return "Completa la razón social y el RUT para el despacho comercial."
     if not datos.direccion.strip() or not datos.comuna.strip():
@@ -47,29 +52,37 @@ def registrar_pedido(
     cliente: Usuario = Depends(usuario_actual),
     db: Session = Depends(get_db),
 ):
-    if pedido.tipo not in TIPOS_PEDIDO:
-        return {"status": "error", "mensaje": "Tipo de pedido no válido."}
+    if cliente.rol != "comprador":
+        return {"status": "error", "mensaje": "Solo los compradores pueden contratar planes."}
 
     error = validar_logistica(pedido)
     if error:
         return {"status": "error", "mensaje": error}
 
-    # El despacho de un árbol solo lo puede pedir quien lo tiene adoptado
     if pedido.tipo == "arbol":
+        # El despacho de un árbol solo lo puede pedir quien lo tiene adoptado
         suscrito = db.query(Suscripcion).filter(
             Suscripcion.arbol_id == pedido.arbol_id,
             Suscripcion.usuario_id == cliente.id,
         ).first()
-        if not suscrito:
+        arbol = db.query(Arbol).filter(Arbol.id == pedido.arbol_id).first()
+        if not suscrito or not arbol:
             return {"status": "error", "mensaje": "No tienes adoptado ese árbol."}
+        plan_nombre = f"Cosecha de {arbol.nombre}"
+        monto = arbol.precio_mensual_clp
+    else:
+        if pedido.plan_nombre not in PLANES_ABASTECIMIENTO:
+            return {"status": "error", "mensaje": "El plan elegido no existe."}
+        plan_nombre = pedido.plan_nombre
+        monto = PLANES_ABASTECIMIENTO[plan_nombre]
 
     # El cliente es el usuario de la sesión, no el id o correo del formulario
     nuevo_pedido = Pedido(
         cliente_id=cliente.id,
         tipo=pedido.tipo,
         arbol_id=pedido.arbol_id if pedido.tipo == "arbol" else None,
-        plan_nombre=pedido.plan_nombre,
-        monto_clp=pedido.monto_clp,
+        plan_nombre=plan_nombre,
+        monto_clp=monto,
         tipo_destino=pedido.tipo_destino,
         razon_social=pedido.razon_social,
         rut=pedido.rut,

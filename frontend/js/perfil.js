@@ -4,6 +4,8 @@
    (PerfilService) con instancia expuesta como AgroColab.perfil. */
 
 (function () {
+  // Escapa datos antes de insertarlos como HTML (ver ui.escapar)
+  const e = (valor) => window.AgroColab.ui.escapar(valor);
   const AgroColab = (window.AgroColab = window.AgroColab || {});
   const { auth, ui } = AgroColab;
 
@@ -24,6 +26,7 @@
       document.getElementById("perfil-input-telefono").value = sesion.telefono || "";
       document.getElementById("perfil-input-direccion").value = sesion.direccion || "";
       document.getElementById("perfil-input-password").value = "";
+      document.getElementById("perfil-input-password-actual").value = "";
 
       document.getElementById("modal-perfil").classList.remove("hidden");
       this.cargarMisArboles();
@@ -53,15 +56,15 @@
           <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
             <div class="flex items-center gap-3">
               <div class="w-14 h-14 rounded-lg overflow-hidden bg-stone-200 flex-shrink-0">
-                <img src="${arbol.imagen || ""}" alt="${arbol.nombre}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" class="w-full h-full object-cover" onerror="this.style.display='none'">
               </div>
               <div class="flex-1 min-w-0">
-                <p class="font-bold text-sm text-stone-900 truncate">${arbol.nombre}</p>
+                <p class="font-bold text-sm text-stone-900 truncate">${e(arbol.nombre)}</p>
                 <p class="text-[11px] text-stone-500 truncate">
-                  <i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${arbol.ubicacion || "Ubicación no informada"}
+                  <i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${e(arbol.ubicacion || "Ubicación no informada")}
                 </p>
                 <p class="text-[11px] text-stone-500 truncate">
-                  Plan <strong>${arbol.plan || "-"}</strong> · Cosecha <strong>${arbol.estimacion_cosecha || "-"}</strong>
+                  Plan <strong>${e(arbol.plan || "-")}</strong> · Cosecha <strong>${e(arbol.estimacion_cosecha || "-")}</strong>
                 </p>
               </div>
               <div class="text-right flex-shrink-0">
@@ -72,7 +75,7 @@
 
             <div class="mt-2 flex items-center justify-between gap-2">
               <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                <i class="fa-solid fa-circle-check mr-1"></i>Activa${arbol.tipo_suscripcion ? ` · ${arbol.tipo_suscripcion}` : ""}
+                <i class="fa-solid fa-circle-check mr-1"></i>Activa${arbol.tipo_suscripcion ? ` · ${e(arbol.tipo_suscripcion)}` : ""}
               </span>
               <span class="text-[10px] ${cuposCompletos ? "text-amber-700 font-bold" : "text-stone-500"}">
                 ${cuposOcupados}/${cuposTotales} coparticipantes${cuposCompletos ? " · completo" : ""}
@@ -82,7 +85,7 @@
             <div class="w-full bg-stone-200 h-1.5 rounded-full overflow-hidden mt-2">
               <div class="${cuposCompletos ? "bg-amber-500" : "bg-emerald-600"} h-1.5 rounded-full" style="width: ${porcentaje}%"></div>
             </div>
-            ${arbol.fecha_suscripcion ? `<p class="text-[10px] text-stone-400 mt-2">Adoptado el ${arbol.fecha_suscripcion}</p>` : ""}
+            ${arbol.fecha_suscripcion ? `<p class="text-[10px] text-stone-400 mt-2">Adoptado el ${e(arbol.fecha_suscripcion)}</p>` : ""}
           </div>
         `;
         })
@@ -158,7 +161,8 @@
         email,
         telefono,
         direccion,
-        password: password || undefined
+        password: password || undefined,
+        password_actual: document.getElementById("perfil-input-password-actual").value || undefined
       };
 
       try {

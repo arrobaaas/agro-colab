@@ -4,8 +4,10 @@ La aplicacion se compone de routers (catalogo, arboles, suscripciones, pedidos
 y usuarios) e inyecta la logica de dominio desde el modulo `core`.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from core import datos_iniciales
 from database import engine, Base, asegurar_columnas, migrar_cuentas_antiguas
@@ -15,6 +17,48 @@ app = FastAPI(
     title="Agro-Colab API",
     description="Adopción de árboles frutales y abastecimiento directo con trazabilidad"
 )
+
+# Nombres legibles de los campos para los mensajes de validación
+CAMPOS = {
+    "nombre": "el nombre", "email": "el correo", "password": "la contraseña",
+    "rol": "el tipo de cuenta", "telefono": "el teléfono", "direccion": "la dirección",
+    "comuna": "la comuna", "razon_social": "la razón social", "rut": "el RUT",
+    "ubicacion": "la ubicación", "estimacion_cosecha": "la estimación de cosecha",
+    "cupos_totales": "los cupos", "precio_mensual_clp": "el precio",
+    "plan": "el plan", "tipo_suscripcion": "el tipo de suscripción",
+    "tipo_destino": "el tipo de destino", "frecuencia_entrega": "la frecuencia",
+    "codigo": "el código", "identificador": "el número del árbol",
+}
+
+
+@app.exception_handler(RequestValidationError)
+async def error_de_validacion(request: Request, exc: RequestValidationError):
+    """Devuelve el error en el formato {status, mensaje} que usa el frontend
+    (el formato por defecto de FastAPI no se podía mostrar al usuario)."""
+    errores = exc.errors()
+    campo = str(errores[0]["loc"][-1]) if errores else ""
+    tipo = errores[0].get("type", "") if errores else ""
+    nombre = CAMPOS.get(campo, campo or "un dato")
+    if tipo == "string_too_short" and campo == "password":
+        mensaje = "La contraseña debe tener al menos 8 caracteres."
+    elif tipo == "value_error":
+        mensaje = f"Revisa {nombre}: no puede contener los caracteres < o >."
+    else:
+        mensaje = f"Revisa {nombre}: el valor no es válido."
+    return JSONResponse(status_code=422, content={"status": "error", "mensaje": mensaje})
+
+
+@app.middleware("http")
+async def cabeceras_de_seguridad(request: Request, call_next):
+    respuesta = await call_next(request)
+    respuesta.headers["X-Content-Type-Options"] = "nosniff"
+    respuesta.headers["X-Frame-Options"] = "DENY"
+    respuesta.headers["Referrer-Policy"] = "no-referrer"
+    if request.url.path.startswith("/api/"):
+        # Las respuestas traen datos personales: que no queden en cachés
+        respuesta.headers["Cache-Control"] = "no-store"
+    return respuesta
+
 
 # Permitir peticiones solo desde los orígenes conocidos del frontend
 app.add_middleware(
@@ -30,8 +74,8 @@ app.add_middleware(
         "https://arrobaaas.github.io",
     ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Crear tablas y datos iniciales

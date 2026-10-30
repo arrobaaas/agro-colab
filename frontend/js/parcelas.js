@@ -4,6 +4,8 @@
 
 (function () {
   const AgroColab = (window.AgroColab = window.AgroColab || {});
+  // Escapa datos antes de insertarlos como HTML (ver ui.escapar)
+  const e = (valor) => window.AgroColab.ui.escapar(valor);
   const { api, ui, auth, config } = AgroColab;
 
   const PLAN_ABASTECIMIENTO_INICIAL = { nombre: "Canasta Huerto Esencial", precio: 19900 };
@@ -135,9 +137,9 @@
           alerta.innerHTML = `
             <div class="flex items-center gap-2 mb-1">
               <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-              <span class="text-sm font-bold">${data.mensaje}</span>
+              <span class="text-sm font-bold">${e(data.mensaje)}</span>
             </div>
-            <p class="text-stone-600">Destino: <strong>${bodyData.direccion}, ${bodyData.comuna}</strong> (${bodyData.tipo_destino.toUpperCase()}) | Frecuencia: <strong>${bodyData.frecuencia_entrega}</strong>.</p>
+            <p class="text-stone-600">Destino: <strong>${e(bodyData.direccion)}, ${e(bodyData.comuna)}</strong> (${e(bodyData.tipo_destino.toUpperCase())}) | Frecuencia: <strong>${e(bodyData.frecuencia_entrega)}</strong>.</p>
           `;
           formulario.reset();
           this.cambiarDestino(this.destinoSeleccionado);
@@ -173,7 +175,7 @@
             : arboles.filter((arbol) => arbol.plan === this.planAdopcionSeleccionado);
 
         if (!visibles.length) {
-          container.innerHTML = `<p class="md:col-span-3 text-center text-stone-500 text-sm py-10">No hay árboles disponibles para el Plan ${this.planAdopcionSeleccionado}.</p>`;
+          container.innerHTML = `<p class="md:col-span-3 text-center text-stone-500 text-sm py-10">No hay árboles disponibles para el Plan ${e(this.planAdopcionSeleccionado)}.</p>`;
           return;
         }
 
@@ -202,22 +204,22 @@
       return `
         <article class="arbol-card group" data-reveal="flip" data-tilt style="--reveal-delay:${(indice % 3) * 150}ms">
           <div class="arbol-card__media">
-            <img src="${arbol.imagen || ""}" alt="${arbol.nombre}" loading="lazy" onerror="this.style.display='none'">
-            <span class="arbol-card__plan">${arbol.plan}</span>
+            <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" loading="lazy" onerror="this.style.display='none'">
+            <span class="arbol-card__plan">${e(arbol.plan)}</span>
             <span class="arbol-card__tipo ${exclusivo ? "arbol-card__tipo--exclusivo" : ""}">
-              <i class="fa-solid ${exclusivo ? "fa-crown" : "fa-users"}"></i> ${arbol.tipo_suscripcion || ""}
+              <i class="fa-solid ${exclusivo ? "fa-crown" : "fa-users"}"></i> ${e(arbol.tipo_suscripcion || "")}
             </span>
             <div class="arbol-card__titulo">
-              ${arbol.especie_nombre ? `<p class="arbol-card__especie">${arbol.especie_nombre}</p>` : ""}
-              <h4>${arbol.nombre}</h4>
+              ${arbol.especie_nombre ? `<p class="arbol-card__especie">${e(arbol.especie_nombre)}</p>` : ""}
+              <h4>${e(arbol.nombre)}</h4>
             </div>
           </div>
 
           <div class="p-5 flex flex-col gap-4 flex-1">
             <ul class="space-y-1.5 text-xs text-stone-600">
-              <li class="flex items-center gap-2 truncate"><i class="fa-solid fa-location-dot text-rose-500 w-4 text-center"></i> ${arbol.ubicacion}</li>
-              <li class="flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-emerald-600 w-4 text-center"></i> Cosecha estimada: <strong class="text-stone-800">${arbol.estimacion_cosecha}</strong></li>
-              ${arbol.productor ? `<li class="flex items-center gap-2 truncate"><i class="fa-solid fa-tractor text-amber-600 w-4 text-center"></i> ${arbol.productor}</li>` : ""}
+              <li class="flex items-center gap-2 truncate"><i class="fa-solid fa-location-dot text-rose-500 w-4 text-center"></i> ${e(arbol.ubicacion)}</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-emerald-600 w-4 text-center"></i> Cosecha estimada: <strong class="text-stone-800">${e(arbol.estimacion_cosecha)}</strong></li>
+              ${arbol.productor ? `<li class="flex items-center gap-2 truncate"><i class="fa-solid fa-tractor text-amber-600 w-4 text-center"></i> ${e(arbol.productor)}</li>` : ""}
             </ul>
 
             <div>
@@ -235,7 +237,7 @@
                 <p class="text-xl font-black text-emerald-900 leading-none">${this.ui.formatearMonto(arbol.precio_mensual_clp)}</p>
                 <p class="text-[10px] text-stone-500 mt-1">CLP por mes</p>
               </div>
-              <button type="button" class="btn-suscribir ${disponible ? "btn-suscribir--activo" : "btn-suscribir--bloqueado"}" data-suscribir-id="${arbol.id}" ${disponible ? "" : "disabled"}>
+              <button type="button" class="btn-suscribir ${disponible ? "btn-suscribir--activo" : "btn-suscribir--bloqueado"}" data-suscribir-id="${e(arbol.id)}" ${disponible ? "" : "disabled"}>
                 <i class="fa-solid ${disponible ? "fa-cart-plus" : "fa-lock"}"></i> ${disponible ? "Adoptar" : "Completo"}
               </button>
             </div>
@@ -337,8 +339,8 @@
       document.getElementById("confirmacion-detalles").innerHTML = detalles
         .map(([icono, etiqueta, valor]) => `
           <div class="confirmacion-dato">
-            <p class="text-[10px] uppercase tracking-wider font-bold text-stone-400"><i class="fa-solid ${icono} mr-1"></i>${etiqueta}</p>
-            <p class="text-sm font-bold text-stone-800 mt-1 leading-snug">${valor || "-"}</p>
+            <p class="text-[10px] uppercase tracking-wider font-bold text-stone-400"><i class="fa-solid ${icono} mr-1"></i>${e(etiqueta)}</p>
+            <p class="text-sm font-bold text-stone-800 mt-1 leading-snug">${e(valor || "-")}</p>
           </div>`)
         .join("");
 
@@ -529,7 +531,7 @@
         .map((item, index) => {
           const comprado = item.estado === "comprado";
           const miniatura = item.imagen
-            ? `<img src="${item.imagen}" alt="" class="w-full h-full object-cover" onerror="this.remove()">`
+            ? `<img src="${e(item.imagen)}" alt="" class="w-full h-full object-cover" onerror="this.remove()">`
             : `<i class="fa-solid ${item.tipo === "plan" ? "fa-basket-shopping" : "fa-tree"}"></i>`;
           const accion = comprado
             ? `<button type="button" class="canasta-accion canasta-accion--peligro" onclick="AgroColab.parcelas.cancelarCompra(${index})">Cancelar</button>`
@@ -543,12 +545,12 @@
               <div class="canasta-item__miniatura">${miniatura}</div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-2">
-                  <p class="font-bold text-sm text-stone-900 truncate">${item.nombre}</p>
+                  <p class="font-bold text-sm text-stone-900 truncate">${e(item.nombre)}</p>
                   <span class="canasta-estado ${comprado ? "canasta-estado--comprado" : ""}">
                     <i class="fa-solid ${comprado ? "fa-circle-check" : "fa-clock"}"></i> ${comprado ? "Comprado" : "Por pagar"}
                   </span>
                 </div>
-                <p class="text-xs text-stone-500 truncate mt-0.5">${item.descripcion}</p>
+                <p class="text-xs text-stone-500 truncate mt-0.5">${e(item.descripcion)}</p>
                 <div class="flex items-center justify-between gap-2 mt-3">
                   <p class="font-extrabold text-emerald-900">${this.ui.formatearMonto(item.precio)} <span class="text-[10px] font-medium text-stone-500">CLP${item.tipo === "arbol" ? " / mes" : ""}</span></p>
                   <div class="flex items-center gap-2">${accion}${pagar}</div>
@@ -747,9 +749,9 @@
         alerta.innerHTML = `
           <div class="flex items-center gap-2 mb-1">
             <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-            <span class="text-sm font-bold">${data.mensaje}</span>
+            <span class="text-sm font-bold">${e(data.mensaje)}</span>
           </div>
-          <p class="text-stone-600">Destino: <strong>${datos.direccion}, ${datos.comuna}</strong> (${datos.tipo_destino}) · Frecuencia: <strong>${datos.frecuencia_entrega}</strong>.</p>
+          <p class="text-stone-600">Destino: <strong>${e(datos.direccion)}, ${e(datos.comuna)}</strong> (${e(datos.tipo_destino)}) · Frecuencia: <strong>${e(datos.frecuencia_entrega)}</strong>.</p>
         `;
 
         setTimeout(() => {
