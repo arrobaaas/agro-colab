@@ -49,7 +49,7 @@
       return `
         <article class="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden flex flex-col">
           <div class="relative h-36 bg-stone-200">
-            <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+            <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" class="w-full h-full object-cover" data-si-falla="ocultar">
             <span class="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-600 text-white shadow">
               <i class="fa-solid fa-circle-check mr-1"></i>Suscripción activa
             </span>
@@ -97,10 +97,10 @@
             </div>
 
             <div class="mt-5 pt-4 border-t border-stone-100 flex flex-wrap gap-2">
-              <button type="button" class="px-4 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-sm hover:bg-stone-50" onclick="AgroColab.dashboard.editarLogisticaArbol(${e(arbol.arbol_id)})">
+              <button type="button" class="px-4 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-sm hover:bg-stone-50" data-accion="dashboard.editarLogisticaArbol" data-args='[${Number(arbol.arbol_id)}]'>
                 <i class="fa-solid fa-truck-fast"></i> ${despacho ? "Modificar logística" : "Configurar despacho"}
               </button>
-              <button type="button" class="px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 ml-auto" onclick="AgroColab.dashboard.cancelarSuscripcionArbol(${e(arbol.arbol_id)})">
+              <button type="button" class="px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 ml-auto" data-accion="dashboard.cancelarSuscripcionArbol" data-args='[${Number(arbol.arbol_id)}]'>
                 <i class="fa-solid fa-xmark"></i> Cancelar suscripción
               </button>
             </div>
@@ -143,10 +143,10 @@
           </ul>
 
           <div class="mt-5 pt-4 border-t border-stone-100 flex flex-wrap gap-2">
-            <button type="button" class="px-4 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-sm hover:bg-stone-50" onclick="AgroColab.dashboard.editarLogisticaPedido(${e(pedido.id)})">
+            <button type="button" class="px-4 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-sm hover:bg-stone-50" data-accion="dashboard.editarLogisticaPedido" data-args='[${Number(pedido.id)}]'>
               <i class="fa-solid fa-truck-fast"></i> Modificar logística
             </button>
-            <button type="button" class="px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 ml-auto" onclick="AgroColab.dashboard.cancelarPlan(${e(pedido.id)})">
+            <button type="button" class="px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 ml-auto" data-accion="dashboard.cancelarPlan" data-args='[${Number(pedido.id)}]'>
               <i class="fa-solid fa-xmark"></i> Cancelar plan
             </button>
           </div>
@@ -177,7 +177,7 @@
           </div>
           <h3 class="text-lg font-black text-stone-900">Todavía no tienes árboles ni planes</h3>
           <p class="text-sm text-stone-500 mt-2">Adopta un árbol o contrata una canasta de abastecimiento.</p>
-          <button type="button" class="btn-hero btn-hero--primario mt-6" onclick="AgroColab.views.mostrarVista('parcelas')">
+          <button type="button" class="btn-hero btn-hero--primario mt-6" data-accion="views.mostrarVista" data-args='["parcelas"]'>
             <i class="fa-solid fa-seedling"></i> Ir al catálogo
           </button>
         </div>`;

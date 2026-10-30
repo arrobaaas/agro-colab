@@ -2,12 +2,13 @@
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timedelta
 import hmac
 import secrets
 
 from core import (
-    LoginRequest, RegistroRequest, VerificacionRequest, PerfilRequest,
+    LoginRequest, RegistroRequest, VerificacionRequest, PerfilRequest, ReenvioRequest,
+    correo_configurado, enviar_codigo_verificacion,
     hash_password, verify_password, foto_de, get_db, MODO_DESARROLLO, limitar_por_ip, crear_token, usuario_actual,
     limitar, es_cuenta_demo,
 )
@@ -16,16 +17,42 @@ from database import Usuario, Arbol, Suscripcion, Pedido, SessionLocal, es_hash_
 router = APIRouter()
 
 
-@router.post("/api/register", dependencies=[Depends(limitar_por_ip(maximo=5, ventana_segundos=3600))])
-def registrar_usuario(data: RegistroRequest, db: Session = Depends(get_db)):
-    # Verificar si el email ya existe
-    existente = db.query(Usuario).filter(Usuario.email == data.email).first()
-    if existente:
-        return {"status": "error", "mensaje": "El correo electrónico ya está registrado."}
+VIGENCIA_CODIGO = timedelta(minutes=30)
+MENSAJE_REGISTRO = "Te enviamos un código de verificación a tu correo. Revisa también la carpeta de spam."
 
-    # Generar código de verificación de 6 dígitos
+
+def nuevo_codigo(usuario: Usuario) -> str:
+    """Asigna al usuario un código de 6 dígitos que vence en 30 minutos."""
     # secrets y no random: random es predecible y no sirve para códigos
     codigo = f"{secrets.randbelow(1_000_000):06d}"
+    usuario.codigo_verificacion = codigo
+    usuario.codigo_expira = datetime.utcnow() + VIGENCIA_CODIGO
+    return codigo
+
+
+def entregar_codigo(usuario: Usuario, codigo: str) -> bool:
+    """En desarrollo el código se muestra en consola; en producción se envía
+    por correo (nunca se escribe en el log: sería una filtración)."""
+    if MODO_DESARROLLO:
+        print(f"[desarrollo] código de verificación de {usuario.email}: {codigo}")
+        return True
+    return enviar_codigo_verificacion(usuario.email, usuario.nombre, codigo)
+
+
+@router.post("/api/register", dependencies=[Depends(limitar_por_ip(maximo=5, ventana_segundos=3600))])
+def registrar_usuario(data: RegistroRequest, db: Session = Depends(get_db)):
+    limitar(f"registro:{data.email.lower()}", maximo=3, ventana_segundos=3600)
+
+    # Sin envío de correos nadie podría verificar la cuenta: mejor avisarlo
+    # que crear cuentas que nunca se podrán usar
+    if not MODO_DESARROLLO and not correo_configurado():
+        return {"status": "error", "mensaje": "El registro de cuentas nuevas no está disponible por ahora. Prueba con las cuentas de demostración."}
+
+    # Misma respuesta si el correo ya tiene cuenta: no se revela qué correos
+    # están registrados (enumeración de usuarios)
+    existente = db.query(Usuario).filter(Usuario.email == data.email).first()
+    if existente:
+        return {"status": "success", "mensaje": MENSAJE_REGISTRO, "user": {"email": data.email}}
 
     nuevo_usuario = Usuario(
         nombre=data.nombre,
@@ -35,36 +62,40 @@ def registrar_usuario(data: RegistroRequest, db: Session = Depends(get_db)):
         telefono=data.telefono,
         direccion=data.direccion,
         verificado=0,
-        codigo_verificacion=codigo,
         consentimiento_datos=1,
         fecha_consentimiento=datetime.now(),
         acepta_terminos=1
     )
+    codigo = nuevo_codigo(nuevo_usuario)
     db.add(nuevo_usuario)
     db.commit()
     db.refresh(nuevo_usuario)
 
-    # Simular envío de correo (en producción, usar un servicio como SendGrid, Mailgun, etc.)
-    print(f"\n{'='*50}")
-    print(f"CORREO DE VERIFICACIÓN ENVIADO A: {data.email}")
-    print(f"Código de verificación: {codigo}")
-    print(f"{'='*50}\n")
+    if not entregar_codigo(nuevo_usuario, codigo):
+        # Sin el correo la cuenta no se podría verificar: se deshace el registro
+        db.delete(nuevo_usuario)
+        db.commit()
+        return {"status": "error", "mensaje": "No pudimos enviar el correo de verificación. Intenta nuevamente en unos minutos."}
 
-    respuesta = {
-        "status": "success",
-        "mensaje": f"Usuario {nuevo_usuario.nombre} registrado correctamente. Revisa tu correo para verificar tu cuenta.",
-        "user": {
-            "id": nuevo_usuario.id,
-            "nombre": nuevo_usuario.nombre,
-            "email": nuevo_usuario.email,
-            "rol": nuevo_usuario.rol
-        }
-    }
-    # El código solo se expone en desarrollo para simular el envío por correo.
-    # Nunca debe salir en producción.
+    respuesta = {"status": "success", "mensaje": MENSAJE_REGISTRO, "user": {"email": nuevo_usuario.email}}
+    # El código solo se devuelve en desarrollo, para probar el flujo sin correo
     if MODO_DESARROLLO:
         respuesta["user"]["codigo_verificacion"] = codigo
+    return respuesta
 
+
+@router.post("/api/reenviar-codigo", dependencies=[Depends(limitar_por_ip(maximo=5, ventana_segundos=3600))])
+def reenviar_codigo(data: ReenvioRequest, db: Session = Depends(get_db)):
+    limitar(f"reenvio:{data.email.lower()}", maximo=3, ventana_segundos=3600)
+
+    respuesta = {"status": "success", "mensaje": "Si la cuenta existe y no está verificada, te enviamos un código nuevo."}
+    usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
+    if usuario and not usuario.verificado:
+        codigo = nuevo_codigo(usuario)
+        db.commit()
+        entregar_codigo(usuario, codigo)
+        if MODO_DESARROLLO:
+            respuesta["codigo_verificacion"] = codigo
     return respuesta
 
 
@@ -123,13 +154,15 @@ def verificar_cuenta(data: VerificacionRequest, db: Session = Depends(get_db)):
     usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
     # Mismo mensaje para cuenta inexistente o código incorrecto: no revela
     # qué correos están registrados
-    if not usuario or usuario.verificado or not usuario.codigo_verificacion or not hmac.compare_digest(
+    vigente = bool(usuario and usuario.codigo_expira and usuario.codigo_expira >= datetime.utcnow())
+    if not usuario or usuario.verificado or not usuario.codigo_verificacion or not vigente or not hmac.compare_digest(
         usuario.codigo_verificacion, data.codigo
     ):
-        return {"status": "error", "mensaje": "Código de verificación incorrecto o cuenta ya verificada."}
+        return {"status": "error", "mensaje": "Código incorrecto o vencido. Puedes pedir uno nuevo."}
 
     usuario.verificado = 1
     usuario.codigo_verificacion = None
+    usuario.codigo_expira = None
     db.commit()
 
     return {

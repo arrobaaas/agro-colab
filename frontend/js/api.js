@@ -126,6 +126,10 @@ class ApiService {
     });
   }
 
+  reenviarCodigo(email) {
+    return this.apiFetch("/reenviar-codigo", { method: "POST", body: JSON.stringify({ email }) });
+  }
+
   eliminarCuenta(email) {
     return this.apiFetch(`/usuario/${encodeURIComponent(email)}`, { method: "DELETE" });
   }

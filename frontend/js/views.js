@@ -102,7 +102,7 @@
       const inicial = (sesion.nombre || "?").trim().charAt(0).toUpperCase();
       contenedores.forEach((contenedor) => {
         contenedor.innerHTML = `
-          <button type="button" class="nav-usuario" onclick="AgroColab.perfil.abrir()" title="Ver mi perfil">
+          <button type="button" class="nav-usuario" data-accion="perfil.abrir" title="Ver mi perfil">
             <span class="nav-usuario__avatar">${e(inicial)}</span>
             <span class="hidden md:flex flex-col text-left leading-tight">
               <span class="text-xs font-bold text-white">${e(sesion.nombre)}</span>

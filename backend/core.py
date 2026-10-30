@@ -8,12 +8,16 @@ eran compartidas dentro de la aplicacion FastAPI.
 from typing import Annotated, Literal, Optional
 from datetime import datetime
 
+import html
+import json
+import logging
 import os
 import time
+import urllib.error
+import urllib.request
 import hmac
 import hashlib
 import secrets
-from collections import defaultdict
 
 from fastapi import Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -21,7 +25,7 @@ from pydantic import AfterValidator, BaseModel, Field, StringConstraints
 from sqlalchemy.orm import Session
 
 from database import (
-    engine, SessionLocal, Base, Usuario, Arbol, Suscripcion, Pedido,
+    engine, SessionLocal, Base, Usuario, Arbol, Suscripcion, Pedido, IntentoAcceso,
     hash_password, verify_password, asegurar_columnas, migrar_cuentas_antiguas,
     CUENTAS_DEMO,
 )
@@ -38,18 +42,26 @@ from catalogo import (
 # En producción jamás se debe exponer el código de verificación.
 MODO_DESARROLLO = os.getenv("AGROCOLAB_MOD_MODE", "produccion").lower() == "desarrollo"
 
-_intentos: dict = defaultdict(list)
-
 def _limitar_intento(clave: str, maximo: int, ventana_segundos: int) -> bool:
-    """Registra un intento y decide si se permite. Contador simple en memoria
-    (suficiente para este proyecto); la clave puede ser una IP o una cuenta."""
-    ahora = time.monotonic()
-    ventana = [t for t in _intentos.get(clave, []) if ahora - t < ventana_segundos]
-    if len(ventana) >= maximo:
-        _intentos[clave] = ventana
-        return False
-    _intentos[clave] = ventana + [ahora]
-    return True
+    """Registra un intento y decide si se permite. La clave puede ser una IP o
+    una cuenta. Los intentos viven en la tabla intentos_acceso."""
+    ahora = time.time()
+    db = SessionLocal()
+    try:
+        # Limpieza: nada de lo que se limita usa ventanas de más de un día
+        db.query(IntentoAcceso).filter(IntentoAcceso.momento < ahora - 86400).delete(synchronize_session=False)
+        recientes = db.query(IntentoAcceso).filter(
+            IntentoAcceso.clave == clave,
+            IntentoAcceso.momento >= ahora - ventana_segundos,
+        ).count()
+        if recientes >= maximo:
+            db.commit()
+            return False
+        db.add(IntentoAcceso(clave=clave, momento=ahora))
+        db.commit()
+        return True
+    finally:
+        db.close()
 
 
 def ip_cliente(request: Request) -> str:
@@ -82,6 +94,54 @@ def limitar_por_ip(maximo: int = 10, ventana_segundos: int = 300):
     def _limiter(request: Request):
         limitar(f"ip:{ip_cliente(request)}:{request.url.path}", maximo, ventana_segundos)
     return _limiter
+
+
+# ----------------- CORREO -----------------
+# Envío del código de verificación con la API HTTP de Brevo (plan gratuito,
+# solo pide verificar el remitente). Se usa HTTP y no SMTP porque algunos
+# hostings bloquean los puertos SMTP. Variables de entorno:
+#   BREVO_API_KEY      clave de la API
+#   CORREO_REMITENTE   correo verificado en Brevo desde el que se envía
+
+registro = logging.getLogger("agrocolab")
+
+
+def correo_configurado() -> bool:
+    return bool(os.getenv("BREVO_API_KEY") and os.getenv("CORREO_REMITENTE"))
+
+
+def enviar_codigo_verificacion(destino: str, nombre: str, codigo: str) -> bool:
+    """Envía el código por correo. Devuelve True si el proveedor lo aceptó."""
+    if not correo_configurado():
+        return False
+
+    cuerpo = {
+        "sender": {"name": "Agro-Colab", "email": os.getenv("CORREO_REMITENTE")},
+        "to": [{"email": destino, "name": nombre}],
+        "subject": f"Tu código de verificación de Agro-Colab: {codigo}",
+        "htmlContent": (
+            f"<p>Hola {html.escape(nombre)},</p>"
+            f"<p>Tu código para verificar tu cuenta en Agro-Colab es:</p>"
+            f"<p style='font-size:28px;font-weight:bold;letter-spacing:6px'>{codigo}</p>"
+            f"<p>Vence en 30 minutos. Si no creaste una cuenta, ignora este correo.</p>"
+        ),
+    }
+    peticion = urllib.request.Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=json.dumps(cuerpo).encode("utf-8"),
+        headers={
+            "api-key": os.getenv("BREVO_API_KEY"),
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(peticion, timeout=10) as respuesta:
+            return 200 <= respuesta.status < 300
+    except (urllib.error.URLError, TimeoutError) as error:
+        registro.error("No se pudo enviar el correo de verificación: %s", error)
+        return False
 
 
 # ----------------- TOKENS DE SESIÓN -----------------
@@ -330,6 +390,9 @@ class RegistroRequest(BaseModel):
     rol: Rol
     telefono: Optional[Texto(30, 0)] = None
     direccion: Optional[Texto(200, 0)] = None
+
+class ReenvioRequest(BaseModel):
+    email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)]
 
 class VerificacionRequest(BaseModel):
     email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)]
