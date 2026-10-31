@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>INGT1003 · Proyecto semestral 2026 segundo semestre · Universidad Mayor</title>
+<style>
+:root{
+  --corporate-blue:#0033A0;
+  --corporate-blue-dark:#002270;
+  --corporate-blue-light:#1a4fc4;
+  --corporate-yellow:#fbcb05;
+  --corporate-yellow-dark:#d9ae00;
+  --light-bg:#f4f6f8;
+  --card-bg:#ffffff;
+  --text-dark:#1a1a1a;
+  --text-muted:#5b6b7f;
+  --border-color:rgba(0,51,160,0.15);
+  --code-bg:#1e1e2e;
+  --success:#2e7d32;
+  --warn:#b26a00;
+  --danger:#c62828;
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md:0 8px 24px rgba(0,0,0,0.08);
+  --shadow-lg:0 15px 40px rgba(0,0,0,0.12);
+  --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
+  --transition:cubic-bezier(0.4,0,0.2,1);
+  --fs-base:clamp(15px,1.05vw,19px);
+  --fs-small:clamp(13.5px,0.92vw,17px);
+  --fs-micro:clamp(12.5px,0.82vw,15px);
+  --fs-h1:clamp(26px,2.35vw,44px);
+  --fs-h2:clamp(20px,1.6vw,32px);
+  --fs-h3:clamp(17px,1.25vw,25px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:120px}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#eef2f7 0%,#f4f6f8 50%,#e8eef5 100%);
+  background-attachment:fixed;
+  color:var(--text-dark);
+  font-size:var(--fs-base);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:60px;
+}
+
+/* ============ HEADER ============ */
+header{
+  background:linear-gradient(135deg,var(--corporate-yellow) 0%,var(--corporate-yellow-dark) 100%);
+  box-shadow:0 4px 20px rgba(251,203,5,0.3);
+  position:sticky;top:0;z-index:900;
+  border-bottom:4px solid var(--corporate-blue);
+}
+.hdr-top{display:flex;align-items:center;gap:18px;padding:12px clamp(14px,2.5vw,40px);flex-wrap:wrap}
+.logo-mark{display:flex;align-items:center;flex-shrink:0}
+.logo-mark img{height:clamp(38px,3.2vw,54px);width:auto;display:block}
+.logo-fallback{height:46px;width:46px;border-radius:11px;background:var(--corporate-blue);
+  color:var(--corporate-yellow);display:none;place-items:center;font-weight:800;font-size:20px}
+.hdr-text{flex-grow:1;min-width:240px}
+.hdr-title{font-size:clamp(16px,1.45vw,27px);font-weight:800;color:var(--corporate-blue);
+  text-transform:uppercase;letter-spacing:-0.3px;line-height:1.15}
+.hdr-sub{font-size:var(--fs-micro);font-weight:600;margin-top:3px;color:#2a2a2a;opacity:0.9}
+.hdr-tools{display:flex;gap:8px;flex-shrink:0}
+.htool{background:rgba(0,51,160,0.10);border:1px solid rgba(0,51,160,0.25);color:var(--corporate-blue);
+  border-radius:9px;padding:8px 12px;font-size:var(--fs-micro);font-weight:700;cursor:pointer;transition:.2s;
+  font-family:inherit}
+.htool:hover{background:var(--corporate-blue);color:#fff}
+.htool:focus-visible{outline:3px solid var(--corporate-blue-dark);outline-offset:2px}
+
+/* ============ TABS ============ */
+.tabbar{display:flex;gap:4px;padding:0 clamp(14px,2.5vw,40px) 0;flex-wrap:wrap;
+  background:rgba(255,255,255,0.35)}
+.tabbtn{
+  background:rgba(255,255,255,0.6);border:none;border-bottom:4px solid transparent;
+  padding:11px clamp(10px,1.2vw,22px);cursor:pointer;font-weight:800;color:#37475c;
+  border-radius:9px 9px 0 0;transition:all .2s var(--transition);
+  font-size:var(--fs-micro);font-family:inherit;letter-spacing:.2px}
+.tabbtn:hover{background:#fff;color:var(--corporate-blue)}
+.tabbtn.active{background:var(--corporate-blue);color:var(--corporate-yellow);border-bottom-color:var(--corporate-blue-dark)}
+.tabbtn:focus-visible{outline:3px solid var(--corporate-blue-dark);outline-offset:-3px}
+
+.wrap{max-width:1360px;margin:0 auto;padding:0 clamp(14px,2.5vw,40px)}
+.panel{display:none;animation:fade .25s var(--transition)}
+.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ============ BLOCKS ============ */
+.hero{
+  background:linear-gradient(135deg,var(--corporate-blue) 0%,#001b58 100%);
+  color:#fff;padding:clamp(22px,2.8vw,46px);border-radius:var(--radius-lg);
+  margin:26px 0;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;right:-60px;top:-60px;width:280px;height:280px;
+  background:radial-gradient(circle,rgba(251,203,5,0.22) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-size:var(--fs-h1);font-weight:900;line-height:1.1;letter-spacing:-1px;margin-bottom:12px}
+.hero h1 .y{color:var(--corporate-yellow)}
+.hero p{font-size:clamp(15px,1.12vw,21px);line-height:1.6;color:#dde5f0;max-width:72ch}
+.hero .meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.hero .meta span{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);
+  padding:7px 14px;border-radius:22px;font-size:var(--fs-micro);font-weight:700}
+
+h2.sec{
+  background:#fff;color:var(--corporate-blue);padding:14px 22px;
+  border-left:10px solid var(--corporate-yellow);border-radius:8px;
+  margin:38px 0 18px;box-shadow:var(--shadow-sm);
+  font-size:var(--fs-h2);font-weight:800;display:flex;align-items:center;
+  justify-content:space-between;gap:14px;flex-wrap:wrap;line-height:1.25}
+h2.sec .badge{background:var(--corporate-blue);color:#fff;padding:5px 14px;border-radius:20px;
+  font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.8px;font-weight:800}
+h3.sub{color:var(--corporate-blue-dark);font-size:var(--fs-h3);font-weight:800;margin:24px 0 10px;line-height:1.3}
+
+.card{background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--radius-md);
+  padding:clamp(16px,1.7vw,28px);margin-bottom:18px;box-shadow:var(--shadow-sm)}
+.card p+p{margin-top:10px}
+.card ul,.card ol{margin:10px 0 10px 24px}
+.card li{margin-bottom:7px}
+.card strong{color:var(--corporate-blue-dark)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+
+.note{border-left:6px solid var(--corporate-yellow);background:#fffbe9;padding:14px 18px;
+  border-radius:6px;margin:16px 0;font-size:var(--fs-small)}
+.note.red{border-left-color:var(--danger);background:#fdecea}
+.note.green{border-left-color:var(--success);background:#eaf5ec}
+.note.blue{border-left-color:var(--corporate-blue);background:#eaf0fb}
+.note b{color:var(--corporate-blue-dark)}
+.note.red b{color:var(--danger)}
+
+.kpi{display:flex;flex-direction:column;gap:2px;background:linear-gradient(135deg,#f7f9fd,#eef3fb);
+  border:1px solid var(--border-color);border-radius:var(--radius-md);padding:16px 18px}
+.kpi .n{font-size:clamp(24px,2.1vw,38px);font-weight:900;color:var(--corporate-blue);line-height:1}
+.kpi .l{font-size:var(--fs-micro);color:var(--text-muted);font-weight:700;text-transform:none}
+
+/* steps */
+ol.pasos{list-style:none;margin:0;counter-reset:p}
+ol.pasos li{counter-increment:p;position:relative;padding:14px 0 14px 62px;border-bottom:1px dashed var(--border-color)}
+ol.pasos li:last-child{border-bottom:none}
+ol.pasos li::before{content:counter(p);position:absolute;left:0;top:12px;width:42px;height:42px;
+  background:var(--corporate-blue);color:var(--corporate-yellow);border-radius:12px;
+  display:grid;place-items:center;font-weight:900;font-size:var(--fs-small)}
+ol.pasos li b{display:block;color:var(--corporate-blue-dark);font-size:var(--fs-base);margin-bottom:3px}
+ol.pasos li span.cuando{display:inline-block;background:rgba(0,51,160,.08);color:var(--corporate-blue);
+  border-radius:12px;padding:2px 10px;font-size:var(--fs-micro);font-weight:700;margin-left:8px}
+
+/* tables */
+.tablewrap{overflow-x:auto;margin:14px 0;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);background:#fff}
+table{width:100%;border-collapse:collapse;font-size:var(--fs-small);min-width:640px}
+th{background:var(--corporate-blue);color:#fff;padding:12px 14px;text-align:left;font-weight:800;
+  letter-spacing:.3px;vertical-align:top}
+td{padding:11px 14px;border:1px solid #e3e9f0;vertical-align:top}
+tbody tr:nth-child(even){background:#f8fafd}
+td.pts{font-weight:900;color:var(--corporate-blue);text-align:center;white-space:nowrap}
+td.lvl{font-size:var(--fs-micro)}
+th.d{background:#1b5e20}th.c{background:#0d47a1}th.e{background:#b26a00}th.i{background:#8e0000}
+
+.subtabs{display:flex;gap:5px;flex-wrap:wrap;margin:18px 0 0}
+.subtab{background:#e7edf5;border:none;padding:9px 16px;border-radius:8px 8px 0 0;cursor:pointer;
+  font-weight:800;color:#41536b;font-size:var(--fs-micro);font-family:inherit;transition:.2s}
+.subtab:hover{background:#d6e0ee;color:var(--corporate-blue)}
+.subtab.active{background:var(--corporate-yellow);color:#1a1a1a}
+.subpanel{display:none;background:#fff;border:1px solid var(--border-color);border-top:3px solid var(--corporate-yellow);
+  border-radius:0 var(--radius-md) var(--radius-md) var(--radius-md);padding:clamp(16px,1.7vw,28px)}
+.subpanel.active{display:block}
+
+/* evaluator */
+.crit{border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;background:#fff}
+.crit .ch{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.crit .cn{font-weight:800;color:var(--corporate-blue-dark);font-size:var(--fs-small)}
+.crit .cp{font-weight:900;color:var(--corporate-blue);white-space:nowrap;font-size:var(--fs-small)}
+.lvls{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin-top:9px}
+.lvls label{display:block;border:2px solid #dfe6ef;border-radius:8px;padding:8px 10px;cursor:pointer;
+  font-size:var(--fs-micro);line-height:1.4;transition:.15s;background:#fbfcfe}
+.lvls label:hover{border-color:var(--corporate-blue-light)}
+.lvls input{margin-right:6px}
+.lvls label.sel-d{border-color:#1b5e20;background:#eaf5ec}
+.lvls label.sel-c{border-color:#0d47a1;background:#eaf0fb}
+.lvls label.sel-e{border-color:#b26a00;background:#fff6e5}
+.lvls label.sel-i{border-color:#8e0000;background:#fdecea}
+.lvls .lname{font-weight:800;display:block;margin-bottom:2px}
+
+.scorebar{position:sticky;bottom:0;z-index:800;background:linear-gradient(135deg,var(--corporate-blue),#001b58);
+  color:#fff;border-radius:var(--radius-md);padding:14px 18px;display:flex;gap:22px;flex-wrap:wrap;
+  align-items:center;justify-content:space-between;box-shadow:var(--shadow-lg);margin-top:16px}
+.scorebar .big{font-size:clamp(26px,2.4vw,44px);font-weight:900;color:var(--corporate-yellow);line-height:1}
+.scorebar .lab{font-size:var(--fs-micro);opacity:.85;font-weight:700}
+.btn{background:var(--corporate-yellow);color:#1a1a1a;border:none;border-radius:9px;padding:10px 18px;
+  font-weight:800;cursor:pointer;font-size:var(--fs-micro);font-family:inherit;transition:.2s}
+.btn:hover{background:#fff}
+.btn.ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.35)}
+.btn.ghost:hover{background:#fff;color:var(--corporate-blue)}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+
+#fbout{width:100%;min-height:280px;font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:var(--fs-micro);padding:14px;border-radius:var(--radius-sm);border:1px solid var(--border-color);
+  background:#fbfcfe;line-height:1.55;resize:vertical}
+
+/* timer */
+.timer{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:#0f172a;color:#fff;
+  border-radius:var(--radius-md);padding:18px 22px}
+#tdisp{font-family:'JetBrains Mono',monospace;font-size:clamp(42px,5vw,86px);font-weight:800;
+  line-height:1;letter-spacing:-2px;color:var(--corporate-yellow);min-width:4.5ch}
+#tdisp.warnc{color:#ffb74d}
+#tdisp.overc{color:#ff5252;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+.picker{background:#0f172a;color:#fff;border-radius:var(--radius-md);padding:18px 22px}
+#pickout{font-size:clamp(22px,2.2vw,40px);font-weight:900;color:var(--corporate-yellow);min-height:1.3em}
+input[type=text],input[type=number],select,textarea{font-family:inherit;font-size:var(--fs-small);
+  padding:9px 12px;border-radius:8px;border:1px solid var(--border-color);background:#fff;color:var(--text-dark)}
+input[type=text]:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--corporate-blue-light);outline-offset:1px}
+
+footer{background:linear-gradient(135deg,var(--corporate-yellow),var(--corporate-yellow-dark));
+  color:#1a1a1a;text-align:center;padding:26px 20px;font-weight:800;margin-top:50px;
+  border-top:4px solid var(--corporate-blue);font-size:var(--fs-small)}
+footer .fine{font-weight:600;opacity:.8;font-size:var(--fs-micro);margin-top:8px}
+
+/* pen mode: hide chrome so the presenter can annotate */
+body.pen header{position:static}
+body.pen .tabbar,body.pen .hdr-tools,body.pen .noprint{display:none}
+body.pen .panel,body.pen .subpanel{display:block!important}
+
+@media print{
+  body{background:#fff;font-size:11pt;padding:0}
+  header{position:static;box-shadow:none}
+  .tabbar,.hdr-tools,.noprint,.subtabs{display:none!important}
+  .panel,.subpanel{display:block!important;page-break-inside:auto}
+  .card,.tablewrap{box-shadow:none;page-break-inside:avoid}
+  h2.sec{page-break-after:avoid}
+  table{min-width:0;font-size:9pt}
+  .hero{background:#0033A0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media (max-width:640px){
+  .hdr-top{gap:10px}
+  .scorebar{flex-direction:column;align-items:flex-start;gap:10px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr-top">
+    <div class="logo-mark" aria-label="Universidad Mayor">
+      <img alt="Universidad Mayor" src="https://www.umayor.cl/um/bundles/umayor/images/header-logo.webp"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"/>
+      <div class="logo-fallback">UM</div>
+    </div>
+    <div class="hdr-text">
+      <div class="hdr-title">Proyecto semestral · Arquitectura de Desarrollo (Móvil y Web)</div>
+      <div class="hdr-sub">INGT1003 · Escuela de Ingeniería Civil · Prof. Carlos Muñoz S. · Segundo semestre 2026</div>
+    </div>
+    <div class="hdr-tools noprint">
+      <button class="htool" id="penBtn" title="Modo lápiz: oculta controles para anotar sobre la proyección (tecla H)">Modo lápiz</button>
+      <button class="htool" id="prtBtn" title="Imprimir o exportar a PDF">Imprimir</button>
+    </div>
+  </div>
+  <nav class="tabbar noprint" aria-label="Secciones del proyecto">
+    <button class="tabbtn active" data-p="panorama">Panorama</button>
+    <button class="tabbtn" data-p="h1">Hito 1 · Propuesta</button>
+    <button class="tabbtn" data-p="h2">Hito 2 · Back end</button>
+    <button class="tabbtn" data-p="h3">Hito 3 · Producto</button>
+    <button class="tabbtn" data-p="rub">Rúbricas</button>
+    <button class="tabbtn" data-p="eva">Evaluador y feedback</button>
+    <button class="tabbtn" data-p="anx">Anexos y reglas</button>
+  </nav>
+</header>
+<main class="wrap">
+
+<section class="panel active" id="p-panorama">
+
+<div class="hero">
+  <h1>Funden una empresa. Tienen un semestre para <span class="y">probar que existe</span>.</h1>
+  <p>No hay tareas sueltas en esta asignatura. Hay un producto que nace en septiembre como promesa, se convierte en
+  servicio en noviembre y termina en diciembre funcionando de verdad, en GitHub, con un video que lo vende en dos
+  minutos. Lo que prometan en el Hito 1 es lo que deberán entregar en el Hito 3. Elijan con esa carga encima.</p>
+  <div class="meta">
+    <span>3 hitos acumulativos</span>
+    <span>Equipos de 4 a 5</span>
+    <span>Repositorio obligatorio</span>
+    <span>Defensa individual</span>
+  </div>
+</div>
+
+<div class="note red">
+  <b>Regla que ordena todo lo demás.</b> El proyecto es acumulativo y no se cambia de idea a mitad de semestre.
+  El producto inventado en el Hito 1 es el que se programa en el Hito 2 y el que se entrega funcionando en el Hito 3.
+  Cambiar de proyecto después del registro de idea exige autorización escrita del docente y arrastra el puntaje ya obtenido.
+</div>
+
+<h2 class="sec"><span>Cómo se conecta el proyecto con la asignatura</span><span class="badge">Programa oficial</span></h2>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:14%">Hito</th><th style="width:26%">Resultado de aprendizaje que evalúa</th>
+<th style="width:22%">Unidad del programa</th><th style="width:14%">Ponderación</th><th style="width:24%">Cuándo</th></tr></thead>
+<tbody>
+<tr><td><b>Hito 1</b><br>La propuesta que se vende</td>
+<td>RDA 1 · Integra tecnologías de desarrollo Front-End para productos de software web y móvil</td>
+<td>Unidad 1 · Aspectos generales de la arquitectura de desarrollo web</td>
+<td class="pts">30 %</td><td>Presentaciones del 21 al 23 de septiembre de 2026</td></tr>
+<tr><td><b>Hito 2</b><br>El motor que sostiene la promesa</td>
+<td>RDA 2 · Aplica en forma integrada las tecnologías de desarrollo de Back-End</td>
+<td>Unidad 2 · Arquitecturas monolíticas y distribuidas</td>
+<td class="pts">35 %</td><td>Presentaciones del 2 al 6 de noviembre de 2026</td></tr>
+<tr><td><b>Hito 3</b><br>El producto que funciona</td>
+<td>RDA 3 · Integra Front-End y Back-End con arquitectura en capas</td>
+<td>Integración de las unidades 1 y 2</td>
+<td class="pts">35 %</td><td>Revisión del 30 de noviembre al 4 de diciembre de 2026</td></tr>
+<tr><td><b>Examen</b><br>Defensa técnica</td>
+<td>Integración de los tres RDA, en modalidad individual</td>
+<td>Todo el programa</td>
+<td class="pts">30 % de la nota final</td><td>Período de exámenes</td></tr>
+</tbody></table>
+</div>
+
+<div class="note blue">
+  <b>Las tres ponderaciones suman el 100 % de las notas parciales de la asignatura.</b> El peso crece con la
+  exigencia: el Hito 1 compromete una promesa, el Hito 2 construye el servicio y el Hito 3 tiene que entregar el
+  producto funcionando. Sobre esa nota grupal se aplica después el factor individual de cada integrante, y el examen
+  final es individual. Esas dos son las instancias donde se verifica el logro persona por persona.
+</div>
+
+<h2 class="sec"><span>Reglas duras del proyecto</span><span class="badge">Léanlas antes de inscribirse</span></h2>
+
+<div class="grid2">
+  <div class="card">
+    <h3 class="sub">1. Sin GitHub no hay entrega</h3>
+    <p>El repositorio se crea al inicio del proyecto, no la noche antes del Hito 3. Si al cierre del plazo
+    el repositorio no existe, es privado sin acceso al docente o está vacío, la entrega se considera no recibida y
+    el hito se califica con nota 1,0. No se aceptan archivos comprimidos por correo como reemplazo.</p>
+  </div>
+  <div class="card">
+    <h3 class="sub">2. El reloj corta la presentación</h3>
+    <p>El cronómetro se proyecta. A los 5:00 en el Hito 1 y a los 7:00 en el Hito 2 la presentación se detiene en el
+    punto exacto en que va. Se evalúa solo lo que alcanzaron a mostrar. No hay minutos de gracia ni por problemas de
+    conexión: el equipo llega con el respaldo listo.</p>
+  </div>
+  <div class="card">
+    <h3 class="sub">3. La pregunta llega a un integrante al azar</h3>
+    <p>Terminada la presentación, el docente sortea a un integrante y le hace una pregunta sobre el trabajo. La
+    respuesta vale 10 de los 100 puntos del hito para todo el grupo y además define el factor individual de esa
+    persona. Nadie sabe a quién le tocará, así que todos deben poder explicar el todo.</p>
+  </div>
+  <div class="card">
+    <h3 class="sub">4. La propuesta se entiende o no vale</h3>
+    <p>En el Hito 1, si al minuto 5:00 el evaluador no puede escribir en una línea qué venden, a quién y qué problema
+    resuelven, el bloque de presentación completo queda en 0 puntos. Es la mitad del hito. Con documento perfecto y
+    presentación en cero, la nota máxima del hito es 3,5.</p>
+  </div>
+  <div class="card">
+    <h3 class="sub">5. El equipo se define una vez</h3>
+    <p>Equipos de 4 a 5 integrantes, ya inscritos. No se reciben cambios de equipo salvo retiro formal de la
+    asignatura. Un equipo que pierde integrantes mantiene el mismo alcance comprometido.</p>
+  </div>
+  <div class="card">
+    <h3 class="sub">6. Cada idea es de un solo equipo</h3>
+    <p>El registro de idea fue por orden de llegada y ya está cerrado. Dos equipos no pueden trabajar el mismo
+    problema con la misma solución. La revisión de duplicados la hace el docente y su decisión no se apela.</p>
+  </div>
+  <div class="card">
+    <h3 class="sub">7. La inteligencia artificial se declara</h3>
+    <p>Pueden usarla. Deben declarar qué usaron, en qué parte y cómo verificaron el resultado. Lo que no se puede es
+    entregar código que ningún integrante sepa explicar. La pregunta al azar existe justamente para verificar eso.</p>
+  </div>
+  <div class="card">
+    <h3 class="sub">8. Los plazos se cuentan en días hábiles</h3>
+    <p>Un día hábil de retraso descuenta 20 puntos del total del hito. Más de un día hábil, la entrega no se recibe y
+    el hito queda en 1,0. La hora de referencia es la que marca el repositorio, no la del correo ni la del reloj del equipo.</p>
+  </div>
+</div>
+
+<h2 class="sec"><span>Escala de calificación</span><span class="badge">Exigencia 60 %</span></h2>
+
+<div class="grid3">
+  <div class="kpi"><span class="n">100</span><span class="l">Puntos por hito, repartidos 50 en presentación y 50 en documento o producto</span></div>
+  <div class="kpi"><span class="n">60</span><span class="l">Puntos necesarios para la nota 4,0</span></div>
+  <div class="kpi"><span class="n">3,5</span><span class="l">Nota mínima del 70 % acumulado para presentarse a examen</span></div>
+  <div class="kpi"><span class="n">5,0</span><span class="l">Nota mínima de eximición, según el programa de la asignatura</span></div>
+  <div class="kpi"><span class="n">75 %</span><span class="l">Asistencia mínima a cátedra</span></div>
+  <div class="kpi"><span class="n">100 %</span><span class="l">Asistencia mínima a laboratorio</span></div>
+</div>
+
+<div class="card">
+<h3 class="sub">Cómo se transforman los puntos en nota</h3>
+<p>Con 60 por ciento de exigencia, la conversión es lineal en dos tramos sobre un total de 100 puntos:</p>
+<ul>
+<li>Si el puntaje es menor a 60: <b>nota = 1,0 + 3,0 × puntaje ÷ 60</b></li>
+<li>Si el puntaje es 60 o más: <b>nota = 4,0 + 3,0 × (puntaje - 60) ÷ 40</b></li>
+</ul>
+<p>Un equipo con 0 puntos en la presentación y 50 sobre 50 en el documento obtiene 50 puntos, es decir un 3,5.
+Un equipo con 75 puntos obtiene un 5,1. El resultado se redondea a un decimal.</p>
+</div>
+
+<div class="card">
+<h3 class="sub">Factor individual</h3>
+<p>La nota del hito es grupal. Sobre esa nota se aplica un factor individual a cada integrante, determinado por la
+respuesta a la pregunta sorteada y por el historial de aportes en el repositorio. La nota individual es
+<b>nota del grupo multiplicada por el factor</b>, con piso 1,0.</p>
+<div class="tablewrap">
+<table><thead><tr><th style="width:16%">Factor</th><th>Situación observada</th></tr></thead><tbody>
+<tr><td class="pts">1,00</td><td>Responde con solvencia y su aporte es visible en el historial del repositorio.</td></tr><tr><td class="pts">0,90</td><td>Responde de forma parcial pero su aporte es visible en el historial.</td></tr><tr><td class="pts">0,70</td><td>No responde la pregunta, aunque su aporte es visible en el historial.</td></tr><tr><td class="pts">0,50</td><td>No responde y su aporte en el historial es marginal.</td></tr><tr><td class="pts">0,00</td><td>No se presenta a la evaluación sin justificación formal.</td></tr>
+</tbody></table>
+</div>
+<p>El factor se comunica junto con la nota y con la evidencia que lo sustenta. Si dos o más integrantes de un mismo
+equipo no logran responder, el grupo completo pierde además los 10 puntos del criterio de respuesta.</p>
+</div>
+
+
+</section>
+
+<section class="panel" id="p-h1">
+<div class="hero">
+  <h1>Hito 1 · Tienen cinco minutos para <span class="y">vender algo que todavía no existe</span></h1>
+  <p>Tres semanas de ideas se juegan en cinco minutos. Un problema real, una promesa clara, un prototipo por el que se pueda navegar y una arquitectura que sostenga lo prometido. El documento se lee como una propuesta comercial y la presentación se corta a los cinco minutos exactos, esté donde esté el equipo.</p>
+  <div class="meta"><span>5 minutos de presentación</span><span>Documento de propuesta</span><span>Prototipo navegable</span><span>Unidad 1</span></div>
+</div>
+
+<div class="grid3">
+  <div class="kpi"><span class="n">30 %</span><span class="l">Nota parcial N1 de la asignatura</span></div>
+  <div class="kpi"><span class="n">50 / 50</span><span class="l">Reparto entre presentación y entrega escrita</span></div>
+  <div class="kpi"><span class="n">11</span><span class="l">Criterios evaluados con rúbrica de cuatro niveles</span></div>
+</div>
+
+<div class="subtabs noprint" role="tablist">
+  <button class="subtab active" data-s="h1-obj">Qué se pide</button>
+  <button class="subtab" data-s="h1-paso">Paso a paso</button>
+  <button class="subtab" data-s="h1-ent">Entregables</button>
+  <button class="subtab" data-s="h1-eva">Cómo se evalúa</button>
+  <button class="subtab" data-s="h1-err">Errores que cuestan puntos</button>
+</div>
+<div class="subpanel active" id="s-h1-obj">
+<h3 class="sub">La situación</h3>
+<p>Es el día cero de la empresa. Todavía no hay una línea de código y ya hay que convencer a alguien de que esto vale
+la pena. En este hito el equipo hace dos cosas al mismo tiempo: decide qué construir y demuestra que sabe cómo se
+sostiene técnicamente lo que promete.</p>
+
+<h3 class="sub">Lo que se evalúa de verdad</h3>
+<p>La idea vale poco por sí sola. Lo que se evalúa es la coherencia entre tres cosas: el problema que dicen resolver,
+la experiencia que prometen y la arquitectura que eligieron para soportarla. Un producto brillante con una arquitectura
+de adorno saca menos que un producto modesto con decisiones bien fundadas.</p>
+
+<div class="grid2">
+<div class="card">
+<h3 class="sub">Contenido de la Unidad 1 que deben aplicar</h3>
+<ul>
+<li>Modelo cliente servidor y arquitectura multicapa, aplicados a su producto y no en abstracto.</li>
+<li>Arquitectura de información: agrupar, jerarquizar y nombrar las secciones del producto.</li>
+<li>Panorama de lenguajes y frameworks, con una decisión firmada y su costo asumido.</li>
+<li>Decisión de renderizado: aplicación de página única o multipágina, con el argumento que corresponda a su caso.</li>
+</ul>
+</div>
+<div class="card">
+<h3 class="sub">Dominios sugeridos con problema real en Chile</h3>
+<ul>
+<li>Salud y atención primaria: agendamiento, adherencia a tratamientos, listas de espera.</li>
+<li>Educación: acompañamiento de estudiantes, gestión de práctica profesional, apoyo a docentes.</li>
+<li>Servicios básicos y municipios: reporte ciudadano, trazabilidad de solicitudes.</li>
+<li>Agro, pesca y logística: trazabilidad, control de temperatura, coordinación de despacho.</li>
+<li>Comercio de barrio: inventario, pedidos, medios de pago locales.</li>
+</ul>
+<p>Cualquier otro dominio es válido si el problema está dimensionado con evidencia.</p>
+</div>
+</div>
+
+<div class="note">
+<b>El documento no es un informe técnico todavía.</b> En este hito el documento es una pieza de venta: debe verse
+como algo que un cliente leería. Tiene que tener tapa, índice, introducción, desarrollo, conclusión y bibliografía,
+pero su tono es el de una propuesta comercial que además muestra el prototipo y explica cómo está pensado por dentro.
+</div>
+</div>
+<div class="subpanel" id="s-h1-paso"><h3 class="sub">Ruta de trabajo</h3><ol class="pasos">
+<li><b>Equipo formado y roles repartidos<span class="cuando">ya realizado</span></b>
+Cuatro o cinco integrantes, con un coordinador, un responsable del documento, uno del prototipo y uno del
+repositorio. Los roles no eximen a nadie de entender el todo.</li>
+
+<li><b>Problema elegido y idea registrada<span class="cuando">ya realizado</span></b>
+El problema escrito en una frase, sin nombrar tecnología. Si todavía necesita explicación, no está claro.
+Busquen dos cifras que lo dimensionen y anoten la fuente antes de escribir el documento.</li>
+
+<li><b>Verifiquen hoy que el repositorio existe y está completo<span class="cuando">esta semana</span></b>
+Creado, con todos los integrantes como colaboradores y con acceso de lectura para el docente. Si esto no está,
+es lo primero que hay que resolver: sin repositorio la entrega no se recibe.</li>
+
+<li><b>Cierren a quién le duele<span class="cuando">esta semana</span></b>
+Usuario objetivo con nombre, contexto y qué hace hoy para resolver el problema sin ustedes. Esa alternativa
+actual es su competencia real.</li>
+
+<li><b>Escriban la promesa<span class="cuando">esta semana</span></b>
+Una frase con la fórmula: para tal persona que sufre tal problema, nuestro producto entrega tal resultado.
+Esta frase abre la presentación y abre el documento.</li>
+
+<li><b>Dibujen la arquitectura de información<span class="cuando">esta semana</span></b>
+Listen todo lo que el producto debe contener, agrúpenlo por afinidad, definan niveles y dibujen el árbol.
+Nombren cada sección con el vocabulario del usuario, no con el del sistema.</li>
+
+<li><b>Decidan la arquitectura técnica<span class="cuando">esta semana</span></b>
+Dibujen cliente, servidor y capas, con la responsabilidad de cada una. Recorran un caso de uso concreto y
+describan qué hace cada capa en ese recorrido.</li>
+
+<li><b>Elijan lenguajes y frameworks comparando<span class="cuando">esta semana</span></b>
+Dos candidatos, tres criterios propios, una decisión firmada y la desventaja que asumen escrita con todas sus letras.</li>
+
+<li><b>Construyan el prototipo navegable<span class="cuando">última semana</span></b>
+Mínimo tres pantallas encadenadas por las que se pueda hacer clic, con datos de ejemplo creíbles de su dominio.
+No sirven imágenes pegadas en las láminas.</li>
+
+<li><b>Armen el documento con formato de venta<span class="cuando">última semana</span></b>
+Tapa, índice, introducción, desarrollo, conclusión, bibliografía y anexos. Identidad visual consistente,
+imágenes propias del prototipo y ortografía revisada.</li>
+
+<li><b>Carguen todo en el repositorio antes del cierre<span class="cuando">domingo 20 de septiembre, 23:59</span></b>
+Documento y láminas en PDF dentro de la carpeta docs, enlace del prototipo en el archivo de instrucciones.
+La hora que vale es la que marca el repositorio, no la del correo.</li>
+
+<li><b>Ensayen con cronómetro<span class="cuando">antes de presentar</span></b>
+Tres ensayos completos con reloj. Repartan la palabra entre todos. Preparen el respaldo del prototipo en dos
+lugares distintos, porque la conexión falla justo cuando importa.</li>
+
+<li><b>Háganse las preguntas entre ustedes<span class="cuando">antes de presentar</span></b>
+Cada integrante debe poder explicar la arquitectura, la decisión de tecnologías y el recorrido del prototipo.
+La pregunta del docente se sortea, no se elige.</li>
+</ol></div>
+<div class="subpanel" id="s-h1-ent">
+<div class="note red">
+<b>Cierre de entrega: domingo 20 de septiembre de 2026, 23:59.</b> Presentaciones del lunes 21 al miércoles 23 de
+septiembre, en el bloque de laboratorio. El orden se sortea al inicio de cada sesión, así que los tres días hay que
+llegar listo. Consideren que el 18 y el 19 de septiembre son feriados: el trabajo se cierra antes, no durante.
+</div>
+<h3 class="sub">Se entrega en el repositorio, antes del cierre</h3>
+<div class="tablewrap">
+<table><thead><tr><th style="width:26%">Entregable</th><th style="width:22%">Formato y ubicación</th><th>Condición mínima para ser recibido</th></tr></thead>
+<tbody>
+<tr><td><b>Documento de propuesta</b></td><td>PDF en la carpeta <b>docs</b> del repositorio</td>
+<td>Tapa, índice, introducción, desarrollo paginado, conclusión, bibliografía y anexos. Máximo 25 páginas sin contar anexos.</td></tr>
+<tr><td><b>Láminas de la presentación</b></td><td>PDF en la carpeta <b>docs</b></td>
+<td>Las mismas que proyectarán. Se entregan antes, no después.</td></tr>
+<tr><td><b>Prototipo navegable</b></td><td>Enlace en el archivo de instrucciones del repositorio</td>
+<td>Al menos tres pantallas encadenadas por las que se pueda hacer clic.</td></tr>
+<tr><td><b>Mapa del producto</b></td><td>Imagen en la carpeta <b>docs</b></td>
+<td>Árbol con secciones, jerarquía y rutas de navegación.</td></tr>
+<tr><td><b>Diagrama de arquitectura</b></td><td>Imagen en la carpeta <b>docs</b></td>
+<td>Cliente, servidor y capas, con los nombres reales de sus componentes.</td></tr>
+<tr><td><b>Archivo de instrucciones del repositorio</b></td><td>Archivo <b>README.md</b> en la raíz</td>
+<td>Nombre del proyecto, promesa en una frase, integrantes con su usuario de GitHub, y enlaces al prototipo y a los documentos.</td></tr>
+</tbody></table>
+</div>
+
+<h3 class="sub">Se presenta en sala</h3>
+<div class="card">
+<p><b>Cinco minutos exactos por equipo.</b> El cronómetro se proyecta y se detiene la presentación al llegar a 5:00.
+Después vienen hasta dos minutos de preguntas, dirigidas a un integrante sorteado en el momento.</p>
+<p>El orden de presentación se sortea al inicio de la sesión, así que todos los equipos llegan listos.
+El equipo que no está presente cuando le toca su turno pierde el bloque de presentación completo.</p>
+</div>
+</div>
+<div class="subpanel" id="s-h1-eva">
+<h3 class="sub">Reparto de los 100 puntos</h3>
+<div class="tablewrap">
+<table><thead><tr><th style="width:10%">Código</th><th>Criterio</th><th style="width:16%">Puntos</th></tr></thead>
+<tbody><tr><td colspan="3" style="background:#eaf0fb;font-weight:800;color:#0033A0">Bloque A · Presentación de 5 minutos · 50 puntos</td></tr><tr><td><b>A1</b></td><td>Propuesta de valor</td><td class="pts">15</td></tr><tr><td><b>A2</b></td><td>Prototipo en pantalla</td><td class="pts">10</td></tr><tr><td><b>A3</b></td><td>Arquitectura de información visible</td><td class="pts">8</td></tr><tr><td><b>A4</b></td><td>Uso del tiempo y del formato</td><td class="pts">7</td></tr><tr><td><b>A5</b></td><td>Respuesta del integrante consultado</td><td class="pts">10</td></tr><tr><td colspan="3" style="background:#eaf0fb;font-weight:800;color:#0033A0">Bloque B · Documento de propuesta · 50 puntos</td></tr><tr><td><b>B1</b></td><td>Estructura formal completa</td><td class="pts">8</td></tr><tr><td><b>B2</b></td><td>Problema y evidencia</td><td class="pts">10</td></tr><tr><td><b>B3</b></td><td>Arquitectura cliente servidor y capas</td><td class="pts">12</td></tr><tr><td><b>B4</b></td><td>Selección de lenguajes y frameworks</td><td class="pts">10</td></tr><tr><td><b>B5</b></td><td>Presentación editorial y coherencia de marca</td><td class="pts">6</td></tr><tr><td><b>B6</b></td><td>Bibliografía y citas</td><td class="pts">4</td></tr></tbody></table>
+</div>
+<p>La rúbrica completa, con los cuatro niveles de logro descritos para cada criterio, está en la pestaña
+<b>Rúbricas</b>. La retroalimentación que recibirá el equipo se genera desde esa misma rúbrica, criterio por criterio.</p>
+<div class="note">
+<b>Retroalimentación garantizada.</b> Cada equipo recibe, dentro de los cinco días hábiles siguientes a la
+presentación, un informe con el nivel alcanzado en cada criterio, el puntaje, la nota, el factor individual de cada
+integrante con su evidencia, y una acción concreta de mejora por cada criterio que no llegó al nivel destacado.
+</div>
+</div>
+<div class="subpanel" id="s-h1-err">
+<h3 class="sub">Lo que hunde a los equipos todos los semestres</h3>
+<div class="grid2">
+<div class="card"><h3 class="sub">Empezar por la tecnología</h3>
+<p>Presentaciones que abren diciendo qué framework usarán. A nadie le importa todavía. Abran por el problema y
+por la persona a la que le duele.</p></div>
+<div class="card"><h3 class="sub">Confundir funciones con propuesta de valor</h3>
+<p>Una lista de pantallas no es una promesa. La promesa es el resultado que obtiene el usuario, no el catálogo
+de lo que el sistema hace.</p></div>
+<div class="card"><h3 class="sub">Diagramas copiados de internet</h3>
+<p>Se reconocen de inmediato porque tienen componentes que el proyecto no usa. Redibujen con los nombres reales
+de su sistema, aunque quede más simple.</p></div>
+<div class="card"><h3 class="sub">Prototipo de imágenes pegadas</h3>
+<p>Capturas dentro de las láminas no demuestran navegación. Debe poderse hacer clic y recorrer un flujo.</p></div>
+<div class="card"><h3 class="sub">Un solo integrante que habla</h3>
+<p>Se descuenta en el criterio de tiempo y formato, y suele coincidir con que el sorteo de la pregunta encuentra
+a alguien que no participó del trabajo.</p></div>
+<div class="card"><h3 class="sub">Bibliografía decorativa</h3>
+<p>Referencias que nadie citó en el cuerpo del documento. Si el dato no tiene su llamada en el texto, la referencia
+no cuenta, y una referencia inventada activa el protocolo de integridad académica.</p></div>
+</div>
+</div>
+</section>
+
+<section class="panel" id="p-h2">
+<div class="hero">
+  <h1>Hito 2 · Ahora hay que <span class="y">construir el motor</span></h1>
+  <p>El servicio del lado del servidor, funcionando y demostrado en vivo. Interfaz de programación diseñada, capas separadas de verdad, datos que persisten y una decisión de arquitectura defendida con argumentos propios, no con modas.</p>
+  <div class="meta"><span>7 minutos de presentación</span><span>Demostración en vivo</span><span>Documento técnico</span><span>Unidad 2</span></div>
+</div>
+
+<div class="grid3">
+  <div class="kpi"><span class="n">35 %</span><span class="l">Nota parcial N2 de la asignatura</span></div>
+  <div class="kpi"><span class="n">50 / 50</span><span class="l">Reparto entre presentación y entrega escrita</span></div>
+  <div class="kpi"><span class="n">10</span><span class="l">Criterios evaluados con rúbrica de cuatro niveles</span></div>
+</div>
+
+<div class="subtabs noprint" role="tablist">
+  <button class="subtab active" data-s="h2-obj">Qué se pide</button>
+  <button class="subtab" data-s="h2-paso">Paso a paso</button>
+  <button class="subtab" data-s="h2-ent">Entregables</button>
+  <button class="subtab" data-s="h2-eva">Cómo se evalúa</button>
+  <button class="subtab" data-s="h2-err">Errores que cuestan puntos</button>
+</div>
+<div class="subpanel active" id="s-h2-obj">
+<h3 class="sub">La situación</h3>
+<p>La propuesta convenció y ahora hay que construir el motor. Este hito es sobre el lado del servidor: la interfaz de
+programación que expone los datos, las capas que separan responsabilidades, el motor de datos que persiste y las
+decisiones de arquitectura que van a condicionar el resto del proyecto.</p>
+
+<h3 class="sub">Lo que se evalúa de verdad</h3>
+<p>Que el servicio funcione es el piso, no el techo. Lo que sube la nota es poder explicar por qué está construido así:
+por qué ese lenguaje, por qué ese framework, por qué monolito o por qué distribuido, y qué costo aceptaron con cada
+elección. Un equipo que dice se lo recomendó un tutorial está entregando la mitad del trabajo.</p>
+
+<div class="grid2">
+<div class="card">
+<h3 class="sub">Contenido de la Unidad 2 que deben aplicar</h3>
+<ul>
+<li>Protocolo HTTP: verbos, códigos de estado, cabeceras y contratos de datos.</li>
+<li>Diseño de interfaces de programación al estilo REST, orientadas a recursos.</li>
+<li>Frameworks para servicios web y qué resuelve cada uno.</li>
+<li>Separación de responsabilidades y programación en capas.</li>
+<li>Monolito frente a microservicios, con sus ventajas y desventajas aplicadas al caso propio.</li>
+</ul>
+</div>
+<div class="card">
+<h3 class="sub">Mínimo funcional exigido</h3>
+<ul>
+<li>Al menos dos recursos del dominio con operaciones de crear, leer, actualizar y borrar.</li>
+<li>Persistencia real en un motor de datos, no en memoria ni en un archivo temporal.</li>
+<li>Códigos de estado correctos, incluidos los de error.</li>
+<li>Credenciales fuera del repositorio, con archivo de ejemplo.</li>
+<li>El servicio se levanta siguiendo el archivo de instrucciones en otro equipo.</li>
+</ul>
+</div>
+</div>
+
+<div class="note blue">
+<b>La decisión monolito o distribuido se evalúa por el argumento, no por la respuesta.</b> Para un proyecto de un
+semestre con un equipo de cinco personas, el monolito bien ordenado suele ser la decisión correcta, y defenderla con
+datos vale más que dividir en servicios porque suena moderno. Lo que no se acepta es no tomar postura.
+</div>
+</div>
+<div class="subpanel" id="s-h2-paso"><h3 class="sub">Ruta de trabajo</h3><ol class="pasos">
+<li><b>Cierren el contrato de la interfaz de programación<span class="cuando">semana 1</span></b>
+Antes de programar, escriban la tabla de recursos: rutas, verbos, parámetros, cuerpo de ejemplo y códigos de estado
+de éxito y de error. Esa tabla es el acuerdo entre quien construye el servidor y quien construye la interfaz.</li>
+
+<li><b>Elijan el motor de datos y modelen<span class="cuando">semana 1</span></b>
+Entidades, claves, relaciones y tipos. Escriban el script de creación desde cero para que cualquiera pueda levantar
+la base sin adivinar.</li>
+
+<li><b>Armen la estructura de capas<span class="cuando">semana 2</span></b>
+Carpetas separadas para ruteo, negocio y acceso a datos. Definan la regla antes de escribir código: en el controlador
+no va lógica de negocio, y las consultas viven solo en la capa de datos.</li>
+
+<li><b>Implementen el primer recurso completo<span class="cuando">semana 2</span></b>
+Un recurso con las cuatro operaciones funcionando de punta a punta. Ese recurso es el molde de todos los demás.</li>
+
+<li><b>Saquen las credenciales del código<span class="cuando">semana 2</span></b>
+Variables de entorno, archivo de ejemplo sin datos reales y la exclusión correspondiente en el archivo de exclusiones
+del repositorio. Si ya subieron una credencial, hay que rotarla, no solo borrarla.</li>
+
+<li><b>Implementen el segundo recurso y los errores<span class="cuando">semana 3</span></b>
+Validación de entrada, respuestas de error con mensaje claro y el código de estado que corresponde.
+Un error devuelto como éxito es una falla de diseño.</li>
+
+<li><b>Documenten la decisión de arquitectura<span class="cuando">semana 3</span></b>
+Monolito o distribuido, con carga esperada, tamaño del equipo, costo de operación y complejidad de despliegue.
+Escriban en qué escenario revisarían esa decisión.</li>
+
+<li><b>Escriban la sección de cambios<span class="cuando">semana 3</span></b>
+Qué se movió respecto del Hito 1, por qué y qué impacto tuvo. Un cambio sin motivo documentado es indistinguible
+de un error.</li>
+
+<li><b>Preparen la demostración en vivo<span class="cuando">semana 4</span></b>
+Cuatro peticiones reales guardadas en el cliente de pruebas, en orden, con datos listos. Ensayen en un equipo
+distinto al de siempre.</li>
+
+<li><b>Ensayen los 7 minutos<span class="cuando">antes de presentar</span></b>
+Demostración primero, justificación de tecnologías después, decisión de arquitectura al final.
+Cada integrante debe poder explicar una parte del código y por qué está escrita así.</li>
+</ol></div>
+<div class="subpanel" id="s-h2-ent">
+<div class="note red">
+<b>Cierre de entrega: viernes 30 de octubre de 2026, 23:59.</b> Presentaciones durante la semana del 2 al 6 de
+noviembre, en el bloque de laboratorio, con el orden sorteado al inicio de cada sesión.
+</div>
+<h3 class="sub">Se entrega en el repositorio, antes del cierre</h3>
+<div class="tablewrap">
+<table><thead><tr><th style="width:26%">Entregable</th><th style="width:22%">Formato y ubicación</th><th>Condición mínima para ser recibido</th></tr></thead>
+<tbody>
+<tr><td><b>Código del servicio</b></td><td>Rama principal del repositorio</td>
+<td>Se levanta siguiendo el archivo de instrucciones, sin credenciales en el código y con estructura de capas visible.</td></tr>
+<tr><td><b>Documento técnico</b></td><td>PDF en la carpeta <b>docs</b></td>
+<td>Estructura formal completa, con la sección de cambios respecto del Hito 1. Máximo 30 páginas sin contar anexos.</td></tr>
+<tr><td><b>Tabla de la interfaz de programación</b></td><td>Dentro del documento y en el repositorio</td>
+<td>Rutas, verbos, parámetros, cuerpo de ejemplo y códigos de estado de éxito y de error.</td></tr>
+<tr><td><b>Modelo de datos y script de creación</b></td><td>Carpeta <b>db</b> del repositorio</td>
+<td>Diagrama del modelo y script que crea la base desde cero.</td></tr>
+<tr><td><b>Colección del cliente de pruebas</b></td><td>Archivo exportado en el repositorio</td>
+<td>Las peticiones que usarán en la demostración, listas para importar.</td></tr>
+<tr><td><b>Archivo de configuración de ejemplo</b></td><td>Raíz del repositorio</td>
+<td>Todas las variables necesarias, con valores de ejemplo y sin datos reales.</td></tr>
+</tbody></table>
+</div>
+
+<h3 class="sub">Se presenta en sala</h3>
+<div class="card">
+<p><b>Siete minutos por equipo</b>, con el cronómetro proyectado, más hasta dos minutos de preguntas dirigidas a un
+integrante sorteado. La demostración se hace en vivo contra el servicio corriendo. Una grabación no reemplaza la
+ejecución. Si el servicio no levanta, se aplica el tope del bloque de presentación.</p>
+</div>
+</div>
+<div class="subpanel" id="s-h2-eva">
+<h3 class="sub">Reparto de los 100 puntos</h3>
+<div class="tablewrap">
+<table><thead><tr><th style="width:10%">Código</th><th>Criterio</th><th style="width:16%">Puntos</th></tr></thead>
+<tbody><tr><td colspan="3" style="background:#eaf0fb;font-weight:800;color:#0033A0">Bloque A · Presentación técnica de 7 minutos · 50 puntos</td></tr><tr><td><b>A1</b></td><td>Demostración de la API en vivo</td><td class="pts">15</td></tr><tr><td><b>A2</b></td><td>Justificación de las tecnologías empleadas</td><td class="pts">12</td></tr><tr><td><b>A3</b></td><td>Decisión monolito o distribuido</td><td class="pts">8</td></tr><tr><td><b>A4</b></td><td>Claridad técnica y tiempo</td><td class="pts">5</td></tr><tr><td><b>A5</b></td><td>Respuesta del integrante consultado</td><td class="pts">10</td></tr><tr><td colspan="3" style="background:#eaf0fb;font-weight:800;color:#0033A0">Bloque B · Documento técnico del back end · 50 puntos</td></tr><tr><td><b>B1</b></td><td>Trazabilidad con el Hito 1</td><td class="pts">8</td></tr><tr><td><b>B2</b></td><td>Diseño de la API REST</td><td class="pts">14</td></tr><tr><td><b>B3</b></td><td>Separación de responsabilidades y capas</td><td class="pts">12</td></tr><tr><td><b>B4</b></td><td>Persistencia y manejo de credenciales</td><td class="pts">10</td></tr><tr><td><b>B5</b></td><td>Referencias técnicas</td><td class="pts">6</td></tr></tbody></table>
+</div>
+<p>La rúbrica completa, con los cuatro niveles de logro descritos para cada criterio, está en la pestaña
+<b>Rúbricas</b>. La retroalimentación que recibirá el equipo se genera desde esa misma rúbrica, criterio por criterio.</p>
+<div class="note">
+<b>Retroalimentación garantizada.</b> Cada equipo recibe, dentro de los cinco días hábiles siguientes a la
+presentación, un informe con el nivel alcanzado en cada criterio, el puntaje, la nota, el factor individual de cada
+integrante con su evidencia, y una acción concreta de mejora por cada criterio que no llegó al nivel destacado.
+</div>
+</div>
+<div class="subpanel" id="s-h2-err">
+<h3 class="sub">Lo que hunde a los equipos todos los semestres</h3>
+<div class="grid2">
+<div class="card"><h3 class="sub">Programar antes de definir el contrato</h3>
+<p>Sin la tabla de recursos acordada, la interfaz y el servidor se construyen contra supuestos distintos y el
+Hito 3 se convierte en una reconstrucción completa.</p></div>
+<div class="card"><h3 class="sub">Devolver 200 para todo</h3>
+<p>Un error que llega con código de éxito rompe a quien consume el servicio. La mitad del trabajo de un servicio
+es responder bien cuando algo falla.</p></div>
+<div class="card"><h3 class="sub">Capas que son solo carpetas</h3>
+<p>Tres carpetas con toda la lógica dentro del controlador no es arquitectura en capas. Se detecta en dos minutos
+revisando un archivo.</p></div>
+<div class="card"><h3 class="sub">Credenciales en el repositorio</h3>
+<p>Es la falta más común y la más cara. Además de descontar puntos, obliga a rotar la credencial y a limpiar el
+historial. Revisen antes de cada carga.</p></div>
+<div class="card"><h3 class="sub">Demostrar con una grabación</h3>
+<p>Una grabación prueba que alguna vez funcionó. La evaluación pide que funcione ahora. Lleven el respaldo,
+pero ejecuten en vivo.</p></div>
+<div class="card"><h3 class="sub">Justificar por moda</h3>
+<p>Elegir una tecnología porque es lo que se usa ahora, sin criterios propios ni alternativa comparada, deja este
+criterio en el nivel más bajo por más que el código funcione.</p></div>
+</div>
+</div>
+</section>
+
+<section class="panel" id="p-h3">
+<div class="hero">
+  <h1>Hito 3 · El producto funciona o <span class="y">no existe</span></h1>
+  <p>Interfaz conectada al servicio, dato que sobrevive a la recarga, documentación al día, manual que otro puede seguir y un video de dos minutos que vende el producto sin que nadie tenga que explicarlo. Todo en GitHub.</p>
+  <div class="meta"><span>Producto funcional</span><span>Video de 2 minutos</span><span>Documentación final</span><span>Integración de las unidades 1 y 2</span></div>
+</div>
+
+<div class="grid3">
+  <div class="kpi"><span class="n">35 %</span><span class="l">Nota parcial N3 de la asignatura</span></div>
+  <div class="kpi"><span class="n">50 / 50</span><span class="l">Reparto entre presentación y entrega escrita</span></div>
+  <div class="kpi"><span class="n">10</span><span class="l">Criterios evaluados con rúbrica de cuatro niveles</span></div>
+</div>
+
+<div class="subtabs noprint" role="tablist">
+  <button class="subtab active" data-s="h3-obj">Qué se pide</button>
+  <button class="subtab" data-s="h3-paso">Paso a paso</button>
+  <button class="subtab" data-s="h3-ent">Entregables</button>
+  <button class="subtab" data-s="h3-eva">Cómo se evalúa</button>
+  <button class="subtab" data-s="h3-err">Errores que cuestan puntos</button>
+</div>
+<div class="subpanel active" id="s-h3-obj">
+<h3 class="sub">La situación</h3>
+<p>Último hito. Lo prometido en septiembre tiene que estar funcionando en diciembre: interfaz conectada al servicio,
+datos que persisten, errores manejados, documentación al día y un video de dos minutos que venda el producto sin
+que nadie tenga que explicarlo.</p>
+
+<h3 class="sub">Lo que se evalúa de verdad</h3>
+<p>Que el docente pueda tomar el teclado y recorrer el flujo principal completo sin ayuda del equipo. Ese es el
+estándar. Todo lo demás, diagramas, manuales y video, existe para respaldar ese momento.</p>
+
+<div class="grid2">
+<div class="card">
+<h3 class="sub">Mínimo funcional exigido</h3>
+<ul>
+<li>Un flujo principal completo desde la interfaz hasta la base de datos y de vuelta.</li>
+<li>El dato sobrevive a recargar la página o reabrir la aplicación.</li>
+<li>Validación en cliente y servidor, con mensajes en lenguaje de usuario.</li>
+<li>Estados de carga, vacío y error visibles en la interfaz.</li>
+<li>El proyecto se levanta en otro equipo siguiendo el archivo de instrucciones, o está publicado y accesible.</li>
+</ul>
+</div>
+<div class="card">
+<h3 class="sub">Reconocimiento adicional, no obligatorio</h3>
+<p>Estos elementos no suman puntos de rúbrica porque exceden el programa de la asignatura, pero se reconocen por
+escrito en la retroalimentación y pesan en la carta de recomendación de quien la solicite:</p>
+<ul>
+<li>Empaquetado en contenedores para levantar todo con un comando.</li>
+<li>Publicación en un servicio en la nube con dirección accesible.</li>
+<li>Pruebas automatizadas sobre la capa de negocio.</li>
+<li>Integración continua que ejecute las pruebas en cada carga.</li>
+</ul>
+</div>
+</div>
+
+<div class="note red">
+<b>Sin repositorio no hay Hito 3.</b> El producto se evalúa desde lo que está en GitHub en la fecha de cierre.
+Un proyecto que funciona en el notebook de un integrante pero no está en el repositorio se considera no entregado.
+</div>
+</div>
+<div class="subpanel" id="s-h3-paso"><h3 class="sub">Ruta de trabajo</h3><ol class="pasos">
+<li><b>Congelen el alcance<span class="cuando">semana 1</span></b>
+Elijan un flujo principal y ciérrenlo completo antes de tocar cualquier otra pantalla. Vale más un recorrido que
+funciona que cinco a medias.</li>
+
+<li><b>Conecten la interfaz al servicio real<span class="cuando">semana 1</span></b>
+Reemplacen los datos de ejemplo del prototipo por llamadas reales al servicio del Hito 2.
+Aquí aparecen los problemas del contrato mal definido: resuélvanlos y anótenlos en la bitácora.</li>
+
+<li><b>Cierren el ciclo completo del dato<span class="cuando">semana 2</span></b>
+El usuario escribe, el servicio guarda, la pantalla lo muestra y el dato sigue ahí después de recargar.
+Ese ciclo es el corazón del resultado de aprendizaje 3.</li>
+
+<li><b>Manejen los errores y los estados<span class="cuando">semana 2</span></b>
+Validen en cliente y en servidor, traduzcan cada error al lenguaje del usuario y agreguen los estados de carga
+y de lista vacía. Una pantalla en blanco es un error de diseño.</li>
+
+<li><b>Prueben la instalación en un equipo limpio<span class="cuando">semana 3</span></b>
+Pidan a otro equipo que instale su proyecto siguiendo el archivo de instrucciones y anoten dónde se traban.
+Lo que se traba es lo que falta documentar.</li>
+
+<li><b>Ordenen el repositorio<span class="cuando">semana 3</span></b>
+Archivo de instrucciones completo, ramas ordenadas, sin credenciales, sin carpetas de dependencias cargadas y
+con mensajes de confirmación legibles.</li>
+
+<li><b>Actualicen los diagramas y escriban la bitácora<span class="cuando">semana 3</span></b>
+Los diagramas finales deben coincidir con el código entregado. La bitácora lista cada decisión con fecha,
+alternativas evaluadas, motivo y lo que salió mal.</li>
+
+<li><b>Escriban el manual de uso e instalación<span class="cuando">semana 3</span></b>
+Requisitos, pasos, usuarios y datos de prueba, y las tres fallas más frecuentes con su solución.</li>
+
+<li><b>Graben el video de dos minutos<span class="cuando">semana 4</span></b>
+Estructura sugerida: 20 segundos de problema, 80 segundos de producto real funcionando, 20 segundos de promesa
+y cierre. Audio en un lugar silencioso, texto legible al proyectar, sin música ni imágenes de terceros sin crédito.</li>
+
+<li><b>Cierren la documentación final<span class="cuando">semana 4</span></b>
+Documento completo, en pasado y sobre lo construido, con las limitaciones declaradas, más el anexo de uso de
+inteligencia artificial y el análisis de datos personales.</li>
+
+<li><b>Ensayen la revisión<span class="cuando">antes de la sesión</span></b>
+El docente ejecutará el recorrido. Dejen el entorno listo, con datos de prueba cargados y sin pasos manuales
+ocultos que solo ustedes conocen.</li>
+</ol></div>
+<div class="subpanel" id="s-h3-ent">
+<div class="note red">
+<b>Cierre de entrega: viernes 27 de noviembre de 2026, 23:59.</b> Proyección de videos y revisión del producto
+durante la semana del 30 de noviembre al 4 de diciembre. Después de esa semana no se recibe ninguna corrección.
+</div>
+<h3 class="sub">Se entrega en el repositorio, antes del cierre</h3>
+<div class="tablewrap">
+<table><thead><tr><th style="width:26%">Entregable</th><th style="width:22%">Formato y ubicación</th><th>Condición mínima para ser recibido</th></tr></thead>
+<tbody>
+<tr><td><b>Producto funcional</b></td><td>Rama principal del repositorio</td>
+<td>Se levanta con el archivo de instrucciones o está publicado en una dirección accesible. Flujo principal completo.</td></tr>
+<tr><td><b>Documentación final</b></td><td>PDF en la carpeta <b>docs</b></td>
+<td>Estructura formal completa, diagramas al día, bitácora de decisiones y limitaciones declaradas.</td></tr>
+<tr><td><b>Manual de uso e instalación</b></td><td>Archivo en la carpeta <b>docs</b> y resumen en el archivo de instrucciones</td>
+<td>Requisitos, pasos, datos de prueba y fallas frecuentes.</td></tr>
+<tr><td><b>Video promocional</b></td><td>Enlace en el archivo de instrucciones, visible sin pedir permisos</td>
+<td>Duración máxima 2:00. Muestra el producto real funcionando.</td></tr>
+<tr><td><b>Anexo de uso de inteligencia artificial</b></td><td>Dentro de la documentación final</td>
+<td>Qué herramienta, en qué parte, y cómo se verificó el resultado.</td></tr>
+<tr><td><b>Análisis de datos personales</b></td><td>Dentro de la documentación final</td>
+<td>Qué datos personales trata el sistema, con qué finalidad y qué medidas aplicaron.</td></tr>
+</tbody></table>
+</div>
+
+<h3 class="sub">Se revisa en sala</h3>
+<div class="card">
+<p>La sesión final tiene dos partes. Primero se proyectan los videos de todos los equipos, sin comentarios.
+Después el docente recorre el producto de cada equipo, ejecutando él mismo el flujo principal, con el equipo presente
+para responder preguntas pero sin intervenir en el teclado.</p>
+<p>El video se evalúa por lo que muestra en sus primeros 120 segundos. Al segundo 121 la evaluación se detiene.</p>
+</div>
+</div>
+<div class="subpanel" id="s-h3-eva">
+<h3 class="sub">Reparto de los 100 puntos</h3>
+<div class="tablewrap">
+<table><thead><tr><th style="width:10%">Código</th><th>Criterio</th><th style="width:16%">Puntos</th></tr></thead>
+<tbody><tr><td colspan="3" style="background:#eaf0fb;font-weight:800;color:#0033A0">Bloque A · Producto funcional y repositorio · 50 puntos</td></tr><tr><td><b>A1</b></td><td>Recorrido completo de punta a punta</td><td class="pts">18</td></tr><tr><td><b>A2</b></td><td>Integración efectiva por capas</td><td class="pts">12</td></tr><tr><td><b>A3</b></td><td>Validación, errores y estados</td><td class="pts">8</td></tr><tr><td><b>A4</b></td><td>Ejecución reproducible o despliegue</td><td class="pts">7</td></tr><tr><td><b>A5</b></td><td>Repositorio e historial de trabajo</td><td class="pts">5</td></tr><tr><td colspan="3" style="background:#eaf0fb;font-weight:800;color:#0033A0">Bloque B · Documentación final y video promocional · 50 puntos</td></tr><tr><td><b>B1</b></td><td>Documento final completo</td><td class="pts">12</td></tr><tr><td><b>B2</b></td><td>Arquitectura final y evolución de decisiones</td><td class="pts">12</td></tr><tr><td><b>B3</b></td><td>Manual de uso e instalación</td><td class="pts">6</td></tr><tr><td><b>B4</b></td><td>Video promocional de máximo 2 minutos</td><td class="pts">14</td></tr><tr><td><b>B5</b></td><td>Uso de inteligencia artificial y datos personales</td><td class="pts">6</td></tr></tbody></table>
+</div>
+<p>La rúbrica completa, con los cuatro niveles de logro descritos para cada criterio, está en la pestaña
+<b>Rúbricas</b>. La retroalimentación que recibirá el equipo se genera desde esa misma rúbrica, criterio por criterio.</p>
+<div class="note">
+<b>Retroalimentación garantizada.</b> Cada equipo recibe, dentro de los cinco días hábiles siguientes a la
+presentación, un informe con el nivel alcanzado en cada criterio, el puntaje, la nota, el factor individual de cada
+integrante con su evidencia, y una acción concreta de mejora por cada criterio que no llegó al nivel destacado.
+</div>
+</div>
+<div class="subpanel" id="s-h3-err">
+<h3 class="sub">Lo que hunde a los equipos todos los semestres</h3>
+<div class="grid2">
+<div class="card"><h3 class="sub">Cinco pantallas a medias</h3>
+<p>El criterio de mayor peso es el recorrido completo de punta a punta. Un flujo cerrado vale más que cinco
+pantallas bonitas que no guardan nada.</p></div>
+<div class="card"><h3 class="sub">El famoso funciona en mi máquina</h3>
+<p>Si nadie más puede levantarlo, no es un producto. Prueben la instalación en un equipo limpio antes de entregar.</p></div>
+<div class="card"><h3 class="sub">Diagramas que ya no coinciden</h3>
+<p>Un diagrama desactualizado es peor que no tenerlo, porque induce a error a quien lea la documentación.</p></div>
+<div class="card"><h3 class="sub">Video de láminas</h3>
+<p>El video promocional muestra el producto funcionando. Grabar las láminas del Hito 1 con música de fondo deja
+el criterio en el nivel más bajo.</p></div>
+<div class="card"><h3 class="sub">Una sola carga al final</h3>
+<p>Un repositorio con una única confirmación no permite verificar autoría ni distribución del trabajo,
+y se refleja directamente en el factor individual de cada integrante.</p></div>
+<div class="card"><h3 class="sub">Documento que habla en futuro</h3>
+<p>Un informe final describe lo construido, no lo que se planeaba construir. Reescriban en pasado y sobre lo
+que existe, con las limitaciones declaradas.</p></div>
+</div>
+</div>
+</section>
+
+<section class="panel" id="p-rub">
+<div class="hero">
+  <h1>Rúbricas completas de los <span class="y">tres hitos</span></h1>
+  <p>Cuatro niveles por criterio, con descriptores observables. Un criterio se califica por lo que se ve en la entrega
+  o en la presentación, no por la impresión general. Esta rúbrica se publica antes de la primera entrega y no cambia
+  durante el semestre.</p>
+</div>
+
+<h2 class="sec"><span>Puertas de entrada</span><span class="badge">Se aplican antes de puntuar</span></h2>
+<div class="card">
+<p>Estas condiciones se verifican primero. Si alguna se activa, el resultado que indica reemplaza al puntaje calculado
+por rúbrica, y así se informa al equipo.</p>
+<div class="tablewrap">
+<table><thead><tr><th style="width:14%">Hitos</th><th style="width:50%">Condición</th><th>Efecto</th></tr></thead>
+<tbody><tr><td>H1, H2, H3</td><td>Sin repositorio en GitHub accesible al docente en la fecha de cierre</td><td><b>Entrega no recibida. Nota 1,0 en el hito.</b></td></tr><tr><td>H1, H2, H3</td><td>Entrega con retraso de hasta un día hábil</td><td><b>Se recibe con descuento de 20 puntos sobre el total del hito.</b></td></tr><tr><td>H1, H2, H3</td><td>Entrega con retraso mayor a un día hábil</td><td><b>No se recibe. Nota 1,0 en el hito.</b></td></tr><tr><td>H1</td><td>Cláusula de propuesta no identificable: al minuto 5:00 el evaluador no puede escribir qué venden, a quién y qué problema resuelven</td><td><b>Bloque A completo en 0 puntos.</b></td></tr><tr><td>H2, H3</td><td>El proyecto entregado no compila o el servicio no levanta con las instrucciones entregadas</td><td><b>Bloque A limitado a un máximo de 20 puntos.</b></td></tr><tr><td>H1, H2, H3</td><td>Plagio, referencias inexistentes o material de terceros presentado como propio</td><td><b>Nota 1,0 e informe a la Dirección de Escuela.</b></td></tr></tbody></table>
+</div>
+</div>
+
+<h2 class="sec"><span>Factor individual</span><span class="badge">Se aplica sobre la nota grupal</span></h2>
+<div class="card">
+<p>Nota individual igual a nota del grupo multiplicada por el factor, con piso 1,0. El factor se comunica junto con la
+nota, acompañado de la evidencia que lo sustenta: la respuesta a la pregunta sorteada y el historial de aportes en el
+repositorio.</p>
+<div class="tablewrap"><table><thead><tr><th style="width:16%">Factor</th><th>Situación observada</th></tr></thead>
+<tbody><tr><td class="pts">1,00</td><td>Responde con solvencia y su aporte es visible en el historial del repositorio.</td></tr><tr><td class="pts">0,90</td><td>Responde de forma parcial pero su aporte es visible en el historial.</td></tr><tr><td class="pts">0,70</td><td>No responde la pregunta, aunque su aporte es visible en el historial.</td></tr><tr><td class="pts">0,50</td><td>No responde y su aporte en el historial es marginal.</td></tr><tr><td class="pts">0,00</td><td>No se presenta a la evaluación sin justificación formal.</td></tr></tbody></table></div>
+</div>
+
+<h2 class="sec"><span>Hito 1 · La propuesta que se vende</span><span class="badge">Nota parcial N1 · 30 por ciento</span></h2>
+<div class="card"><p><b>Resultado de aprendizaje evaluado:</b> RDA 1 · Integra tecnologías de desarrollo Front-End<br><b>Contenido del programa:</b> Unidad 1 · Aspectos generales de la arquitectura de desarrollo web</p></div>
+<h3 class="sub">Bloque A · Presentación de 5 minutos · 50 puntos</h3>
+<div class="tablewrap"><table><thead><tr><th style="width:15%">Criterio</th><th style="width:7%">Puntos</th><th class="d" style="width:19%">Destacado · 100 %</th><th class="c" style="width:19%">Competente · 75 %</th><th class="e" style="width:20%">En desarrollo · 45 %</th><th class="i" style="width:20%">Insuficiente · 0 %</th></tr></thead><tbody>
+<tr><td><b>A1</b><br>Propuesta de valor</td><td class="pts">15</td><td class="lvl">En los primeros 90 segundos queda claro qué problema resuelven, para quién y qué prometen. La promesa es concreta y se puede verificar.</td><td class="lvl">La propuesta se entiende, pero el evaluador debe armar las piezas por su cuenta o la promesa recién aparece pasado el minuto tres.</td><td class="lvl">Describen el producto pero no el problema ni el destinatario. Queda como una lista de funciones.</td><td class="lvl">Al minuto 5:00 el evaluador no puede escribir en una línea qué venden, a quién y qué problema resuelven.</td></tr>
+<tr><td><b>A2</b><br>Prototipo en pantalla</td><td class="pts">10</td><td class="lvl">Muestran un prototipo navegable con al menos tres pantallas encadenadas y datos de ejemplo verosímiles.</td><td class="lvl">Muestran un prototipo navegable pero con pantallas sueltas o datos de relleno evidentes.</td><td class="lvl">Solo muestran imágenes estáticas o capturas dentro de las láminas.</td><td class="lvl">No hay prototipo.</td></tr>
+<tr><td><b>A3</b><br>Arquitectura de información visible</td><td class="pts">8</td><td class="lvl">Presentan el mapa del producto con secciones, jerarquía y rutas de navegación, y lo usan para explicar el recorrido del usuario.</td><td class="lvl">Presentan el mapa pero no lo conectan con el recorrido del usuario.</td><td class="lvl">Mencionan las secciones sin estructura ni jerarquía.</td><td class="lvl">La arquitectura de información no aparece.</td></tr>
+<tr><td><b>A4</b><br>Uso del tiempo y del formato</td><td class="pts">7</td><td class="lvl">Cierran entre 4:30 y 5:00, reparten la palabra entre todos los integrantes y no leen las láminas.</td><td class="lvl">Cierran dentro del tiempo pero hablan uno o dos integrantes, o leen buena parte del contenido.</td><td class="lvl">Se les corta a los 5:00 con contenido central sin mostrar.</td><td class="lvl">Se les corta a los 5:00 antes de mostrar la propuesta o el prototipo.</td></tr>
+<tr><td><b>A5</b><br>Respuesta del integrante consultado</td><td class="pts">10</td><td class="lvl">El integrante elegido al azar responde con precisión y conecta la respuesta con una decisión del equipo.</td><td class="lvl">Responde correctamente pero sin fundamento, o pide apoyo del grupo.</td><td class="lvl">Responde de forma vaga o contradice lo que el grupo acaba de presentar.</td><td class="lvl">No responde.</td></tr>
+</tbody></table></div>
+<h3 class="sub">Bloque B · Documento de propuesta · 50 puntos</h3>
+<div class="tablewrap"><table><thead><tr><th style="width:15%">Criterio</th><th style="width:7%">Puntos</th><th class="d" style="width:19%">Destacado · 100 %</th><th class="c" style="width:19%">Competente · 75 %</th><th class="e" style="width:20%">En desarrollo · 45 %</th><th class="i" style="width:20%">Insuficiente · 0 %</th></tr></thead><tbody>
+<tr><td><b>B1</b><br>Estructura formal completa</td><td class="pts">8</td><td class="lvl">Tapa, índice, introducción, desarrollo paginado, conclusión, bibliografía y anexos, con numeración y encabezados consistentes.</td><td class="lvl">Están todas las partes pero hay fallas de paginación, índice desactualizado o encabezados irregulares.</td><td class="lvl">Faltan una o dos partes obligatorias.</td><td class="lvl">Faltan tres o más partes obligatorias, o el documento es un conjunto de láminas exportadas.</td></tr>
+<tr><td><b>B2</b><br>Problema y evidencia</td><td class="pts">10</td><td class="lvl">El problema está dimensionado con datos verificables y citados de fuentes chilenas o sectoriales recientes, y se explica a quién afecta.</td><td class="lvl">Hay datos, pero de fuentes débiles o que no terminan de conectar con el problema.</td><td class="lvl">El problema se afirma sin evidencia.</td><td class="lvl">No hay problema definido, o se copia un caso conocido sin adaptación.</td></tr>
+<tr><td><b>B3</b><br>Arquitectura cliente servidor y capas</td><td class="pts">12</td><td class="lvl">Diagrama propio con cliente, servidor, capas y responsabilidades de cada una, más la explicación de qué ocurre en cada capa al ejecutar un caso de uso concreto.</td><td class="lvl">Diagrama correcto, pero la explicación se queda en la definición general y no recorre un caso de uso.</td><td class="lvl">Diagrama genérico copiado, sin relación con el producto propuesto.</td><td class="lvl">No hay arquitectura descrita.</td></tr>
+<tr><td><b>B4</b><br>Selección de lenguajes y frameworks</td><td class="pts">10</td><td class="lvl">Comparan al menos dos alternativas con criterios explícitos como curva de aprendizaje, soporte, comunidad, costo y compatibilidad móvil, y firman una decisión asumiendo su desventaja.</td><td class="lvl">Justifican la elección pero sin alternativa comparada o sin nombrar la desventaja que asumen.</td><td class="lvl">La justificación se reduce a popularidad o a que ya conocían la herramienta.</td><td class="lvl">Enumeran tecnologías sin justificar.</td></tr>
+<tr><td><b>B5</b><br>Presentación editorial y coherencia de marca</td><td class="pts">6</td><td class="lvl">El documento se lee como material de venta: identidad visual consistente, imágenes propias del prototipo y sin errores de ortografía ni de formato.</td><td class="lvl">Presentación cuidada con detalles sueltos: tipografías mezcladas, imágenes de baja resolución o algunos errores.</td><td class="lvl">Formato descuidado que dificulta la lectura.</td><td class="lvl">Documento sin formato, o con errores que impiden leerlo como pieza profesional.</td></tr>
+<tr><td><b>B6</b><br>Bibliografía y citas</td><td class="pts">4</td><td class="lvl">Referencias en norma APA séptima edición, citadas en el cuerpo y todas verificables.</td><td class="lvl">Referencias correctas pero con citas incompletas dentro del texto.</td><td class="lvl">Lista de enlaces sin norma ni citas en el cuerpo.</td><td class="lvl">Sin bibliografía, o con referencias que no existen.</td></tr>
+</tbody></table></div>
+<h2 class="sec"><span>Hito 2 · El motor que sostiene la promesa</span><span class="badge">Nota parcial N2 · 35 por ciento</span></h2>
+<div class="card"><p><b>Resultado de aprendizaje evaluado:</b> RDA 2 · Aplica en forma integrada las tecnologías de desarrollo de Back-End<br><b>Contenido del programa:</b> Unidad 2 · Arquitecturas monolíticas y distribuidas</p></div>
+<h3 class="sub">Bloque A · Presentación técnica de 7 minutos · 50 puntos</h3>
+<div class="tablewrap"><table><thead><tr><th style="width:15%">Criterio</th><th style="width:7%">Puntos</th><th class="d" style="width:19%">Destacado · 100 %</th><th class="c" style="width:19%">Competente · 75 %</th><th class="e" style="width:20%">En desarrollo · 45 %</th><th class="i" style="width:20%">Insuficiente · 0 %</th></tr></thead><tbody>
+<tr><td><b>A1</b><br>Demostración de la API en vivo</td><td class="pts">15</td><td class="lvl">Ejecutan al menos cuatro peticiones reales contra su servidor, cubriendo crear, leer, actualizar y borrar, y muestran el código de estado y el dato ya guardado.</td><td class="lvl">Ejecutan peticiones reales pero solo de lectura, o no muestran que el dato quedó guardado.</td><td class="lvl">Muestran capturas o una grabación en lugar de ejecutar en vivo.</td><td class="lvl">No hay demostración, o el servidor no levanta.</td></tr>
+<tr><td><b>A2</b><br>Justificación de las tecnologías empleadas</td><td class="pts">12</td><td class="lvl">Explican lenguaje, framework y motor de datos con criterios declarados y contrastados, y dicen qué costo asumen por cada elección.</td><td class="lvl">Explican las elecciones con criterios generales, sin costos ni alternativas.</td><td class="lvl">Justifican por moda, por un tutorial o por comodidad.</td><td class="lvl">No justifican las tecnologías empleadas.</td></tr>
+<tr><td><b>A3</b><br>Decisión monolito o distribuido</td><td class="pts">8</td><td class="lvl">Toman postura y la sostienen con carga esperada, tamaño del equipo, costo de operación y complejidad de despliegue.</td><td class="lvl">Toman postura con uno o dos argumentos válidos.</td><td class="lvl">Repiten definiciones de clase sin aplicarlas a su caso.</td><td class="lvl">No abordan la decisión.</td></tr>
+<tr><td><b>A4</b><br>Claridad técnica y tiempo</td><td class="pts">5</td><td class="lvl">Cierran dentro de los 7 minutos, reparten la palabra y usan vocabulario técnico correcto.</td><td class="lvl">Cierran dentro del tiempo con imprecisiones de vocabulario.</td><td class="lvl">Se les corta con contenido central pendiente.</td><td class="lvl">Presentación inconexa o sin estructura reconocible.</td></tr>
+<tr><td><b>A5</b><br>Respuesta del integrante consultado</td><td class="pts">10</td><td class="lvl">El integrante elegido al azar explica una parte del código propio y por qué está escrita así.</td><td class="lvl">Explica qué hace el código pero no por qué se decidió así.</td><td class="lvl">Reconoce el código pero no puede explicarlo.</td><td class="lvl">No responde, o desconoce el código que su grupo entregó.</td></tr>
+</tbody></table></div>
+<h3 class="sub">Bloque B · Documento técnico del back end · 50 puntos</h3>
+<div class="tablewrap"><table><thead><tr><th style="width:15%">Criterio</th><th style="width:7%">Puntos</th><th class="d" style="width:19%">Destacado · 100 %</th><th class="c" style="width:19%">Competente · 75 %</th><th class="e" style="width:20%">En desarrollo · 45 %</th><th class="i" style="width:20%">Insuficiente · 0 %</th></tr></thead><tbody>
+<tr><td><b>B1</b><br>Trazabilidad con el Hito 1</td><td class="pts">8</td><td class="lvl">Sección de cambios que declara qué se movió respecto del Hito 1, por qué y qué impacto tuvo.</td><td class="lvl">Declaran cambios sin explicar el motivo o el impacto.</td><td class="lvl">Mencionan que hubo cambios sin detallarlos.</td><td class="lvl">El documento ignora el Hito 1 o se contradice con él.</td></tr>
+<tr><td><b>B2</b><br>Diseño de la API REST</td><td class="pts">14</td><td class="lvl">Tabla de recursos con verbos, rutas, parámetros, cuerpo de ejemplo, códigos de estado de éxito y de error, y criterio de versionado.</td><td class="lvl">Tabla completa de rutas y verbos, pero con códigos de error incompletos o sin ejemplos de carga útil.</td><td class="lvl">Lista de rutas sin contrato ni códigos de estado.</td><td class="lvl">No hay diseño de API documentado.</td></tr>
+<tr><td><b>B3</b><br>Separación de responsabilidades y capas</td><td class="pts">12</td><td class="lvl">Muestran la estructura de carpetas indicando qué archivo corresponde a cada capa, con el recorrido completo de una petición desde la ruta hasta la base de datos.</td><td class="lvl">Describen las capas y la estructura, sin recorrer una petición completa.</td><td class="lvl">Afirman tener capas, pero el código muestra lógica de negocio en el controlador o consultas dentro de la vista.</td><td class="lvl">No hay separación ni descripción de capas.</td></tr>
+<tr><td><b>B4</b><br>Persistencia y manejo de credenciales</td><td class="pts">10</td><td class="lvl">Modelo de datos con claves, relaciones y tipos, script de creación reproducible, y credenciales fuera del repositorio con un archivo de ejemplo.</td><td class="lvl">Modelo correcto, pero sin script reproducible o sin documentar cómo configurar las credenciales.</td><td class="lvl">Modelo incompleto, o credenciales escritas dentro del código.</td><td class="lvl">Sin persistencia real, o con credenciales expuestas en un repositorio público.</td></tr>
+<tr><td><b>B5</b><br>Referencias técnicas</td><td class="pts">6</td><td class="lvl">Citan la documentación oficial de cada tecnología usada, en norma, y la usan para sostener decisiones.</td><td class="lvl">Citan documentación oficial, pero de manera decorativa.</td><td class="lvl">Citan solo blogs, videos o foros.</td><td class="lvl">Sin referencias.</td></tr>
+</tbody></table></div>
+<h2 class="sec"><span>Hito 3 · El producto que funciona</span><span class="badge">Nota parcial N3 · 35 por ciento</span></h2>
+<div class="card"><p><b>Resultado de aprendizaje evaluado:</b> RDA 3 · Integra Front-End y Back-End en arquitectura por capas<br><b>Contenido del programa:</b> Integración de las unidades 1 y 2</p></div>
+<h3 class="sub">Bloque A · Producto funcional y repositorio · 50 puntos</h3>
+<div class="tablewrap"><table><thead><tr><th style="width:15%">Criterio</th><th style="width:7%">Puntos</th><th class="d" style="width:19%">Destacado · 100 %</th><th class="c" style="width:19%">Competente · 75 %</th><th class="e" style="width:20%">En desarrollo · 45 %</th><th class="i" style="width:20%">Insuficiente · 0 %</th></tr></thead><tbody>
+<tr><td><b>A1</b><br>Recorrido completo de punta a punta</td><td class="pts">18</td><td class="lvl">El evaluador ejecuta el flujo principal completo sin ayuda del equipo: la interfaz llama al servicio, el servicio guarda y el dato vuelve a la pantalla y sobrevive a una recarga.</td><td class="lvl">El flujo funciona con una intervención menor del equipo, o con un paso simulado.</td><td class="lvl">Funcionan partes sueltas: la interfaz no conversa con el servicio, o el dato no persiste.</td><td class="lvl">El producto no se ejecuta, o solo existe la maqueta del Hito 1.</td></tr>
+<tr><td><b>A2</b><br>Integración efectiva por capas</td><td class="pts">12</td><td class="lvl">La capa de presentación no contiene reglas de negocio ni consultas, la de negocio es reutilizable y la de datos queda aislada tras un repositorio o interfaz.</td><td class="lvl">Las capas existen, pero se filtra alguna responsabilidad entre ellas.</td><td class="lvl">Hay archivos separados, pero la lógica está mezclada.</td><td class="lvl">Todo el código vive en un archivo o dentro del controlador.</td></tr>
+<tr><td><b>A3</b><br>Validación, errores y estados</td><td class="pts">8</td><td class="lvl">Validan la entrada en cliente y servidor, devuelven mensajes claros con el código correcto, y la interfaz muestra los estados de carga, vacío y error.</td><td class="lvl">Validan y manejan errores en el servidor, con retroalimentación limitada en la interfaz.</td><td class="lvl">Validación mínima: los errores llegan al usuario como fallas técnicas.</td><td class="lvl">Sin validación: el producto se cae con una entrada inválida.</td></tr>
+<tr><td><b>A4</b><br>Ejecución reproducible o despliegue</td><td class="pts">7</td><td class="lvl">El proyecto se levanta siguiendo el archivo de instrucciones al primer intento, o está publicado en una dirección accesible que funciona.</td><td class="lvl">Se levanta con ajustes menores que no estaban documentados.</td><td class="lvl">Se levanta solo en el equipo del grupo.</td><td class="lvl">No se puede ejecutar con lo entregado.</td></tr>
+<tr><td><b>A5</b><br>Repositorio e historial de trabajo</td><td class="pts">5</td><td class="lvl">Historial con aportes de todos los integrantes distribuidos a lo largo del semestre, mensajes legibles, uso de ramas, archivo de instrucciones completo y sin credenciales.</td><td class="lvl">Historial completo pero concentrado en pocos integrantes o en los últimos días.</td><td class="lvl">Repositorio con dos o tres cargas masivas de archivos.</td><td class="lvl">Repositorio con una sola carga final.</td></tr>
+</tbody></table></div>
+<h3 class="sub">Bloque B · Documentación final y video promocional · 50 puntos</h3>
+<div class="tablewrap"><table><thead><tr><th style="width:15%">Criterio</th><th style="width:7%">Puntos</th><th class="d" style="width:19%">Destacado · 100 %</th><th class="c" style="width:19%">Competente · 75 %</th><th class="e" style="width:20%">En desarrollo · 45 %</th><th class="i" style="width:20%">Insuficiente · 0 %</th></tr></thead><tbody>
+<tr><td><b>B1</b><br>Documento final completo</td><td class="pts">12</td><td class="lvl">Tapa, índice, introducción, desarrollo, conclusión, bibliografía y anexos, con el estado real del producto y sus limitaciones declaradas.</td><td class="lvl">Documento completo, pero describe lo planificado en lugar de lo construido.</td><td class="lvl">Faltan partes obligatorias, o el contenido repite el Hito 2 sin actualizar.</td><td class="lvl">Documento ausente o irreconocible como informe.</td></tr>
+<tr><td><b>B2</b><br>Arquitectura final y evolución de decisiones</td><td class="pts">12</td><td class="lvl">Diagramas finales al día, con la bitácora de decisiones y qué cambió desde el Hito 1, incluyendo lo que salió mal y cómo lo resolvieron.</td><td class="lvl">Diagramas al día, pero sin bitácora de decisiones.</td><td class="lvl">Diagramas desactualizados respecto del código entregado.</td><td class="lvl">Sin diagramas, o diagramas tomados de fuentes ajenas.</td></tr>
+<tr><td><b>B3</b><br>Manual de uso e instalación</td><td class="pts">6</td><td class="lvl">Un tercero instala y usa el producto siguiendo el manual, con requisitos, pasos, datos de prueba y solución de fallas frecuentes.</td><td class="lvl">Manual correcto, pero sin datos de prueba ni fallas frecuentes.</td><td class="lvl">Instrucciones incompletas que obligan a adivinar.</td><td class="lvl">Sin manual.</td></tr>
+<tr><td><b>B4</b><br>Video promocional de máximo 2 minutos</td><td class="pts">14</td><td class="lvl">Dura hasta 2:00. Abre con el problema, muestra el producto real funcionando y cierra con la promesa. Audio audible, imagen legible y sin material de terceros sin crédito.</td><td class="lvl">Dentro del tiempo y con demostración real, pero con problemas de audio, de ritmo o sin cierre.</td><td class="lvl">Excede los 2:00, o muestra láminas en vez del producto.</td><td class="lvl">Sin video, o el video no muestra el producto.</td></tr>
+<tr><td><b>B5</b><br>Uso de inteligencia artificial y datos personales</td><td class="pts">6</td><td class="lvl">Anexo que declara qué herramientas usaron, en qué partes y cómo verificaron el resultado, más el análisis de qué datos personales trata el sistema y qué medidas aplicaron.</td><td class="lvl">Declaran uso de herramientas y datos, sin verificación ni medidas concretas.</td><td class="lvl">Declaración genérica de una línea.</td><td class="lvl">Sin declaración, o declaración desmentida durante la defensa.</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="panel" id="p-eva">
+<div class="hero">
+  <h1>Herramientas de la <span class="y">sesión de evaluación</span></h1>
+  <p>Cronómetro para el corte de tiempo, sorteo del integrante que responde y evaluador que calcula el puntaje, la nota
+  y arma la retroalimentación escrita criterio por criterio. Todo funciona sin conexión y nada sale de este equipo.</p>
+</div>
+
+<h2 class="sec"><span>Cronómetro de presentación</span><span class="badge">Tecla T inicia y pausa</span></h2>
+<div class="timer noprint">
+  <div id="tdisp">05:00</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <button class="btn" id="tStart">Iniciar</button>
+    <button class="btn ghost" id="tReset">Reiniciar</button>
+    <select id="tPreset" aria-label="Duración del cronómetro">
+      <option value="300">5:00 · pitch Hito 1</option>
+      <option value="420">7:00 · presentación Hito 2</option>
+      <option value="120">2:00 · video Hito 3</option>
+      <option value="60">1:00 · preguntas</option>
+    </select>
+  </div>
+  <div style="font-size:var(--fs-micro);opacity:.75;max-width:44ch">
+    Al llegar a cero el reloj sigue contando en rojo para dejar registro del exceso. La presentación se detiene igual.
+  </div>
+</div>
+
+<h2 class="sec"><span>Sorteo del integrante que responde</span><span class="badge">Tecla N sortea</span></h2>
+<div class="picker noprint">
+  <label style="font-size:var(--fs-micro);font-weight:700;opacity:.85">Integrantes del equipo, separados por coma</label>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 14px">
+    <input type="text" id="members" style="flex:1;min-width:260px" placeholder="Nombre 1, Nombre 2, Nombre 3, Nombre 4, Nombre 5"/>
+    <button class="btn" id="pickBtn">Sortear</button>
+  </div>
+  <div id="pickout">Sin sorteo</div>
+</div>
+
+<h2 class="sec"><span>Evaluador con generación de retroalimentación</span><span class="badge">Modo docente</span></h2>
+<div class="card noprint">
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+    <div><label style="font-size:var(--fs-micro);font-weight:700;display:block;margin-bottom:4px">Hito</label>
+      <select id="evHito"><option value="h1">Hito 1 · Propuesta</option><option value="h2">Hito 2 · Back end</option><option value="h3">Hito 3 · Producto</option></select></div>
+    <div style="flex:1;min-width:220px"><label style="font-size:var(--fs-micro);font-weight:700;display:block;margin-bottom:4px">Equipo</label>
+      <input type="text" id="evTeam" style="width:100%" placeholder="Nombre del equipo"/></div>
+    <button class="btn" id="evReset">Limpiar selección</button>
+  </div>
+  <div id="evPuertas" style="margin-top:16px"></div>
+</div>
+
+<div id="evBody" class="noprint"></div>
+
+<div class="scorebar noprint">
+  <div><div class="lab">Puntaje</div><div class="big" id="scPts">0</div></div>
+  <div><div class="lab">Nota del grupo</div><div class="big" id="scNota">1,0</div></div>
+  <div><div class="lab">Estado</div><div class="lab" id="scEstado" style="font-size:var(--fs-small);font-weight:800">Sin evaluar</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" id="genFb">Generar retroalimentación</button>
+    <button class="btn ghost" id="copyFb">Copiar</button>
+  </div>
+</div>
+
+<h2 class="sec"><span>Retroalimentación para el equipo</span><span class="badge">Editable antes de enviar</span></h2>
+<div class="card noprint">
+  <p style="font-size:var(--fs-micro);color:var(--text-muted);margin-bottom:10px">
+  El texto se arma con el nivel alcanzado en cada criterio y la acción de mejora asociada. Se puede editar antes de
+  copiarlo al informe del equipo.</p>
+  <textarea id="fbout" spellcheck="false" aria-label="Retroalimentación generada"></textarea>
+</div>
+</section>
+
+<section class="panel" id="p-anx">
+<div class="hero">
+  <h1>Reglas de formato, repositorio e <span class="y">integridad académica</span></h1>
+  <p>Todo lo que se da por sabido y después cuesta puntos. Léanlo una vez al inicio del semestre y vuelvan antes de
+  cada entrega.</p>
+</div>
+
+<h2 class="sec"><span>Anexo A · Formato obligatorio del documento</span><span class="badge">Los tres hitos</span></h2>
+<div class="card">
+<ol class="pasos">
+<li><b>Tapa</b>Universidad, facultad, escuela, asignatura y código, título del proyecto, nombre del equipo, integrantes
+en orden alfabético por apellido, docente, ciudad y fecha. Sin decoración que tape la información.</li>
+<li><b>Índice</b>Generado automáticamente, con numeración de páginas concordante. Un índice desactualizado descuenta.</li>
+<li><b>Introducción</b>Contexto, problema, objetivo del documento y qué encontrará el lector. Entre media y una página.</li>
+<li><b>Desarrollo</b>El cuerpo del trabajo, con títulos numerados, figuras y tablas con leyenda y numeración,
+y referencia a cada figura desde el texto.</li>
+<li><b>Conclusión</b>Qué se logró, qué quedó pendiente y qué aprendieron. No es un resumen del desarrollo.</li>
+<li><b>Bibliografía</b>Norma APA séptima edición, ordenada alfabéticamente, con todas las fuentes citadas en el cuerpo.</li>
+<li><b>Anexos</b>Material de respaldo: capturas, tablas extensas, declaración de uso de inteligencia artificial.</li>
+</ol>
+<p style="margin-top:14px"><b>Formato:</b> tamaño carta, márgenes de 2,5 centímetros, cuerpo de 11 o 12 puntos,
+interlineado 1,15 o 1,5, páginas numeradas desde la introducción. Se entrega en PDF. No se reciben archivos editables
+como entrega final ni documentos exportados desde láminas de presentación.</p>
+</div>
+
+<h2 class="sec"><span>Anexo B · Reglas del repositorio</span><span class="badge">Obligatorio desde septiembre</span></h2>
+<div class="grid2">
+<div class="card">
+<h3 class="sub">Estructura mínima</h3>
+<ul>
+<li><b>README.md</b> en la raíz, con nombre del proyecto, promesa en una frase, integrantes con su usuario, instrucciones de instalación y enlaces a documentos y video.</li>
+<li><b>docs</b> con los documentos en PDF, diagramas e imágenes.</li>
+<li><b>db</b> con el modelo de datos y el script de creación.</li>
+<li>Código fuente organizado por capas.</li>
+<li><b>.gitignore</b> que excluya dependencias, archivos de entorno y artefactos de compilación.</li>
+<li><b>.env.example</b> con todas las variables necesarias y valores de ejemplo.</li>
+</ul>
+</div>
+<div class="card">
+<h3 class="sub">Cómo se trabaja</h3>
+<ul>
+<li>Todos los integrantes deben aparecer como colaboradores desde el inicio del proyecto.</li>
+<li>Confirmaciones frecuentes y pequeñas, con mensajes que expliquen el cambio.</li>
+<li>Una rama por funcionalidad y unión a la rama principal mediante solicitud de incorporación revisada por otro integrante.</li>
+<li>Ninguna credencial, clave ni dato personal real dentro del repositorio.</li>
+<li>El docente debe tener acceso de lectura desde el primer día.</li>
+</ul>
+<p><b>El historial es evidencia.</b> Se usa para determinar el factor individual, así que cada integrante debe cargar
+su propio trabajo con su propia cuenta.</p>
+</div>
+</div>
+
+<h2 class="sec"><span>Anexo C · Uso de inteligencia artificial</span><span class="badge">Permitido y declarado</span></h2>
+<div class="card">
+<p>El uso de asistentes de inteligencia artificial está permitido en las tres entregas. Lo que se evalúa es el
+criterio de ingeniería, y ese no se autocompleta.</p>
+<ul>
+<li><b>Se declara</b> en un anexo: qué herramienta, en qué parte del trabajo y cómo se verificó el resultado.</li>
+<li><b>Se verifica</b>: toda cita, cifra o referencia generada debe comprobarse en la fuente original. Una referencia inexistente activa el protocolo de integridad académica.</li>
+<li><b>Se explica</b>: cualquier integrante debe poder explicar cualquier parte del código entregado. La pregunta sorteada existe para verificarlo.</li>
+<li><b>No se acepta</b> entregar texto o código que el equipo no comprende, aunque funcione.</li>
+</ul>
+</div>
+
+<h2 class="sec"><span>Anexo D · Datos personales</span><span class="badge">Ley 21.719</span></h2>
+<div class="card">
+<p>La Ley 21.719 sobre protección de datos personales entra en vigencia plena en Chile el 1 de diciembre de 2026,
+dentro de este semestre. Todo proyecto que trate datos de personas debe incluir en su documentación final:</p>
+<ul>
+<li>Qué datos personales trata el sistema y con qué finalidad declarada.</li>
+<li>Por qué esos datos son necesarios y no otros, aplicando el criterio de minimización.</li>
+<li>Qué medidas técnicas aplicaron: control de acceso, cifrado de contraseñas, registro de accesos.</li>
+<li>Qué pasa si el usuario pide eliminar sus datos.</li>
+</ul>
+<p><b>En las evaluaciones se usan datos ficticios.</b> No se cargan datos reales de personas al repositorio ni a los
+entornos de prueba, en ninguna circunstancia.</p>
+</div>
+
+<h2 class="sec"><span>Anexo E · Integridad académica y apelación</span><span class="badge">Procedimiento</span></h2>
+<div class="grid2">
+<div class="card">
+<h3 class="sub">Qué activa el protocolo</h3>
+<ul>
+<li>Texto, código o diagramas de terceros presentados como propios.</li>
+<li>Referencias bibliográficas que no existen o que no dicen lo que se les atribuye.</li>
+<li>Declaración de uso de inteligencia artificial desmentida durante la defensa.</li>
+<li>Historial de repositorio manipulado para simular aportes.</li>
+</ul>
+<p>Consecuencia: nota 1,0 en el hito e informe a la Dirección de Escuela, según el reglamento del estudiante.</p>
+</div>
+<div class="card">
+<h3 class="sub">Cómo se apela una calificación</h3>
+<ul>
+<li>Plazo: cinco días hábiles desde la publicación de la nota.</li>
+<li>Forma: por escrito al docente, indicando el criterio específico de la rúbrica y la evidencia de la entrega que respalda un nivel distinto.</li>
+<li>No se revisan apelaciones sobre la impresión general del trabajo ni sobre la nota completa, solo sobre criterios identificados.</li>
+<li>La respuesta se entrega por escrito dentro de cinco días hábiles.</li>
+</ul>
+</div>
+</div>
+
+<h2 class="sec"><span>Anexo F · Bibliografía del proyecto</span><span class="badge">Programa de la asignatura</span></h2>
+<div class="card">
+<h3 class="sub">Básica</h3>
+<ul>
+<li>Pressman, R. S. (2009). <i>Ingeniería de software, un enfoque práctico</i>. McGraw Hill.</li>
+<li>Vara Mesa, J. M., Verde Marín, J. y López Sanz, M. (2015). <i>Desarrollo web en entorno servidor</i>. RA-MA Editorial.</li>
+<li>Vara Mesa, J. M. y Granada, D. (2015). <i>Desarrollo web en entorno cliente</i>. RA-MA Editorial.</li>
+<li>Zofío Jiménez, J. (2013). <i>Aplicaciones web</i>. Macmillan Iberia.</li>
+</ul>
+<h3 class="sub">Complementaria</h3>
+<ul>
+<li>Pérez-Montoro Gutiérrez, M. (2010). <i>Arquitectura de la información en entornos web</i>. Ediciones Trea.</li>
+<li>Cardador Cabello, A. L. (2015). <i>Desarrollo de aplicaciones web distribuidas (UF1846)</i>. IC Editorial.</li>
+<li>Granados La Paz, R. L. (2015). <i>Desarrollo de aplicaciones web en el entorno servidor (UF1844)</i>. IC Editorial.</li>
+<li>W3Schools. Recursos de aprendizaje complementarios. https://www.w3schools.com/</li>
+</ul>
+<p style="font-size:var(--fs-micro);color:var(--text-muted)">Los textos de la bibliografía básica y complementaria
+están disponibles en la biblioteca digital de la Universidad Mayor con las credenciales institucionales.</p>
+</div>
+</section>
+
+</main>
+<footer>
+  Universidad Mayor · Facultad de Ciencias, Ingeniería y Tecnología · Escuela de Ingeniería Civil
+  <div class="fine">INGT1003 Arquitectura de Desarrollo (Móvil y Web) · Proyecto semestral · Segundo semestre 2026 ·
+  Prof. Carlos Muñoz S. · Teclas: H modo lápiz, T cronómetro, N sorteo</div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+var RUB = {"h1": {"cod": "H1", "titulo": "Hito 1 · La propuesta que se vende", "sap": "Nota parcial N1 · 30 por ciento", "rda": "RDA 1 · Integra tecnologías de desarrollo Front-End", "unidad": "Unidad 1 · Aspectos generales de la arquitectura de desarrollo web", "bloques": [{"id": "A", "nombre": "Presentación de 5 minutos", "pts": 50, "criterios": [{"id": "A1", "nombre": "Propuesta de valor", "pts": 15, "niveles": {"d": "En los primeros 90 segundos queda claro qué problema resuelven, para quién y qué prometen. La promesa es concreta y se puede verificar.", "c": "La propuesta se entiende, pero el evaluador debe armar las piezas por su cuenta o la promesa recién aparece pasado el minuto tres.", "e": "Describen el producto pero no el problema ni el destinatario. Queda como una lista de funciones.", "i": "Al minuto 5:00 el evaluador no puede escribir en una línea qué venden, a quién y qué problema resuelven."}, "fb": {"d": "Mantengan esa apertura para el Hito 2: la primera frase decide si el resto se escucha.", "c": "Reordenen: problema, afectado, promesa, y recién después la solución. Ensayen los primeros 90 segundos hasta que salgan sin láminas.", "e": "Una lista de funciones no vende. Escriban una sola frase con la fórmula: para [quién] que sufre [problema], nuestro producto [promesa medible].", "i": "Aplica la cláusula de propuesta no identificable. Antes del Hito 2 deben validar la frase de propuesta con el docente en horario de consulta."}}, {"id": "A2", "nombre": "Prototipo en pantalla", "pts": 10, "niveles": {"d": "Muestran un prototipo navegable con al menos tres pantallas encadenadas y datos de ejemplo verosímiles.", "c": "Muestran un prototipo navegable pero con pantallas sueltas o datos de relleno evidentes.", "e": "Solo muestran imágenes estáticas o capturas dentro de las láminas.", "i": "No hay prototipo."}, "fb": {"d": "El prototipo ya sostiene la demostración. Congelen ese flujo: es el que deben hacer funcionar de verdad en el Hito 3.", "c": "Encadenen las pantallas en un flujo único y reemplacen los datos de relleno por casos reales de su dominio.", "e": "Las capturas no demuestran navegación. Armen el prototipo en una herramienta que permita hacer clic y recorrer tres pantallas.", "i": "Sin prototipo no hay nada que evaluar en este criterio. Es requisito de entrada del Hito 2."}}, {"id": "A3", "nombre": "Arquitectura de información visible", "pts": 8, "niveles": {"d": "Presentan el mapa del producto con secciones, jerarquía y rutas de navegación, y lo usan para explicar el recorrido del usuario.", "c": "Presentan el mapa pero no lo conectan con el recorrido del usuario.", "e": "Mencionan las secciones sin estructura ni jerarquía.", "i": "La arquitectura de información no aparece."}, "fb": {"d": "Ese mapa es la base del ruteo del Hito 2. Consérvenlo versionado en el repositorio.", "c": "Recorran el mapa contando la historia de un usuario concreto que entra, busca y completa una acción.", "e": "Agrupen las secciones por afinidad, definan niveles y dibujen el árbol. Sin jerarquía no hay navegación que diseñar.", "i": "Este contenido es central en la Unidad 1. Debe aparecer en el documento del Hito 2 como corrección."}}, {"id": "A4", "nombre": "Uso del tiempo y del formato", "pts": 7, "niveles": {"d": "Cierran entre 4:30 y 5:00, reparten la palabra entre todos los integrantes y no leen las láminas.", "c": "Cierran dentro del tiempo pero hablan uno o dos integrantes, o leen buena parte del contenido.", "e": "Se les corta a los 5:00 con contenido central sin mostrar.", "i": "Se les corta a los 5:00 antes de mostrar la propuesta o el prototipo."}, "fb": {"d": "El control del tiempo es una destreza profesional. Repitan el mismo ensayo cronometrado en el Hito 2.", "c": "Repartan la exposición: cada integrante toma un tramo y lo defiende. Leer la lámina resta y se nota desde la primera fila.", "e": "Ensayen con cronómetro y corten contenido antes de presentar. Lo que no cabe en 5 minutos va al documento.", "i": "Presentar sin ensayo cronometrado cuesta el bloque completo. Ensayen tres veces con reloj antes del Hito 2."}}, {"id": "A5", "nombre": "Respuesta del integrante consultado", "pts": 10, "niveles": {"d": "El integrante elegido al azar responde con precisión y conecta la respuesta con una decisión del equipo.", "c": "Responde correctamente pero sin fundamento, o pide apoyo del grupo.", "e": "Responde de forma vaga o contradice lo que el grupo acaba de presentar.", "i": "No responde."}, "fb": {"d": "El equipo demuestra trabajo repartido. Sostengan esa práctica: cada integrante debe poder explicar el todo.", "c": "Antes de presentar, háganse las preguntas entre ustedes. Saber la respuesta y saber fundamentarla no es lo mismo.", "e": "La contradicción entre lo presentado y lo respondido indica que el trabajo no se compartió. Corrijan la distribución de tareas ahora.", "i": "Se aplica el factor individual al integrante consultado y el bloque pierde estos puntos para todo el grupo."}}]}, {"id": "B", "nombre": "Documento de propuesta", "pts": 50, "criterios": [{"id": "B1", "nombre": "Estructura formal completa", "pts": 8, "niveles": {"d": "Tapa, índice, introducción, desarrollo paginado, conclusión, bibliografía y anexos, con numeración y encabezados consistentes.", "c": "Están todas las partes pero hay fallas de paginación, índice desactualizado o encabezados irregulares.", "e": "Faltan una o dos partes obligatorias.", "i": "Faltan tres o más partes obligatorias, o el documento es un conjunto de láminas exportadas."}, "fb": {"d": "La forma está resuelta. Reutilicen esta plantilla en los dos hitos siguientes.", "c": "Actualicen el índice automático y unifiquen estilos de título antes de exportar a PDF.", "e": "Las partes faltantes están enumeradas en el anexo de formato de este documento. No son opcionales.", "i": "Un documento profesional no se arma exportando láminas. Rehagan la estructura completa para el Hito 2."}}, {"id": "B2", "nombre": "Problema y evidencia", "pts": 10, "niveles": {"d": "El problema está dimensionado con datos verificables y citados de fuentes chilenas o sectoriales recientes, y se explica a quién afecta.", "c": "Hay datos, pero de fuentes débiles o que no terminan de conectar con el problema.", "e": "El problema se afirma sin evidencia.", "i": "No hay problema definido, o se copia un caso conocido sin adaptación."}, "fb": {"d": "La evidencia sostiene la propuesta. Vuelvan a esos datos en la conclusión del Hito 3 para medir la promesa.", "c": "Reemplacen las fuentes secundarias por fuentes primarias: instituciones, estudios sectoriales o datos abiertos del Estado.", "e": "Una afirmación sin dato es una opinión. Busquen al menos dos cifras que dimensionen el problema y cítenlas.", "i": "Sin problema definido no hay proyecto. Deben acordar el problema con el docente antes del Hito 2."}}, {"id": "B3", "nombre": "Arquitectura cliente servidor y capas", "pts": 12, "niveles": {"d": "Diagrama propio con cliente, servidor, capas y responsabilidades de cada una, más la explicación de qué ocurre en cada capa al ejecutar un caso de uso concreto.", "c": "Diagrama correcto, pero la explicación se queda en la definición general y no recorre un caso de uso.", "e": "Diagrama genérico copiado, sin relación con el producto propuesto.", "i": "No hay arquitectura descrita."}, "fb": {"d": "Ese diagrama es el contrato del semestre. Todo cambio posterior debe quedar registrado en la bitácora de decisiones.", "c": "Tomen un caso de uso, por ejemplo el registro de un usuario, y describan qué hace cada capa en ese recorrido.", "e": "Un diagrama copiado no describe su sistema. Redibujen usando los nombres reales de sus componentes.", "i": "Este es el contenido central de la Unidad 1. Debe aparecer completo en el Hito 2."}}, {"id": "B4", "nombre": "Selección de lenguajes y frameworks", "pts": 10, "niveles": {"d": "Comparan al menos dos alternativas con criterios explícitos como curva de aprendizaje, soporte, comunidad, costo y compatibilidad móvil, y firman una decisión asumiendo su desventaja.", "c": "Justifican la elección pero sin alternativa comparada o sin nombrar la desventaja que asumen.", "e": "La justificación se reduce a popularidad o a que ya conocían la herramienta.", "i": "Enumeran tecnologías sin justificar."}, "fb": {"d": "Decidir asumiendo el costo es exactamente lo que se espera de un arquitecto. Repitan el ejercicio con el motor de datos en el Hito 2.", "c": "Agreguen la alternativa descartada y la razón del descarte. La decisión se evalúa por el contraste, no por el resultado.", "e": "Que sea popular no lo hace correcto para su caso. Definan tres criterios propios y evalúen dos candidatos contra ellos.", "i": "Una lista de tecnologías no es una decisión de arquitectura. Es corrección obligatoria para el Hito 2."}}, {"id": "B5", "nombre": "Presentación editorial y coherencia de marca", "pts": 6, "niveles": {"d": "El documento se lee como material de venta: identidad visual consistente, imágenes propias del prototipo y sin errores de ortografía ni de formato.", "c": "Presentación cuidada con detalles sueltos: tipografías mezcladas, imágenes de baja resolución o algunos errores.", "e": "Formato descuidado que dificulta la lectura.", "i": "Documento sin formato, o con errores que impiden leerlo como pieza profesional."}, "fb": {"d": "La pieza ya funciona como material comercial. Consérvenla como base del video del Hito 3.", "c": "Unifiquen tipografías y exporten las imágenes del prototipo a resolución alta.", "e": "Definan una plantilla con dos tipografías y tres colores, y apliquen la misma a todo el documento.", "i": "Se pidió una pieza de marketing, no un borrador. Rehagan la presentación editorial completa."}}, {"id": "B6", "nombre": "Bibliografía y citas", "pts": 4, "niveles": {"d": "Referencias en norma APA séptima edición, citadas en el cuerpo y todas verificables.", "c": "Referencias correctas pero con citas incompletas dentro del texto.", "e": "Lista de enlaces sin norma ni citas en el cuerpo.", "i": "Sin bibliografía, o con referencias que no existen."}, "fb": {"d": "Mantengan el gestor de referencias que están usando durante todo el semestre.", "c": "Cada dato del cuerpo necesita su cita. Una referencia sin llamada en el texto no cuenta.", "e": "Pasen la lista a norma APA y agreguen las citas dentro del texto donde usaron cada fuente.", "i": "Una referencia inexistente activa el protocolo de integridad académica descrito en los anexos."}}]}]}, "h2": {"cod": "H2", "titulo": "Hito 2 · El motor que sostiene la promesa", "sap": "Nota parcial N2 · 35 por ciento", "rda": "RDA 2 · Aplica en forma integrada las tecnologías de desarrollo de Back-End", "unidad": "Unidad 2 · Arquitecturas monolíticas y distribuidas", "bloques": [{"id": "A", "nombre": "Presentación técnica de 7 minutos", "pts": 50, "criterios": [{"id": "A1", "nombre": "Demostración de la API en vivo", "pts": 15, "niveles": {"d": "Ejecutan al menos cuatro peticiones reales contra su servidor, cubriendo crear, leer, actualizar y borrar, y muestran el código de estado y el dato ya guardado.", "c": "Ejecutan peticiones reales pero solo de lectura, o no muestran que el dato quedó guardado.", "e": "Muestran capturas o una grabación en lugar de ejecutar en vivo.", "i": "No hay demostración, o el servidor no levanta."}, "fb": {"d": "La API ya es demostrable. En el Hito 3 el mismo recorrido debe ejecutarse desde la interfaz, no desde el cliente de pruebas.", "c": "Leer es lo fácil. Preparen la demostración de escritura y muestren el registro en la base de datos.", "e": "Una grabación no prueba que el servicio funcione hoy. Preparen el entorno para ejecutar en vivo.", "i": "Que el servidor no levante en la presentación es el peor escenario posible. Preparen un ensayo completo en otro equipo."}}, {"id": "A2", "nombre": "Justificación de las tecnologías empleadas", "pts": 12, "niveles": {"d": "Explican lenguaje, framework y motor de datos con criterios declarados y contrastados, y dicen qué costo asumen por cada elección.", "c": "Explican las elecciones con criterios generales, sin costos ni alternativas.", "e": "Justifican por moda, por un tutorial o por comodidad.", "i": "No justifican las tecnologías empleadas."}, "fb": {"d": "Ese nivel de argumentación es el que se espera en una defensa profesional. Trasládenlo al documento final.", "c": "Nombren la alternativa descartada y el costo que asumen. Toda elección paga un precio.", "e": "Un tutorial no es un criterio de arquitectura. Definan criterios propios ligados a su caso de negocio.", "i": "Este era el eje de la presentación del Hito 2. Corrección obligatoria en el documento final."}}, {"id": "A3", "nombre": "Decisión monolito o distribuido", "pts": 8, "niveles": {"d": "Toman postura y la sostienen con carga esperada, tamaño del equipo, costo de operación y complejidad de despliegue.", "c": "Toman postura con uno o dos argumentos válidos.", "e": "Repiten definiciones de clase sin aplicarlas a su caso.", "i": "No abordan la decisión."}, "fb": {"d": "La postura está bien fundada. Registren en la bitácora en qué escenario la revisarían.", "c": "Agreguen el costo de operación y el tamaño del equipo: son los dos factores que más pesan en un proyecto real.", "e": "Las definiciones están en el material del curso. Lo evaluado es aplicarlas a su producto.", "i": "La decisión monolito o distribuido es contenido obligatorio de la Unidad 2."}}, {"id": "A4", "nombre": "Claridad técnica y tiempo", "pts": 5, "niveles": {"d": "Cierran dentro de los 7 minutos, reparten la palabra y usan vocabulario técnico correcto.", "c": "Cierran dentro del tiempo con imprecisiones de vocabulario.", "e": "Se les corta con contenido central pendiente.", "i": "Presentación inconexa o sin estructura reconocible."}, "fb": {"d": "El manejo del tiempo y del lenguaje técnico ya está resuelto.", "c": "Revisen los términos que usaron de forma imprecisa. En una defensa técnica el vocabulario es parte del argumento.", "e": "Prioricen: demostración primero, justificación después, historia al final.", "i": "Definan una estructura de tres partes y asignen minutos a cada una antes de ensayar."}}, {"id": "A5", "nombre": "Respuesta del integrante consultado", "pts": 10, "niveles": {"d": "El integrante elegido al azar explica una parte del código propio y por qué está escrita así.", "c": "Explica qué hace el código pero no por qué se decidió así.", "e": "Reconoce el código pero no puede explicarlo.", "i": "No responde, o desconoce el código que su grupo entregó."}, "fb": {"d": "El código es del equipo y se nota. Sostengan esa práctica hasta la defensa final.", "c": "Documenten las decisiones mientras programan. El porqué se olvida en una semana.", "e": "Revisen juntos el código antes de cada entrega. Nadie debe presentar algo que no puede explicar.", "i": "Se aplica el factor individual y el bloque pierde estos puntos. Si el código no es del equipo, se activa el protocolo de integridad académica."}}]}, {"id": "B", "nombre": "Documento técnico del back end", "pts": 50, "criterios": [{"id": "B1", "nombre": "Trazabilidad con el Hito 1", "pts": 8, "niveles": {"d": "Sección de cambios que declara qué se movió respecto del Hito 1, por qué y qué impacto tuvo.", "c": "Declaran cambios sin explicar el motivo o el impacto.", "e": "Mencionan que hubo cambios sin detallarlos.", "i": "El documento ignora el Hito 1 o se contradice con él."}, "fb": {"d": "Esa bitácora es lo que distingue un proyecto gestionado de uno improvisado.", "c": "Un cambio sin motivo documentado es indistinguible de un error. Agreguen la razón y el impacto.", "e": "Listen los cambios uno a uno con fecha y responsable.", "i": "El proyecto es acumulativo. Contradecir el Hito 1 sin declararlo es una falta de trazabilidad grave."}}, {"id": "B2", "nombre": "Diseño de la API REST", "pts": 14, "niveles": {"d": "Tabla de recursos con verbos, rutas, parámetros, cuerpo de ejemplo, códigos de estado de éxito y de error, y criterio de versionado.", "c": "Tabla completa de rutas y verbos, pero con códigos de error incompletos o sin ejemplos de carga útil.", "e": "Lista de rutas sin contrato ni códigos de estado.", "i": "No hay diseño de API documentado."}, "fb": {"d": "El contrato está bien definido. Publíquenlo en el repositorio para que la interfaz del Hito 3 lo consuma sin ambigüedad.", "c": "Completen los códigos de error. La mitad del trabajo de una API es responder bien cuando algo falla.", "e": "Una ruta sin contrato no se puede consumir. Definan entrada, salida y códigos para cada una.", "i": "El diseño de API es el contenido central de la Unidad 2 y requisito para el Hito 3."}}, {"id": "B3", "nombre": "Separación de responsabilidades y capas", "pts": 12, "niveles": {"d": "Muestran la estructura de carpetas indicando qué archivo corresponde a cada capa, con el recorrido completo de una petición desde la ruta hasta la base de datos.", "c": "Describen las capas y la estructura, sin recorrer una petición completa.", "e": "Afirman tener capas, pero el código muestra lógica de negocio en el controlador o consultas dentro de la vista.", "i": "No hay separación ni descripción de capas."}, "fb": {"d": "La separación real se paga sola cuando el proyecto crece. Manténganla en el Hito 3.", "c": "Agreguen el recorrido de una petición: es la prueba de que las capas existen y no son solo carpetas.", "e": "Carpetas separadas no son capas separadas. Muevan la lógica de negocio fuera del controlador antes del Hito 3.", "i": "Sin capas no se cumple el resultado de aprendizaje 3, que se evalúa en el Hito 3."}}, {"id": "B4", "nombre": "Persistencia y manejo de credenciales", "pts": 10, "niveles": {"d": "Modelo de datos con claves, relaciones y tipos, script de creación reproducible, y credenciales fuera del repositorio con un archivo de ejemplo.", "c": "Modelo correcto, pero sin script reproducible o sin documentar cómo configurar las credenciales.", "e": "Modelo incompleto, o credenciales escritas dentro del código.", "i": "Sin persistencia real, o con credenciales expuestas en un repositorio público."}, "fb": {"d": "El proyecto se puede levantar desde cero en otro equipo. Ese es el estándar.", "c": "Agreguen el script de creación y un archivo de ejemplo de configuración sin datos reales.", "e": "Una credencial en el código es una credencial filtrada. Muévanla a variables de entorno hoy.", "i": "Credenciales expuestas exigen rotarlas de inmediato y limpiar el historial del repositorio. Es un hallazgo de seguridad, no un detalle."}}, {"id": "B5", "nombre": "Referencias técnicas", "pts": 6, "niveles": {"d": "Citan la documentación oficial de cada tecnología usada, en norma, y la usan para sostener decisiones.", "c": "Citan documentación oficial, pero de manera decorativa.", "e": "Citan solo blogs, videos o foros.", "i": "Sin referencias."}, "fb": {"d": "Sostener decisiones con documentación oficial es una práctica profesional. Consérvenla.", "c": "Vinculen cada cita a la decisión que respalda, no al final del párrafo.", "e": "Un blog puede orientar, pero la fuente de verdad es la documentación oficial de la herramienta.", "i": "Las referencias técnicas son parte de la evaluación en los tres hitos."}}]}]}, "h3": {"cod": "H3", "titulo": "Hito 3 · El producto que funciona", "sap": "Nota parcial N3 · 35 por ciento", "rda": "RDA 3 · Integra Front-End y Back-End en arquitectura por capas", "unidad": "Integración de las unidades 1 y 2", "bloques": [{"id": "A", "nombre": "Producto funcional y repositorio", "pts": 50, "criterios": [{"id": "A1", "nombre": "Recorrido completo de punta a punta", "pts": 18, "niveles": {"d": "El evaluador ejecuta el flujo principal completo sin ayuda del equipo: la interfaz llama al servicio, el servicio guarda y el dato vuelve a la pantalla y sobrevive a una recarga.", "c": "El flujo funciona con una intervención menor del equipo, o con un paso simulado.", "e": "Funcionan partes sueltas: la interfaz no conversa con el servicio, o el dato no persiste.", "i": "El producto no se ejecuta, o solo existe la maqueta del Hito 1."}, "fb": {"d": "El producto es demostrable por un tercero. Ese es el estándar de la industria y lo cumplieron.", "c": "Identifiquen el paso que necesitó ayuda y automatícenlo. Un producto que necesita a su autor al lado no está terminado.", "e": "Cierren primero un flujo completo, aunque sea el más simple. Vale más uno que funciona que cinco a medias.", "i": "No entregar producto funcional impide cumplir el resultado de aprendizaje 3 de la asignatura."}}, {"id": "A2", "nombre": "Integración efectiva por capas", "pts": 12, "niveles": {"d": "La capa de presentación no contiene reglas de negocio ni consultas, la de negocio es reutilizable y la de datos queda aislada tras un repositorio o interfaz.", "c": "Las capas existen, pero se filtra alguna responsabilidad entre ellas.", "e": "Hay archivos separados, pero la lógica está mezclada.", "i": "Todo el código vive en un archivo o dentro del controlador."}, "fb": {"d": "La arquitectura que dibujaron en el Hito 1 es la que están ejecutando. Coherencia completa.", "c": "Señalen la filtración en la bitácora y expliquen por qué la aceptaron. Una deuda declarada es aceptable, una oculta no.", "e": "Separar archivos no separa responsabilidades. Muevan las reglas de negocio a su propia capa.", "i": "Este criterio es el corazón del resultado de aprendizaje 3 de la asignatura."}}, {"id": "A3", "nombre": "Validación, errores y estados", "pts": 8, "niveles": {"d": "Validan la entrada en cliente y servidor, devuelven mensajes claros con el código correcto, y la interfaz muestra los estados de carga, vacío y error.", "c": "Validan y manejan errores en el servidor, con retroalimentación limitada en la interfaz.", "e": "Validación mínima: los errores llegan al usuario como fallas técnicas.", "i": "Sin validación: el producto se cae con una entrada inválida."}, "fb": {"d": "El producto se comporta bien cuando algo falla, que es cuando de verdad se evalúa un sistema.", "c": "Agreguen los estados de carga y de vacío. Una pantalla en blanco es un error de diseño.", "e": "Un mensaje técnico en pantalla es una falla de producto. Traduzcan cada error al lenguaje del usuario.", "i": "Validar la entrada es la defensa mínima de cualquier sistema. Sin ella, el producto no es entregable."}}, {"id": "A4", "nombre": "Ejecución reproducible o despliegue", "pts": 7, "niveles": {"d": "El proyecto se levanta siguiendo el archivo de instrucciones al primer intento, o está publicado en una dirección accesible que funciona.", "c": "Se levanta con ajustes menores que no estaban documentados.", "e": "Se levanta solo en el equipo del grupo.", "i": "No se puede ejecutar con lo entregado."}, "fb": {"d": "Reproducibilidad lograda. Es lo que permite que otro equipo tome el proyecto mañana.", "c": "Documenten los ajustes que hicieron falta. Lo que no está escrito, no existe.", "e": "Prueben la instalación en un equipo limpio o en el de otro grupo antes de entregar.", "i": "Un proyecto que solo corre en un notebook no es un producto."}}, {"id": "A5", "nombre": "Repositorio e historial de trabajo", "pts": 5, "niveles": {"d": "Historial con aportes de todos los integrantes distribuidos a lo largo del semestre, mensajes legibles, uso de ramas, archivo de instrucciones completo y sin credenciales.", "c": "Historial completo pero concentrado en pocos integrantes o en los últimos días.", "e": "Repositorio con dos o tres cargas masivas de archivos.", "i": "Repositorio con una sola carga final."}, "fb": {"d": "El historial demuestra trabajo repartido y sostenido. Es evidencia que sirve para su portafolio profesional.", "c": "La concentración de aportes se refleja en el factor individual de cada integrante.", "e": "Cargar todo de una vez impide revisar el trabajo. Trabajen con confirmaciones frecuentes y pequeñas.", "i": "Una sola carga final no permite verificar autoría ni distribución del trabajo."}}]}, {"id": "B", "nombre": "Documentación final y video promocional", "pts": 50, "criterios": [{"id": "B1", "nombre": "Documento final completo", "pts": 12, "niveles": {"d": "Tapa, índice, introducción, desarrollo, conclusión, bibliografía y anexos, con el estado real del producto y sus limitaciones declaradas.", "c": "Documento completo, pero describe lo planificado en lugar de lo construido.", "e": "Faltan partes obligatorias, o el contenido repite el Hito 2 sin actualizar.", "i": "Documento ausente o irreconocible como informe."}, "fb": {"d": "Declarar las limitaciones es señal de madurez técnica, no de debilidad.", "c": "Reescriban en pasado y sobre lo que existe. Un informe final documenta lo construido, no lo prometido.", "e": "Actualicen el documento contra el código entregado, sección por sección.", "i": "Sin documento final no se puede evaluar el bloque completo."}}, {"id": "B2", "nombre": "Arquitectura final y evolución de decisiones", "pts": 12, "niveles": {"d": "Diagramas finales al día, con la bitácora de decisiones y qué cambió desde el Hito 1, incluyendo lo que salió mal y cómo lo resolvieron.", "c": "Diagramas al día, pero sin bitácora de decisiones.", "e": "Diagramas desactualizados respecto del código entregado.", "i": "Sin diagramas, o diagramas tomados de fuentes ajenas."}, "fb": {"d": "Contar lo que salió mal y cómo se resolvió es lo que se evalúa en una revisión de arquitectura real.", "c": "Agreguen la bitácora: cada decisión con fecha, alternativas y motivo.", "e": "Un diagrama que no coincide con el código es peor que no tenerlo, porque induce a error.", "i": "Un diagrama ajeno presentado como propio activa el protocolo de integridad académica."}}, {"id": "B3", "nombre": "Manual de uso e instalación", "pts": 6, "niveles": {"d": "Un tercero instala y usa el producto siguiendo el manual, con requisitos, pasos, datos de prueba y solución de fallas frecuentes.", "c": "Manual correcto, pero sin datos de prueba ni fallas frecuentes.", "e": "Instrucciones incompletas que obligan a adivinar.", "i": "Sin manual."}, "fb": {"d": "El manual cumple su función: alguien externo puede usar el producto sin ustedes.", "c": "Agreguen usuarios y datos de prueba. Sin ellos, nadie puede recorrer el sistema.", "e": "Pidan a otro grupo que instale el proyecto siguiendo el manual y anoten dónde se traban.", "i": "El manual es entregable obligatorio del Hito 3."}}, {"id": "B4", "nombre": "Video promocional de máximo 2 minutos", "pts": 14, "niveles": {"d": "Dura hasta 2:00. Abre con el problema, muestra el producto real funcionando y cierra con la promesa. Audio audible, imagen legible y sin material de terceros sin crédito.", "c": "Dentro del tiempo y con demostración real, pero con problemas de audio, de ritmo o sin cierre.", "e": "Excede los 2:00, o muestra láminas en vez del producto.", "i": "Sin video, o el video no muestra el producto."}, "fb": {"d": "El video sirve como pieza de portafolio. Publíquenlo enlazado desde el repositorio.", "c": "Regraben el audio en un lugar silencioso y agreguen un cierre con la promesa.", "e": "La evaluación se detiene en el segundo 120. Editen para que lo importante ocurra antes.", "i": "El video es entregable obligatorio y pesa 14 de los 100 puntos del hito."}}, {"id": "B5", "nombre": "Uso de inteligencia artificial y datos personales", "pts": 6, "niveles": {"d": "Anexo que declara qué herramientas usaron, en qué partes y cómo verificaron el resultado, más el análisis de qué datos personales trata el sistema y qué medidas aplicaron.", "c": "Declaran uso de herramientas y datos, sin verificación ni medidas concretas.", "e": "Declaración genérica de una línea.", "i": "Sin declaración, o declaración desmentida durante la defensa."}, "fb": {"d": "Declarar y verificar es la práctica correcta. La Ley 21.719 rige en Chile desde diciembre de 2026.", "c": "Agreguen cómo verificaron lo generado y qué medidas concretas aplicaron sobre los datos personales.", "e": "Una línea no es una declaración. Detallen herramienta, uso y verificación.", "i": "Una declaración desmentida en la defensa activa el protocolo de integridad académica."}}]}]}};
+var PUERTAS = [{"id": "g1", "hitos": ["h1", "h2", "h3"], "txt": "Sin repositorio en GitHub accesible al docente en la fecha de cierre", "efecto": "Entrega no recibida. Nota 1,0 en el hito.", "tipo": "nota1"}, {"id": "g2", "hitos": ["h1", "h2", "h3"], "txt": "Entrega con retraso de hasta un día hábil", "efecto": "Se recibe con descuento de 20 puntos sobre el total del hito.", "tipo": "menos20"}, {"id": "g3", "hitos": ["h1", "h2", "h3"], "txt": "Entrega con retraso mayor a un día hábil", "efecto": "No se recibe. Nota 1,0 en el hito.", "tipo": "nota1"}, {"id": "g4", "hitos": ["h1"], "txt": "Cláusula de propuesta no identificable: al minuto 5:00 el evaluador no puede escribir qué venden, a quién y qué problema resuelven", "efecto": "Bloque A completo en 0 puntos.", "tipo": "bloqueA0"}, {"id": "g5", "hitos": ["h2", "h3"], "txt": "El proyecto entregado no compila o el servicio no levanta con las instrucciones entregadas", "efecto": "Bloque A limitado a un máximo de 20 puntos.", "tipo": "topeA20"}, {"id": "g6", "hitos": ["h1", "h2", "h3"], "txt": "Plagio, referencias inexistentes o material de terceros presentado como propio", "efecto": "Nota 1,0 e informe a la Dirección de Escuela.", "tipo": "nota1"}];
+var FACT = {d:1.0,c:0.75,e:0.45,i:0.0};
+var LNAME = {d:"Destacado",c:"Competente",e:"En desarrollo",i:"Insuficiente"};
+
+/* ---------- tab navigation ---------- */
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('active',p.id==='p-'+id);});
+  document.querySelectorAll('.tabbtn').forEach(function(b){b.classList.toggle('active',b.dataset.p===id);});
+  window.scrollTo({top:0,behavior:'auto'});
+}
+document.querySelectorAll('.tabbtn').forEach(function(b){
+  b.addEventListener('click',function(){showPanel(b.dataset.p);});
+});
+document.querySelectorAll('.subtab').forEach(function(b){
+  b.addEventListener('click',function(){
+    var host = b.closest('.panel');
+    host.querySelectorAll('.subtab').forEach(function(x){x.classList.remove('active');});
+    host.querySelectorAll('.subpanel').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    var t = host.querySelector('#s-'+b.dataset.s);
+    if(t){t.classList.add('active');}
+  });
+});
+
+/* ---------- pen mode and print ---------- */
+document.getElementById('penBtn').addEventListener('click',togglePen);
+document.getElementById('prtBtn').addEventListener('click',function(){window.print();});
+function togglePen(){document.body.classList.toggle('pen');}
+
+/* ---------- timer ---------- */
+var tTotal=300,tLeft=300,tRun=false,tInt=null;
+var tdisp=document.getElementById('tdisp');
+function fmt(s){var neg=s<0;s=Math.abs(s);var m=Math.floor(s/60),r=s%60;
+  return (neg?'+':'')+String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');}
+function paint(){
+  tdisp.textContent=fmt(tLeft);
+  tdisp.classList.toggle('warnc',tLeft<=30&&tLeft>0);
+  tdisp.classList.toggle('overc',tLeft<=0);
+}
+function tick(){tLeft--;paint();}
+function tToggle(){
+  tRun=!tRun;
+  document.getElementById('tStart').textContent=tRun?'Pausar':'Iniciar';
+  if(tRun){tInt=setInterval(tick,1000);}else{clearInterval(tInt);}
+}
+document.getElementById('tStart').addEventListener('click',tToggle);
+document.getElementById('tReset').addEventListener('click',function(){
+  clearInterval(tInt);tRun=false;document.getElementById('tStart').textContent='Iniciar';
+  tLeft=tTotal;paint();
+});
+document.getElementById('tPreset').addEventListener('change',function(e){
+  tTotal=parseInt(e.target.value,10);tLeft=tTotal;
+  clearInterval(tInt);tRun=false;document.getElementById('tStart').textContent='Iniciar';paint();
+});
+paint();
+
+/* ---------- random member picker ---------- */
+function pick(){
+  var raw=document.getElementById('members').value.split(',')
+    .map(function(s){return s.trim();}).filter(function(s){return s.length>0;});
+  var out=document.getElementById('pickout');
+  if(raw.length===0){out.textContent='Escriba los integrantes primero';return;}
+  var i=0,n=0;
+  var spin=setInterval(function(){
+    out.textContent=raw[i%raw.length];i++;n++;
+    if(n>14){clearInterval(spin);
+      var w=raw[Math.floor(Math.random()*raw.length)];
+      out.textContent=w+' responde';}
+  },70);
+}
+document.getElementById('pickBtn').addEventListener('click',pick);
+
+/* ---------- keyboard shortcuts ---------- */
+document.addEventListener('keydown',function(e){
+  var t=e.target.tagName;
+  if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT'){return;}
+  var k=e.key.toLowerCase();
+  if(k==='h'){togglePen();}
+  if(k==='t'){tToggle();}
+  if(k==='n'){pick();}
+});
+
+/* ---------- evaluator ---------- */
+var evHito=document.getElementById('evHito');
+var evBody=document.getElementById('evBody');
+var evPuertas=document.getElementById('evPuertas');
+
+function buildGates(){
+  var h=evHito.value;
+  var rows=PUERTAS.filter(function(p){return p.hitos.indexOf(h)>=0;}).map(function(p){
+    return '<label style="display:block;margin:6px 0;font-size:var(--fs-micro);line-height:1.45">'+
+      '<input type="checkbox" class="gate" data-tipo="'+p.tipo+'" style="margin-right:7px"/>'+
+      '<b>'+p.txt+'</b> · '+p.efecto+'</label>';
+  }).join('');
+  evPuertas.innerHTML='<h3 class="sub" style="margin-top:0">Puertas de entrada</h3>'+rows;
+  evPuertas.querySelectorAll('.gate').forEach(function(g){g.addEventListener('change',recalc);});
+}
+
+function buildBody(){
+  var h=evHito.value,r=RUB[h],html='';
+  r.bloques.forEach(function(b){
+    html+='<h2 class="sec"><span>Bloque '+b.id+' · '+b.nombre+'</span><span class="badge">'+b.pts+' puntos</span></h2>';
+    b.criterios.forEach(function(c){
+      html+='<div class="crit" data-b="'+b.id+'" data-c="'+c.id+'" data-pts="'+c.pts+'">'+
+        '<div class="ch"><span class="cn">'+c.id+' · '+c.nombre+'</span>'+
+        '<span class="cp"><span class="got">0</span> / '+c.pts+' pts</span></div><div class="lvls">';
+      ['d','c','e','i'].forEach(function(n){
+        html+='<label data-n="'+n+'"><input type="radio" name="'+h+'_'+c.id+'" value="'+n+'"/>'+
+          '<span class="lname">'+LNAME[n]+'</span>'+c.niveles[n]+'</label>';
+      });
+      html+='</div></div>';
+    });
+  });
+  evBody.innerHTML=html;
+  evBody.querySelectorAll('input[type=radio]').forEach(function(i){
+    i.addEventListener('change',function(){
+      var box=i.closest('.crit');
+      box.querySelectorAll('label').forEach(function(l){l.className='';});
+      i.closest('label').className='sel-'+i.value;
+      recalc();
+    });
+  });
+  recalc();
+}
+
+function nota(p){
+  var n = p<60 ? 1.0+3.0*p/60 : 4.0+3.0*(p-60)/40;
+  n=Math.round(n*10)/10;
+  if(n<1)n=1;if(n>7)n=7;
+  return n;
+}
+function nfmt(n){return n.toFixed(1).replace('.',',');}
+
+function readState(){
+  var h=evHito.value,r=RUB[h];
+  var sel={},pts=0,bloque={};
+  evBody.querySelectorAll('.crit').forEach(function(box){
+    var cid=box.dataset.c,bid=box.dataset.b,max=parseInt(box.dataset.pts,10);
+    var chosen=box.querySelector('input:checked');
+    var got=0,niv=null;
+    if(chosen){niv=chosen.value;got=Math.round(max*FACT[niv]*10)/10;}
+    box.querySelector('.got').textContent=got.toString().replace('.',',');
+    sel[cid]=niv;pts+=got;
+    bloque[bid]=(bloque[bid]||0)+got;
+  });
+  var gates=[];
+  evPuertas.querySelectorAll('.gate:checked').forEach(function(g){gates.push(g.dataset.tipo);});
+  return {h:h,r:r,sel:sel,pts:pts,bloque:bloque,gates:gates};
+}
+
+function applyGates(st){
+  var pts=st.pts,estado='Evaluado con rúbrica';
+  if(st.gates.indexOf('bloqueA0')>=0){pts=pts-(st.bloque['A']||0);estado='Cláusula de propuesta no identificable aplicada';}
+  if(st.gates.indexOf('topeA20')>=0){
+    var a=st.bloque['A']||0;
+    if(a>20){pts=pts-(a-20);}
+    estado='Tope de bloque A aplicado por servicio que no levanta';
+  }
+  if(st.gates.indexOf('menos20')>=0){pts=pts-20;estado='Descuento por entrega con un día hábil de retraso';}
+  if(pts<0)pts=0;
+  var n=nota(pts);
+  if(st.gates.indexOf('nota1')>=0){n=1.0;estado='Entrega no recibida o falta de integridad académica';}
+  return {pts:Math.round(pts*10)/10,nota:n,estado:estado};
+}
+
+function recalc(){
+  var st=readState(),res=applyGates(st);
+  document.getElementById('scPts').textContent=String(res.pts).replace('.',',');
+  document.getElementById('scNota').textContent=nfmt(res.nota);
+  document.getElementById('scEstado').textContent=res.estado;
+}
+
+function genFeedback(){
+  var st=readState(),res=applyGates(st),r=st.r;
+  var team=document.getElementById('evTeam').value.trim()||'(nombre del equipo)';
+  var L=[];
+  L.push('INGT1003 ARQUITECTURA DE DESARROLLO (MOVIL Y WEB)');
+  L.push('Retroalimentacion de evaluacion · '+r.titulo);
+  L.push('Equipo: '+team);
+  L.push('Resultado de aprendizaje evaluado: '+r.rda);
+  L.push('');
+  L.push('PUNTAJE: '+String(res.pts).replace('.',',')+' de 100   NOTA DEL GRUPO: '+nfmt(res.nota));
+  L.push('Estado: '+res.estado);
+  L.push('Escala con 60 por ciento de exigencia. 60 puntos equivalen a nota 4,0.');
+  L.push('');
+  r.bloques.forEach(function(b){
+    L.push('== BLOQUE '+b.id+' · '+b.nombre.toUpperCase()+' ('+(Math.round((st.bloque[b.id]||0)*10)/10).toString().replace('.',',')+' de '+b.pts+' puntos) ==');
+    b.criterios.forEach(function(c){
+      var niv=st.sel[c.id];
+      if(!niv){L.push('  '+c.id+' · '+c.nombre+': sin evaluar');return;}
+      var got=Math.round(c.pts*FACT[niv]*10)/10;
+      L.push('  '+c.id+' · '+c.nombre+'  ['+LNAME[niv]+']  '+String(got).replace('.',',')+' de '+c.pts+' pts');
+      L.push('     Observado: '+c.niveles[niv]);
+      L.push('     Que hacer: '+c.fb[niv]);
+    });
+    L.push('');
+  });
+  var pend=[];
+  r.bloques.forEach(function(b){b.criterios.forEach(function(c){
+    if(st.sel[c.id]&&st.sel[c.id]!=='d'){pend.push(c.id+' · '+c.nombre);}
+  });});
+  L.push('== PRIORIDADES PARA LA PROXIMA ENTREGA ==');
+  if(pend.length===0){L.push('  Todos los criterios alcanzaron el nivel destacado. Sostener el estandar.');}
+  else{pend.slice(0,5).forEach(function(p,i){L.push('  '+(i+1)+'. '+p);});}
+  L.push('');
+  L.push('== FACTOR INDIVIDUAL ==');
+  L.push('  Nota individual = nota del grupo x factor, con piso 1,0.');
+  var raw=document.getElementById('members').value.split(',')
+    .map(function(s){return s.trim();}).filter(function(s){return s.length>0;});
+  if(raw.length){raw.forEach(function(m){L.push('  '+m+': factor ____   nota individual ____');});}
+  else{L.push('  (completar por integrante)');}
+  L.push('');
+  L.push('Plazo de apelacion: cinco dias habiles desde la publicacion, por escrito, indicando el criterio especifico.');
+  document.getElementById('fbout').value=L.join('\n');
+}
+document.getElementById('genFb').addEventListener('click',genFeedback);
+document.getElementById('copyFb').addEventListener('click',function(){
+  var ta=document.getElementById('fbout'),b=this;
+  function done(){b.textContent='Copiado';setTimeout(function(){b.textContent='Copiar';},1400);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(done,function(){ta.select();
+      try{document.execCommand('copy');done();}catch(e){}});
+  }else{ta.select();try{document.execCommand('copy');done();}catch(e){}}
+});
+document.getElementById('evReset').addEventListener('click',function(){
+  buildGates();buildBody();document.getElementById('fbout').value='';
+});
+evHito.addEventListener('change',function(){buildGates();buildBody();document.getElementById('fbout').value='';});
+
+buildGates();
+buildBody();
+})();
+</script>
+</body>
+</html>
