@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import hashlib
+import os
 import hmac
 import secrets
 
@@ -192,6 +193,12 @@ def estado_servicio():
         "status": "success",
         "correo_real": correo_configurado(),
         "modo_desarrollo": MODO_DESARROLLO,
+        # Solo si cada variable existe (nunca su valor), para saber cuál
+        # falta en Render cuando correo_real sale en false
+        "variables": {
+            "BREVO_API_KEY": bool(os.getenv("BREVO_API_KEY", "").strip()),
+            "CORREO_REMITENTE": bool(os.getenv("CORREO_REMITENTE", "").strip()),
+        },
     }
 
 

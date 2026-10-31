@@ -15,8 +15,14 @@ import urllib.request
 registro = logging.getLogger("agrocolab")
 
 
+def variable(nombre: str) -> str:
+    """Valor de una variable de entorno sin espacios: al copiar y pegar la
+    clave en Render es fácil arrastrar un espacio o un salto de línea."""
+    return os.getenv(nombre, "").strip()
+
+
 def correo_configurado() -> bool:
-    return bool(os.getenv("BREVO_API_KEY") and os.getenv("CORREO_REMITENTE"))
+    return bool(variable("BREVO_API_KEY") and variable("CORREO_REMITENTE"))
 
 
 def enviar_correo(destino: str, nombre: str, asunto: str, contenido_html: str) -> bool:
@@ -25,7 +31,7 @@ def enviar_correo(destino: str, nombre: str, asunto: str, contenido_html: str) -
         return False
 
     cuerpo = {
-        "sender": {"name": "Agro-Colab", "email": os.getenv("CORREO_REMITENTE")},
+        "sender": {"name": "Agro-Colab", "email": variable("CORREO_REMITENTE")},
         "to": [{"email": destino, "name": nombre}],
         "subject": asunto,
         "htmlContent": contenido_html,
@@ -34,7 +40,7 @@ def enviar_correo(destino: str, nombre: str, asunto: str, contenido_html: str) -
         "https://api.brevo.com/v3/smtp/email",
         data=json.dumps(cuerpo).encode("utf-8"),
         headers={
-            "api-key": os.getenv("BREVO_API_KEY"),
+            "api-key": variable("BREVO_API_KEY"),
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
