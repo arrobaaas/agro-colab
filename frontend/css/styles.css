@@ -1345,7 +1345,9 @@ h1, h2, h3, h4 {
    allá de la portada, la página "se ilumina" hacia la paleta clara con un
    fundido. Cada color es una mezcla entre su versión oscura y su versión
    clara. Se anima en el tiempo y no ligado al scroll: con una mezcla
-   continua, a mitad de camino fondo y texto quedaban ambos grises. */
+   continua, a mitad de camino fondo y texto quedaban ambos grises.
+   La versión clara es un piedra apagado, no blanco: el salto desde el
+   negro encandilaba al bajar rápido de noche. */
 @property --luz {
   syntax: "<number>";
   inherits: true;
@@ -1353,14 +1355,14 @@ h1, h2, h3, h4 {
 }
 
 html {
-  transition: --luz 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: --luz 1.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tema-comprador {
   --tc-mezcla: calc((1 - var(--luz, 0)) * 100%);
-  --tc-vacio: color-mix(in srgb, #040806 var(--tc-mezcla), #f6f4ee);
-  --tc-superficie: color-mix(in srgb, #0a110d var(--tc-mezcla), #ffffff);
-  --tc-superficie-2: color-mix(in srgb, #101a15 var(--tc-mezcla), #edeae2);
+  --tc-vacio: color-mix(in srgb, #040806 var(--tc-mezcla), #dcdad1);
+  --tc-superficie: color-mix(in srgb, #0a110d var(--tc-mezcla), #e8e6de);
+  --tc-superficie-2: color-mix(in srgb, #101a15 var(--tc-mezcla), #d0cec4);
   --tc-linea: color-mix(in srgb, rgba(255, 255, 255, 0.08) var(--tc-mezcla), rgba(28, 25, 23, 0.1));
   --tc-linea-fuerte: color-mix(in srgb, rgba(255, 255, 255, 0.14) var(--tc-mezcla), rgba(28, 25, 23, 0.18));
   --tc-texto: color-mix(in srgb, #ffffff var(--tc-mezcla), #0c1410);
@@ -1706,6 +1708,11 @@ html {
   background-color: var(--tc-vacio);
   box-shadow: none;
   border-top: 1px solid var(--tc-linea);
+}
+
+/* En las páginas legales la hoja es la misma raíz del tema */
+.tema-comprador.hoja {
+  background-color: var(--tc-vacio);
 }
 
 /* ----- Secciones ----- */
@@ -2310,6 +2317,16 @@ html {
 .tema-comprador .drawer-cabecera {
   background: none;
   border-bottom: 1px solid var(--tc-linea);
+}
+
+/* El título y el resumen traen clases de color fijas pensadas para la
+   cabecera oscura: con la página iluminada quedaban blanco sobre claro */
+.tema-comprador .drawer-cabecera .text-white {
+  color: var(--tc-texto);
+}
+
+.tema-comprador .drawer-cabecera .text-emerald-200\/70 {
+  color: var(--tc-texto-3);
 }
 
 .tema-comprador .drawer-pie {
@@ -3887,7 +3904,13 @@ html:has(> body.tema-comprador) {
   display: grid;
   gap: 0.15rem;
   margin-top: 1rem;
-  counter-reset: indice;
+  counter-reset: indice -1;
+}
+
+/* El resumen no lleva número en el texto: así el 01 del índice coincide
+   con el "1." del primer título numerado */
+.tc-indice li:first-child a::before {
+  content: "—";
 }
 
 .tc-indice a {

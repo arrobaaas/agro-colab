@@ -43,6 +43,11 @@ def enviar_correo(destino: str, nombre: str, asunto: str, contenido_html: str) -
     try:
         with urllib.request.urlopen(peticion, timeout=10) as respuesta:
             return 200 <= respuesta.status < 300
+    except urllib.error.HTTPError as error:
+        # Brevo explica el motivo del rechazo en el cuerpo de la respuesta
+        detalle = error.read().decode("utf-8", errors="replace")[:500]
+        registro.error("Brevo rechazó el correo '%s' (%s): %s", asunto, error.code, detalle)
+        return False
     except (urllib.error.URLError, TimeoutError) as error:
         registro.error("No se pudo enviar el correo '%s': %s", asunto, error)
         return False
