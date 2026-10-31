@@ -4,295 +4,161 @@
 
 **Financia la cosecha, asegura tu abastecimiento.**
 
-Plataforma web que conecta a consumidores con pequeños agricultores chilenos mediante la
-adopción de árboles frutales y la suscripción a canastas de cosecha, con trazabilidad
-directa del huerto a la mesa y sin intermediarios.
+Plataforma web full stack que conecta a consumidores con pequeños agricultores chilenos:
+el cliente adopta un árbol frutal o contrata una canasta de cosecha, y el pago llega
+directo al productor, sin intermediarios.
 
 [![Demo en vivo](https://img.shields.io/badge/demo-en%20vivo-059669?style=for-the-badge&logo=github)](https://arrobaaas.github.io/agro-colab/)
-[![Licencia MIT](https://img.shields.io/badge/licencia-MIT-blue?style=for-the-badge)](LICENSE)
 [![Pruebas](https://img.shields.io/github/actions/workflow/status/arrobaaas/agro-colab/pruebas.yml?branch=main&label=pruebas&style=for-the-badge)](https://github.com/arrobaaas/agro-colab/actions/workflows/pruebas.yml)
+[![Licencia MIT](https://img.shields.io/badge/licencia-MIT-blue?style=for-the-badge)](LICENSE)
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?logo=sqlalchemy&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
+
+<br>
+
+<a href="https://arrobaaas.github.io/agro-colab/">
+  <img src="docs/capturas/portada.png" alt="Pantalla de inicio de Agro-Colab: titular 'Del huerto chileno. Directo a tu mesa.', un árbol animado de partículas y el formulario de inicio de sesión" width="900">
+</a>
 
 [Demo](https://arrobaaas.github.io/agro-colab/) ·
-[Funcionalidades](#-funcionalidades) ·
+[Destacados](#-destacados-técnicos) ·
 [Arquitectura](#-arquitectura) ·
+[Seguridad](#-seguridad) ·
 [Instalación](#-instalación-local) ·
 [API](#-api-rest) ·
-[Seguridad](#-seguridad-y-protección-de-datos) ·
 [Equipo](#-equipo)
 
 </div>
 
 ---
 
-## 📋 Sobre el proyecto
+## 🔎 Prueba la demo
 
-Agro-Colab nació como proyecto semestral del curso **INGT1003 Arquitectura de Desarrollo
-(Móvil y Web)** de la Universidad Mayor (2026). Responde a un problema concreto: el pequeño
-agricultor necesita financiamiento antes de la temporada y vende su cosecha a intermediarios
-que se quedan con buena parte del margen. Agro-Colab le permite cobrar por adelantado,
-directamente al consumidor final.
+**👉 [arrobaaas.github.io/agro-colab](https://arrobaaas.github.io/agro-colab/)**
 
-La plataforma ofrece dos líneas de producto:
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Comprador | `comprador@agrocolab.cl` | `123` |
+| Agricultor | `agricultor@agrocolab.cl` | `123` |
 
-| Línea | Qué compra el cliente | Unidad | Planes |
-|---|---|---|---|
-| **Adopción de árboles** | Un cupo sobre un árbol concreto: es copropietario de su producción de temporada | Cupo (copartícipe) | Básico (5 personas) · Intermedio (3) · Premium (exclusivo) |
-| **Abastecimiento** | Una canasta de cosecha con entrega programada a domicilio o local comercial | Kilos por entrega | Dúo · Familiar · B2B (facturable) |
+> El backend corre en el plan gratuito de Render: si estuvo inactivo, la primera petición
+> puede tardar alrededor de un minuto mientras el servidor despierta.
 
-Cada pedido genera un código de seguimiento que lo vincula al huerto de origen.
+---
 
-> **Prueba la demo** con las cuentas de demostración:
-> comprador `comprador@agrocolab.cl` / `123` · agricultor `agricultor@agrocolab.cl` / `123`
+## 📋 El problema
+
+El pequeño agricultor necesita capital **antes** de la temporada, y termina vendiendo su
+cosecha a intermediarios que se quedan con buena parte del margen. Agro-Colab le permite
+cobrar por adelantado, directamente al consumidor final, con dos líneas de producto:
+
+| Línea | Qué compra el cliente | Planes |
+|---|---|---|
+| **Adopción de árboles** | Un cupo sobre un árbol concreto: es copropietario de su producción de temporada | Básico (5 personas) · Intermedio (3) · Premium (exclusivo) |
+| **Abastecimiento** | Una canasta de cosecha con entrega programada a domicilio o a un local comercial | Dúo · Familiar · B2B (facturable) |
+
+Cada pedido genera un código de seguimiento que lo vincula a su huerto de origen.
+
+---
+
+## ⭐ Destacados técnicos
+
+- **Sin sobreventa bajo concurrencia.** La reserva de cupos es un `UPDATE` condicional atómico, respaldado por un índice único: dos compras simultáneas del último cupo nunca se aprueban ambas.
+- **Seguridad aplicada de punta a punta.** Tokens firmados con HMAC-SHA256, autorización por recurso, *rate limiting* persistente, CSP estricta sin JavaScript en línea y defensa contra XSS en tres capas. [Ver detalle](#-seguridad).
+- **Monitoreo y alertas propios.** Los eventos de seguridad se registran en base de datos y en logs JSON, y disparan alertas por correo o webhook según reglas (fuerza bruta, tokens falsificados, accesos a datos ajenos).
+- **Calidad verificada en CI.** 39 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend.
+- **Frontend sin frameworks.** SPA en JavaScript vanilla organizada en servicios, con router de vistas, delegación de eventos, gráficos accesibles hechos con HTML y CSS, y un árbol 3D de partículas en `<canvas>`.
+- **Privacidad desde el diseño.** Cumplimiento de la Ley N° 21.719 de Protección de Datos Personales de Chile: consentimiento explícito, derechos de acceso, rectificación y eliminación, y registro de tratamiento.
 
 ---
 
 ## ✨ Funcionalidades
 
-**Para el comprador**
+**Comprador**
 - Catálogo de árboles con filtro por plan y cupos disponibles en tiempo real.
-- Adopción de árboles con control de cupos en el servidor: no hay sobreventa aunque varias personas compren a la vez.
-- Contratación de canastas de abastecimiento con destino particular o comercial (razón social y RUT).
-- Panel de adopción: árboles adoptados, coparticipantes, cosecha estimada, cancelación de la suscripción.
+- Canasta de compra y pasarela de pago simulada: el monto lo fija el servidor y los datos de la tarjeta nunca se guardan.
+- Planes de abastecimiento con destino particular o comercial (razón social y RUT).
+- Panel de adopción: árboles adoptados, coparticipantes, cosecha estimada y cancelación de la suscripción.
 - Autocompletado de direcciones reales con OpenStreetMap, sin geolocalizar el dispositivo.
-- Perfil editable y eliminación completa de la cuenta.
+- Registro con verificación por correo, recuperación de contraseña y eliminación completa de la cuenta.
 
-**Para el agricultor**
-- Panel con estadísticas: árboles publicados, suscriptores e ingresos estimados.
-- Publicación de árboles desde un **catálogo cerrado de 12 especies**: el nombre se compone automáticamente (por ejemplo, "Palto Hass" + "#104").
-- **Galería de 36 fotos verificadas** de Wikimedia Commons. El servidor rechaza cualquier imagen que no pertenezca a la especie, incluso en peticiones hechas a mano.
-- Gestión de suscriptores: ver su perfil de contacto y expulsarlos para liberar el cupo.
+**Agricultor**
+- Panel con estadísticas y gráficos: ingresos por árbol, ocupación de cupos y adopciones por mes.
+- Publicación de árboles desde un **catálogo cerrado de 12 especies**, con nombre compuesto automáticamente (por ejemplo, "Palto Hass #104").
+- **Galería de 36 fotos verificadas** de Wikimedia Commons: el servidor rechaza cualquier imagen que no corresponda a la especie, incluso en peticiones hechas a mano. Así el comprador ve siempre el árbol correcto.
+- Gestión de suscriptores: perfil de contacto y expulsión para liberar el cupo.
 
 ---
 
 ## 🏗 Arquitectura
 
-Modelo cliente-servidor en tres capas. El frontend es una SPA en JavaScript vanilla
-organizada en servicios; el backend es una API REST en FastAPI dividida en routers por
-dominio.
+Arquitectura cliente-servidor en tres capas. El frontend estático se publica en GitHub
+Pages y consume una API REST en FastAPI desplegada en Render.
 
 ```mermaid
 flowchart LR
-    subgraph Cliente["Capa de presentación · GitHub Pages"]
-        SPA["SPA HTML + JS<br/>Tailwind CSS"]
+    subgraph Cliente["Presentación · GitHub Pages"]
+        SPA["SPA en JavaScript<br/>Tailwind CSS"]
     end
-    subgraph Servidor["Capa de negocio · Render"]
+    subgraph Servidor["Negocio · Render"]
         API["FastAPI<br/>routers por dominio"]
-        Core["core.py<br/>validaciones, tokens, catálogo"]
+        Core["Reglas de negocio<br/>tokens · validaciones · catálogo"]
+        Seg["Monitoreo<br/>eventos y alertas"]
     end
-    subgraph Datos["Capa de datos"]
-        DB[("SQLite<br/>SQLAlchemy ORM")]
+    subgraph Datos["Datos"]
+        DB[("PostgreSQL<br/>SQLAlchemy ORM")]
     end
-    Photon["Photon / OpenStreetMap"]
+    Brevo["Brevo<br/>correo transaccional"]
+    Photon["Photon<br/>OpenStreetMap"]
 
     SPA -- "fetch + Bearer token" --> API
     API --> Core --> DB
+    API --> Seg --> DB
+    Core -- "códigos de verificación" --> Brevo
     SPA -- "autocompletado" --> Photon
 ```
 
-| Capa | Tecnología | Responsabilidad |
+| Capa | Tecnologías | Responsabilidad |
 |---|---|---|
-| Presentación | HTML5, CSS3, JavaScript (ES2020), Tailwind CSS, Font Awesome | Vistas por rol en un único documento, sin recargas |
-| Negocio | Python 3.12, FastAPI, Pydantic | Reglas de cupos, validación de especies e imágenes, autenticación |
-| Datos | SQLAlchemy 2, SQLite | Persistencia, restricciones de integridad y migraciones ligeras al arrancar |
+| Presentación | HTML5, CSS3, JavaScript ES2020, Tailwind CSS | Vistas por rol en un único documento, sin recargas |
+| Negocio | Python 3.12, FastAPI, Pydantic, bcrypt | Cupos, pagos, validación de especies e imágenes, autenticación y autorización |
+| Datos | SQLAlchemy 2, PostgreSQL (SQLite en local) | Persistencia, restricciones de integridad y migraciones ligeras al arrancar |
+| Infraestructura | GitHub Pages, Render, GitHub Actions, Brevo | Hosting, despliegue, integración continua y correo |
 
 ---
 
-## 📁 Estructura del proyecto
+## 🔐 Seguridad
 
-```
-agro-colab/
-├── index.html                 # Redirección a frontend/ para GitHub Pages
-├── frontend/
-│   ├── index.html             # SPA: login y vistas de comprador y agricultor
-│   ├── privacidad.html        # Política de privacidad (Ley 21.719)
-│   ├── terminos.html          # Términos y condiciones
-│   ├── monitoreo.html         # Panel de monitoreo de seguridad (con token)
-│   ├── css/
-│   │   ├── styles.css         # Estilos propios
-│   │   └── tailwind.css       # Tailwind compilado (scripts/compilar-css.sh)
-│   └── js/
-│       ├── config.js          # URL de la API y vistas por rol
-│       ├── api.js             # Cliente HTTP: adjunta el token de sesión
-│       ├── auth.js            # Sesión en localStorage
-│       ├── views.js           # Router de vistas
-│       ├── login.js           # Login, registro y verificación de cuenta
-│       ├── parcelas.js        # Catálogo, carrito y logística del comprador
-│       ├── dashboard.js       # Panel de adopción del comprador
-│       ├── agricultor.js      # Panel del agricultor
-│       ├── catalogo.js        # Selector de especies y galería de fotos
-│       ├── autocomplete.js    # Autocompletado de direcciones (Photon)
-│       ├── perfil.js          # Perfil de usuario
-│       ├── ui.js              # Alertas, formato de montos y escape de HTML
-│       ├── acciones.js        # Delegación de eventos (sin onclick en el HTML)
-│       ├── efectos.js         # Animaciones de scroll e inclinación 3D
-│       ├── monitoreo.js       # Panel de monitoreo de seguridad
-│       └── app.js             # Arranque de la aplicación
-├── backend/
-│   ├── main.py                # Aplicación FastAPI, CORS y registro de routers
-│   ├── core.py                # Esquemas, tokens de sesión y lógica compartida
-│   ├── database.py            # Modelos SQLAlchemy y migraciones
-│   ├── catalogo.py            # Catálogo cerrado de especies con fotos atribuidas
-│   ├── seguridad.py           # Registro de eventos, reglas de alerta y alertas
-│   ├── notificaciones.py      # Envío de correos (Brevo)
-│   ├── routers/               # arboles, especies, suscripciones, pedidos, pagos, usuarios, monitoreo
-│   ├── tests/                 # Pruebas automatizadas (pytest)
-│   ├── requirements.txt
-│   └── requirements-dev.txt   # requirements.txt + pytest y httpx
-├── Informe.pdf                # Informe del proyecto
-├── Presentacion.pptx          # Presentación del proyecto
-├── scripts/compilar-css.sh    # Compila Tailwind localmente (verifica el checksum)
-├── LICENSE
-└── THIRD_PARTY_NOTICES.md
-```
-
----
-
-## 🚀 Instalación local
-
-**Requisitos:** Python 3.12 o superior y un navegador moderno.
-
-```bash
-git clone https://github.com/arrobaaas/agro-colab.git
-cd agro-colab
-
-# Backend (http://127.0.0.1:8000)
-cd backend
-python3 -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-```
-
-En otra terminal:
-
-```bash
-# Frontend (http://localhost:3000)
-cd frontend
-python3 -m http.server 3000
-```
-
-Los estilos de Tailwind ya vienen compilados en `frontend/css/tailwind.css`. Si agregas
-clases nuevas al HTML o al JavaScript, vuelve a compilarlos (no requiere Node; descarga
-el ejecutable oficial y verifica su checksum antes de usarlo):
-
-```bash
-bash scripts/compilar-css.sh
-```
-
-La base de datos SQLite (`backend/agrocolab.db`) se crea sola al primer arranque, con las
-cuentas de demostración y tres árboles de ejemplo. La documentación interactiva de la API
-queda en `http://127.0.0.1:8000/docs`.
-
-### Variables de entorno
-
-| Variable | Obligatoria | Descripción |
-|---|---|---|
-| `DATABASE_URL` | En producción | Conexión a PostgreSQL (Render, Neon o Supabase; se acepta `postgres://` o `postgresql://`). Sin ella se usa SQLite local (`agrocolab.db`), que en Render se borra en cada despliegue. |
-| `AGROCOLAB_SECRET` | En producción | Clave para firmar los tokens de sesión. Si falta, se genera una al arrancar y las sesiones se cierran en cada reinicio. |
-| `AGROCOLAB_MOD_MODE` | No | `desarrollo` devuelve el código de verificación de cuenta en la respuesta, para probar el registro sin correo. Por defecto: `produccion`. |
-| `BREVO_API_KEY` | Para registrar cuentas y recuperar contraseñas en producción | Clave de la API de [Brevo](https://www.brevo.com) para enviar los códigos por correo (plan gratuito: 300 correos al día). |
-| `CORREO_REMITENTE` | Junto con `BREVO_API_KEY` | Correo verificado en Brevo desde el que se envía el código. |
-| `ALERTA_CORREO` | No | Correo que recibe las alertas de seguridad (usa Brevo). |
-| `ALERTA_WEBHOOK_URL` | No | Webhook de Discord o Slack para las alertas de seguridad (`https://`). |
-| `MONITOREO_TOKEN` | Para usar el panel | Token secreto (24 caracteres o más) que da acceso al panel de monitoreo. Sin él, el panel está desactivado. |
-
-Sin `BREVO_API_KEY` y `CORREO_REMITENTE`, en producción el registro de cuentas nuevas
-avisa que no está disponible, en lugar de crear cuentas que nadie podría verificar.
-Las cuentas de demostración funcionan siempre.
-
----
-
-## 🧪 Pruebas
-
-El backend tiene **39 pruebas automatizadas** (pytest) que corren en GitHub Actions
-en cada push y en cada pull request, **dos veces: con SQLite y con PostgreSQL**, junto
-con una revisión de sintaxis de todo el JavaScript del frontend.
-
-```bash
-cd backend
-pip install -r requirements-dev.txt
-python -m pytest
-```
-
-Las pruebas usan una base temporal (SQLite, o PostgreSQL con `PRUEBAS_DB_URL`), nunca la real, y no envían correos.
-
-| Archivo | Qué cubre |
+| Área | Implementación |
 |---|---|
-| `tests/test_cuentas.py` | Registro y verificación, login, tokens alterados, recuperación de contraseña (sin enumeración de usuarios, código guardado como hash y anulado tras 5 errores, cierre de sesiones) |
-| `tests/test_pagos.py` | Pasarela simulada: aprobación y rechazo, monto fijado por el servidor, tarjetas inválidas, sin cobro si no hay cupo, número y CVV nunca guardados, planes que exigen un pago propio y no reutilizable |
-| `tests/test_seguridad.py` | Autorización por recurso, cabeceras de seguridad, rechazo de HTML (XSS), imágenes fuera del catálogo, cuentas demo protegidas, límite de intentos de login, borrado de datos al eliminar la cuenta |
+| Contraseñas | Hash con **bcrypt** y mínimo de 8 caracteres. Cambiarla exige la actual y cierra las demás sesiones |
+| Sesión | **Tokens firmados con HMAC-SHA256**, con expiración de 7 días y ligados a la contraseña. Se guardan en `sessionStorage`, limitados a la pestaña |
+| Autorización | Por recurso: cada usuario solo ve y modifica lo suyo. El usuario se toma siempre del token, nunca del cuerpo de la petición |
+| Integridad | Precios fijados por el servidor y reserva de cupos atómica con índice único |
+| XSS | Escape de todo dato insertado como HTML, rechazo de `<` y `>` en el backend y **Content-Security-Policy** sin `'unsafe-inline'` |
+| Abuso | *Rate limiting* por IP real y por cuenta en login, registro y verificación, persistido en la base de datos |
+| Cuentas | Verificación por correo con códigos generados con `secrets`. La recuperación no revela qué correos están registrados |
+| Transporte | Cabeceras `nosniff`, `X-Frame-Options`, `Referrer-Policy` y `no-store`, y CORS restringido al frontend |
 
----
+<details>
+<summary><b>Registro de eventos, reglas de alerta y panel de monitoreo</b></summary>
 
-## 🔌 API REST
+<br>
 
-Los endpoints marcados con 🔒 exigen el header `Authorization: Bearer <token>`, que se
-obtiene al iniciar sesión. El usuario se toma siempre del token, nunca del cuerpo de la
-petición.
+Cada evento de seguridad se guarda en la tabla `eventos_seguridad` (30 días) y como una
+línea JSON en los logs del servidor: logins fallidos y exitosos, tokens falsificados,
+accesos a datos ajenos, bloqueos por *rate limit*, intentos de XSS, ataques a las cuentas
+demo, cambios de contraseña y cuentas eliminadas. El navegador también reporta cuando la
+CSP bloquea código (`POST /api/seguridad/csp`).
 
-| Método | Endpoint | Descripción |
-|---|---|---|
-| `POST` | `/api/register` | Registra una cuenta y envía el código de verificación |
-| `POST` | `/api/verificar-cuenta` | Verifica la cuenta con el código de 6 dígitos |
-| `POST` | `/api/recuperar-contrasena` | Envía un código para restablecer la contraseña (misma respuesta exista o no la cuenta) |
-| `POST` | `/api/restablecer-contrasena` | Cambia la contraseña con el código y cierra las sesiones abiertas |
-| `GET` | `/api/estado` | Indica si el envío real de correos está activo |
-| `POST` | `/api/login` | Inicia sesión y devuelve el token |
-| `GET` | `/api/especies` | Catálogo cerrado de especies con sus fotos verificadas |
-| `GET` | `/api/arboles` | Catálogo público de árboles |
-| `POST` | `/api/arboles` 🔒 | Publica un árbol (solo agricultores) |
-| `PUT` | `/api/arboles/{id}` 🔒 | Edita un árbol (solo su productor) |
-| `DELETE` | `/api/arboles/{id}` 🔒 | Elimina un árbol y sus suscripciones (solo su productor) |
-| `POST` | `/api/pagos` 🔒 | Pasarela simulada: valida la tarjeta de prueba y, si se aprueba, adopta el árbol reservando el cupo de forma atómica |
-| `GET` | `/api/pagos` 🔒 | Historial de pagos del comprador (marca y últimos 4 dígitos) |
-| `POST` | `/api/cancelar-suscripcion` 🔒 | Cancela la suscripción propia y libera el cupo |
-| `GET` | `/api/suscripciones/usuario/{id}` 🔒 | Árboles adoptados por el usuario |
-| `GET` | `/api/mis-arboles/{id}/suscriptores` 🔒 | Suscriptores de los árboles del productor |
-| `DELETE` | `/api/suscripciones/{id}` 🔒 | Expulsa a un suscriptor (solo el productor) |
-| `POST` | `/api/pedidos` 🔒 | Registra un plan de abastecimiento o el despacho de la cosecha de un árbol adoptado |
-| `GET` | `/api/pedidos` 🔒 | Pedidos del usuario |
-| `PUT` | `/api/pedidos/{id}` 🔒 | Modifica el destino y la frecuencia de un pedido propio |
-| `DELETE` | `/api/pedidos/{id}` 🔒 | Cancela un plan de abastecimiento propio |
-| `GET` | `/api/usuario/{id}` 🔒 | Perfil propio, o el de un suscriptor para su productor |
-| `PUT` | `/api/perfil` 🔒 | Actualiza el perfil propio |
-| `DELETE` | `/api/usuario/{email}` 🔒 | Elimina la cuenta propia y todos sus datos |
-
----
-
-## 🔐 Seguridad y protección de datos
-
-**Medidas implementadas**
-- Contraseñas hasheadas con **bcrypt**; mínimo 8 caracteres para cuentas nuevas. Las bases antiguas con texto plano se migran solas al arrancar.
-- **Tokens de sesión firmados con HMAC-SHA256**, con expiración de 7 días y ligados a la contraseña: al cambiarla, los tokens anteriores dejan de servir. Cambiar la contraseña exige la actual.
-- **Autorización por recurso:** cada usuario solo ve y modifica lo suyo, y solo el productor ve los datos de contacto de sus suscriptores. Solo los compradores adoptan y contratan planes.
-- **Precios fijados por el servidor:** el monto de un plan o de un árbol nunca se toma del navegador.
-- **Protección contra XSS en tres capas:** todo dato se escapa antes de insertarse como HTML, el backend rechaza `<` y `>` en los textos y una **Content-Security-Policy estricta** prohíbe el JavaScript en línea (`script-src` sin `'unsafe-inline'`) y las conexiones a dominios ajenos. El HTML no tiene manejadores `onclick`: los eventos se conectan por delegación (`acciones.js`).
-- **Sesión limitada a la pestaña:** la sesión y la canasta se guardan en `sessionStorage`, no en `localStorage`. Sobreviven a recargar o a ir a Privacidad y volver, y se borran al cerrar la pestaña: cada visita nueva parte en el login. Cerrar sesión vacía también la canasta.
-- **Validación estricta de entrada** con Pydantic: largos máximos, valores permitidos (roles, planes, frecuencias) y rangos numéricos.
-- **Rate limiting** por IP real (detrás del proxy de Render) y por cuenta en login, registro y verificación, guardado en la base de datos para que sobreviva a reinicios.
-- **Verificación de cuenta por correo:** código de 6 dígitos generado con `secrets`, vigente por 30 minutos, con reenvío y sin revelar qué correos están registrados.
-- **Cuentas demo protegidas:** sus credenciales son públicas, así que no se pueden borrar, cambiarles la contraseña ni eliminar sus árboles.
-- **Integridad de cupos:** la reserva se hace con un `UPDATE` condicional atómico, y un índice único impide que un usuario ocupe dos cupos del mismo árbol.
-- **Cabeceras de seguridad** (`nosniff`, `X-Frame-Options`, `Referrer-Policy`, `no-store`) y **CORS** restringido a los orígenes, métodos y cabeceras que usa el frontend.
-
-**Registro, monitoreo y alertas**
-
-El backend registra cada evento de seguridad en la tabla `eventos_seguridad` (30 días) y
-como una línea JSON en los logs del servidor: logins fallidos y exitosos, tokens
-falsificados, accesos a datos ajenos, bloqueos por rate limit, intentos de XSS, ataques a
-las cuentas demo, cambios de contraseña y cuentas eliminadas. El navegador también reporta
-cuando la CSP bloquea código (`POST /api/seguridad/csp`).
-
-Cuando se cumple una regla se envía una **alerta** por correo y/o webhook, como máximo una
-vez por hora por regla y origen:
+Cuando se cumple una regla se envía una alerta por correo o webhook, como máximo una vez
+por hora por regla y origen:
 
 | Regla | Se dispara con |
 |---|---|
@@ -304,19 +170,21 @@ vez por hora por regla y origen:
 | Intento de XSS | 1 texto con `<` o `>` |
 | Bloqueo de CSP | 1 reporte del navegador |
 
-El **panel de monitoreo** (`frontend/monitoreo.html`) muestra los eventos de las últimas
-24 horas, por tipo y por severidad, y se actualiza cada 30 segundos. Pide el
-`MONITOREO_TOKEN`, que se guarda solo en memoria.
+El panel de monitoreo (`frontend/monitoreo.html`) muestra los eventos de las últimas 24
+horas por tipo y severidad, y se actualiza cada 30 segundos. Pide el `MONITOREO_TOKEN`,
+que se guarda solo en memoria.
 
-**Ley N° 21.719 de Protección de Datos Personales (Chile)**
+</details>
+
+<details>
+<summary><b>Ley N° 21.719 de Protección de Datos Personales (Chile)</b></summary>
+
+<br>
 
 El proyecto incorpora desde el diseño los requisitos de la ley, vigente desde el 1 de
 diciembre de 2026: consentimiento explícito al registrarse, [política de
-privacidad](https://arrobaaas.github.io/agro-colab/privacidad.html) y los derechos de
-acceso, rectificación y eliminación desde el perfil del usuario.
-
-<details>
-<summary><b>Registro de actividades de tratamiento, DPO y protocolo de brechas</b></summary>
+privacidad](https://arrobaaas.github.io/agro-colab/frontend/privacidad.html) y derechos
+de acceso, rectificación y eliminación desde el perfil del usuario.
 
 **Delegado de Protección de Datos (DPO):** Nicolas Reyes Orellana · [@arrobaaas](https://github.com/arrobaaas)
 
@@ -329,46 +197,202 @@ acceso, rectificación y eliminación desde el perfil del usuario.
 | Dirección | Despacho de productos | Consentimiento | Hasta eliminación |
 | Suscripciones | Gestión de adopciones | Contrato | Hasta eliminación |
 | Pedidos | Gestión logística | Contrato | Hasta eliminación |
-| IP, correo y acción en eventos de seguridad | Detectar y responder a ataques | Interés legítimo (seguridad del servicio) | 30 días |
+| IP, correo y acción en eventos de seguridad | Detectar y responder a ataques | Interés legítimo | 30 días |
 
 | Derecho (Art. 20) | Cómo ejercerlo |
 |---|---|
-| Acceso | Perfil de usuario |
-| Rectificación | Perfil de usuario |
+| Acceso y rectificación | Perfil de usuario |
 | Eliminación | Botón "Eliminar mi cuenta" en el perfil |
 | Oposición | Contactar al DPO |
 
-**Protocolo de notificación de brechas (Art. 22):** notificación a la Agencia de Protección
-de Datos dentro de 72 horas, aviso directo a los usuarios afectados, documentación del
-incidente y de las medidas correctivas.
+**Notificación de brechas (Art. 22):** aviso a la Agencia de Protección de Datos dentro de
+72 horas y a los usuarios afectados, con documentación del incidente y de las medidas
+correctivas.
 
-**Evaluación de impacto (DPIA):** riesgo bajo. No se tratan datos sensibles, el volumen es
+**Evaluación de impacto:** riesgo bajo. No se tratan datos sensibles, el volumen es
 pequeño (prototipo académico) y las medidas mitigantes son el hash de contraseñas, el
 consentimiento y el derecho a eliminación.
 
-**Encargados del tratamiento:** GitHub Pages ([términos](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)) y Render ([términos](https://render.com/legal/terms)).
+**Encargados del tratamiento:** GitHub Pages, Render y Brevo.
 
 </details>
 
 ---
 
-## 🗺 Hoja de ruta
+## 🧪 Pruebas e integración continua
 
-- [x] Catálogo de árboles y adopción con control de cupos
-- [x] Planes de abastecimiento con logística particular y comercial
-- [x] Catálogo cerrado de especies con imágenes verificadas
-- [x] Panel del comprador y panel del agricultor
-- [x] Persistencia con SQLAlchemy (PostgreSQL en producción, SQLite en local)
-- [x] Autenticación con tokens y autorización por recurso
-- [x] Pasarela de pago (simulada)
-- [x] Migración a PostgreSQL
-- [x] Envío real del correo de verificación (Brevo) y recuperación de contraseña
-- [ ] Fotos propias del productor con flujo de moderación
-- [x] Pruebas automatizadas e integración continua
+**39 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
+*pull request* dos veces, **con SQLite y con PostgreSQL**, y además revisa la sintaxis de
+todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca envían correos.
+
+| Archivo | Qué cubre |
+|---|---|
+| `test_cuentas.py` | Registro y verificación, login, tokens alterados y recuperación de contraseña (sin enumeración de usuarios, código guardado como hash, bloqueo tras 5 errores y cierre de sesiones) |
+| `test_pagos.py` | Aprobación y rechazo, monto fijado por el servidor, tarjetas inválidas, sin cobro si no hay cupo, número y CVV nunca guardados |
+| `test_seguridad.py` | Autorización por recurso, cabeceras, rechazo de XSS, imágenes fuera del catálogo, cuentas demo protegidas, límite de intentos y borrado de datos |
+| `test_base_datos.py` | Selección de la base de datos según las variables de entorno (SQLite local o PostgreSQL de Render) |
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+python -m pytest
+```
 
 ---
 
-## 🤖 Declaración de uso de Inteligencia Artificial
+## 🚀 Instalación local
+
+**Requisitos:** Python 3.12 o superior y un navegador moderno.
+
+```bash
+git clone https://github.com/arrobaaas/agro-colab.git
+cd agro-colab
+
+# Backend → http://127.0.0.1:8000  (documentación interactiva en /docs)
+cd backend
+python3 -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+AGROCOLAB_MOD_MODE=desarrollo uvicorn main:app --reload --port 8000
+```
+
+```bash
+# Frontend → http://localhost:3000  (en otra terminal)
+cd frontend
+python3 -m http.server 3000
+```
+
+Sin `DATABASE_URL` se usa una base SQLite local que se crea sola con las cuentas de
+demostración y tres árboles de ejemplo. En modo `desarrollo` el código de verificación
+aparece en la consola, así que se puede probar el registro sin configurar el correo.
+
+Los estilos de Tailwind vienen compilados. Si agregas clases nuevas, vuelve a compilarlos
+con `bash scripts/compilar-css.sh` (no requiere Node: descarga el ejecutable oficial y
+verifica su checksum).
+
+<details>
+<summary><b>Variables de entorno</b></summary>
+
+<br>
+
+| Variable | Obligatoria | Descripción |
+|---|---|---|
+| `DATABASE_URL` | En producción | Conexión a PostgreSQL (`postgres://` o `postgresql://`). Sin ella se usa SQLite local |
+| `AGROCOLAB_SECRET` | En producción | Clave para firmar los tokens. Si falta, se genera una al arrancar y las sesiones se cierran en cada reinicio |
+| `AGROCOLAB_MOD_MODE` | No | `desarrollo` muestra el código de verificación sin enviar correo. Por defecto: `produccion` |
+| `BREVO_API_KEY` | Para el registro en producción | Clave de la API de [Brevo](https://www.brevo.com) para enviar los códigos por correo |
+| `CORREO_REMITENTE` | Junto con `BREVO_API_KEY` | Correo verificado en Brevo desde el que se envían los códigos |
+| `ALERTA_CORREO` | No | Correo que recibe las alertas de seguridad |
+| `ALERTA_WEBHOOK_URL` | No | Webhook de Discord o Slack para las alertas (`https://`) |
+| `MONITOREO_TOKEN` | Para usar el panel | Token secreto (24 caracteres o más) del panel de monitoreo. Sin él, el panel está desactivado |
+
+Sin `BREVO_API_KEY` y `CORREO_REMITENTE`, en producción el registro avisa que no está
+disponible en lugar de crear cuentas que nadie podría verificar. Las cuentas de
+demostración funcionan siempre.
+
+</details>
+
+---
+
+## 🔌 API REST
+
+Documentación interactiva (Swagger) en `/docs` al levantar el backend. Los endpoints
+marcados con 🔒 exigen `Authorization: Bearer <token>`.
+
+<details>
+<summary><b>Ver todos los endpoints</b></summary>
+
+<br>
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `POST` | `/api/register` | Registra una cuenta y envía el código de verificación |
+| `POST` | `/api/verificar-cuenta` | Verifica la cuenta con el código de 6 dígitos |
+| `POST` | `/api/reenviar-codigo` | Envía un código de verificación nuevo |
+| `POST` | `/api/recuperar-contrasena` | Envía un código para restablecer la contraseña |
+| `POST` | `/api/restablecer-contrasena` | Cambia la contraseña con el código y cierra las sesiones abiertas |
+| `GET` | `/api/estado` | Indica si el envío real de correos está activo |
+| `POST` | `/api/login` | Inicia sesión y devuelve el token |
+| `GET` | `/api/especies` | Catálogo cerrado de especies con sus fotos verificadas |
+| `GET` | `/api/arboles` | Catálogo público de árboles |
+| `POST` | `/api/arboles` 🔒 | Publica un árbol (solo agricultores) |
+| `PUT` | `/api/arboles/{id}` 🔒 | Edita un árbol (solo su productor) |
+| `DELETE` | `/api/arboles/{id}` 🔒 | Elimina un árbol y sus suscripciones (solo su productor) |
+| `POST` | `/api/pagos` 🔒 | Pasarela simulada: valida la tarjeta y adopta el árbol reservando el cupo de forma atómica |
+| `GET` | `/api/pagos` 🔒 | Historial de pagos (marca y últimos 4 dígitos) |
+| `POST` | `/api/cancelar-suscripcion` 🔒 | Cancela la suscripción propia y libera el cupo |
+| `GET` | `/api/suscripciones/usuario/{id}` 🔒 | Árboles adoptados por el usuario |
+| `GET` | `/api/mis-arboles/{id}/suscriptores` 🔒 | Suscriptores de los árboles del productor |
+| `DELETE` | `/api/suscripciones/{id}` 🔒 | Expulsa a un suscriptor (solo el productor) |
+| `POST` | `/api/pedidos` 🔒 | Registra un plan de abastecimiento o el despacho de una cosecha |
+| `GET` | `/api/pedidos` 🔒 | Pedidos del usuario |
+| `PUT` | `/api/pedidos/{id}` 🔒 | Modifica el destino y la frecuencia de un pedido propio |
+| `DELETE` | `/api/pedidos/{id}` 🔒 | Cancela un plan de abastecimiento propio |
+| `GET` | `/api/usuario/{id}` 🔒 | Perfil propio, o el de un suscriptor para su productor |
+| `PUT` | `/api/perfil` 🔒 | Actualiza el perfil propio |
+| `DELETE` | `/api/usuario/{email}` 🔒 | Elimina la cuenta propia y todos sus datos |
+
+</details>
+
+---
+
+## 📁 Estructura del proyecto
+
+<details>
+<summary><b>Ver árbol de archivos</b></summary>
+
+```
+agro-colab/
+├── frontend/
+│   ├── index.html             # SPA: login y vistas de comprador y agricultor
+│   ├── privacidad.html        # Política de privacidad (Ley 21.719)
+│   ├── terminos.html          # Términos y condiciones
+│   ├── monitoreo.html         # Panel de monitoreo de seguridad
+│   ├── css/                   # Estilos propios y Tailwind compilado
+│   └── js/
+│       ├── app.js             # Arranque de la aplicación
+│       ├── config.js          # URL de la API y vistas por rol
+│       ├── api.js             # Cliente HTTP con token de sesión
+│       ├── auth.js            # Sesión del usuario
+│       ├── views.js           # Router de vistas
+│       ├── acciones.js        # Delegación de eventos (sin onclick en el HTML)
+│       ├── login.js           # Login, registro y verificación
+│       ├── recuperacion.js    # Recuperación de contraseña
+│       ├── parcelas.js        # Catálogo, canasta y logística del comprador
+│       ├── pago.js            # Checkout de la pasarela simulada
+│       ├── dashboard.js       # Panel del comprador
+│       ├── agricultor.js      # Panel del agricultor
+│       ├── graficos.js        # Gráficos accesibles con HTML y CSS
+│       ├── catalogo.js        # Selector de especies y galería de fotos
+│       ├── autocomplete.js    # Autocompletado de direcciones
+│       ├── perfil.js          # Perfil de usuario
+│       ├── dialogo.js         # Diálogos propios (reemplazan alert y confirm)
+│       ├── efectos.js         # Animaciones de scroll e inclinación 3D
+│       ├── constelacion.js    # Árbol 3D de partículas en canvas
+│       ├── monitoreo.js       # Panel de monitoreo
+│       ├── legal.js           # Efectos de las páginas legales
+│       └── ui.js              # Alertas, formato de montos y escape de HTML
+├── backend/
+│   ├── main.py                # Aplicación FastAPI, CORS y routers
+│   ├── core.py                # Esquemas, tokens y lógica compartida
+│   ├── database.py            # Modelos SQLAlchemy y migraciones
+│   ├── catalogo.py            # Catálogo de especies con fotos atribuidas
+│   ├── seguridad.py           # Eventos, reglas de alerta y alertas
+│   ├── notificaciones.py      # Correo transaccional (Brevo)
+│   ├── routers/               # arboles, especies, suscripciones, pedidos, pagos, usuarios, monitoreo
+│   └── tests/                 # Pruebas automatizadas (pytest)
+├── .github/workflows/         # Integración continua
+├── scripts/compilar-css.sh    # Compilación de Tailwind con verificación de checksum
+├── docs/capturas/             # Capturas de pantalla
+├── Informe.pdf                # Informe del proyecto
+└── Presentacion.pptx          # Presentación del proyecto
+```
+
+</details>
+
+---
+
+## 🤖 Uso de Inteligencia Artificial
 
 En este proyecto se usaron herramientas de IA como **apoyo**. Las decisiones de diseño,
 la revisión del código y la responsabilidad sobre el resultado son del equipo.
@@ -377,27 +401,31 @@ la revisión del código y la responsabilidad sobre el resultado son del equipo.
 |---|---|---|
 | **Gemini** (Google) | Septiembre 2026 | Estructura y redacción de los argumentos comerciales del informe |
 | **ChatGPT** (OpenAI) | Septiembre 2026 | Comparación técnica de lenguajes (Node.js vs Python) y apoyo en el código del prototipo inicial |
-| **Claude Code** (Anthropic, modelo Claude Opus 5.5) | Octubre 2026 | Asistente de programación en la terminal: revisión de código en busca de fallas, rediseño de las tarjetas de suscripción, implementación de la autenticación con tokens y la autorización por recurso, corrección de la condición de carrera en la reserva de cupos, y redacción de esta documentación y de los avisos de licencias |
+| **Claude Code** (Anthropic) | Octubre 2026 | Asistente de programación: revisión de código, autenticación con tokens y autorización por recurso, corrección de la condición de carrera en la reserva de cupos, y documentación |
 
-**Cómo se verificó**
-- Las cifras sobre el abandono del campo y las tendencias de consumo en Chile se contrastaron a mano con las fuentes primarias del Ministerio de Agricultura y con las revistas sectoriales citadas en el informe.
-- Los cambios de código propuestos por la IA se revisaron antes de incorporarlos. Los de seguridad se probaron contra la API en ejecución: peticiones sin token o con token falso, acceso a recursos de otros usuarios y compras simultáneas del último cupo.
+Los cambios propuestos por la IA se revisaron antes de incorporarlos, y los de seguridad
+se probaron contra la API en ejecución: peticiones sin token o con token falso, acceso a
+recursos de otros usuarios y compras simultáneas del último cupo. Las cifras del informe
+se contrastaron con fuentes primarias del Ministerio de Agricultura.
 
 ---
 
 ## 👥 Equipo
 
-- Joaquin Alveal Santos - [@Joaquin-alveal](https://github.com/Joaquin-Alveal)
-- Matias Gonzalez Paredes - [@Skt1-Ctrl](https://github.com/SKT1-Ctrl)
-- Nicolas Reyes Orellana - [@arrobaaas](https://github.com/arrobaaas)
+| Integrante | GitHub |
+|---|---|
+| Nicolas Reyes Orellana | [@arrobaaas](https://github.com/arrobaaas) |
+| Joaquin Alveal Santos | [@Joaquin-Alveal](https://github.com/Joaquin-Alveal) |
+| Matias Gonzalez Paredes | [@SKT1-Ctrl](https://github.com/SKT1-Ctrl) |
 
-Proyecto semestral · INGT1003 Arquitectura de Desarrollo (Móvil y Web) · Universidad Mayor · 2026
+Proyecto semestral del curso **INGT1003 Arquitectura de Desarrollo (Móvil y Web)** ·
+Universidad Mayor · 2026
 
 ---
 
 ## 📄 Licencia
 
-El código se distribuye bajo la [licencia MIT](LICENSE). Las fotografías del catálogo
-conservan sus licencias originales de Wikimedia Commons (CC BY, CC BY-SA o dominio
-público), con autor y licencia registrados por imagen. Las dependencias, servicios y
-créditos de cada foto están en [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Código bajo [licencia MIT](LICENSE). Las fotografías del catálogo conservan sus licencias
+originales de Wikimedia Commons (CC BY, CC BY-SA o dominio público), con autor y licencia
+registrados por imagen. Dependencias, servicios y créditos en
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
