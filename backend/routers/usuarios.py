@@ -13,8 +13,9 @@ from core import (
     RecuperacionRequest, RestablecerRequest,
     correo_configurado, enviar_codigo_verificacion, enviar_codigo_recuperacion, enviar_aviso_cambio_contrasena,
     hash_password, verify_password, foto_de, get_db, MODO_DESARROLLO, limitar_por_ip, crear_token, usuario_actual,
-    limitar, es_cuenta_demo,
+    limitar, es_cuenta_demo, ROL_ADMIN,
 )
+from sqlalchemy import or_
 from seguridad import registrar_evento
 from database import Usuario, Arbol, Suscripcion, Pedido, Pago, SessionLocal, es_hash_bcrypt
 
@@ -110,9 +111,11 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     # repartida entre muchas IPs contra un mismo correo
     limitar(f"login:{data.email.lower()}", maximo=10, ventana_segundos=900)
 
+    # El administrador no tiene botón propio en el login: entra con
+    # cualquiera de los dos tipos de cuenta
     usuario = db.query(Usuario).filter(
         Usuario.email == data.email,
-        Usuario.rol == data.rol
+        or_(Usuario.rol == data.rol, Usuario.rol == ROL_ADMIN)
     ).first()
 
     if not usuario or not verify_password(data.password, usuario.password):
@@ -393,6 +396,19 @@ def eliminar_usuario(
         registrar_evento("cuenta_demo", "advertencia", usuario=usuario, detalle="eliminar cuenta")
         return {"status": "error", "mensaje": "La cuenta de demostración no se puede eliminar."}
 
+    registrar_evento("cuenta_eliminada", "info", usuario=usuario)
+    borrar_cuenta(usuario, db)
+    db.commit()
+
+    return {
+        "status": "success",
+        "mensaje": "Todos tus datos han sido eliminados correctamente."
+    }
+
+
+def borrar_cuenta(usuario: Usuario, db: Session):
+    """Borra la cuenta y todos sus datos (sin hacer commit). La usan la
+    eliminación de la propia cuenta y el panel de administración."""
     # Eliminar suscripciones del usuario y las de sus árboles publicados
     db.query(Suscripcion).filter(Suscripcion.usuario_id == usuario.id).delete()
     ids_arboles = [a.id for a in db.query(Arbol.id).filter(Arbol.productor_id == usuario.id)]
@@ -406,13 +422,5 @@ def eliminar_usuario(
     # Eliminar árboles publicados por el usuario (si es agricultor)
     db.query(Arbol).filter(Arbol.productor_id == usuario.id).delete()
 
-    registrar_evento("cuenta_eliminada", "info", usuario=usuario)
-
     # Finalmente eliminar el usuario
     db.delete(usuario)
-    db.commit()
-
-    return {
-        "status": "success",
-        "mensaje": "Todos tus datos han sido eliminados correctamente."
-    }

@@ -33,6 +33,12 @@
           requiereSesion: true,
           roles: ["agricultor"],
           alMostrar: () => AgroColab.agricultor.cargar()
+        },
+        admin: {
+          selector: "#vista-admin",
+          requiereSesion: true,
+          roles: ["administrador"],
+          alMostrar: () => AgroColab.admin.cargar()
         }
       };
       this.vistaActual = null;

@@ -23,6 +23,12 @@ os.environ.pop("BREVO_API_KEY", None)
 os.environ.pop("CORREO_REMITENTE", None)
 os.environ.pop("ALERTA_CORREO", None)
 os.environ.pop("ALERTA_WEBHOOK_URL", None)
+# Cuenta de administrador de las pruebas (en producción la definen estas
+# mismas variables en Render)
+ADMIN_EMAIL = "admin@pruebas.cl"
+ADMIN_PASSWORD = "clave-admin-de-pruebas"
+os.environ["ADMIN_EMAIL"] = ADMIN_EMAIL
+os.environ["ADMIN_PASSWORD"] = ADMIN_PASSWORD
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -64,6 +70,7 @@ def _tokens_demo():
         return {
             "comprador": login(c, "comprador@agrocolab.cl"),
             "agricultor": login(c, "agricultor@agrocolab.cl", rol="agricultor"),
+            "admin": login(c, ADMIN_EMAIL, ADMIN_PASSWORD),
         }
 
 
@@ -75,6 +82,11 @@ def token_comprador(_tokens_demo):
 @pytest.fixture
 def token_agricultor(_tokens_demo):
     return _tokens_demo["agricultor"]
+
+
+@pytest.fixture
+def token_admin(_tokens_demo):
+    return _tokens_demo["admin"]
 
 
 def registrar(cliente, rol):

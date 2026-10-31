@@ -21,28 +21,29 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261031o">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261031o">
-  <script src="js/config.js?v=20261031o" defer></script>
-  <script src="js/ui.js?v=20261031o" defer></script>
-  <script src="js/dialogo.js?v=20261031o" defer></script>
-  <script src="js/api.js?v=20261031o" defer></script>
-  <script src="js/auth.js?v=20261031o" defer></script>
-  <script src="js/pago.js?v=20261031o" defer></script>
-  <script src="js/parcelas.js?v=20261031o" defer></script>
-  <script src="js/catalogo.js?v=20261031o" defer></script>
-  <script src="js/agricultor.js?v=20261031o" defer></script>
-  <script src="js/graficos.js?v=20261031o" defer></script>
-  <script src="js/perfil.js?v=20261031o" defer></script>
-  <script src="js/autocomplete.js?v=20261031o" defer></script>
-  <script src="js/dashboard.js?v=20261031o" defer></script>
-  <script src="js/efectos.js?v=20261031o" defer></script>
-  <script src="js/constelacion.js?v=20261031o" defer></script>
-  <script src="js/views.js?v=20261031o" defer></script>
-  <script src="js/login.js?v=20261031o" defer></script>
-  <script src="js/recuperacion.js?v=20261031o" defer></script>
-  <script src="js/acciones.js?v=20261031o" defer></script>
-  <script src="js/app.js?v=20261031o" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261031p">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261031p">
+  <script src="js/config.js?v=20261031p" defer></script>
+  <script src="js/ui.js?v=20261031p" defer></script>
+  <script src="js/dialogo.js?v=20261031p" defer></script>
+  <script src="js/api.js?v=20261031p" defer></script>
+  <script src="js/auth.js?v=20261031p" defer></script>
+  <script src="js/pago.js?v=20261031p" defer></script>
+  <script src="js/parcelas.js?v=20261031p" defer></script>
+  <script src="js/catalogo.js?v=20261031p" defer></script>
+  <script src="js/agricultor.js?v=20261031p" defer></script>
+  <script src="js/graficos.js?v=20261031p" defer></script>
+  <script src="js/perfil.js?v=20261031p" defer></script>
+  <script src="js/autocomplete.js?v=20261031p" defer></script>
+  <script src="js/dashboard.js?v=20261031p" defer></script>
+  <script src="js/efectos.js?v=20261031p" defer></script>
+  <script src="js/constelacion.js?v=20261031p" defer></script>
+  <script src="js/views.js?v=20261031p" defer></script>
+  <script src="js/login.js?v=20261031p" defer></script>
+  <script src="js/recuperacion.js?v=20261031p" defer></script>
+  <script src="js/admin.js?v=20261031p" defer></script>
+  <script src="js/acciones.js?v=20261031p" defer></script>
+  <script src="js/app.js?v=20261031p" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -961,6 +962,86 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       VISTA ADMINISTRADOR - Cuentas de todos los usuarios (admin.js)
+       ============================================================ -->
+  <div id="vista-admin" data-vista="admin" class="hidden tema-comprador">
+    <header class="tc-nav sticky top-0 z-50">
+      <div class="tc-contenedor tc-nav__fila">
+        <span class="tc-marca"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado-adm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado-adm)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</span>
+        <nav class="tc-nav__enlaces" aria-label="Navegación principal">
+          <span class="nav-separador"></span>
+          <div data-nav-sesion></div>
+          <button type="button" class="nav-icono" data-cerrar-sesion title="Cerrar sesión" aria-label="Cerrar sesión">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="tc-contenedor" style="padding-bottom:6rem">
+      <div class="tc-panel-cabecera" data-reveal="wipe">
+        <p class="tc-etiqueta">Administración</p>
+        <h1 class="tc-display" style="margin-top:1.5rem">Cuentas de Agro-Colab.<br><span class="tc-tenue">Todas en un lugar.</span></h1>
+        <p class="tc-cuerpo" style="margin-top:1.75rem">
+          Revisa el perfil de cada persona y los árboles que publica cada agricultor.
+          Corrige sus datos o elimina su cuenta cuando te lo pidan.
+        </p>
+      </div>
+
+      <div class="tc-kpis" style="margin-top:3rem">
+        <div class="tc-kpi">
+          <p class="tc-kpi__etiqueta">Cuentas</p>
+          <p class="tc-kpi__valor" id="admin-total">0</p>
+        </div>
+        <div class="tc-kpi">
+          <p class="tc-kpi__etiqueta">Compradores</p>
+          <p class="tc-kpi__valor" id="admin-compradores">0</p>
+        </div>
+        <div class="tc-kpi">
+          <p class="tc-kpi__etiqueta">Agricultores</p>
+          <p class="tc-kpi__valor" id="admin-agricultores">0</p>
+        </div>
+        <div class="tc-kpi tc-kpi--destacado">
+          <p class="tc-kpi__etiqueta">Árboles publicados</p>
+          <p class="tc-kpi__valor" id="admin-arboles">0</p>
+        </div>
+      </div>
+
+      <div class="tc-panel-seccion">
+        <h2 class="tc-titulo-sm">Usuarios</h2>
+        <span id="admin-contador" class="tc-contador"></span>
+      </div>
+
+      <div class="admin-filtros">
+        <div class="admin-buscar">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <input type="search" id="admin-buscar" class="input" placeholder="Buscar por nombre o correo" aria-label="Buscar por nombre o correo" data-al-escribir="admin.filtrar" autocomplete="off">
+        </div>
+        <select id="admin-rol" class="input admin-rol" aria-label="Filtrar por tipo de cuenta" data-al-escribir="admin.filtrar">
+          <option value="">Todas las cuentas</option>
+          <option value="comprador">Compradores</option>
+          <option value="agricultor">Agricultores</option>
+          <option value="administrador">Administradores</option>
+        </select>
+      </div>
+
+      <div id="admin-usuarios">
+        <p class="tc-cuerpo-sm" style="padding:2rem 0">Cargando cuentas...</p>
+      </div>
+    </main>
+
+    <footer class="tc-footer">
+      <div class="tc-contenedor tc-footer__base" style="border-top:0">
+        <span class="tc-marca" style="font-size:.875rem"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="logo-degradado-adm2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#15846e"/></linearGradient></defs><path d="M12 2 22 20H2Z" fill="url(#logo-degradado-adm2)"/><path d="M12 9 17 18H7Z" fill="#040806" opacity=".55"/></svg> Agro-Colab</span>
+        <span style="display:flex;gap:1.5rem">
+          <a href="privacidad.html">Privacidad</a>
+          <a href="terminos.html">Términos</a>
+        </span>
+      </div>
+    </footer>
+  </div>
+
   <!-- MODAL: SUSCRIPTORES DE UN ÁRBOL -->
   <div id="modal-suscriptores" class="modal-animado fixed inset-0 z-[100] hidden tema-comprador">
     <div class="absolute inset-0 bg-black/60" data-accion="agricultor.cerrarSuscriptores"></div>
@@ -1236,6 +1317,75 @@
             <p class="tc-cuerpo-sm" style="margin-top:.5rem">Elimina tu cuenta y todos tus datos de forma permanente.</p>
           </div>
           <button type="button" data-accion="perfil.eliminarCuenta" class="perfil-eliminar">
+            Eliminar cuenta
+          </button>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CUENTA DE UN USUARIO (panel de administración, admin.js) -->
+  <div id="modal-admin-usuario" class="modal-animado fixed inset-0 z-[100] hidden tema-comprador">
+    <div class="absolute inset-0" data-accion="admin.cerrar"></div>
+    <div class="perfil-panel" role="dialog" aria-modal="true" aria-labelledby="admin-usuario-nombre">
+      <div class="perfil-cabecera">
+        <span id="admin-usuario-avatar" class="perfil-avatar">?</span>
+        <div class="perfil-identidad">
+          <p id="admin-usuario-rol" class="tc-etiqueta tc-etiqueta--verde">--</p>
+          <h3 id="admin-usuario-nombre" class="tc-titulo-sm">--</h3>
+        </div>
+        <button type="button" class="nav-icono" data-accion="admin.cerrar" title="Cerrar" aria-label="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="perfil-cuerpo">
+        <section class="perfil-seccion">
+          <p id="admin-usuario-titulo-arboles" class="tc-etiqueta tc-etiqueta--gris">Árboles</p>
+          <div id="admin-usuario-arboles" class="perfil-arboles"></div>
+        </section>
+
+        <p id="admin-usuario-protegida" class="tc-aviso hidden"></p>
+
+        <form id="form-admin-usuario" class="perfil-seccion" data-sin-envio>
+          <p class="tc-etiqueta tc-etiqueta--gris">Datos de la cuenta</p>
+          <div class="perfil-campos">
+            <div class="perfil-campo perfil-campo--ancho">
+              <label for="admin-input-nombre">Nombre completo</label>
+              <input type="text" id="admin-input-nombre" class="input" required minlength="2" maxlength="80" autocomplete="off">
+            </div>
+            <div class="perfil-campo perfil-campo--ancho">
+              <label for="admin-input-email">Correo electrónico</label>
+              <input type="email" id="admin-input-email" class="input" required maxlength="120" autocomplete="off">
+            </div>
+            <div class="perfil-campo">
+              <label for="admin-input-telefono">Teléfono</label>
+              <input type="tel" id="admin-input-telefono" class="input" maxlength="30" placeholder="+56 9 1234 5678" autocomplete="off">
+            </div>
+            <div class="perfil-campo">
+              <label for="admin-input-direccion">Dirección</label>
+              <input type="text" id="admin-input-direccion" class="input" maxlength="200" placeholder="Av. Los Aromos 1234" autocomplete="off">
+            </div>
+            <div class="perfil-campo perfil-campo--ancho">
+              <label for="admin-input-password">Nueva contraseña</label>
+              <input type="password" id="admin-input-password" class="input" minlength="8" maxlength="128" placeholder="Déjala vacía para no cambiarla" autocomplete="new-password">
+            </div>
+            <label class="admin-check perfil-campo--ancho">
+              <input type="checkbox" id="admin-input-verificado">
+              <span>Cuenta verificada <small>(puede iniciar sesión sin el código del correo)</small></span>
+            </label>
+          </div>
+
+          <div id="alerta-admin-usuario" class="hidden" style="margin-top:1.25rem"></div>
+          <button type="submit" class="tc-boton perfil-guardar">Guardar cambios</button>
+        </form>
+
+        <section id="admin-usuario-peligro" class="perfil-seccion perfil-peligro">
+          <div>
+            <p class="tc-etiqueta perfil-peligro__titulo">Zona de peligro</p>
+            <p class="tc-cuerpo-sm" style="margin-top:.5rem">Elimina la cuenta con sus árboles, adopciones y pedidos.</p>
+          </div>
+          <button type="button" data-accion="admin.eliminar" class="perfil-eliminar">
             Eliminar cuenta
           </button>
         </section>

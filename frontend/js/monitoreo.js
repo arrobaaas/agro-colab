@@ -22,6 +22,8 @@
     cambio_password: "Cambio de contraseña",
     cambio_password_fallido: "Cambio de contraseña fallido",
     cuenta_eliminada: "Cuenta eliminada",
+    admin_edicion: "Cuenta editada por admin",
+    admin_eliminacion: "Cuenta eliminada por admin",
     registro: "Registro",
     verificacion_fallida: "Verificación fallida",
     alerta_enviada: "Alerta enviada"
