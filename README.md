@@ -15,6 +15,7 @@ directa del huerto a la mesa y sin intermediarios.
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?logo=sqlalchemy&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
@@ -194,6 +195,7 @@ queda en `http://127.0.0.1:8000/docs`.
 
 | Variable | Obligatoria | Descripción |
 |---|---|---|
+| `DATABASE_URL` | En producción | Conexión a PostgreSQL (Render, Neon o Supabase; se acepta `postgres://` o `postgresql://`). Sin ella se usa SQLite local (`agrocolab.db`), que en Render se borra en cada despliegue. |
 | `AGROCOLAB_SECRET` | En producción | Clave para firmar los tokens de sesión. Si falta, se genera una al arrancar y las sesiones se cierran en cada reinicio. |
 | `AGROCOLAB_MOD_MODE` | No | `desarrollo` devuelve el código de verificación de cuenta en la respuesta, para probar el registro sin correo. Por defecto: `produccion`. |
 | `BREVO_API_KEY` | Para registrar cuentas y recuperar contraseñas en producción | Clave de la API de [Brevo](https://www.brevo.com) para enviar los códigos por correo (plan gratuito: 300 correos al día). |
@@ -210,9 +212,9 @@ Las cuentas de demostración funcionan siempre.
 
 ## 🧪 Pruebas
 
-El backend tiene **35 pruebas automatizadas** (pytest) que corren en GitHub Actions
-en cada push y en cada pull request, junto con una revisión de sintaxis de todo el
-JavaScript del frontend.
+El backend tiene **39 pruebas automatizadas** (pytest) que corren en GitHub Actions
+en cada push y en cada pull request, **dos veces: con SQLite y con PostgreSQL**, junto
+con una revisión de sintaxis de todo el JavaScript del frontend.
 
 ```bash
 cd backend
@@ -220,7 +222,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-Las pruebas usan una base SQLite temporal (nunca `agrocolab.db`) y no envían correos.
+Las pruebas usan una base temporal (SQLite, o PostgreSQL con `PRUEBAS_DB_URL`), nunca la real, y no envían correos.
 
 | Archivo | Qué cubre |
 |---|---|
@@ -356,10 +358,10 @@ consentimiento y el derecho a eliminación.
 - [x] Planes de abastecimiento con logística particular y comercial
 - [x] Catálogo cerrado de especies con imágenes verificadas
 - [x] Panel del comprador y panel del agricultor
-- [x] Persistencia con SQLAlchemy y SQLite
+- [x] Persistencia con SQLAlchemy (PostgreSQL en producción, SQLite en local)
 - [x] Autenticación con tokens y autorización por recurso
 - [x] Pasarela de pago (simulada)
-- [ ] Migración a PostgreSQL
+- [x] Migración a PostgreSQL
 - [x] Envío real del correo de verificación (Brevo) y recuperación de contraseña
 - [ ] Fotos propias del productor con flujo de moderación
 - [x] Pruebas automatizadas e integración continua

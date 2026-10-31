@@ -1,7 +1,7 @@
 """Configuración común de las pruebas.
 
-Antes de importar la aplicación se fija el entorno: una base SQLite
-temporal (nunca la real), modo desarrollo (los códigos de verificación
+Antes de importar la aplicación se fija el entorno: una base temporal
+(SQLite, o PostgreSQL con PRUEBAS_DB_URL; nunca la real), modo desarrollo (los códigos de verificación
 llegan en la respuesta en vez de por correo) y un secreto fijo para los
 tokens. Sin BREVO_API_KEY no se envía ningún correo real.
 """
@@ -14,7 +14,9 @@ import tempfile
 import pytest
 
 _carpeta = tempfile.mkdtemp(prefix="agrocolab-pruebas-")
-os.environ["AGROCOLAB_DB_URL"] = f"sqlite:///{os.path.join(_carpeta, 'pruebas.db')}"
+# PRUEBAS_DB_URL permite correrlas contra PostgreSQL (así lo hace la
+# integración continua); sin ella se usa una base SQLite temporal
+os.environ["AGROCOLAB_DB_URL"] = os.getenv("PRUEBAS_DB_URL") or f"sqlite:///{os.path.join(_carpeta, 'pruebas.db')}"
 os.environ["AGROCOLAB_MOD_MODE"] = "desarrollo"
 os.environ["AGROCOLAB_SECRET"] = "secreto-solo-para-pruebas"
 os.environ.pop("BREVO_API_KEY", None)
