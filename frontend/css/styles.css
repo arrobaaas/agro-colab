@@ -4364,3 +4364,111 @@ header.sticky.header--con-scroll {
     position: relative;
   }
 }
+
+/* ----- Panel de administración (admin.js) ----- */
+/* Texto solo para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.admin-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.admin-buscar {
+  position: relative;
+  flex: 1 1 18rem;
+}
+
+.admin-buscar i {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  color: var(--tc-texto-3);
+  pointer-events: none;
+}
+
+.admin-buscar .input {
+  padding-left: 2.6rem;
+}
+
+.admin-rol {
+  flex: 0 1 14rem;
+}
+
+/* En el celular la tabla se desplaza de lado en vez de aplastarse */
+.admin-tabla {
+  overflow-x: auto;
+}
+
+.admin-tabla .tc-tabla {
+  min-width: 44rem;
+}
+
+.admin-tabla td {
+  vertical-align: middle;
+}
+
+.admin-persona,
+.admin-correo {
+  display: block;
+}
+
+.admin-correo {
+  font-size: 0.8125rem;
+  font-weight: 300;
+  color: var(--tc-texto-3);
+}
+
+.admin-rol-etiqueta {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--tc-linea-fuerte);
+  color: var(--tc-texto-2);
+}
+
+.admin-rol-etiqueta--agricultor { color: var(--tc-accion); }
+.admin-rol-etiqueta--administrador { color: var(--tc-acento); }
+
+.admin-pendiente {
+  color: var(--tc-acento);
+}
+
+.admin-acciones {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.admin-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.875rem;
+  color: var(--tc-texto-2);
+  cursor: pointer;
+}
+
+.admin-check input {
+  margin-top: 0.2rem;
+  accent-color: var(--tc-accion);
+}
+
+.admin-check small {
+  color: var(--tc-texto-3);
+}

@@ -246,6 +246,57 @@ def es_cuenta_demo(usuario: Usuario) -> bool:
     return usuario.email in CUENTAS_DEMO
 
 
+# ----------------- ADMINISTRADOR -----------------
+
+ROL_ADMIN = "administrador"
+
+
+def es_admin(usuario: Usuario) -> bool:
+    return usuario.rol == ROL_ADMIN
+
+
+def usuario_admin(usuario: Usuario = Depends(usuario_actual)) -> Usuario:
+    """Dependencia de FastAPI: corta la petición si la sesión no es de un
+    administrador."""
+    if not es_admin(usuario):
+        registrar_evento("acceso_denegado", "advertencia", usuario=usuario, detalle="panel de administración")
+        raise _no_autorizado("Solo un administrador puede hacer esto.", 403)
+    return usuario
+
+
+def crear_administrador(db: Session):
+    """Crea la cuenta de administrador desde ADMIN_EMAIL y ADMIN_PASSWORD.
+
+    Nadie puede registrarse como administrador: la cuenta solo existe si se
+    configuran esas variables en el servidor, y su contraseña no queda en el
+    repositorio. Si el correo ya tiene cuenta, se la asciende a
+    administrador. La contraseña solo se usa al crearla: después se cambia
+    desde el perfil o con la recuperación de contraseña.
+    """
+    email = os.getenv("ADMIN_EMAIL", "").strip().lower()
+    password = os.getenv("ADMIN_PASSWORD", "")
+    if not email:
+        return
+    usuario = db.query(Usuario).filter(Usuario.email == email).first()
+    if usuario:
+        if usuario.rol != ROL_ADMIN and not es_cuenta_demo(usuario):
+            usuario.rol = ROL_ADMIN
+            usuario.verificado = 1
+            db.commit()
+            print(f"[admin] {email} ahora es administrador")
+        return
+    if len(password) < 12:
+        print("[admin] ADMIN_PASSWORD falta o tiene menos de 12 caracteres: no se creó el administrador")
+        return
+    db.add(Usuario(
+        nombre=os.getenv("ADMIN_NOMBRE", "").strip() or "Administrador",
+        email=email, password=hash_password(password), rol=ROL_ADMIN, verificado=1,
+        consentimiento_datos=1, fecha_consentimiento=datetime.now(), acepta_terminos=1,
+    ))
+    db.commit()
+    print(f"[admin] cuenta de administrador creada: {email}")
+
+
 def exigir_mismo_usuario(usuario: Usuario, usuario_id: int):
     """Corta la petición si el usuario autenticado no es el dueño del recurso."""
     if usuario.id != usuario_id:
@@ -327,6 +378,8 @@ def datos_iniciales():
             ]
             db.add_all(arboles)
             db.commit()
+
+        crear_administrador(db)
     finally:
         db.close()
 
@@ -457,6 +510,16 @@ class RegistroRequest(BaseModel):
     rol: Rol
     telefono: Optional[Texto(30, 0)] = None
     direccion: Optional[Texto(200, 0)] = None
+
+class AdminUsuarioRequest(BaseModel):
+    """Cambios que el administrador hace en la cuenta de otra persona."""
+    nombre: Texto(80, 2)
+    email: Correo
+    telefono: Optional[Texto(30, 0)] = None
+    direccion: Optional[Texto(200, 0)] = None
+    verificado: bool
+    # Opcional: una contraseña nueva, por ejemplo si la persona perdió acceso a su correo
+    password: Optional[Contrasena] = None
 
 class ReenvioRequest(BaseModel):
     email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)]

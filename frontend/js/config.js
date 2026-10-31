@@ -23,7 +23,8 @@ class ConfigService {
          agricultor: "mis-parcelas" */
     this.VISTAS_POR_ROL = {
       comprador: "parcelas",
-      agricultor: "agricultor"
+      agricultor: "agricultor",
+      administrador: "admin"
     };
   }
 }

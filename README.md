@@ -72,7 +72,7 @@ Cada pedido genera un código de seguimiento que lo vincula a su huerto de orige
 - **Sin sobreventa bajo concurrencia.** La reserva de cupos es un `UPDATE` condicional atómico, respaldado por un índice único: dos compras simultáneas del último cupo nunca se aprueban ambas.
 - **Seguridad aplicada de punta a punta.** Tokens firmados con HMAC-SHA256, autorización por recurso, *rate limiting* persistente, CSP estricta sin JavaScript en línea y defensa contra XSS en tres capas. [Ver detalle](#-seguridad).
 - **Monitoreo y alertas propios.** Los eventos de seguridad se registran en base de datos y en logs JSON, y disparan alertas por correo o webhook según reglas (fuerza bruta, tokens falsificados, accesos a datos ajenos).
-- **Calidad verificada en CI.** 39 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend.
+- **Calidad verificada en CI.** 46 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend.
 - **Frontend sin frameworks.** SPA en JavaScript vanilla organizada en servicios, con router de vistas, delegación de eventos, gráficos accesibles hechos con HTML y CSS, y un árbol 3D de partículas en `<canvas>`.
 - **Privacidad desde el diseño.** Cumplimiento de la Ley N° 21.719 de Protección de Datos Personales de Chile: consentimiento explícito, derechos de acceso, rectificación y eliminación, y registro de tratamiento.
 
@@ -93,6 +93,12 @@ Cada pedido genera un código de seguimiento que lo vincula a su huerto de orige
 - Publicación de árboles desde un **catálogo cerrado de 12 especies**, con nombre compuesto automáticamente (por ejemplo, "Palto Hass #104").
 - **Galería de 36 fotos verificadas** de Wikimedia Commons: el servidor rechaza cualquier imagen que no corresponda a la especie, incluso en peticiones hechas a mano. Así el comprador ve siempre el árbol correcto.
 - Gestión de suscriptores: perfil de contacto y expulsión para liberar el cupo.
+
+**Administrador**
+- Panel con todas las cuentas: búsqueda por nombre o correo, filtro por tipo y resumen de compradores, agricultores y árboles publicados.
+- Detalle de cada cuenta: datos de contacto, árboles publicados (agricultor) o adoptados (comprador).
+- Corrección de datos, verificación manual, cambio de contraseña (cierra las sesiones de la persona y le avisa por correo) y eliminación de la cuenta con todos sus datos.
+- Nadie puede registrarse como administrador: la cuenta se crea solo desde las variables del servidor, y las cuentas demo y de otros administradores quedan protegidas. Cada acción queda en el registro de seguridad.
 
 ---
 
@@ -139,7 +145,7 @@ flowchart LR
 |---|---|
 | Contraseñas | Hash con **bcrypt** y mínimo de 8 caracteres. Cambiarla exige la actual y cierra las demás sesiones |
 | Sesión | **Tokens firmados con HMAC-SHA256**, con expiración de 7 días y ligados a la contraseña. Se guardan en `sessionStorage`, limitados a la pestaña |
-| Autorización | Por recurso: cada usuario solo ve y modifica lo suyo. El usuario se toma siempre del token, nunca del cuerpo de la petición |
+| Autorización | Por recurso: cada usuario solo ve y modifica lo suyo. El usuario se toma siempre del token, nunca del cuerpo de la petición. El panel de administración exige el rol de administrador en el servidor |
 | Integridad | Precios fijados por el servidor y reserva de cupos atómica con índice único |
 | XSS | Escape de todo dato insertado como HTML, rechazo de `<` y `>` en el backend y **Content-Security-Policy** sin `'unsafe-inline'` |
 | Abuso | *Rate limiting* por IP real y por cuenta en login, registro y verificación, persistido en la base de datos |
@@ -221,7 +227,7 @@ consentimiento y el derecho a eliminación.
 
 ## 🧪 Pruebas e integración continua
 
-**39 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
+**46 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
 *pull request* dos veces, **con SQLite y con PostgreSQL**, y además revisa la sintaxis de
 todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca envían correos.
 
@@ -230,6 +236,7 @@ todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca env�
 | `test_cuentas.py` | Registro y verificación, login, tokens alterados y recuperación de contraseña (sin enumeración de usuarios, código guardado como hash, bloqueo tras 5 errores y cierre de sesiones) |
 | `test_pagos.py` | Aprobación y rechazo, monto fijado por el servidor, tarjetas inválidas, sin cobro si no hay cupo, número y CVV nunca guardados |
 | `test_seguridad.py` | Autorización por recurso, cabeceras, rechazo de XSS, imágenes fuera del catálogo, cuentas demo protegidas, límite de intentos y borrado de datos |
+| `test_admin.py` | Acceso exclusivo del administrador, registro como administrador bloqueado, edición y cambio de contraseña, correos repetidos, eliminación con sus árboles y cuentas protegidas |
 | `test_base_datos.py` | Selección de la base de datos según las variables de entorno (SQLite local o PostgreSQL de Render) |
 
 ```bash
@@ -284,6 +291,9 @@ verifica su checksum).
 | `CORREO_REMITENTE` | Junto con `BREVO_API_KEY` | Correo verificado en Brevo desde el que se envían los códigos |
 | `ALERTA_CORREO` | No | Correo que recibe las alertas de seguridad |
 | `ALERTA_WEBHOOK_URL` | No | Webhook de Discord o Slack para las alertas (`https://`) |
+| `ADMIN_EMAIL` | Para el panel de administración | Correo de la cuenta de administrador. Si ya existe una cuenta con ese correo, se la asciende a administrador al arrancar |
+| `ADMIN_PASSWORD` | Junto con `ADMIN_EMAIL` | Contraseña inicial (12 caracteres o más). Solo se usa al crear la cuenta: después se cambia desde el perfil |
+| `ADMIN_NOMBRE` | No | Nombre que se muestra de la cuenta de administrador. Por defecto: "Administrador" |
 | `MONITOREO_TOKEN` | Para usar el panel | Token secreto (24 caracteres o más) del panel de monitoreo. Sin él, el panel está desactivado |
 
 Sin `BREVO_API_KEY` y `CORREO_REMITENTE`, en producción el registro avisa que no está
@@ -331,6 +341,10 @@ marcados con 🔒 exigen `Authorization: Bearer <token>`.
 | `GET` | `/api/usuario/{id}` 🔒 | Perfil propio, o el de un suscriptor para su productor |
 | `PUT` | `/api/perfil` 🔒 | Actualiza el perfil propio |
 | `DELETE` | `/api/usuario/{email}` 🔒 | Elimina la cuenta propia y todos sus datos |
+| `GET` | `/api/admin/usuarios` 🔒 | Todas las cuentas con su actividad (solo administrador) |
+| `GET` | `/api/admin/usuarios/{id}` 🔒 | Detalle de una cuenta con sus árboles publicados y adoptados (solo administrador) |
+| `PUT` | `/api/admin/usuarios/{id}` 🔒 | Corrige los datos de una cuenta, su verificación o su contraseña (solo administrador) |
+| `DELETE` | `/api/admin/usuarios/{id}` 🔒 | Elimina una cuenta y todos sus datos (solo administrador) |
 
 </details>
 
@@ -369,6 +383,7 @@ agro-colab/
 │       ├── dialogo.js         # Diálogos propios (reemplazan alert y confirm)
 │       ├── efectos.js         # Animaciones de scroll e inclinación 3D
 │       ├── constelacion.js    # Árbol 3D de partículas en canvas
+│       ├── admin.js           # Panel de administración
 │       ├── monitoreo.js       # Panel de monitoreo
 │       ├── legal.js           # Efectos de las páginas legales
 │       └── ui.js              # Alertas, formato de montos y escape de HTML
@@ -379,7 +394,7 @@ agro-colab/
 │   ├── catalogo.py            # Catálogo de especies con fotos atribuidas
 │   ├── seguridad.py           # Eventos, reglas de alerta y alertas
 │   ├── notificaciones.py      # Correo transaccional (Brevo)
-│   ├── routers/               # arboles, especies, suscripciones, pedidos, pagos, usuarios, monitoreo
+│   ├── routers/               # admin, arboles, especies, suscripciones, pedidos, pagos, usuarios, monitoreo
 │   └── tests/                 # Pruebas automatizadas (pytest)
 ├── .github/workflows/         # Integración continua
 ├── scripts/compilar-css.sh    # Compilación de Tailwind con verificación de checksum

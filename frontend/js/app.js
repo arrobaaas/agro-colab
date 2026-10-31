@@ -31,6 +31,7 @@ class AppService {
       this.dashboard.init();
       window.AgroColab.pago.init();
       window.AgroColab.recuperacion.init();
+      window.AgroColab.admin.init();
       this.views.init();
       this.efectos.init();
       this.constelacion.init();

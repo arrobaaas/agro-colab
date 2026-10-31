@@ -21,7 +21,8 @@
 
       const esComprador = sesion.rol === "comprador";
       document.getElementById("perfil-nombre").textContent = sesion.nombre;
-      document.getElementById("perfil-rol").textContent = esComprador ? "Comprador" : "Agricultor";
+      const ROLES = { comprador: "Comprador", agricultor: "Agricultor", administrador: "Administrador" };
+      document.getElementById("perfil-rol").textContent = ROLES[sesion.rol] || sesion.rol;
       document.getElementById("perfil-avatar").textContent = (sesion.nombre || "?").trim().charAt(0).toUpperCase();
       // Solo el comprador adopta árboles: al agricultor no se le muestra esa sección
       document.getElementById("perfil-seccion-arboles").classList.toggle("hidden", !esComprador);
