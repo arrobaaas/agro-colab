@@ -4,7 +4,9 @@
    Un árbol volumétrico hecho de partículas triangulares en la paleta de la
    marca: copa formada por varias esferas, tronco, ramas, raíces y un anillo
    de suelo. Gira lentamente con perspectiva real (lo lejano se ve más chico y
-   tenue), se inclina hacia el mouse y la copa se mece con el "viento".
+   tenue) y la copa se mece con el "viento". Se puede arrastrar con el mouse
+   o el dedo para girarlo; al soltarlo sigue con inercia y vuelve a su giro
+   lento.
    Solo se anima mientras está en pantalla; con "reducir movimiento" se dibuja
    una vez, quieto. */
 
@@ -15,6 +17,16 @@
   const PESOS_COPA = [6, 5, 3, 2, 2, 2, 1.5];
   const COLORES_MADERA = ["#15846e", "#0f766e", "#34d399", "#d97706"];
   const PESOS_MADERA = [4, 3, 1, 1];
+
+  // Una vuelta completa en unos 70 segundos
+  const GIRO_AUTOMATICO = 0.00009;
+  const INCLINACION_INICIAL = -0.32;
+  const INCLINACION_MIN = -1.2;
+  const INCLINACION_MAX = 0.5;
+  // Radianes por píxel arrastrado
+  const SENSIBILIDAD = 0.008;
+  // Tope del impulso al soltar: un tirón fuerte no lo hace girar como trompo
+  const VELOCIDAD_MAX = 0.004;
 
   // Lóbulos de la copa: [x, y, z, radio] en el espacio del árbol (y hacia arriba)
   const LOBULOS = [
@@ -35,8 +47,10 @@
       this.visible = false;
       this.cuadro = null;
       this.giro = 0.6;
-      this.inclinacionObjetivo = { x: 0, y: 0 };
-      this.inclinacion = { x: 0, y: 0 };
+      this.inclinacion = INCLINACION_INICIAL;
+      // Velocidad de giro en radianes por milisegundo
+      this.velocidad = GIRO_AUTOMATICO;
+      this.arrastre = null;
       this.ultimoTiempo = 0;
       this.reducirMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     }
@@ -147,15 +161,15 @@
       const delta = this.ultimoTiempo ? Math.min(tiempo - this.ultimoTiempo, 50) : 16;
       this.ultimoTiempo = tiempo;
 
-      if (!this.reducirMovimiento) {
-        this.giro += delta * 0.00018;
-        // La inclinación sigue al mouse con suavidad
-        this.inclinacion.x += (this.inclinacionObjetivo.x - this.inclinacion.x) * 0.06;
-        this.inclinacion.y += (this.inclinacionObjetivo.y - this.inclinacion.y) * 0.06;
+      /* Mientras se arrastra, el giro lo maneja el puntero. Al soltar, la
+         velocidad del arrastre se va frenando hasta el giro lento. */
+      if (!this.reducirMovimiento && !this.arrastre) {
+        this.velocidad += (GIRO_AUTOMATICO - this.velocidad) * Math.min(delta * 0.003, 1);
+        this.giro += delta * this.velocidad;
       }
 
-      const yaw = this.giro + this.inclinacion.x;
-      const pitch = -0.32 + this.inclinacion.y;
+      const yaw = this.giro;
+      const pitch = this.inclinacion;
       const cosY = Math.cos(yaw), sinY = Math.sin(yaw);
       const cosX = Math.cos(pitch), sinX = Math.sin(pitch);
       const escala = Math.min(this.ancho, this.alto) * 0.5;
@@ -218,6 +232,49 @@
       ctx.globalAlpha = 1;
     }
 
+    /* Arrastrar en horizontal gira el árbol; en vertical cambia el ángulo
+       desde el que se mira. En pantallas táctiles el arrastre vertical
+       sigue desplazando la página (touch-action: pan-y). */
+    iniciarArrastre() {
+      const canvas = this.canvas;
+      canvas.classList.add("constelacion--arrastrable");
+
+      canvas.addEventListener("pointerdown", (evento) => {
+        if (evento.button !== 0) return;
+        canvas.setPointerCapture(evento.pointerId);
+        canvas.classList.add("constelacion--arrastrando");
+        this.arrastre = { id: evento.pointerId, x: evento.clientX, y: evento.clientY, tiempo: evento.timeStamp };
+        this.velocidad = 0;
+      });
+
+      canvas.addEventListener("pointermove", (evento) => {
+        const arrastre = this.arrastre;
+        if (!arrastre || arrastre.id !== evento.pointerId) return;
+        const dx = evento.clientX - arrastre.x;
+        const dy = evento.clientY - arrastre.y;
+        const dt = Math.max(evento.timeStamp - arrastre.tiempo, 1);
+
+        this.giro += dx * SENSIBILIDAD;
+        this.inclinacion = Math.min(Math.max(this.inclinacion - dy * SENSIBILIDAD * 0.6, INCLINACION_MIN), INCLINACION_MAX);
+        // Se recuerda la velocidad para seguir girando al soltar
+        const velocidad = (dx * SENSIBILIDAD) / dt;
+        this.velocidad = Math.min(Math.max(velocidad, -VELOCIDAD_MAX), VELOCIDAD_MAX);
+        Object.assign(arrastre, { x: evento.clientX, y: evento.clientY, tiempo: evento.timeStamp });
+
+        if (this.reducirMovimiento) this.dibujar(performance.now());
+      });
+
+      const soltar = (evento) => {
+        if (!this.arrastre || this.arrastre.id !== evento.pointerId) return;
+        // Si el puntero se quedó quieto antes de soltar, no hay impulso
+        if (evento.timeStamp - this.arrastre.tiempo > 80) this.velocidad = 0;
+        this.arrastre = null;
+        canvas.classList.remove("constelacion--arrastrando");
+      };
+      canvas.addEventListener("pointerup", soltar);
+      canvas.addEventListener("pointercancel", soltar);
+    }
+
     animar(tiempo) {
       if (!this.visible) {
         this.cuadro = null;
@@ -245,17 +302,7 @@
         this.dibujar(performance.now());
       }, { passive: true });
 
-      // El árbol se inclina hacia donde está el mouse
-      const zona = this.canvas.parentElement;
-      zona.addEventListener("pointermove", (evento) => {
-        const caja = zona.getBoundingClientRect();
-        const nx = (evento.clientX - caja.left) / caja.width - 0.5;
-        const ny = (evento.clientY - caja.top) / caja.height - 0.5;
-        this.inclinacionObjetivo = { x: nx * 0.9, y: ny * 0.45 };
-      }, { passive: true });
-      zona.addEventListener("pointerleave", () => {
-        this.inclinacionObjetivo = { x: 0, y: 0 };
-      });
+      this.iniciarArrastre();
 
       /* Solo se anima mientras está en pantalla (y la vista no está oculta) */
       if ("IntersectionObserver" in window) {
