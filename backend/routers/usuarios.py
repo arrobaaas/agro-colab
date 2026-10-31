@@ -176,10 +176,22 @@ def verificar_cuenta(data: VerificacionRequest, db: Session = Depends(get_db)):
     usuario.codigo_verificacion = None
     usuario.codigo_expira = None
     db.commit()
+    db.refresh(usuario)
 
+    # El código llegó a su correo: eso ya prueba que la cuenta es suya, así
+    # que se entrega la sesión y no hay que volver a escribir los datos
+    registrar_evento("login_exitoso", "info", usuario=usuario, detalle="al verificar la cuenta")
     return {
         "status": "success",
-        "mensaje": "Cuenta verificada correctamente. Ya puedes iniciar sesión."
+        "mensaje": f"Cuenta verificada. Bienvenido/a {usuario.nombre}",
+        "user": {
+            "id": usuario.id,
+            "nombre": usuario.nombre,
+            "email": usuario.email,
+            "rol": usuario.rol,
+            "verificado": usuario.verificado,
+            "token": crear_token(usuario),
+        },
     }
 
 

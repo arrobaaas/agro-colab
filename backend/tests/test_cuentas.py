@@ -111,3 +111,27 @@ def test_codigo_de_recuperacion_se_guarda_como_hash(cliente, nuevo_comprador):
     finally:
         db.close()
     assert guardado and codigo not in guardado
+
+
+def test_verificar_la_cuenta_inicia_sesion(cliente):
+    """Tras verificar con el código se entra directo, sin volver a escribir
+    el correo y la contraseña."""
+    email = "entra-directo@ejemplo.cl"
+    r = cliente.post("/api/register", json={
+        "nombre": "Persona Nueva", "email": email, "password": "clave-segura-1", "rol": "agricultor",
+    }).json()
+    v = cliente.post("/api/verificar-cuenta", json={"email": email, "codigo": r["user"]["codigo_verificacion"]}).json()
+    assert v["status"] == "success", v
+    assert v["user"]["rol"] == "agricultor" and v["user"]["email"] == email
+    # El token sirve para usar la API de inmediato
+    assert cliente.get("/api/pedidos", headers=auth(v["user"]["token"])).status_code == 200
+
+
+def test_codigo_incorrecto_no_entrega_sesion(cliente):
+    email = "codigo-malo@ejemplo.cl"
+    r = cliente.post("/api/register", json={
+        "nombre": "Persona Nueva", "email": email, "password": "clave-segura-1", "rol": "comprador",
+    }).json()
+    codigo_malo = "000000" if r["user"]["codigo_verificacion"] != "000000" else "111111"
+    v = cliente.post("/api/verificar-cuenta", json={"email": email, "codigo": codigo_malo}).json()
+    assert v["status"] == "error" and "user" not in v

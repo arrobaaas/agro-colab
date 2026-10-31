@@ -172,10 +172,24 @@ class LoginService {
 
       if (data.status === "success") {
         this.ui.mostrarAlerta(alerta, "exito", data.mensaje);
+        const usuario = data.user;
         setTimeout(() => {
           this.cerrarVerificacion();
-          AgroColab.dialogo.avisar("Ya puedes iniciar sesión con tu correo y contraseña.", { tipo: "exito", titulo: "Cuenta verificada" });
-        }, 1500);
+          // Con la sesión que entrega el servidor se entra directo a la cuenta
+          if (usuario && usuario.token) {
+            // Al cerrar sesión no deben quedar a la vista la contraseña ni el código
+            document.getElementById("register-form").reset();
+            document.getElementById("form-verificacion").reset();
+            this.ui.ocultarAlerta(document.getElementById("alerta-registro"));
+            this.ui.ocultarAlerta(alerta);
+            this.auth.eliminarSesion();
+            this.auth.guardarSesion(usuario);
+            this.views.pintarNavbar();
+            this.views.mostrarVistaPorRol(usuario.rol);
+          } else {
+            AgroColab.dialogo.avisar("Ya puedes iniciar sesión con tu correo y contraseña.", { tipo: "exito", titulo: "Cuenta verificada" });
+          }
+        }, 1200);
       } else {
         this.ui.mostrarAlerta(alerta, "error", data.mensaje);
       }

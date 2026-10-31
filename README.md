@@ -72,7 +72,7 @@ Cada pedido genera un código de seguimiento que lo vincula a su huerto de orige
 - **Sin sobreventa bajo concurrencia.** La reserva de cupos es un `UPDATE` condicional atómico, respaldado por un índice único: dos compras simultáneas del último cupo nunca se aprueban ambas.
 - **Seguridad aplicada de punta a punta.** Tokens firmados con HMAC-SHA256, autorización por recurso, *rate limiting* persistente, CSP estricta sin JavaScript en línea y defensa contra XSS en tres capas. [Ver detalle](#-seguridad).
 - **Monitoreo y alertas propios.** Los eventos de seguridad se registran en base de datos y en logs JSON, y disparan alertas por correo o webhook según reglas (fuerza bruta, tokens falsificados, accesos a datos ajenos).
-- **Calidad verificada en CI.** 46 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend.
+- **Calidad verificada en CI.** 48 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend.
 - **Frontend sin frameworks.** SPA en JavaScript vanilla organizada en servicios, con router de vistas, delegación de eventos, gráficos accesibles hechos con HTML y CSS, y un árbol 3D de partículas en `<canvas>`.
 - **Privacidad desde el diseño.** Cumplimiento de la Ley N° 21.719 de Protección de Datos Personales de Chile: consentimiento explícito, derechos de acceso, rectificación y eliminación, y registro de tratamiento.
 
@@ -227,7 +227,7 @@ consentimiento y el derecho a eliminación.
 
 ## 🧪 Pruebas e integración continua
 
-**46 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
+**48 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
 *pull request* dos veces, **con SQLite y con PostgreSQL**, y además revisa la sintaxis de
 todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca envían correos.
 
@@ -317,7 +317,7 @@ marcados con 🔒 exigen `Authorization: Bearer <token>`.
 | Método | Endpoint | Descripción |
 |---|---|---|
 | `POST` | `/api/register` | Registra una cuenta y envía el código de verificación |
-| `POST` | `/api/verificar-cuenta` | Verifica la cuenta con el código de 6 dígitos |
+| `POST` | `/api/verificar-cuenta` | Verifica la cuenta con el código de 6 dígitos e inicia la sesión |
 | `POST` | `/api/reenviar-codigo` | Envía un código de verificación nuevo |
 | `POST` | `/api/recuperar-contrasena` | Envía un código para restablecer la contraseña |
 | `POST` | `/api/restablecer-contrasena` | Cambia la contraseña con el código y cierra las sesiones abiertas |
