@@ -75,6 +75,9 @@
       this.vistaActual = nombre;
       if (nombre !== config.VISTA_SIN_SESION) auth.guardarVista(nombre);
       window.scrollTo({ top: 0, behavior: "auto" });
+      /* Si ya estaba arriba no hay evento de scroll: sin esto la portada
+         seguía desvanecida con el avance de la vista anterior */
+      if (AgroColab.efectos && AgroColab.efectos.actualizarScroll) AgroColab.efectos.actualizarScroll();
 
       if (vista.alMostrar) vista.alMostrar();
       return true;

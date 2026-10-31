@@ -136,6 +136,7 @@
       );
       window.addEventListener("resize", actualizar, { passive: true });
       actualizar();
+      this.actualizarScroll = actualizar;
     }
 
     /* ---------- Interacción con el mouse ---------- */
