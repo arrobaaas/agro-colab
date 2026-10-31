@@ -1668,6 +1668,19 @@ html {
   height: 100%;
 }
 
+/* El árbol se gira arrastrándolo (constelacion.js). pan-y deja que en el
+   celular el arrastre vertical siga desplazando la página. */
+.constelacion--arrastrable {
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.constelacion--arrastrando {
+  cursor: grabbing;
+}
+
 .tc-acciones {
   display: flex;
   flex-wrap: wrap;
