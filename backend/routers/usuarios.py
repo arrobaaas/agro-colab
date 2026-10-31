@@ -322,7 +322,7 @@ def actualizar_perfil(
     usuario: Usuario = Depends(usuario_actual),
     db: Session = Depends(get_db),
 ):
-    cambios = data.dict(exclude_unset=True)
+    cambios = data.model_dump(exclude_unset=True)
 
     # Se edita siempre la cuenta de la sesión. Antes se buscaba por el correo
     # enviado, y cualquiera podía cambiar la contraseña de otra cuenta.

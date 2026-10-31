@@ -2,13 +2,39 @@ from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateT
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
 import bcrypt
+import os
 import hmac
 
-# Conexión a SQLite (para desarrollo local)
-SQLALCHEMY_DATABASE_URL = "sqlite:///./agrocolab.db"
+def url_base_datos() -> str:
+    """Base de datos a usar, en este orden:
+
+    1. AGROCOLAB_DB_URL: la fijan las pruebas (backend/tests) para usar una
+       base temporal.
+    2. DATABASE_URL: PostgreSQL en producción (Render, Neon, Supabase...).
+       Los datos sobreviven a los despliegues y reinicios del servidor;
+       con SQLite en Render se perdían en cada despliegue.
+    3. SQLite local (agrocolab.db) para desarrollar sin instalar nada.
+    """
+    url = os.getenv("AGROCOLAB_DB_URL") or os.getenv("DATABASE_URL") or "sqlite:///./agrocolab.db"
+    # Los proveedores entregan "postgres://" o "postgresql://"; SQLAlchemy
+    # necesita que se indique el controlador (psycopg 3)
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        url = "postgresql+psycopg://" + url[len("postgresql://"):]
+    return url
+
+
+SQLALCHEMY_DATABASE_URL = url_base_datos()
+ES_SQLITE = SQLALCHEMY_DATABASE_URL.startswith("sqlite")
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL,
+    # check_same_thread solo existe en SQLite
+    connect_args={"check_same_thread": False} if ES_SQLITE else {},
+    # Descarta conexiones cortadas por el proveedor (las bases gratuitas
+    # cierran las conexiones inactivas)
+    pool_pre_ping=True,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -193,7 +219,7 @@ class Pago(Base):
 
 
 # ----------------- MIGRACIONES LIGERAS -----------------
-# create_all() no modifica las tablas que ya existen en el archivo SQLite, por eso
+# create_all() no modifica las tablas que ya existen en la base, por eso
 # se comparan los modelos con el esquema real y se completan las columnas faltantes.
 
 def asegurar_columnas():
