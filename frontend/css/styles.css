@@ -4472,3 +4472,114 @@ header.sticky.header--con-scroll {
 .admin-check small {
   color: var(--tc-texto-3);
 }
+
+/* En el celular cada cuenta es una tarjeta: una tabla ancha hacía que el
+   navegador ensanchara la página y dejaba el botón de editar y la ventana de
+   la cuenta fuera de la pantalla */
+@media (max-width: 767px) {
+  .admin-tabla {
+    overflow-x: visible;
+  }
+
+  .admin-tabla .tc-tabla {
+    display: block;
+    min-width: 0;
+    margin-top: 1rem;
+  }
+
+  .admin-tabla thead {
+    display: none;
+  }
+
+  .admin-tabla tbody {
+    display: block;
+  }
+
+  .admin-tabla tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--tc-linea);
+  }
+
+  .admin-tabla td {
+    padding: 0;
+    border-bottom: 0;
+    font-size: 0.875rem;
+  }
+
+  .admin-tabla td:first-child,
+  .admin-tabla td:nth-child(4),
+  .admin-tabla .admin-acciones {
+    flex: 1 0 100%;
+    min-width: 0;
+  }
+
+  .admin-correo {
+    overflow-wrap: anywhere;
+  }
+
+  .admin-tabla .admin-acciones {
+    text-align: left;
+  }
+
+  /* Área cómoda para el dedo */
+  .admin-tabla .admin-acciones .tc-enlace {
+    display: inline-block;
+    padding: 0.5rem 0;
+  }
+
+  .admin-rol {
+    flex: 1 1 100%;
+  }
+}
+
+/* ----- Aviso de cookies (sitio.js) ----- */
+.aviso-cookies {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 34rem;
+  margin-left: auto;
+  padding: 1.25rem;
+  border: 1px solid var(--tc-linea-fuerte);
+  border-radius: 20px;
+  background-color: var(--tc-superficie);
+  color: var(--tc-texto-2);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8);
+}
+
+.aviso-cookies p {
+  margin: 0;
+}
+
+.aviso-cookies strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--tc-texto);
+}
+
+.aviso-cookies a {
+  color: var(--tc-accion);
+  text-decoration: underline;
+}
+
+.aviso-cookies__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.aviso-cookies__acciones .tc-boton {
+  flex: 1 1 9rem;
+  padding: 0.75rem 1rem;
+}

@@ -96,7 +96,13 @@ class AuthService {
     return Array.isArray(items) ? items : [];
   }
 
+  /* El plan solo perdura entre visitas si la persona aceptó las preferencias
+     (ver sitio.js); si no, dura lo que la pestaña */
   guardarPlan(plan) {
+    if (!window.AgroColab.cookies.aceptaPreferencias()) {
+      this.guardarEnPestana(this.clavePlan, plan);
+      return;
+    }
     try {
       localStorage.setItem(this.clavePlan, JSON.stringify(plan));
     } catch (error) { /* almacenamiento no disponible */ }
@@ -105,7 +111,7 @@ class AuthService {
   leerPlan() {
     try {
       const raw = localStorage.getItem(this.clavePlan);
-      return raw ? JSON.parse(raw) : null;
+      return raw ? JSON.parse(raw) : this.leerDePestana(this.clavePlan);
     } catch (error) {
       return null;
     }
