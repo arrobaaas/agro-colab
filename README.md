@@ -400,9 +400,10 @@ agro-colab/
 │   └── tests/                 # Pruebas automatizadas (pytest)
 ├── .github/workflows/         # Integración continua
 ├── scripts/compilar-css.sh    # Compilación de Tailwind con verificación de checksum
-├── docs/capturas/             # Capturas de pantalla
-├── Informe.pdf                # Informe del proyecto
-└── Presentacion.pptx          # Presentación del proyecto
+└── docs/
+    ├── capturas/              # Capturas de pantalla
+    ├── Informe.pdf            # Informe del proyecto
+    └── Presentacion.pptx      # Presentación del proyecto
 ```
 
 </details>
