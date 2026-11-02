@@ -361,6 +361,7 @@ agro-colab/
 │   ├── index.html             # SPA: login y vistas de comprador y agricultor
 │   ├── privacidad.html        # Política de privacidad (Ley 21.719)
 │   ├── terminos.html          # Términos y condiciones
+│   ├── cookies.html           # Política de cookies
 │   ├── monitoreo.html         # Panel de monitoreo de seguridad
 │   ├── css/                   # Estilos propios y Tailwind compilado
 │   └── js/
@@ -384,6 +385,7 @@ agro-colab/
 │       ├── efectos.js         # Animaciones de scroll e inclinación 3D
 │       ├── constelacion.js    # Árbol 3D de partículas en canvas
 │       ├── admin.js           # Panel de administración
+│       ├── sitio.js           # Aviso de cookies y clic derecho, en todas las páginas
 │       ├── monitoreo.js       # Panel de monitoreo
 │       ├── legal.js           # Efectos de las páginas legales
 │       └── ui.js              # Alertas, formato de montos y escape de HTML
