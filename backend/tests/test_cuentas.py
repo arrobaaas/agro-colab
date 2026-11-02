@@ -9,6 +9,13 @@ def test_login_cuenta_demo(cliente):
     assert r["user"]["token"]
 
 
+def test_login_no_distingue_mayusculas_en_el_correo(cliente):
+    # El teclado del celular suele poner la primera letra en mayúscula
+    r = cliente.post("/api/login", json={"email": "Comprador@AgroColab.cl", "password": "123", "rol": "comprador"}).json()
+    assert r["status"] == "success"
+    assert r["user"]["email"] == "comprador@agrocolab.cl"
+
+
 def test_login_con_rol_equivocado_falla(cliente):
     r = cliente.post("/api/login", json={"email": "comprador@agrocolab.cl", "password": "123", "rol": "agricultor"}).json()
     assert r["status"] == "error"

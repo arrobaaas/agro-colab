@@ -15,7 +15,7 @@ from core import (
     hash_password, verify_password, foto_de, get_db, MODO_DESARROLLO, limitar_por_ip, crear_token, usuario_actual,
     limitar, es_cuenta_demo, ROL_ADMIN,
 )
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from seguridad import registrar_evento
 from database import Usuario, Arbol, Suscripcion, Pedido, Pago, SessionLocal, es_hash_bcrypt
 
@@ -24,6 +24,15 @@ router = APIRouter()
 
 VIGENCIA_CODIGO = timedelta(minutes=30)
 MENSAJE_REGISTRO = "Te enviamos un código de verificación a tu correo. Revisa también la carpeta de spam."
+
+
+def por_correo(db: Session, email: str):
+    """Consulta de usuarios por correo, sin distinguir mayúsculas: el teclado
+    del celular suele escribir la primera letra en mayúscula. Si hubiera
+    cuentas antiguas que solo difieren en eso, primero va la coincidencia exacta."""
+    return db.query(Usuario).filter(
+        func.lower(Usuario.email) == email.lower()
+    ).order_by((Usuario.email == email).desc())
 
 
 def nuevo_codigo(usuario: Usuario) -> str:
@@ -55,13 +64,13 @@ def registrar_usuario(data: RegistroRequest, db: Session = Depends(get_db)):
 
     # Misma respuesta si el correo ya tiene cuenta: no se revela qué correos
     # están registrados (enumeración de usuarios)
-    existente = db.query(Usuario).filter(Usuario.email == data.email).first()
+    existente = por_correo(db, data.email).first()
     if existente:
         return {"status": "success", "mensaje": MENSAJE_REGISTRO, "user": {"email": data.email}}
 
     nuevo_usuario = Usuario(
         nombre=data.nombre,
-        email=data.email,
+        email=data.email.lower(),
         password=hash_password(data.password),
         rol=data.rol,
         telefono=data.telefono,
@@ -95,7 +104,7 @@ def reenviar_codigo(data: ReenvioRequest, db: Session = Depends(get_db)):
     limitar(f"reenvio:{data.email.lower()}", maximo=3, ventana_segundos=3600)
 
     respuesta = {"status": "success", "mensaje": "Si la cuenta existe y no está verificada, te enviamos un código nuevo."}
-    usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
+    usuario = por_correo(db, data.email).first()
     if usuario and not usuario.verificado:
         codigo = nuevo_codigo(usuario)
         db.commit()
@@ -113,8 +122,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
     # El administrador no tiene botón propio en el login: entra con
     # cualquiera de los dos tipos de cuenta
-    usuario = db.query(Usuario).filter(
-        Usuario.email == data.email,
+    usuario = por_correo(db, data.email).filter(
         or_(Usuario.rol == data.rol, Usuario.rol == ROL_ADMIN)
     ).first()
 
@@ -162,7 +170,7 @@ def verificar_cuenta(data: VerificacionRequest, db: Session = Depends(get_db)):
     # Un código de 6 dígitos se adivinaría por fuerza bruta sin un límite por cuenta
     limitar(f"verificar:{data.email.lower()}", maximo=5, ventana_segundos=3600)
 
-    usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
+    usuario = por_correo(db, data.email).first()
     # Mismo mensaje para cuenta inexistente o código incorrecto: no revela
     # qué correos están registrados
     vigente = bool(usuario and usuario.codigo_expira and usuario.codigo_expira >= datetime.utcnow())
@@ -240,7 +248,7 @@ def recuperar_contrasena(data: RecuperacionRequest, db: Session = Depends(get_db
 
     # Siempre la misma respuesta, exista o no la cuenta: no se revela qué
     # correos están registrados (enumeración de usuarios)
-    usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
+    usuario = por_correo(db, data.email).first()
     if not usuario or es_cuenta_demo(usuario):
         registrar_evento("recuperacion_solicitada", "info", email=data.email, detalle="sin cuenta o cuenta demo")
         return respuesta
@@ -266,7 +274,7 @@ def restablecer_contrasena(data: RestablecerRequest, db: Session = Depends(get_d
     limitar(f"restablecer:{data.email.lower()}", maximo=8, ventana_segundos=3600)
     error = {"status": "error", "mensaje": "Código incorrecto o vencido. Puedes pedir uno nuevo."}
 
-    usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
+    usuario = por_correo(db, data.email).first()
     if not usuario or not usuario.recuperacion_hash:
         registrar_evento("recuperacion_fallida", "advertencia", email=data.email, detalle="sin código vigente")
         return error
