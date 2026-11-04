@@ -97,7 +97,7 @@
       }
 
       try {
-        const data = await window.AgroColab.api.eliminarCuenta(sesion.email);
+        const data = await window.AgroColab.api.eliminarCuenta();
         if (data.status === "success") {
           AgroColab.dialogo.avisar(data.mensaje, { tipo: "exito", titulo: "Cuenta eliminada" });
           this.auth.eliminarSesion();

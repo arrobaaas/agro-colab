@@ -32,6 +32,8 @@ directo al productor, sin intermediarios.
 [Seguridad](#-seguridad) ·
 [Instalación](#-instalación-local) ·
 [API](#-api-rest) ·
+[Base de datos](db/README.md) ·
+[Documentos](#-documentos) ·
 [Equipo](#-equipo)
 
 </div>
@@ -72,7 +74,7 @@ Cada pedido genera un código de seguimiento que lo vincula a su huerto de orige
 - **Sin sobreventa bajo concurrencia.** La reserva de cupos es un `UPDATE` condicional atómico, respaldado por un índice único: dos compras simultáneas del último cupo nunca se aprueban ambas.
 - **Seguridad aplicada de punta a punta.** Tokens firmados con HMAC-SHA256, autorización por recurso, *rate limiting* persistente, CSP estricta sin JavaScript en línea y defensa contra XSS en tres capas. [Ver detalle](#-seguridad).
 - **Monitoreo y alertas propios.** Los eventos de seguridad se registran en base de datos y en logs JSON, y disparan alertas por correo o webhook según reglas (fuerza bruta, tokens falsificados, accesos a datos ajenos).
-- **Calidad verificada en CI.** 48 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend.
+- **Calidad verificada en CI.** 139 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend. Las reglas de la arquitectura también se comprueban: si una consulta sale de la capa de datos, la integración continua falla.
 - **Frontend sin frameworks.** SPA en JavaScript vanilla organizada en servicios, con router de vistas, delegación de eventos, gráficos accesibles hechos con HTML y CSS, y un árbol 3D de partículas en `<canvas>`.
 - **Privacidad desde el diseño.** Cumplimiento de la Ley N° 21.719 de Protección de Datos Personales de Chile: consentimiento explícito, derechos de acceso, rectificación y eliminación, y registro de tratamiento.
 
@@ -104,18 +106,19 @@ Cada pedido genera un código de seguimiento que lo vincula a su huerto de orige
 
 ## 🏗 Arquitectura
 
-Arquitectura cliente-servidor en tres capas. El frontend estático se publica en GitHub
-Pages y consume una API REST en FastAPI desplegada en Render.
+Arquitectura cliente-servidor en capas, en un **monolito modular**. El frontend estático se
+publica en GitHub Pages y consume una API REST en FastAPI desplegada en Render.
 
 ```mermaid
 flowchart LR
     subgraph Cliente["Presentación · GitHub Pages"]
         SPA["SPA en JavaScript<br/>Tailwind CSS"]
     end
-    subgraph Servidor["Negocio · Render"]
-        API["FastAPI<br/>routers por dominio"]
-        Core["Reglas de negocio<br/>tokens · validaciones · catálogo"]
-        Seg["Monitoreo<br/>eventos y alertas"]
+    subgraph Servidor["Servidor · Render · un proceso"]
+        R["routers/<br/>HTTP"]
+        S["services/<br/>reglas de negocio"]
+        Rep["repositories/<br/>consultas y transacciones"]
+        Seg["seguridad.py<br/>eventos y alertas"]
     end
     subgraph Datos["Datos"]
         DB[("PostgreSQL<br/>SQLAlchemy ORM")]
@@ -123,19 +126,24 @@ flowchart LR
     Brevo["Brevo<br/>correo transaccional"]
     Photon["Photon<br/>OpenStreetMap"]
 
-    SPA -- "fetch + Bearer token" --> API
-    API --> Core --> DB
-    API --> Seg --> DB
-    Core -- "códigos de verificación" --> Brevo
+    SPA -- "fetch + Bearer token" --> R
+    R --> S --> Rep --> DB
+    S --> Seg --> Rep
+    S -- "códigos de verificación" --> Brevo
     SPA -- "autocompletado" --> Photon
 ```
 
-| Capa | Tecnologías | Responsabilidad |
-|---|---|---|
-| Presentación | HTML5, CSS3, JavaScript ES2020, Tailwind CSS | Vistas por rol en un único documento, sin recargas |
-| Negocio | Python 3.12, FastAPI, Pydantic, bcrypt | Cupos, pagos, validación de especies e imágenes, autenticación y autorización |
-| Datos | SQLAlchemy 2, PostgreSQL (SQLite en local) | Persistencia, restricciones de integridad y migraciones ligeras al arrancar |
-| Infraestructura | GitHub Pages, Render, GitHub Actions, Brevo | Hosting, despliegue, integración continua y correo |
+| Capa | Dónde | Responsabilidad | No puede |
+|---|---|---|---|
+| Presentación | `frontend/` | Vistas por rol en un único documento, sin recargas | Decidir reglas: el servidor valida todo de nuevo |
+| HTTP | `backend/routers/`, `main.py` | Rutas, validación de entrada y traducción de errores a códigos HTTP | Contener condicionales de negocio ni consultas |
+| Negocio | `backend/services/` | Cupos, pagos, validación de especies e imágenes, cuentas | Conocer HTTP ni escribir consultas |
+| Datos | `backend/repositories/`, `database.py` | Consultas, transacciones, modelos y migraciones ligeras | Depender de las capas superiores |
+
+`backend/tests/test_arquitectura.py` comprueba estas reglas leyendo el código.
+
+**Tecnologías:** Python 3.12, FastAPI, Pydantic, SQLAlchemy 2, PostgreSQL (SQLite en local), bcrypt,
+JavaScript ES2020, Tailwind CSS, GitHub Pages, Render, GitHub Actions y Brevo.
 
 ---
 
@@ -227,7 +235,7 @@ consentimiento y el derecho a eliminación.
 
 ## 🧪 Pruebas e integración continua
 
-**48 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
+**139 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
 *pull request* dos veces, **con SQLite y con PostgreSQL**, y además revisa la sintaxis de
 todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca envían correos.
 
@@ -238,6 +246,9 @@ todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca env�
 | `test_seguridad.py` | Autorización por recurso, cabeceras, rechazo de XSS, imágenes fuera del catálogo, cuentas demo protegidas, límite de intentos y borrado de datos |
 | `test_admin.py` | Acceso exclusivo del administrador, registro como administrador bloqueado, edición y cambio de contraseña, correos repetidos, eliminación con sus árboles y cuentas protegidas |
 | `test_base_datos.py` | Selección de la base de datos según las variables de entorno (SQLite local o PostgreSQL de Render) |
+| `test_contrato_http.py` | Código de estado de cada resultado (201, 400, 401, 402, 403, 404, 409, 422, 429) y forma única de los errores |
+| `test_arquitectura.py` | Separación de capas: consultas solo en la capa de datos, routers sin reglas, negocio sin HTTP |
+| `test_entregables.py` | La tabla de la API, `.env.example` y `db/esquema.sql` coinciden con el código; ejecuta completa la colección de Postman |
 
 ```bash
 cd backend
@@ -260,7 +271,8 @@ cd backend
 python3 -m venv venv
 source venv/bin/activate          # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-AGROCOLAB_MOD_MODE=desarrollo uvicorn main:app --reload --port 8000
+cp ../.env.example ../.env        # Windows: copy ..\.env.example ..\.env
+uvicorn main:app --reload --port 8000 --env-file ../.env
 ```
 
 ```bash
@@ -269,9 +281,11 @@ cd frontend
 python3 -m http.server 3000
 ```
 
-Sin `DATABASE_URL` se usa una base SQLite local que se crea sola con las cuentas de
-demostración y tres árboles de ejemplo. En modo `desarrollo` el código de verificación
-aparece en la consola, así que se puede probar el registro sin configurar el correo.
+Con los valores de [`.env.example`](.env.example) se usa una base SQLite local que se crea
+sola con las cuentas de demostración y tres árboles de ejemplo, y en modo `desarrollo` el
+código de verificación aparece en la consola, así que se puede probar el registro sin
+configurar el correo. El archivo `.env` está excluido del repositorio. Para crear la base en
+PostgreSQL con un script, ver [`db/`](db/README.md).
 
 Los estilos de Tailwind vienen compilados. Si agregas clases nuevas, vuelve a compilarlos
 con `bash scripts/compilar-css.sh` (no requiere Node: descarga el ejecutable oficial y
@@ -284,6 +298,7 @@ verifica su checksum).
 
 | Variable | Obligatoria | Descripción |
 |---|---|---|
+| `AGROCOLAB_DB_URL` | No | Conexión con prioridad sobre `DATABASE_URL`. La usan las pruebas para una base temporal |
 | `DATABASE_URL` | En producción | Conexión a PostgreSQL (`postgres://` o `postgresql://`). Sin ella se usa SQLite local |
 | `AGROCOLAB_SECRET` | En producción | Clave para firmar los tokens. Si falta, se genera una al arrancar y las sesiones se cierran en cada reinicio |
 | `AGROCOLAB_MOD_MODE` | No | `desarrollo` muestra el código de verificación sin enviar correo. Por defecto: `produccion` |
@@ -306,8 +321,15 @@ demostración funcionan siempre.
 
 ## 🔌 API REST
 
-Documentación interactiva (Swagger) en `/docs` al levantar el backend. Los endpoints
-marcados con 🔒 exigen `Authorization: Bearer <token>`.
+Documentación interactiva (Swagger) en `/docs` al levantar el backend. El contrato completo,
+con parámetros, cuerpos de ejemplo y códigos de éxito y de error, está en
+[`docs/API.md`](docs/API.md). Para probarla, importa
+[`docs/AgroColab.postman_collection.json`](docs/AgroColab.postman_collection.json) en Postman.
+
+Cada resultado usa su código HTTP: 201 al crear, 401 sin credenciales, 403 sin permiso, 404 si
+no existe, 409 si choca con el estado actual y 422 con datos inválidos. Todos los errores
+responden `{"status": "error", "mensaje": "..."}`. Los endpoints marcados con 🔒 exigen
+`Authorization: Bearer <token>`.
 
 <details>
 <summary><b>Ver todos los endpoints</b></summary>
@@ -325,26 +347,31 @@ marcados con 🔒 exigen `Authorization: Bearer <token>`.
 | `POST` | `/api/login` | Inicia sesión y devuelve el token |
 | `GET` | `/api/especies` | Catálogo cerrado de especies con sus fotos verificadas |
 | `GET` | `/api/arboles` | Catálogo público de árboles |
+| `GET` | `/api/arboles/{id}` | Un árbol del catálogo |
 | `POST` | `/api/arboles` 🔒 | Publica un árbol (solo agricultores) |
 | `PUT` | `/api/arboles/{id}` 🔒 | Edita un árbol (solo su productor) |
 | `DELETE` | `/api/arboles/{id}` 🔒 | Elimina un árbol y sus suscripciones (solo su productor) |
 | `POST` | `/api/pagos` 🔒 | Pasarela simulada: valida la tarjeta y adopta el árbol reservando el cupo de forma atómica |
 | `GET` | `/api/pagos` 🔒 | Historial de pagos (marca y últimos 4 dígitos) |
-| `POST` | `/api/cancelar-suscripcion` 🔒 | Cancela la suscripción propia y libera el cupo |
+| `GET` | `/api/pagos/{id}` 🔒 | Un comprobante propio |
+| `DELETE` | `/api/arboles/{id}/suscripcion` 🔒 | Cancela la suscripción propia y libera el cupo |
 | `GET` | `/api/suscripciones/usuario/{id}` 🔒 | Árboles adoptados por el usuario |
 | `GET` | `/api/mis-arboles/{id}/suscriptores` 🔒 | Suscriptores de los árboles del productor |
 | `DELETE` | `/api/suscripciones/{id}` 🔒 | Expulsa a un suscriptor (solo el productor) |
 | `POST` | `/api/pedidos` 🔒 | Registra un plan de abastecimiento o el despacho de una cosecha |
 | `GET` | `/api/pedidos` 🔒 | Pedidos del usuario |
+| `GET` | `/api/pedidos/{id}` 🔒 | Un pedido propio |
 | `PUT` | `/api/pedidos/{id}` 🔒 | Modifica el destino y la frecuencia de un pedido propio |
 | `DELETE` | `/api/pedidos/{id}` 🔒 | Cancela un plan de abastecimiento propio |
 | `GET` | `/api/usuario/{id}` 🔒 | Perfil propio, o el de un suscriptor para su productor |
 | `PUT` | `/api/perfil` 🔒 | Actualiza el perfil propio |
-| `DELETE` | `/api/usuario/{email}` 🔒 | Elimina la cuenta propia y todos sus datos |
+| `DELETE` | `/api/perfil` 🔒 | Elimina la cuenta de la sesión y todos sus datos |
 | `GET` | `/api/admin/usuarios` 🔒 | Todas las cuentas con su actividad (solo administrador) |
 | `GET` | `/api/admin/usuarios/{id}` 🔒 | Detalle de una cuenta con sus árboles publicados y adoptados (solo administrador) |
 | `PUT` | `/api/admin/usuarios/{id}` 🔒 | Corrige los datos de una cuenta, su verificación o su contraseña (solo administrador) |
 | `DELETE` | `/api/admin/usuarios/{id}` 🔒 | Elimina una cuenta y todos sus datos (solo administrador) |
+| `POST` | `/api/seguridad/csp` | Reporte del navegador cuando la CSP bloquea código |
+| `GET` | `/api/seguridad/resumen` | Datos del panel de monitoreo (exige `X-Monitoreo-Token`) |
 
 </details>
 
@@ -390,23 +417,44 @@ agro-colab/
 │       ├── legal.js           # Efectos de las páginas legales
 │       └── ui.js              # Alertas, formato de montos y escape de HTML
 ├── backend/
-│   ├── main.py                # Aplicación FastAPI, CORS y routers
-│   ├── core.py                # Esquemas, tokens y lógica compartida
-│   ├── database.py            # Modelos SQLAlchemy y migraciones
+│   ├── main.py                # Aplicación, CORS y traducción de errores a códigos HTTP
+│   ├── routers/               # Capa HTTP: rutas, sin reglas ni consultas
+│   ├── services/              # Capa de negocio: cuentas, arboles, suscripciones, pedidos, pagos, admin
+│   ├── repositories/          # Capa de datos: consultas y transacciones
+│   ├── database.py            # Conexión, modelos SQLAlchemy y migraciones ligeras
+│   ├── schemas.py             # Contratos de entrada (Pydantic)
+│   ├── errores.py             # Errores del dominio
+│   ├── core.py                # Tokens, autenticación y límite de intentos
 │   ├── catalogo.py            # Catálogo de especies con fotos atribuidas
 │   ├── seguridad.py           # Eventos, reglas de alerta y alertas
-│   ├── notificaciones.py      # Correo transaccional (Brevo)
-│   ├── routers/               # admin, arboles, especies, suscripciones, pedidos, pagos, usuarios, monitoreo
+│   ├── notificaciones.py      # Correo transaccional (Brevo) y sus plantillas
 │   └── tests/                 # Pruebas automatizadas (pytest)
+├── db/                        # Diagrama del modelo y script de creación de la base
 ├── .github/workflows/         # Integración continua
 ├── scripts/compilar-css.sh    # Compilación de Tailwind con verificación de checksum
+├── .env.example               # Variables de entorno, con valores de ejemplo
 └── docs/
+    ├── Informe_Hito2_AgroColab.pdf  # Documento técnico del Hito 2
+    ├── API.md                 # Contrato completo de la API
+    ├── AgroColab.postman_collection.json  # Peticiones de la demostración
     ├── capturas/              # Capturas de pantalla
-    ├── Informe.pdf            # Informe del proyecto
+    ├── Informe.pdf            # Propuesta del Hito 1
     └── Presentacion.pptx      # Presentación del proyecto
 ```
 
 </details>
+
+---
+
+## 📚 Documentos
+
+| Documento | Contenido |
+|---|---|
+| [Documento técnico del Hito 2](docs/Informe_Hito2_AgroColab.pdf) | Arquitectura, decisiones, contrato de la API, capas, persistencia, mediciones y limitaciones |
+| [Contrato de la API](docs/API.md) | Rutas, verbos, parámetros, cuerpos de ejemplo y códigos de estado |
+| [Colección de Postman](docs/AgroColab.postman_collection.json) | Las peticiones de la demostración, listas para importar |
+| [Modelo de datos y script SQL](db/README.md) | Diagrama y creación de la base desde cero |
+| [Propuesta del Hito 1](docs/Informe.pdf) · [Presentación](docs/Presentacion.pptx) | Propuesta comercial y arquitectura inicial |
 
 ---
 
@@ -420,6 +468,7 @@ la revisión del código y la responsabilidad sobre el resultado son del equipo.
 | **Gemini** (Google) | Septiembre 2026 | Estructura y redacción de los argumentos comerciales del informe |
 | **ChatGPT** (OpenAI) | Septiembre 2026 | Comparación técnica de lenguajes (Node.js vs Python) y apoyo en el código del prototipo inicial |
 | **Claude Code** (Anthropic) | Octubre 2026 | Asistente de programación: revisión de código, autenticación con tokens y autorización por recurso, corrección de la condición de carrera en la reserva de cupos, y documentación |
+| **Claude Code** (Anthropic) | Noviembre 2026 | Análisis contra la rúbrica, corrección de los códigos HTTP, separación en capas, pruebas nuevas, carpeta `db/`, colección de Postman, mediciones y documento técnico del Hito 2 |
 
 Los cambios propuestos por la IA se revisaron antes de incorporarlos, y los de seguridad
 se probaron contra la API en ejecución: peticiones sin token o con token falso, acceso a

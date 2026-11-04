@@ -1,238 +1,31 @@
-"""Router de suscripciones (adopción, cancelación y gestión de cupos).
-
-Todas las rutas exigen sesión: el usuario se toma del token, nunca del cuerpo
-de la petición, para que nadie pueda suscribir, cancelar o ver datos ajenos.
-"""
+"""Rutas de suscripciones. La adopción se crea con POST /api/pagos."""
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import update
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
-from core import (
-    SuscripcionRequest, cupos_ocupados_de, serializar_arbol,
-    get_db, especie_de_arbol, buscar_especie, usuario_actual, exigir_mismo_usuario,
-)
-from seguridad import registrar_evento
-from database import Arbol, Pedido, Suscripcion, Usuario
+from core import get_db, usuario_actual
+from database import Usuario
+from services import suscripciones as servicio
 
-router = APIRouter()
-
-
-def borrar_despacho_del_arbol(db: Session, usuario_id: int, arbol_id: int):
-    """Sin la suscripción, el despacho de la cosecha de ese árbol ya no aplica."""
-    db.query(Pedido).filter(
-        Pedido.cliente_id == usuario_id,
-        Pedido.arbol_id == arbol_id,
-        Pedido.tipo == "arbol",
-    ).delete(synchronize_session=False)
-
-
-def puede_adoptar(db: Session, usuario: Usuario, arbol: Arbol) -> str:
-    """Revisa, antes de cobrar, si el usuario puede adoptar el árbol.
-    Devuelve el motivo si no puede, o cadena vacía."""
-    ya_suscrito = db.query(Suscripcion).filter(
-        Suscripcion.arbol_id == arbol.id,
-        Suscripcion.usuario_id == usuario.id
-    ).first()
-    if ya_suscrito:
-        return f"Ya estás suscrito a {arbol.nombre}. No puedes ocupar dos cupos del mismo árbol."
-    if cupos_ocupados_de(arbol, db) >= arbol.cupos_totales:
-        return "Cupos agotados para este árbol."
-    return ""
-
-
-def reservar_cupo(db: Session, usuario: Usuario, arbol: Arbol) -> str:
-    """Crea la suscripción del usuario al árbol, sin confirmar la transacción.
-    Devuelve el motivo si no se pudo (y deshace la transacción), o cadena
-    vacía. Se llama antes de agregar nada más a la sesión.
-
-    La usa la pasarela de pago (routers/pagos.py): el cupo se reserva en la
-    misma transacción que registra el pago aprobado. Antes existía
-    POST /api/suscribir, que adoptaba sin pagar.
-    """
-    # Un mismo usuario no puede ocupar dos cupos del mismo árbol
-    motivo = puede_adoptar(db, usuario, arbol)
-    if motivo.startswith("Ya estás"):
-        return motivo
-
-    # Reserva atómica del cupo: el UPDATE condicional bloquea la fila, así dos
-    # compras simultáneas no pueden quedarse con el último cupo a la vez.
-    # Antes se contaba y luego se insertaba, y ambas peticiones veían cupo libre.
-    reservado = db.execute(
-        update(Arbol)
-        .where(Arbol.id == arbol.id, Arbol.cupos_ocupados < Arbol.cupos_totales)
-        .values(cupos_ocupados=Arbol.cupos_ocupados + 1)
-    ).rowcount
-    if not reservado:
-        db.rollback()
-        return "Cupos agotados para este árbol."
-
-    try:
-        db.add(Suscripcion(usuario_id=usuario.id, arbol_id=arbol.id))
-        db.flush()
-    except IntegrityError:
-        # Otra petición del mismo usuario se adelantó (índice único)
-        db.rollback()
-        return f"Ya estás suscrito a {arbol.nombre}. No puedes ocupar dos cupos del mismo árbol."
-
-    db.refresh(arbol)
-    arbol.cupos_ocupados = cupos_ocupados_de(arbol, db)
-    return ""
+router = APIRouter(tags=["Suscripciones"])
 
 
 @router.get("/api/mis-arboles/{productor_id}/suscriptores")
-def listar_suscriptores(
-    productor_id: int,
-    usuario: Usuario = Depends(usuario_actual),
-    db: Session = Depends(get_db),
-):
-    """Lista los usuarios suscritos a los árboles de un productor.
-
-    Incluye datos de contacto, por eso solo el propio productor puede verla.
-    """
-    exigir_mismo_usuario(usuario, productor_id)
-
-    arboles = (
-        db.query(Arbol)
-        .options(joinedload(Arbol.productor))
-        .filter(Arbol.productor_id == productor_id)
-        .all()
-    )
-
-    resultado = []
-    for arbol in arboles:
-        suscripciones = (
-            db.query(Suscripcion)
-            .options(joinedload(Suscripcion.usuario))
-            .filter(Suscripcion.arbol_id == arbol.id)
-            .all()
-        )
-        suscriptores = []
-        for s in suscripciones:
-            u = s.usuario
-            if u:
-                suscriptores.append({
-                    "suscripcion_id": s.id,
-                    "usuario_id": u.id,
-                    "nombre": u.nombre,
-                    "email": u.email,
-                    "telefono": u.telefono,
-                    "direccion": u.direccion,
-                    "rol": u.rol,
-                    "fecha_suscripcion": s.fecha_suscripcion.strftime("%d/%m/%Y") if s.fecha_suscripcion else None
-                })
-
-        resultado.append({
-            "arbol_id": arbol.id,
-            "arbol_nombre": arbol.nombre,
-            "cupos_totales": arbol.cupos_totales,
-            "cupos_ocupados": len(suscriptores),
-            "suscriptores": suscriptores
-        })
-
-    return resultado
+def listar_suscriptores(productor_id: int, usuario: Usuario = Depends(usuario_actual), db: Session = Depends(get_db)):
+    return servicio.listar_suscriptores(db, usuario, productor_id)
 
 
 @router.get("/api/suscripciones/usuario/{usuario_id}")
-def listar_suscripciones_usuario(
-    usuario_id: int,
-    usuario: Usuario = Depends(usuario_actual),
-    db: Session = Depends(get_db),
-):
-    """Árboles que un usuario tiene adoptados, para su panel de perfil."""
-    exigir_mismo_usuario(usuario, usuario_id)
-
-    suscripciones = (
-        db.query(Suscripcion)
-        .options(joinedload(Suscripcion.arbol).joinedload(Arbol.productor))
-        .filter(Suscripcion.usuario_id == usuario_id)
-        .all()
-    )
-
-    arboles = []
-    for suscripcion in suscripciones:
-        arbol = suscripcion.arbol
-        if not arbol:
-            continue
-        arboles.append({
-            "suscripcion_id": suscripcion.id,
-            "arbol_id": arbol.id,
-            "nombre": arbol.nombre,
-            "especie": especie_de_arbol(arbol),
-            "especie_nombre": (buscar_especie(especie_de_arbol(arbol)) or {}).get("nombre"),
-            "plan": arbol.plan,
-            "tipo_suscripcion": arbol.tipo_suscripcion,
-            "precio_mensual_clp": arbol.precio_mensual_clp,
-            "imagen": arbol.imagen,
-            "ubicacion": arbol.ubicacion,
-            "estimacion_cosecha": arbol.estimacion_cosecha,
-            "cupos_totales": arbol.cupos_totales,
-            "cupos_ocupados": cupos_ocupados_de(arbol, db),
-            "productor": arbol.productor.nombre if arbol.productor else None,
-            "fecha_suscripcion": suscripcion.fecha_suscripcion.strftime("%d/%m/%Y") if suscripcion.fecha_suscripcion else None,
-        })
-
-    return {"status": "success", "arboles": arboles}
+def listar_suscripciones_usuario(usuario_id: int, usuario: Usuario = Depends(usuario_actual), db: Session = Depends(get_db)):
+    return servicio.listar_de_usuario(db, usuario, usuario_id)
 
 
 @router.delete("/api/suscripciones/{suscripcion_id}")
-def expulsar_suscriptor(
-    suscripcion_id: int,
-    usuario: Usuario = Depends(usuario_actual),
-    db: Session = Depends(get_db),
-):
-    """Expulsa a un suscriptor de un árbol y libera su cupo.
-
-    Solo el productor dueño del árbol puede expulsar suscriptores.
-    """
-    suscripcion = db.query(Suscripcion).filter(Suscripcion.id == suscripcion_id).first()
-    if not suscripcion:
-        return {"status": "error", "mensaje": "Suscripción no encontrada."}
-
-    arbol = db.query(Arbol).filter(Arbol.id == suscripcion.arbol_id).first()
-    if not arbol or arbol.productor_id != usuario.id:
-        registrar_evento("acceso_denegado", "advertencia", usuario=usuario, detalle=f"expulsar en la suscripción {suscripcion_id}")
-        return {"status": "error", "mensaje": "Solo el productor del árbol puede expulsar suscriptores."}
-
-    borrar_despacho_del_arbol(db, suscripcion.usuario_id, arbol.id)
-    db.delete(suscripcion)
-    db.flush()
-    arbol.cupos_ocupados = cupos_ocupados_de(arbol, db)
-    db.commit()
-
-    return {"status": "success", "mensaje": "Suscriptor expulsado y cupo liberado."}
+def expulsar_suscriptor(suscripcion_id: int, usuario: Usuario = Depends(usuario_actual), db: Session = Depends(get_db)):
+    return servicio.expulsar(db, usuario, suscripcion_id)
 
 
-@router.post("/api/cancelar-suscripcion")
-def cancelar_suscripcion(
-    data: SuscripcionRequest,
-    usuario: Usuario = Depends(usuario_actual),
-    db: Session = Depends(get_db),
-):
-    arbol = db.query(Arbol).filter(Arbol.id == data.tree_id).first()
-    if not arbol:
-        return {"status": "error", "mensaje": "Árbol no encontrado."}
-
-    # Se busca la suscripción real del usuario: sin esto, cancelar solo
-    # bajaba el contador y el usuario seguía suscrito.
-    suscripcion = db.query(Suscripcion).filter(
-        Suscripcion.arbol_id == arbol.id,
-        Suscripcion.usuario_id == usuario.id
-    ).first()
-
-    if not suscripcion:
-        return {"status": "error", "mensaje": "No estás suscrito a este árbol."}
-
-    borrar_despacho_del_arbol(db, usuario.id, arbol.id)
-    db.delete(suscripcion)
-    db.flush()
-
-    arbol.cupos_ocupados = cupos_ocupados_de(arbol, db)
-    db.commit()
-
-    return {
-        "status": "success",
-        "mensaje": f"Suscripción cancelada para {usuario.nombre} en {arbol.nombre}.",
-        "arbol": serializar_arbol(arbol, db)
-    }
+@router.delete("/api/arboles/{arbol_id}/suscripcion")
+def cancelar_suscripcion(arbol_id: int, usuario: Usuario = Depends(usuario_actual), db: Session = Depends(get_db)):
+    """Cancela la suscripción propia a un árbol y libera el cupo."""
+    return servicio.cancelar(db, usuario, arbol_id)

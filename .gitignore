@@ -6,5 +6,10 @@ __pycache__/
 Guion(1).docx
 backend/agrocolab.db
 
+# Credenciales: nunca al repositorio. La plantilla sí se versiona
+.env
+.env.*
+!.env.example
+
 # Ejecutable de Tailwind descargado por scripts/compilar-css.sh
 .tailwind/
