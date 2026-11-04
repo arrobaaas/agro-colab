@@ -21,8 +21,8 @@ import urllib.request
 from contextvars import ContextVar
 from datetime import datetime, timedelta
 
-from database import EventoSeguridad, SessionLocal
 from notificaciones import enviar_correo
+from repositories import eventos
 
 registro = logging.getLogger("agrocolab.seguridad")
 if not registro.handlers:
@@ -74,33 +74,25 @@ def registrar_evento(tipo, severidad="info", ip=None, usuario=None, email=None, 
     }
     registro.info(json.dumps({"seguridad": datos}, ensure_ascii=False))
 
-    db = SessionLocal()
     try:
-        db.add(EventoSeguridad(
+        eventos.guardar(
+            limite_antiguedad=datetime.utcnow() - RETENCION,
             tipo=tipo, severidad=severidad, ip=ip, usuario_id=datos["usuario_id"],
             email=email, ruta=ruta, detalle=datos["detalle"],
-        ))
-        db.query(EventoSeguridad).filter(
-            EventoSeguridad.momento < datetime.utcnow() - RETENCION
-        ).delete(synchronize_session=False)
-        db.commit()
+        )
 
-        alerta = _alerta_pendiente(db, tipo, severidad, ip, email)
+        alerta = _alerta_pendiente(tipo, severidad, ip, email)
         if alerta:
             clave, descripcion, cantidad = alerta
-            db.add(EventoSeguridad(tipo="alerta_enviada", severidad="advertencia", ip=ip, email=email, ruta=ruta, detalle=clave))
-            db.commit()
+            eventos.guardar(tipo="alerta_enviada", severidad="advertencia", ip=ip, email=email, ruta=ruta, detalle=clave)
             threading.Thread(
                 target=_enviar_alerta, args=(descripcion, cantidad, datos), daemon=True
             ).start()
     except Exception as error:  # noqa: BLE001 - el registro nunca debe romper la petición
         registro.error("No se pudo registrar el evento de seguridad %s: %s", tipo, error)
-        db.rollback()
-    finally:
-        db.close()
 
 
-def _alerta_pendiente(db, tipo, severidad, ip, email):
+def _alerta_pendiente(tipo, severidad, ip, email):
     """Devuelve (clave, descripción, cantidad) si el evento debe generar una
     alerta que no se haya enviado en la última hora; si no, None."""
     regla = REGLAS.get(tipo)
@@ -110,23 +102,14 @@ def _alerta_pendiente(db, tipo, severidad, ip, email):
     if regla:
         cantidad_minima, ventana, agrupar_por, descripcion = regla
         valor = email if agrupar_por == "email" else ip
-        columna = EventoSeguridad.email if agrupar_por == "email" else EventoSeguridad.ip
-        cantidad = db.query(EventoSeguridad).filter(
-            EventoSeguridad.tipo == tipo,
-            columna == valor,
-            EventoSeguridad.momento >= datetime.utcnow() - ventana,
-        ).count()
+        cantidad = eventos.contar_recientes(tipo, agrupar_por, valor, datetime.utcnow() - ventana)
         if cantidad < cantidad_minima:
             return None
     else:
         descripcion, valor, cantidad = f"Evento crítico: {tipo}", ip, 1
 
     clave = f"{tipo}:{valor}"
-    ya_enviada = db.query(EventoSeguridad).filter(
-        EventoSeguridad.tipo == "alerta_enviada",
-        EventoSeguridad.detalle == clave,
-        EventoSeguridad.momento >= datetime.utcnow() - SILENCIO_ENTRE_ALERTAS,
-    ).first()
+    ya_enviada = eventos.alerta_enviada_desde(clave, datetime.utcnow() - SILENCIO_ENTRE_ALERTAS)
     return None if ya_enviada else (clave, descripcion, cantidad)
 
 
@@ -165,39 +148,31 @@ def _enviar_alerta(descripcion, cantidad, datos):
 
 def resumen(horas: int = 24, limite: int = 50) -> dict:
     """Datos para el panel de monitoreo."""
-    db = SessionLocal()
-    try:
-        desde = datetime.utcnow() - timedelta(hours=horas)
-        recientes = db.query(EventoSeguridad).filter(EventoSeguridad.momento >= desde)
-        por_tipo = {}
-        por_severidad = {"info": 0, "advertencia": 0, "critica": 0}
-        for evento in recientes:
-            por_tipo[evento.tipo] = por_tipo.get(evento.tipo, 0) + 1
-            # Las alertas son consecuencia de otros eventos: no se cuentan dos veces
-            if evento.tipo != "alerta_enviada" and evento.severidad in por_severidad:
-                por_severidad[evento.severidad] += 1
-        ultimos = (
-            db.query(EventoSeguridad).order_by(EventoSeguridad.id.desc()).limit(limite).all()
-        )
-        return {
-            "status": "success",
-            "horas": horas,
-            "por_tipo": por_tipo,
-            "por_severidad": por_severidad,
-            "alertas": por_tipo.get("alerta_enviada", 0),
-            "alertas_configuradas": bool(os.getenv("ALERTA_CORREO") or os.getenv("ALERTA_WEBHOOK_URL")),
-            "eventos": [
-                {
-                    "momento": e.momento.isoformat(timespec="seconds") + "Z" if e.momento else None,
-                    "tipo": e.tipo,
-                    "severidad": e.severidad,
-                    "ip": e.ip,
-                    "email": e.email,
-                    "ruta": e.ruta,
-                    "detalle": e.detalle,
-                }
-                for e in ultimos
-            ],
-        }
-    finally:
-        db.close()
+    fecha = datetime.utcnow() - timedelta(hours=horas)
+    por_tipo = {}
+    por_severidad = {"info": 0, "advertencia": 0, "critica": 0}
+    for evento in eventos.desde(fecha):
+        por_tipo[evento.tipo] = por_tipo.get(evento.tipo, 0) + 1
+        # Las alertas son consecuencia de otros eventos: no se cuentan dos veces
+        if evento.tipo != "alerta_enviada" and evento.severidad in por_severidad:
+            por_severidad[evento.severidad] += 1
+    return {
+        "status": "success",
+        "horas": horas,
+        "por_tipo": por_tipo,
+        "por_severidad": por_severidad,
+        "alertas": por_tipo.get("alerta_enviada", 0),
+        "alertas_configuradas": bool(os.getenv("ALERTA_CORREO") or os.getenv("ALERTA_WEBHOOK_URL")),
+        "eventos": [
+            {
+                "momento": e.momento.isoformat(timespec="seconds") + "Z" if e.momento else None,
+                "tipo": e.tipo,
+                "severidad": e.severidad,
+                "ip": e.ip,
+                "email": e.email,
+                "ruta": e.ruta,
+                "detalle": e.detalle,
+            }
+            for e in eventos.ultimos(limite)
+        ],
+    }

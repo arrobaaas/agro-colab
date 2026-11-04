@@ -115,6 +115,6 @@ def test_cancelar_libera_el_cupo(cliente, token_agricultor, nuevo_comprador):
     _, _, token = nuevo_comprador
     arbol = publicar_arbol(cliente, token_agricultor, cupos=1)
     assert pagar(cliente, token, arbol_id=arbol)["status"] == "success"
-    assert cliente.post("/api/cancelar-suscripcion", headers=auth(token), json={"tree_id": arbol}).json()["status"] == "success"
+    assert cliente.delete(f"/api/arboles/{arbol}/suscripcion", headers=auth(token)).json()["status"] == "success"
     catalogo = {a["id"]: a for a in cliente.get("/api/arboles").json()}
     assert catalogo[arbol]["cupos_ocupados"] == 0

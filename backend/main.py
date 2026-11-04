@@ -1,18 +1,24 @@
 """Agro-Colab API - aplicacion FastAPI.
 
-La aplicacion se compone de routers (catalogo, arboles, suscripciones, pedidos
-y usuarios) e inyecta la logica de dominio desde el modulo `core`.
+Arquitectura en capas: routers (HTTP) -> services (negocio) -> repositories
+(datos) -> database (modelos y conexión). Este módulo arma la aplicación y es
+el único que traduce los errores del dominio a códigos de estado HTTP.
 """
+
+import logging
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from core import datos_iniciales, ip_cliente
+import errores
+from core import ip_cliente
 from database import engine, Base, asegurar_columnas, migrar_cuentas_antiguas
 from routers import admin, arboles, especies, monitoreo, pagos, pedidos, suscripciones, usuarios
 from seguridad import peticion_actual, registrar_evento
+from services.inicio import cargar_datos_iniciales
 
 app = FastAPI(
     title="Agro-Colab API",
@@ -31,6 +37,45 @@ CAMPOS = {
     "codigo": "el código", "identificador": "el número del árbol",
     "estimacion_cosecha_kg": "la estimación de cosecha (kg)",
 }
+
+
+# Un solo lugar decide qué código HTTP corresponde a cada error del dominio
+CODIGOS_HTTP = {
+    errores.CodigoIncorrecto: 400,
+    errores.NoAutenticado: 401,
+    errores.PagoRechazado: 402,
+    errores.Prohibido: 403,
+    errores.NoEncontrado: 404,
+    errores.Conflicto: 409,
+    errores.DatoInvalido: 422,
+    errores.DemasiadosIntentos: 429,
+    errores.ServicioNoDisponible: 503,
+}
+
+MENSAJES_HTTP = {404: "La ruta solicitada no existe.", 405: "Este verbo no está permitido en esta ruta."}
+
+
+def respuesta_de_error(codigo: int, mensaje: str, estado: str = "error", **extra) -> JSONResponse:
+    """Todos los errores de la API tienen la misma forma: {status, mensaje}."""
+    return JSONResponse(status_code=codigo, content={"status": estado, "mensaje": mensaje, **extra})
+
+
+@app.exception_handler(errores.ErrorDeNegocio)
+async def error_de_negocio(request: Request, exc: errores.ErrorDeNegocio):
+    return respuesta_de_error(CODIGOS_HTTP[type(exc)], exc.mensaje, exc.estado, **exc.extra)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def error_http(request: Request, exc: StarletteHTTPException):
+    """Errores que genera el propio framework, como una ruta inexistente."""
+    return respuesta_de_error(exc.status_code, MENSAJES_HTTP.get(exc.status_code, str(exc.detail)))
+
+
+@app.exception_handler(Exception)
+async def error_inesperado(request: Request, exc: Exception):
+    """Un fallo no previsto se registra, pero su detalle no se expone al cliente."""
+    logging.getLogger("agrocolab").exception("Error no controlado en %s %s", request.method, request.url.path)
+    return respuesta_de_error(500, "Ocurrió un error inesperado. Intenta nuevamente en unos minutos.")
 
 
 @app.exception_handler(RequestValidationError)
@@ -53,7 +98,7 @@ async def error_de_validacion(request: Request, exc: RequestValidationError):
             registrar_evento("entrada_html", "critica", detalle=f"campo {campo}: {muestra}")
     else:
         mensaje = f"Revisa {nombre}: el valor no es válido."
-    return JSONResponse(status_code=422, content={"status": "error", "mensaje": mensaje})
+    return respuesta_de_error(422, mensaje)
 
 
 @app.middleware("http")
@@ -92,7 +137,7 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 asegurar_columnas()
 migrar_cuentas_antiguas()
-datos_iniciales()
+cargar_datos_iniciales()
 
 app.include_router(especies.router)
 app.include_router(arboles.router)

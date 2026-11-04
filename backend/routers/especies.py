@@ -1,10 +1,10 @@
-"""Router de catálogo de especies."""
+"""Rutas del catálogo de especies."""
 
 from fastapi import APIRouter
 
-from core import listar_especies
+from catalogo import listar_especies
 
-router = APIRouter()
+router = APIRouter(tags=["Especies"])
 
 
 @router.get("/api/especies")

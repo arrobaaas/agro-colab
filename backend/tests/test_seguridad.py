@@ -52,16 +52,14 @@ def test_no_se_ven_datos_de_otro_usuario(cliente, nuevo_comprador, token_comprad
     _, _, token = nuevo_comprador
     id_ajeno = int(token_comprador.split(".")[0])
     assert cliente.get(f"/api/usuario/{id_ajeno}", headers=auth(token)).json()["status"] == "error"
-    assert cliente.get(f"/api/suscripciones/usuario/{id_ajeno}", headers=auth(token)).status_code in (200, 403)
-    r = cliente.get(f"/api/suscripciones/usuario/{id_ajeno}", headers=auth(token)).json()
-    assert r.get("status") == "error" or r.get("detail", {}).get("status") == "error"
+    r = cliente.get(f"/api/suscripciones/usuario/{id_ajeno}", headers=auth(token))
+    assert r.status_code == 403 and r.json()["status"] == "error"
 
 
 def test_solo_el_productor_ve_sus_suscriptores(cliente, token_agricultor, token_comprador):
     id_agricultor = int(token_agricultor.split(".")[0])
     r = cliente.get(f"/api/mis-arboles/{id_agricultor}/suscriptores", headers=auth(token_comprador))
-    cuerpo = r.json()
-    assert r.status_code == 403 or cuerpo.get("status") == "error" or cuerpo.get("detail", {}).get("status") == "error"
+    assert r.status_code == 403 and r.json()["status"] == "error"
 
 
 def test_cuentas_demo_no_se_modifican(cliente, token_comprador):
@@ -69,17 +67,17 @@ def test_cuentas_demo_no_se_modifican(cliente, token_comprador):
         "nombre": "Nombre Cambiado", "email": "comprador@agrocolab.cl",
     }).json()
     assert r["status"] == "error"
-    r = cliente.delete("/api/usuario/comprador@agrocolab.cl", headers=auth(token_comprador)).json()
-    assert r["status"] == "error"
+    r = cliente.delete("/api/perfil", headers=auth(token_comprador))
+    assert r.status_code == 403 and r.json()["status"] == "error"
 
 
 def test_eliminar_cuenta_borra_sus_pagos(cliente, token_agricultor, nuevo_comprador):
     from database import Pago, SessionLocal
-    email, _, token = nuevo_comprador
+    _, _, token = nuevo_comprador
     arbol = publicar_arbol(cliente, token_agricultor)
     usuario = int(token.split(".")[0])
     assert pagar(cliente, token, arbol_id=arbol)["status"] == "success"
-    assert cliente.delete(f"/api/usuario/{email}", headers=auth(token)).json()["status"] == "success"
+    assert cliente.delete("/api/perfil", headers=auth(token)).json()["status"] == "success"
     db = SessionLocal()
     try:
         assert db.query(Pago).filter(Pago.usuario_id == usuario).count() == 0

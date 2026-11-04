@@ -47,7 +47,7 @@
       });
       const cuerpo = await respuesta.json().catch(() => null);
       if (!respuesta.ok) {
-        const mensaje = cuerpo && cuerpo.detail && cuerpo.detail.mensaje;
+        const mensaje = cuerpo && cuerpo.mensaje;
         throw new Error(mensaje || `El servidor respondió ${respuesta.status}.`);
       }
       return cuerpo;

@@ -42,13 +42,8 @@ class ApiService {
       );
     }
 
-    /* Los errores lanzados con HTTPException (sesión inválida, sin permiso,
-       demasiados intentos) llegan envueltos en "detail": se desenvuelven para
-       que el resto de la app siga leyendo status/mensaje. */
-    if (!respuesta.ok && cuerpo.detail && typeof cuerpo.detail === "object" && cuerpo.detail.mensaje) {
-      return cuerpo.detail;
-    }
-
+    /* Éxitos y errores traen status y mensaje en el cuerpo, con su código HTTP
+       correcto (400, 401, 403, 404, 409, 422...). El resto de la app lee status. */
     return cuerpo;
   }
 
@@ -80,10 +75,7 @@ class ApiService {
   }
 
   cancelarSuscripcion(sesion, treeId) {
-    return this.apiFetch("/cancelar-suscripcion", {
-      method: "POST",
-      body: JSON.stringify({ tree_id: treeId })
-    });
+    return this.apiFetch(`/arboles/${treeId}/suscripcion`, { method: "DELETE" });
   }
 
   crearPedido(pedido) {
@@ -144,8 +136,9 @@ class ApiService {
     return this.apiFetch("/reenviar-codigo", { method: "POST", body: JSON.stringify({ email }) });
   }
 
-  eliminarCuenta(email) {
-    return this.apiFetch(`/usuario/${encodeURIComponent(email)}`, { method: "DELETE" });
+  /* La cuenta sale del token: el correo no viaja en la ruta */
+  eliminarCuenta() {
+    return this.apiFetch("/perfil", { method: "DELETE" });
   }
 
   obtenerSuscriptores(productorId) {
