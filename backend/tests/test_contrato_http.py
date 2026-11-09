@@ -269,7 +269,9 @@ def test_eliminar_un_agricultor_borra_los_despachos_de_sus_arboles(cliente, toke
 
 def test_cuenta_eliminada_deja_de_funcionar(cliente, nuevo_comprador):
     email, password, token = nuevo_comprador
-    assert cliente.delete("/api/perfil", headers=auth(token)).status_code == 200
+    error(cliente.request("DELETE", "/api/perfil", headers=auth(token), json={"password": "incorrecta"}), 403)
+    error(cliente.delete("/api/perfil", headers=auth(token)), 422)
+    assert cliente.request("DELETE", "/api/perfil", headers=auth(token), json={"password": password}).status_code == 200
     error(cliente.get("/api/pedidos", headers=auth(token)), 401)
     error(cliente.post("/api/login", json={"email": email, "password": password, "rol": "comprador"}), 401)
 

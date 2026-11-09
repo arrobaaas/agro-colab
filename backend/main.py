@@ -109,9 +109,18 @@ async def cabeceras_de_seguridad(request: Request, call_next):
     respuesta.headers["X-Content-Type-Options"] = "nosniff"
     respuesta.headers["X-Frame-Options"] = "DENY"
     respuesta.headers["Referrer-Policy"] = "no-referrer"
+    # Solo HTTPS durante un año: el navegador no vuelve a intentar HTTP
+    # (lo ignora en http://localhost, así que no afecta al desarrollo)
+    respuesta.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    # La API no usa cámara, micrófono, ubicación ni pagos del navegador
+    respuesta.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    respuesta.headers["Cross-Origin-Opener-Policy"] = "same-origin"
     if request.url.path.startswith("/api/"):
         # Las respuestas traen datos personales: que no queden en cachés
         respuesta.headers["Cache-Control"] = "no-store"
+        # La API solo devuelve JSON: si un navegador la abriera como página,
+        # no puede cargar nada ni quedar dentro de un iframe
+        respuesta.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
     return respuesta
 
 
@@ -128,7 +137,9 @@ app.add_middleware(
         # bloquea todas las llamadas a la API desde la demo en línea.
         "https://arrobaaas.github.io",
     ],
-    allow_credentials=True,
+    # La sesión viaja en la cabecera Authorization, no en cookies: no hace
+    # falta que el navegador envíe credenciales entre orígenes
+    allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Content-Type", "Authorization", "X-Monitoreo-Token"],
 )

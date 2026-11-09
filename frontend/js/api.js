@@ -137,8 +137,9 @@ class ApiService {
   }
 
   /* La cuenta sale del token: el correo no viaja en la ruta */
-  eliminarCuenta() {
-    return this.apiFetch("/perfil", { method: "DELETE" });
+  /* Exige la contraseña actual: con solo el token no se borra la cuenta */
+  eliminarCuenta(password) {
+    return this.apiFetch("/perfil", { method: "DELETE", body: JSON.stringify({ password }) });
   }
 
   obtenerSuscriptores(productorId) {
