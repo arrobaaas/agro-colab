@@ -118,6 +118,10 @@ class PerfilRequest(BaseModel):
     # robado) no se puede secuestrar la cuenta
     password_actual: Optional[Annotated[str, StringConstraints(max_length=128)]] = None
 
+class EliminarCuentaRequest(BaseModel):
+    # Con solo el token (por ejemplo, robado) no se puede borrar la cuenta
+    password: Annotated[str, StringConstraints(min_length=1, max_length=128)]
+
 class RegistroRequest(BaseModel):
     nombre: Texto(80, 2)
     email: Correo

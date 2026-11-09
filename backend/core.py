@@ -3,6 +3,7 @@ autenticación y límite de intentos. No contiene reglas de negocio."""
 
 import hashlib
 import hmac
+import logging
 import os
 import secrets
 import time
@@ -66,7 +67,25 @@ def limitar_por_ip(maximo: int = 10, ventana_segundos: int = 300):
 # En producción AGROCOLAB_SECRET debe estar definido; si no, se genera uno al
 # arrancar y las sesiones se invalidan en cada reinicio del servidor.
 
-SECRETO_TOKENS = os.getenv("AGROCOLAB_SECRET") or secrets.token_hex(32)
+# Una clave de ejemplo (la de .env.example es pública en el repositorio) o
+# demasiado corta permitiría a cualquiera falsificar tokens de sesión: se
+# descarta y se usa una aleatoria.
+CLAVES_DE_EJEMPLO = {"cambia-esta-clave-por-una-generada"}
+
+
+def _secreto_tokens() -> str:
+    clave = os.getenv("AGROCOLAB_SECRET", "").strip()
+    if clave and clave not in CLAVES_DE_EJEMPLO and len(clave) >= 32:
+        return clave
+    if clave:
+        logging.getLogger("agrocolab").warning(
+            "AGROCOLAB_SECRET es la clave de ejemplo o tiene menos de 32 caracteres: "
+            "se ignora y se usa una aleatoria (las sesiones se cierran al reiniciar)."
+        )
+    return secrets.token_hex(32)
+
+
+SECRETO_TOKENS = _secreto_tokens()
 DURACION_TOKEN_SEGUNDOS = 7 * 24 * 3600
 
 

@@ -94,7 +94,7 @@ Todos los errores tienen la misma forma:
 | `GET` | `/api/estado` | Público | — | 200 | — | Indica si el correo real está activo |
 | `GET` | `/api/usuario/{usuario_id}` | Él mismo o su productor | — | 200 | 401, 403, 404, 422 | Perfil con datos de contacto |
 | `PUT` | `/api/perfil` | Sesión | `PerfilRequest` | 200 | 401, 403, 422 | Cambiar la contraseña exige la actual |
-| `DELETE` | `/api/perfil` | Sesión | — | 200 | 401, 403 | Borra la cuenta de la sesión y todos sus datos |
+| `DELETE` | `/api/perfil` | Sesión | `EliminarCuentaRequest` (`{"password"}`) | 200 | 401, 403, 422, 429 | Borra la cuenta de la sesión y todos sus datos. Exige la contraseña actual |
 
 ### Administración
 

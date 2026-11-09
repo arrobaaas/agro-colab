@@ -16,7 +16,7 @@ from notificaciones import (
 )
 from repositories import suscripciones as repo_suscripciones, transaccion, usuarios as repo
 from schemas import (
-    LoginRequest, PerfilRequest, RecuperacionRequest, ReenvioRequest, RegistroRequest, RestablecerRequest,
+    EliminarCuentaRequest, LoginRequest, PerfilRequest, RecuperacionRequest, ReenvioRequest, RegistroRequest, RestablecerRequest,
     VerificacionRequest,
 )
 from seguridad import registrar_evento
@@ -27,6 +27,9 @@ VIGENCIA_RECUPERACION = timedelta(minutes=15)
 MAX_INTENTOS_RECUPERACION = 5
 MENSAJE_RECUPERACION = "Si el correo tiene una cuenta, te enviamos un código para restablecer tu contraseña. Revisa también la carpeta de spam."
 MENSAJE_CODIGO_INCORRECTO = "Código incorrecto o vencido. Puedes pedir uno nuevo."
+# Hash de relleno: si el correo no existe se compara igual contra bcrypt, para
+# que la demora de la respuesta no revele qué correos están registrados
+HASH_DE_RELLENO = hash_password(secrets.token_hex(16))
 
 
 def _nuevo_codigo(usuario: Usuario) -> str:
@@ -119,6 +122,8 @@ def iniciar_sesion(db: Session, data: LoginRequest) -> dict:
     # cualquiera de los dos tipos de cuenta
     usuario = repo.por_correo_y_roles(db, data.email, (data.rol, ROL_ADMIN))
 
+    if not usuario:
+        verify_password(data.password, HASH_DE_RELLENO)
     if not usuario or not verify_password(data.password, usuario.password):
         registrar_evento("login_fallido", "advertencia", email=data.email, detalle=f"rol {data.rol}")
         raise NoAutenticado("Credenciales inválidas o el rol seleccionado no coincide.")
@@ -338,12 +343,19 @@ def actualizar_perfil(db: Session, usuario: Usuario, data: PerfilRequest) -> dic
     return {"status": "success", "mensaje": "Perfil actualizado correctamente.", "user": datos}
 
 
-def eliminar_propia(db: Session, usuario: Usuario) -> dict:
+def eliminar_propia(db: Session, usuario: Usuario, data: EliminarCuentaRequest) -> dict:
     """Derecho a la eliminación de datos (Art. 20 Ley 21.719). La cuenta sale
-    del token: el correo, un dato personal, no viaja en la ruta."""
+    del token: el correo, un dato personal, no viaja en la ruta. Se pide la
+    contraseña actual: con un token robado no se puede borrar la cuenta."""
     if es_cuenta_demo(usuario):
         registrar_evento("cuenta_demo", "advertencia", usuario=usuario, detalle="eliminar cuenta")
         raise Prohibido("La cuenta de demostración no se puede eliminar.")
+
+    # Sin tope, quien tenga el token podría adivinar la contraseña aquí
+    limitar(f"eliminar:{usuario.id}", maximo=5, ventana_segundos=900)
+    if not verify_password(data.password, usuario.password):
+        registrar_evento("eliminar_cuenta_fallido", "advertencia", usuario=usuario, detalle="contraseña incorrecta")
+        raise Prohibido("La contraseña no es correcta. Tu cuenta no se eliminó.")
 
     registrar_evento("cuenta_eliminada", "info", usuario=usuario)
     repo.borrar_con_sus_datos(db, usuario)

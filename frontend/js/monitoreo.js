@@ -21,6 +21,7 @@
     plan_inexistente: "Plan inexistente",
     cambio_password: "Cambio de contraseña",
     cambio_password_fallido: "Cambio de contraseña fallido",
+    eliminar_cuenta_fallido: "Eliminación de cuenta fallida",
     cuenta_eliminada: "Cuenta eliminada",
     admin_edicion: "Cuenta editada por admin",
     admin_eliminacion: "Cuenta eliminada por admin",

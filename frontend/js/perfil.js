@@ -92,12 +92,14 @@
       const sesion = this.auth.leerSesion();
       if (!sesion) return;
 
-      if (!(await AgroColab.dialogo.confirmar("Se borrarán para siempre tus datos personales, tus adopciones y tus pedidos. Esta acción no se puede deshacer.", { titulo: "¿Eliminar tu cuenta?", aceptar: "Eliminar mi cuenta", peligro: true }))) {
-        return;
-      }
+      const password = await AgroColab.dialogo.pedirClave(
+        "Se borrarán para siempre tus datos personales, tus adopciones y tus pedidos. Esta acción no se puede deshacer. Para confirmar, escribe tu contraseña.",
+        { titulo: "¿Eliminar tu cuenta?", aceptar: "Eliminar mi cuenta", peligro: true }
+      );
+      if (!password) return;
 
       try {
-        const data = await window.AgroColab.api.eliminarCuenta();
+        const data = await window.AgroColab.api.eliminarCuenta(password);
         if (data.status === "success") {
           AgroColab.dialogo.avisar(data.mensaje, { tipo: "exito", titulo: "Cuenta eliminada" });
           this.auth.eliminarSesion();

@@ -106,11 +106,18 @@
         const recorrido = raiz.scrollHeight - window.innerHeight;
         raiz.style.setProperty("--progreso", recorrido > 0 ? (actual / recorrido).toFixed(4) : 0);
 
-        /* Iluminación del tema del comprador: al pasar la portada la página
-           se ilumina (1) y al volver arriba se oscurece (0). El fundido lo
-           hace CSS (transición de --luz en styles.css) */
-        const luz = actual > window.innerHeight * 0.45 ? "1" : "0";
+        /* Iluminación del tema del comprador: la página se aclara de a poco
+           mientras se baja, entre el 25% y el 115% de la altura de la
+           ventana (0 = oscuro, 1 = claro), como un degradé. El texto cambia
+           de color a mitad de camino (--luz-texto) para seguir legible.
+           CSS suaviza los saltos con una transición (styles.css). */
+        const inicioLuz = window.innerHeight * 0.25;
+        const tramoLuz = window.innerHeight * 0.9;
+        const valorLuz = Math.min(Math.max((actual - inicioLuz) / tramoLuz, 0), 1);
+        const luz = valorLuz.toFixed(3);
         if (raiz.style.getPropertyValue("--luz") !== luz) raiz.style.setProperty("--luz", luz);
+        const luzTexto = valorLuz >= 0.5 ? "1" : "0";
+        if (raiz.style.getPropertyValue("--luz-texto") !== luzTexto) raiz.style.setProperty("--luz-texto", luzTexto);
 
         /* Avance de la portada (0 arriba, 1 cuando el contenido ya la cubrió) */
         if (!this.reducirMovimiento) {

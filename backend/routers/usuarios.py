@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from core import get_db, limitar_por_ip, usuario_actual
 from database import Usuario
 from schemas import (
-    LoginRequest, PerfilRequest, RecuperacionRequest, ReenvioRequest, RegistroRequest, RestablecerRequest,
+    EliminarCuentaRequest, LoginRequest, PerfilRequest, RecuperacionRequest, ReenvioRequest, RegistroRequest, RestablecerRequest,
     VerificacionRequest,
 )
 from services import cuentas as servicio
@@ -62,6 +62,7 @@ def actualizar_perfil(data: PerfilRequest, usuario: Usuario = Depends(usuario_ac
 
 
 @router.delete("/api/perfil")
-def eliminar_cuenta(usuario: Usuario = Depends(usuario_actual), db: Session = Depends(get_db)):
-    """Elimina la cuenta de la sesión y todos sus datos (Art. 20 Ley 21.719)."""
-    return servicio.eliminar_propia(db, usuario)
+def eliminar_cuenta(data: EliminarCuentaRequest, usuario: Usuario = Depends(usuario_actual), db: Session = Depends(get_db)):
+    """Elimina la cuenta de la sesión y todos sus datos (Art. 20 Ley 21.719).
+    Exige la contraseña actual en el cuerpo: {"password": "..."}."""
+    return servicio.eliminar_propia(db, usuario, data)

@@ -365,7 +365,7 @@ responden `{"status": "error", "mensaje": "..."}`. Los endpoints marcados con �
 | `DELETE` | `/api/pedidos/{id}` 🔒 | Cancela un plan de abastecimiento propio |
 | `GET` | `/api/usuario/{id}` 🔒 | Perfil propio, o el de un suscriptor para su productor |
 | `PUT` | `/api/perfil` 🔒 | Actualiza el perfil propio |
-| `DELETE` | `/api/perfil` 🔒 | Elimina la cuenta de la sesión y todos sus datos |
+| `DELETE` | `/api/perfil` 🔒 | Elimina la cuenta de la sesión y todos sus datos (pide la contraseña actual) |
 | `GET` | `/api/admin/usuarios` 🔒 | Todas las cuentas con su actividad (solo administrador) |
 | `GET` | `/api/admin/usuarios/{id}` 🔒 | Detalle de una cuenta con sus árboles publicados y adoptados (solo administrador) |
 | `PUT` | `/api/admin/usuarios/{id}` 🔒 | Corrige los datos de una cuenta, su verificación o su contraseña (solo administrador) |
