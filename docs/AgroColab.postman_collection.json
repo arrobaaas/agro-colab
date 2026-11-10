@@ -205,7 +205,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"plan_nombre\": \"Canasta Huerto Esencial\",\n  \"cliente_nombre\": \"Camila Soto\",\n  \"telefono\": \"+56911111111\",\n  \"email\": \"comprador@agrocolab.cl\",\n  \"tipo_destino\": \"particular\",\n  \"direccion\": \"Av. Falsa 123\",\n  \"comuna\": \"Ñuñoa\",\n  \"frecuencia_entrega\": \"mensual\",\n  \"pago_id\": {{pagoId}}\n}",
+              "raw": "{\n  \"plan_nombre\": \"Canasta Huerto Esencial\",\n  \"tipo_destino\": \"particular\",\n  \"direccion\": \"Av. Falsa 123\",\n  \"comuna\": \"Ñuñoa\",\n  \"codigo_postal\": \"7750000\",\n  \"telefono_codigo\": \"+56\",\n  \"telefono\": \"911111111\",\n  \"frecuencia_entrega\": \"mensual\",\n  \"pago_id\": {{pagoId}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -288,7 +288,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tipo_destino\": \"particular\",\n  \"direccion\": \"Av. Falsa 123\",\n  \"comuna\": \"Macul\",\n  \"frecuencia_entrega\": \"mensual\"\n}",
+              "raw": "{\n  \"tipo_destino\": \"particular\",\n  \"direccion\": \"Av. Falsa 123\",\n  \"comuna\": \"Macul\",\n  \"frecuencia_entrega\": \"mensual\",\n  \"codigo_postal\": \"7750000\",\n  \"telefono_codigo\": \"+56\",\n  \"telefono\": \"911111111\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -437,7 +437,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"nadie@ejemplo.cl\",\n  \"codigo\": \"000000\"\n}",
+              "raw": "{\n  \"email\": \"nadie@ejemplo.cl\",\n  \"codigo\": \"000000\",\n  \"password\": \"clave-de-ejemplo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -676,7 +676,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"plan_nombre\": \"Canasta Huerto Esencial\",\n  \"cliente_nombre\": \"Camila Soto\",\n  \"telefono\": \"+56911111111\",\n  \"email\": \"comprador@agrocolab.cl\",\n  \"tipo_destino\": \"particular\",\n  \"direccion\": \"Av. Falsa 123\",\n  \"comuna\": \"Ñuñoa\",\n  \"frecuencia_entrega\": \"mensual\"\n}",
+              "raw": "{\n  \"plan_nombre\": \"Canasta Huerto Esencial\",\n  \"tipo_destino\": \"particular\",\n  \"direccion\": \"Av. Falsa 123\",\n  \"comuna\": \"Ñuñoa\",\n  \"frecuencia_entrega\": \"mensual\",\n  \"codigo_postal\": \"7750000\",\n  \"telefono_codigo\": \"+56\",\n  \"telefono\": \"911111111\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -768,7 +768,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"plan_nombre\": \"Plan Inventado\",\n  \"cliente_nombre\": \"Camila Soto\",\n  \"telefono\": \"+56911111111\",\n  \"email\": \"comprador@agrocolab.cl\",\n  \"tipo_destino\": \"particular\",\n  \"direccion\": \"Av. Falsa 123\",\n  \"comuna\": \"Ñuñoa\",\n  \"frecuencia_entrega\": \"mensual\"\n}",
+              "raw": "{\n  \"plan_nombre\": \"Plan Inventado\",\n  \"tipo_destino\": \"particular\",\n  \"direccion\": \"Av. Falsa 123\",\n  \"comuna\": \"Ñuñoa\",\n  \"frecuencia_entrega\": \"mensual\",\n  \"codigo_postal\": \"7750000\",\n  \"telefono_codigo\": \"+56\",\n  \"telefono\": \"911111111\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

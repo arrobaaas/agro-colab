@@ -70,6 +70,11 @@ class ApiService {
     return this.apiFetch("/pagos", { method: "POST", body: JSON.stringify(datos) });
   }
 
+  /* Un solo cobro para toda la canasta: todo o nada */
+  pagarCanasta(datos) {
+    return this.apiFetch("/pagos/canasta", { method: "POST", body: JSON.stringify(datos) });
+  }
+
   obtenerPagos() {
     return this.apiFetch("/pagos");
   }
@@ -125,11 +130,15 @@ class ApiService {
     });
   }
 
-  verificarCuenta(email, codigo) {
+  verificarCuenta(email, codigo, password) {
     return this.apiFetch("/verificar-cuenta", {
       method: "POST",
-      body: JSON.stringify({ email, codigo })
+      body: JSON.stringify({ email, codigo, password })
     });
+  }
+
+  cerrarSesion() {
+    return this.apiFetch("/logout", { method: "POST" });
   }
 
   reenviarCodigo(email) {
@@ -137,9 +146,12 @@ class ApiService {
   }
 
   /* La cuenta sale del token: el correo no viaja en la ruta */
-  /* Exige la contraseña actual: con solo el token no se borra la cuenta */
   eliminarCuenta(password) {
     return this.apiFetch("/perfil", { method: "DELETE", body: JSON.stringify({ password }) });
+  }
+
+  exportarDatos() {
+    return this.apiFetch("/perfil/exportar");
   }
 
   obtenerSuscriptores(productorId) {

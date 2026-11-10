@@ -55,6 +55,41 @@ def existe_entre(db: Session, usuario_id: int, productor_id: int) -> bool:
     ) is not None
 
 
+def contar_por_arbol(db: Session, ids_arboles: list) -> dict:
+    """{arbol_id: suscripciones}, en una sola consulta para todo el catálogo."""
+    return dict(
+        db.query(Suscripcion.arbol_id, func.count())
+        .filter(Suscripcion.arbol_id.in_(ids_arboles))
+        .group_by(Suscripcion.arbol_id)
+        .all()
+    )
+
+
+def contar_de_productor(db: Session, productor_id: int) -> int:
+    return (
+        db.query(Suscripcion)
+        .join(Arbol, Suscripcion.arbol_id == Arbol.id)
+        .filter(Arbol.productor_id == productor_id)
+        .count()
+    )
+
+
+def de_productor_con_usuario(db: Session, productor_id: int):
+    """Suscripciones a los árboles de un productor, para avisarles si los pierden."""
+    return (
+        db.query(Suscripcion)
+        .options(joinedload(Suscripcion.usuario), joinedload(Suscripcion.arbol))
+        .join(Arbol, Suscripcion.arbol_id == Arbol.id)
+        .filter(Arbol.productor_id == productor_id)
+        .all()
+    )
+
+
+def borrar(db: Session, suscripcion_id: int) -> bool:
+    """True si este DELETE fue el que borró la fila."""
+    return bool(db.query(Suscripcion).filter(Suscripcion.id == suscripcion_id).delete(synchronize_session=False))
+
+
 def crear_sin_confirmar(db: Session, usuario_id: int, arbol_id: int) -> bool:
     """Agrega la suscripción. Devuelve False si el índice único la rechaza
     porque otra petición del mismo usuario se adelantó."""

@@ -30,6 +30,14 @@ def crear_con_id(db: Session, **campos) -> Pedido:
     return pedido
 
 
+def despacho_de_arbol(db: Session, cliente_id: int, arbol_id: int):
+    return db.query(Pedido).filter(
+        Pedido.cliente_id == cliente_id,
+        Pedido.arbol_id == arbol_id,
+        Pedido.tipo == "arbol",
+    ).first()
+
+
 def borrar_despacho_de_arbol(db: Session, usuario_id: int, arbol_id: int):
     db.query(Pedido).filter(
         Pedido.cliente_id == usuario_id,

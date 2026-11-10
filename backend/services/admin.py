@@ -9,11 +9,12 @@ from sqlalchemy.orm import Session
 from core import MODO_DESARROLLO, es_admin, es_cuenta_demo
 from database import Usuario, hash_password
 from errores import Conflicto, NoEncontrado, Prohibido
-from notificaciones import enviar_aviso_cambio_contrasena
+from notificaciones import enviar_aviso_adopcion_cancelada, enviar_aviso_cambio_contrasena, enviar_en_segundo_plano
 from repositories import arboles as repo_arboles, pedidos as repo_pedidos, suscripciones as repo_suscripciones, transaccion, usuarios as repo
 from schemas import AdminUsuarioRequest
 from seguridad import registrar_evento
 from services.arboles import serializar as serializar_arbol
+from services.cuentas import borrar_rastro
 
 
 def _resumen(usuario: Usuario, arboles: dict, adopciones: dict, pedidos: dict) -> dict:
@@ -48,15 +49,17 @@ def _exigir_no_protegida(usuario: Usuario):
         raise Prohibido("Las cuentas de demostración no se modifican: sus credenciales son públicas.")
 
 
-def listar(db: Session) -> dict:
+def listar(db: Session, admin: Usuario) -> dict:
+    registrar_evento("lectura_datos", "info", usuario=admin, detalle="lista de cuentas")
     arboles = repo_arboles.publicados_por_usuario(db)
     adopciones = repo_suscripciones.adopciones_por_usuario(db)
     pedidos = repo_pedidos.por_cliente(db)
     return {"status": "success", "usuarios": [_resumen(u, arboles, adopciones, pedidos) for u in repo.listar(db)]}
 
 
-def detalle(db: Session, usuario_id: int) -> dict:
+def detalle(db: Session, admin: Usuario, usuario_id: int) -> dict:
     usuario = _buscar(db, usuario_id)
+    registrar_evento("lectura_datos", "info", usuario=admin, detalle=f"cuenta {usuario_id}")
     arboles = repo_arboles.de_productor(db, usuario.id)
     adoptados = repo_arboles.adoptados_por(db, usuario.id)
     resumen = _resumen(
@@ -77,7 +80,7 @@ def editar(db: Session, admin: Usuario, usuario_id: int, data: AdminUsuarioReque
     usuario = _buscar(db, usuario_id)
     _exigir_no_protegida(usuario)
 
-    email = data.email
+    email = data.email.lower()
     if repo.correo_en_otra_cuenta(db, email, usuario.id):
         raise Conflicto("Ese correo ya pertenece a otra cuenta.")
 
@@ -107,10 +110,10 @@ def editar(db: Session, admin: Usuario, usuario_id: int, data: AdminUsuarioReque
 
     registrar_evento(
         "admin_edicion", "info", usuario=admin,
-        detalle=f"cuenta {usuario.id} ({usuario.email}): {', '.join(cambios) or 'sin cambios'}",
+        detalle=f"cuenta {usuario.id}: {', '.join(cambios) or 'sin cambios'}",
     )
     if data.password and not MODO_DESARROLLO:
-        enviar_aviso_cambio_contrasena(usuario.email, usuario.nombre)
+        enviar_en_segundo_plano(enviar_aviso_cambio_contrasena, usuario.email)
     return {"status": "success", "mensaje": "Cuenta actualizada correctamente."}
 
 
@@ -118,7 +121,18 @@ def eliminar(db: Session, admin: Usuario, usuario_id: int) -> dict:
     usuario = _buscar(db, usuario_id)
     _exigir_no_protegida(usuario)
 
-    registrar_evento("admin_eliminacion", "advertencia", usuario=admin, detalle=f"cuenta {usuario.id} ({usuario.email})")
+    email, cuenta_id = usuario.email, usuario.id
+    # Quienes adoptaron árboles de esta cuenta los pierden: se les avisa
+    afectados = [
+        (s.usuario.email, s.arbol.nombre)
+        for s in repo_suscripciones.de_productor_con_usuario(db, cuenta_id)
+        if s.usuario and s.arbol
+    ]
     repo.borrar_con_sus_datos(db, usuario)
     transaccion.confirmar(db)
+    borrar_rastro(email, cuenta_id)
+    registrar_evento("admin_eliminacion", "advertencia", usuario=admin, detalle=f"cuenta {cuenta_id}")
+    if not MODO_DESARROLLO:
+        for destinatario, arbol in afectados:
+            enviar_en_segundo_plano(enviar_aviso_adopcion_cancelada, destinatario, arbol)
     return {"status": "success", "mensaje": "La cuenta y todos sus datos fueron eliminados."}

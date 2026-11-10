@@ -1,6 +1,6 @@
 """Registro, inicio de sesión, tokens y recuperación de contraseña."""
 
-from conftest import auth, login
+from conftest import CONSENTIMIENTO, auth, login
 
 
 def test_login_cuenta_demo(cliente):
@@ -44,7 +44,7 @@ def test_registro_y_verificacion(cliente, nuevo_comprador):
 
 
 def test_cuenta_sin_verificar_no_recibe_token(cliente):
-    r = cliente.post("/api/register", json={
+    r = cliente.post("/api/register", json={**CONSENTIMIENTO,
         "nombre": "Sin Verificar", "email": "sinverificar@ejemplo.cl", "password": "clave-segura-1", "rol": "comprador",
     }).json()
     assert r["status"] == "success"
@@ -54,7 +54,7 @@ def test_cuenta_sin_verificar_no_recibe_token(cliente):
 
 def test_registro_no_revela_correos_existentes(cliente):
     """Registrar un correo ya usado responde igual que uno nuevo."""
-    r = cliente.post("/api/register", json={
+    r = cliente.post("/api/register", json={**CONSENTIMIENTO,
         "nombre": "Otra Persona", "email": "comprador@agrocolab.cl", "password": "clave-segura-1", "rol": "comprador",
     }).json()
     assert r["status"] == "success"
@@ -62,7 +62,7 @@ def test_registro_no_revela_correos_existentes(cliente):
 
 
 def test_contrasena_corta_se_rechaza(cliente):
-    r = cliente.post("/api/register", json={
+    r = cliente.post("/api/register", json={**CONSENTIMIENTO,
         "nombre": "Clave Corta", "email": "corta@ejemplo.cl", "password": "123", "rol": "comprador",
     })
     assert r.json()["status"] == "error"
@@ -124,10 +124,10 @@ def test_verificar_la_cuenta_inicia_sesion(cliente):
     """Tras verificar con el código se entra directo, sin volver a escribir
     el correo y la contraseña."""
     email = "entra-directo@ejemplo.cl"
-    r = cliente.post("/api/register", json={
+    r = cliente.post("/api/register", json={**CONSENTIMIENTO,
         "nombre": "Persona Nueva", "email": email, "password": "clave-segura-1", "rol": "agricultor",
     }).json()
-    v = cliente.post("/api/verificar-cuenta", json={"email": email, "codigo": r["user"]["codigo_verificacion"]}).json()
+    v = cliente.post("/api/verificar-cuenta", json={"email": email, "codigo": r["user"]["codigo_verificacion"], "password": "clave-segura-1"}).json()
     assert v["status"] == "success", v
     assert v["user"]["rol"] == "agricultor" and v["user"]["email"] == email
     # El token sirve para usar la API de inmediato
@@ -136,9 +136,9 @@ def test_verificar_la_cuenta_inicia_sesion(cliente):
 
 def test_codigo_incorrecto_no_entrega_sesion(cliente):
     email = "codigo-malo@ejemplo.cl"
-    r = cliente.post("/api/register", json={
+    r = cliente.post("/api/register", json={**CONSENTIMIENTO,
         "nombre": "Persona Nueva", "email": email, "password": "clave-segura-1", "rol": "comprador",
     }).json()
     codigo_malo = "000000" if r["user"]["codigo_verificacion"] != "000000" else "111111"
-    v = cliente.post("/api/verificar-cuenta", json={"email": email, "codigo": codigo_malo}).json()
+    v = cliente.post("/api/verificar-cuenta", json={"email": email, "codigo": codigo_malo, "password": "clave-segura-1"}).json()
     assert v["status"] == "error" and "user" not in v

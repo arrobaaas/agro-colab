@@ -119,17 +119,21 @@
       const inicial = (sesion.nombre || "?").trim().charAt(0).toUpperCase();
       contenedores.forEach((contenedor) => {
         contenedor.innerHTML = `
-          <button type="button" class="nav-usuario" data-accion="perfil.abrir" title="Ver mi perfil">
+          <button type="button" class="nav-usuario" data-accion="perfil.abrir" title="Ver mi perfil" aria-label="Ver mi perfil: ${e(sesion.nombre)}">
             <span class="nav-usuario__avatar">${e(inicial)}</span>
             <span class="hidden md:flex flex-col text-left leading-tight">
               <span class="text-xs font-bold text-white">${e(sesion.nombre)}</span>
-              <span class="text-[10px] text-emerald-300 capitalize">${e(sesion.rol)}</span>
+              <span class="nav-usuario__rol text-emerald-300 capitalize">${e(sesion.rol)}</span>
             </span>
           </button>`;
       });
     }
 
     cerrarSesion() {
+      // También en el servidor: un token copiado deja de valer. El token se lee
+      // al iniciar la petición, antes de borrar la sesión local
+      const sesion = auth.leerSesion();
+      if (sesion && sesion.token) AgroColab.api.cerrarSesion().catch(() => {});
       auth.eliminarSesion();
       if (AgroColab.parcelas) AgroColab.parcelas.vaciarCarrito();
       this.mostrarVista(config.VISTA_SIN_SESION);

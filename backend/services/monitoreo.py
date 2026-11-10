@@ -25,7 +25,7 @@ def resumen_protegido(token: str) -> dict:
     if len(esperado) < 24:
         # Sin un token largo configurado, el panel no existe
         raise NoEncontrado("Panel de monitoreo desactivado.")
-    if not hmac.compare_digest(token, esperado):
+    if not hmac.compare_digest(token.encode(), esperado.encode()):
         registrar_evento("acceso_denegado", "advertencia", detalle="token del panel de monitoreo incorrecto")
         raise NoAutenticado("Token de monitoreo incorrecto.")
     return resumen()

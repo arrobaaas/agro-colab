@@ -86,7 +86,7 @@ def test_agricultor_no_puede_pagar(cliente, token_agricultor):
 PEDIDO = {
     "plan_nombre": "Canasta Huerto Esencial", "cliente_nombre": "Persona", "telefono": "+56911112222",
     "email": "persona@ejemplo.cl", "tipo_destino": "particular", "direccion": "Av. Siempre Viva 742",
-    "comuna": "Maipú", "frecuencia_entrega": "semanal",
+    "comuna": "Maipú", "codigo_postal": "8320000", "telefono_codigo": "+56", "telefono": "912345678", "frecuencia_entrega": "semanal",
 }
 
 

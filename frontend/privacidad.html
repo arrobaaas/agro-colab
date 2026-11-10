@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#040806">
+  <meta name="theme-color" content="#33443b">
   <title>Política de privacidad | Agro-Colab</title>
   <meta name="description" content="Cómo Agro-Colab trata tus datos personales conforme a la Ley N° 21.719: qué datos, para qué, con quién, por cuánto tiempo y cómo ejercer tus derechos.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261109a">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261109a">
-  <script src="js/sitio.js?v=20261109a" defer></script>
-  <script src="js/efectos.js?v=20261109a" defer></script>
-  <script src="js/constelacion.js?v=20261109a" defer></script>
-  <script src="js/legal.js?v=20261109a" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261110e">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261110e">
+  <script src="js/sitio.js?v=20261110e" defer></script>
+  <script src="js/efectos.js?v=20261110e" defer></script>
+  <script src="js/constelacion.js?v=20261110e" defer></script>
+  <script src="js/legal.js?v=20261110e" defer></script>
 </head>
 <body class="tema-comprador">
 
@@ -48,7 +48,7 @@
     </div>
   </section>
 
-  <div class="tema-comprador hoja" style="--luz:1">
+  <div class="tema-comprador hoja">
     <main class="tc-contenedor tc-legal">
       <aside class="tc-indice" aria-label="Índice" data-reveal="left">
         <p class="tc-etiqueta tc-etiqueta--gris">Contenido</p>
@@ -74,12 +74,13 @@
             <div><dt>Pedimos lo mínimo</dt><dd>Nombre, correo y contraseña para tu cuenta; teléfono y dirección solo para tus despachos.</dd></div>
             <div><dt>No vendemos datos</dt><dd>Ni los arrendamos ni los usamos para publicidad. No usamos cookies de seguimiento.</dd></div>
             <div><dt>Quién los ve</dt><dd>El agricultor de los árboles que adoptas, para coordinar la cosecha, y los proveedores que operan el servicio.</dd></div>
-            <div><dt>Tú decides</dt><dd>Puedes ver, corregir y eliminar tus datos desde tu perfil, o pedir una copia.</dd></div>
+            <div><dt>Tú decides</dt><dd>Puedes ver, corregir, descargar y eliminar tus datos desde tu perfil.</dd></div>
           </dl>
           <p class="tc-aviso">
             <strong>Prototipo académico.</strong> Agro-Colab es un proyecto del curso INGT1003 de la
             Universidad Mayor. En esta versión los pagos son simulados: la pasarela solo acepta tarjetas
-            de prueba y nunca guarda el número completo de una tarjeta ni su código de seguridad.
+            de prueba y nunca guarda el número completo de una tarjeta ni su código de seguridad. Las cuentas de
+            demostración las comparten todos los visitantes: no escribas datos reales en ellas. Se limpian cada hora.
           </p>
         </section>
 
@@ -100,10 +101,10 @@
           <table class="tc-tabla">
             <thead><tr><th>Categoría</th><th>Datos</th><th>Origen</th></tr></thead>
             <tbody>
-              <tr><td>Cuenta</td><td>Nombre, correo, contraseña (guardada solo como hash bcrypt), rol y fecha de tus consentimientos.</td><td>Tú, al registrarte.</td></tr>
+              <tr><td>Cuenta</td><td>Nombre, correo, contraseña (guardada solo como hash bcrypt), rol, y fecha y versión de los textos que aceptaste.</td><td>Tú, al registrarte.</td></tr>
               <tr><td>Perfil</td><td>Teléfono y dirección (opcionales).</td><td>Tú, en tu perfil.</td></tr>
               <tr><td>Adopciones</td><td>Árboles adoptados y fecha de cada adopción.</td><td>Tu actividad.</td></tr>
-              <tr><td>Despachos</td><td>Plan, monto, tipo de destino, dirección, comuna, frecuencia y, en planes comerciales, razón social y RUT de la empresa.</td><td>Tú, al configurar un despacho.</td></tr>
+              <tr><td>Despachos</td><td>Plan, monto, tipo de destino, dirección, comuna, código postal, número celular con su código de país, frecuencia y, en planes comerciales, razón social y RUT de la empresa.</td><td>Tú, al configurar un despacho.</td></tr>
               <tr><td>Pagos</td><td>Concepto, monto, estado (aprobado o rechazado), marca y últimos 4 dígitos de la tarjeta, código de autorización y fecha. Nunca el número completo ni el código de seguridad (CVV).</td><td>Tú, al pagar.</td></tr>
               <tr><td>Seguridad</td><td>Dirección IP, correo asociado, acción realizada (por ejemplo, un inicio de sesión fallido) y fecha.</td><td>Generado al usar el servicio.</td></tr>
               <tr><td>Agricultores</td><td>Además de su cuenta, los datos de los árboles que publican.</td><td>El agricultor.</td></tr>
@@ -145,6 +146,7 @@
               <tr><td>Brevo</td><td>Correo de verificación y alertas de seguridad</td><td>Tu nombre y correo</td></tr>
               <tr><td>Photon (Komoot)</td><td>Sugerir direcciones mientras escribes</td><td>El texto que escribes en el campo de dirección</td></tr>
               <tr><td>Google Fonts, cdnjs y Wikimedia</td><td>Tipografías, íconos e imágenes del catálogo</td><td>Datos técnicos de la visita (IP)</td></tr>
+              <tr><td>Discord o Slack, si están activadas las alertas</td><td>Avisos internos de seguridad</td><td>Correo e IP parciales, y la acción detectada</td></tr>
             </tbody>
           </table>
           <p>
@@ -173,7 +175,7 @@
               <tr><td>Cuenta, perfil y adopciones</td><td>Mientras tu cuenta esté activa. Se eliminan al borrarla.</td></tr>
               <tr><td>Pedidos y despachos</td><td>Mientras estén activos y, en operación real, el plazo que exija la normativa tributaria. En esta versión de demostración se borran junto con la cuenta.</td></tr>
               <tr><td>Registro de seguridad</td><td>30 días. Luego se elimina automáticamente.</td></tr>
-              <tr><td>Códigos de verificación</td><td>30 minutos.</td></tr>
+              <tr><td>Códigos de verificación</td><td>Valen 30 minutos. Una cuenta que nunca se verificó se borra después de un día.</td></tr>
             </tbody>
           </table>
         </section>
@@ -203,11 +205,11 @@
           <table class="tc-tabla">
             <thead><tr><th>Derecho</th><th>Qué significa</th><th>Cómo ejercerlo</th></tr></thead>
             <tbody>
-              <tr><td>Acceso</td><td>Saber qué datos tenemos sobre ti</td><td>En tu perfil, o pidiéndolo al Delegado</td></tr>
+              <tr><td>Acceso</td><td>Saber qué datos tenemos sobre ti</td><td>En tu perfil, con «Descargar mis datos»</td></tr>
               <tr><td>Rectificación</td><td>Corregir datos inexactos</td><td>En tu perfil</td></tr>
               <tr><td>Supresión</td><td>Eliminar tus datos</td><td>Botón "Eliminar mi cuenta" en tu perfil</td></tr>
               <tr><td>Oposición</td><td>Oponerte a un tratamiento</td><td>Contactando al Delegado</td></tr>
-              <tr><td>Portabilidad</td><td>Recibir tus datos en un formato estructurado</td><td>Contactando al Delegado</td></tr>
+              <tr><td>Portabilidad</td><td>Recibir tus datos en un formato estructurado</td><td>En tu perfil, con «Descargar mis datos»</td></tr>
               <tr><td>Bloqueo</td><td>Suspender temporalmente un tratamiento</td><td>Contactando al Delegado</td></tr>
             </tbody>
           </table>

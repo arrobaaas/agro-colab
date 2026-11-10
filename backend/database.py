@@ -1,9 +1,11 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Float, Text, UniqueConstraint, inspect, text
+from sqlalchemy import CheckConstraint, create_engine, Column, Integer, String, ForeignKey, DateTime, Float, Text, UniqueConstraint, inspect, text
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
 import bcrypt
 import os
 import hmac
+import logging
+from urllib.parse import urlsplit
 
 def url_base_datos() -> str:
     """Base de datos a usar, en este orden:
@@ -25,8 +27,20 @@ def url_base_datos() -> str:
     return url
 
 
+def sin_tls_exigido(url: str) -> bool:
+    """True si la conexión sale de la máquina o de la red interna del proveedor
+    sin exigir TLS. Los hosts internos de Render no llevan puntos."""
+    if url.startswith("sqlite") or "sslmode=" in url:
+        return False
+    host = urlsplit(url).hostname or ""
+    return "." in host and host != "127.0.0.1"
+
+
 SQLALCHEMY_DATABASE_URL = url_base_datos()
 ES_SQLITE = SQLALCHEMY_DATABASE_URL.startswith("sqlite")
+
+if sin_tls_exigido(SQLALCHEMY_DATABASE_URL):
+    logging.getLogger("agrocolab").warning("DATABASE_URL apunta a un servidor externo sin sslmode: agrega ?sslmode=require.")
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
@@ -37,6 +51,20 @@ engine = create_engine(
     pool_pre_ping=True,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Pool aparte para el registro de eventos y el límite de intentos. Una petición
+# ya tiene una conexión del pool principal cuando los usa: si compartieran pool,
+# con 15 peticiones simultáneas todas esperarían una segunda conexión que nadie
+# puede liberar, y la API se detendría hasta agotar el tiempo de espera.
+_engine_auxiliar = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False} if ES_SQLITE else {},
+    pool_pre_ping=True,
+    pool_size=3,
+    max_overflow=2,
+    pool_timeout=5,
+)
+SessionAuxiliar = sessionmaker(autocommit=False, autoflush=False, bind=_engine_auxiliar)
 Base = declarative_base()
 
 # Cuentas de demostración que el README documenta como cuentas de prueba
@@ -74,12 +102,12 @@ class Usuario(Base):
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, index=True)
     email = Column(String, unique=True, index=True)
-    password = Column(String) # En un entorno real, esto debe ser un hash
-    rol = Column(String) # "comprador" o "agricultor"
+    password = Column(String) # Hash bcrypt
+    rol = Column(String) # "comprador", "agricultor" o "administrador"
     telefono = Column(String, nullable=True)
     direccion = Column(String, nullable=True)
     verificado = Column(Integer, default=0) # 0 = no verificado, 1 = verificado
-    codigo_verificacion = Column(String, nullable=True)
+    codigo_verificacion = Column(String, nullable=True)  # huella del código, no el código (core.firmar_codigo)
     codigo_expira = Column(DateTime, nullable=True)  # el código vale 30 minutos
     # Recuperación de contraseña: se guarda el hash del código (no el código),
     # su vencimiento y los intentos fallidos
@@ -90,6 +118,8 @@ class Usuario(Base):
     fecha_consentimiento = Column(DateTime, nullable=True)
     acepta_terminos = Column(Integer, default=0) # 0 = no aceptado, 1 = aceptado
     politica_privacidad = Column(Text, nullable=True) # Versión de política aceptada
+    # Forma parte de la firma del token: subirla cierra todas las sesiones (logout)
+    sesion_version = Column(Integer, default=0)
 
     # Relaciones
     arboles_publicados = relationship("Arbol", back_populates="productor")
@@ -98,6 +128,10 @@ class Usuario(Base):
 
 class Arbol(Base):
     __tablename__ = "arboles"
+    # La base impide la sobreventa aunque un error de la aplicación lo intente
+    __table_args__ = (
+        CheckConstraint("cupos_ocupados >= 0 AND cupos_ocupados <= cupos_totales", name="ck_arboles_cupos"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, index=True)
@@ -179,6 +213,9 @@ class Pedido(Base):
     rut = Column(String, nullable=True)
     direccion = Column(String)
     comuna = Column(String)
+    codigo_postal = Column(String, nullable=True)
+    telefono_codigo = Column(String, nullable=True)  # código de país, como "+56"
+    telefono = Column(String, nullable=True)  # celular, solo dígitos
     frecuencia_entrega = Column(String)
     codigo_seguimiento = Column(String, unique=True)
     fecha_registro = Column(DateTime, default=datetime.utcnow)
@@ -266,12 +303,12 @@ def migrar_cuentas_antiguas():
         for usuario in db.query(Usuario).all():
             if usuario.password and not es_hash_bcrypt(usuario.password):
                 usuario.password = hash_password(usuario.password)
-                print(f"[migracion] contrasena re-hasheada para {usuario.email}")
+                print("[migracion] contrasena antigua re-hasheada")
 
             if usuario.email in CUENTAS_DEMO and not usuario.verificado:
                 usuario.verificado = 1
                 usuario.codigo_verificacion = None
-                print(f"[migracion] cuenta de demostracion verificada: {usuario.email}")
+                print("[migracion] cuenta de demostracion verificada")
 
         # Un usuario no puede tener dos suscripciones al mismo árbol: se
         # conserva la más antigua y se borran las repetidas. Va antes del
@@ -303,8 +340,31 @@ def migrar_cuentas_antiguas():
                     f"[migracion] cupos de '{arbol.nombre}': "
                     f"{arbol.cupos_ocupados} -> {reales} (suscripciones reales)"
                 )
+                # Un árbol sobrevendido por versiones anteriores: el dato real es
+                # el de las personas que ya pagaron
+                if reales > (arbol.cupos_totales or 0):
+                    arbol.cupos_totales = reales
                 arbol.cupos_ocupados = reales
 
         db.commit()
     finally:
         db.close()
+    asegurar_restriccion_de_cupos()
+
+
+def asegurar_restriccion_de_cupos():
+    """create_all() no agrega restricciones a tablas existentes. Va después del
+    recálculo de cupos, y SQLite no permite agregarlas a una tabla ya creada."""
+    if ES_SQLITE:
+        return
+    if any(c["name"] == "ck_arboles_cupos" for c in inspect(engine).get_check_constraints("arboles")):
+        return
+    try:
+        with engine.begin() as conexion:
+            conexion.execute(text(
+                "ALTER TABLE arboles ADD CONSTRAINT ck_arboles_cupos "
+                "CHECK (cupos_ocupados >= 0 AND cupos_ocupados <= cupos_totales)"
+            ))
+        print("[migracion] restriccion de cupos agregada")
+    except Exception as error:  # noqa: BLE001 - un dato antiguo no debe impedir el arranque
+        print(f"[migracion] no se pudo agregar la restriccion de cupos: {type(error).__name__}")

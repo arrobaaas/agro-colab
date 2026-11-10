@@ -4,10 +4,6 @@
 
 **Financia la cosecha, asegura tu abastecimiento.**
 
-*Para el consumidor urbano preocupado por el origen de sus alimentos y el pequeño agricultor
-ahogado por los intermediarios, Agro-Colab permite adoptar árboles frutales: fruta fresca con
-trazabilidad para el cliente y financiamiento directo y justo para el productor.*
-
 Plataforma web full stack que conecta a consumidores con pequeños agricultores chilenos:
 el cliente adopta un árbol frutal o contrata una canasta de cosecha, y el pago llega
 directo al productor, sin intermediarios.
@@ -55,6 +51,10 @@ directo al productor, sin intermediarios.
 
 > El backend corre en el plan gratuito de Render: si estuvo inactivo, la primera petición
 > puede tardar alrededor de un minuto mientras el servidor despierta.
+>
+> **Estas cuentas son públicas: no escribas datos reales en ellas.** Lo demo y lo real están
+> separados: el comprador demo solo adopta árboles demo, la cuenta demo no ve a personas reales
+> ni modifica el catálogo, y lo que quede guardado en la cuenta demo se borra cada hora.
 
 ---
 
@@ -75,10 +75,10 @@ Cada pedido genera un código de seguimiento que lo vincula a su huerto de orige
 
 ## ⭐ Destacados técnicos
 
-- **Sin sobreventa bajo concurrencia.** La reserva de cupos es un `UPDATE` condicional atómico, respaldado por un índice único: dos compras simultáneas del último cupo nunca se aprueban ambas.
+- **Sin sobreventa bajo concurrencia.** La reserva de cupos es un `UPDATE` condicional atómico, respaldado por un índice único y una restricción `CHECK`: dos compras simultáneas del último cupo nunca se aprueban ambas.
 - **Seguridad aplicada de punta a punta.** Tokens firmados con HMAC-SHA256, autorización por recurso, *rate limiting* persistente, CSP estricta sin JavaScript en línea y defensa contra XSS en tres capas. [Ver detalle](#-seguridad).
 - **Monitoreo y alertas propios.** Los eventos de seguridad se registran en base de datos y en logs JSON, y disparan alertas por correo o webhook según reglas (fuerza bruta, tokens falsificados, accesos a datos ajenos).
-- **Calidad verificada en CI.** 142 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend. Las reglas de la arquitectura también se comprueban: si una consulta sale de la capa de datos, la integración continua falla.
+- **Calidad verificada en CI.** 279 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend. Las reglas de la arquitectura también se comprueban leyendo el código.
 - **Frontend sin frameworks.** SPA en JavaScript vanilla organizada en servicios, con router de vistas, delegación de eventos, gráficos accesibles hechos con HTML y CSS, y un árbol 3D de partículas en `<canvas>`.
 - **Privacidad desde el diseño.** Cumplimiento de la Ley N° 21.719 de Protección de Datos Personales de Chile: consentimiento explícito, derechos de acceso, rectificación y eliminación, y registro de tratamiento.
 
@@ -104,7 +104,7 @@ Cada pedido genera un código de seguimiento que lo vincula a su huerto de orige
 - Panel con todas las cuentas: búsqueda por nombre o correo, filtro por tipo y resumen de compradores, agricultores y árboles publicados.
 - Detalle de cada cuenta: datos de contacto, árboles publicados (agricultor) o adoptados (comprador).
 - Corrección de datos, verificación manual, cambio de contraseña (cierra las sesiones de la persona y le avisa por correo) y eliminación de la cuenta con todos sus datos.
-- Nadie puede registrarse como administrador: la cuenta se crea solo desde las variables del servidor, y las cuentas demo y de otros administradores quedan protegidas. Cada acción queda en el registro de seguridad.
+- Nadie puede registrarse como administrador: la cuenta se crea solo desde las variables del servidor. Las cuentas demo y de otros administradores no se pueden editar ni eliminar. Cada edición, eliminación y lectura de datos queda en el registro de seguridad.
 
 ---
 
@@ -155,14 +155,14 @@ JavaScript ES2020, Tailwind CSS, GitHub Pages, Render, GitHub Actions y Brevo.
 
 | Área | Implementación |
 |---|---|
-| Contraseñas | Hash con **bcrypt** y mínimo de 8 caracteres. Cambiarla exige la actual y cierra las demás sesiones |
-| Sesión | **Tokens firmados con HMAC-SHA256**, con expiración de 7 días y ligados a la contraseña. Se guardan en `sessionStorage`, limitados a la pestaña |
-| Autorización | Por recurso: cada usuario solo ve y modifica lo suyo. El usuario se toma siempre del token, nunca del cuerpo de la petición. El panel de administración exige el rol de administrador en el servidor |
-| Integridad | Precios fijados por el servidor y reserva de cupos atómica con índice único |
-| XSS | Escape de todo dato insertado como HTML, rechazo de `<` y `>` en el backend y **Content-Security-Policy** sin `'unsafe-inline'` |
-| Abuso | *Rate limiting* por IP real y por cuenta en login, registro y verificación, persistido en la base de datos |
-| Cuentas | Verificación por correo con códigos generados con `secrets`. Ni la recuperación ni el tiempo de respuesta del login revelan qué correos están registrados. Eliminar la cuenta exige la contraseña actual |
-| Transporte | Cabeceras HSTS, `nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, CSP en la API y `no-store`; CORS restringido al frontend y sin credenciales; SRI en la hoja de estilos externa |
+| Contraseñas | Hash con **bcrypt**, de 8 caracteres a 72 bytes. Cambiarla exige la actual y cierra las demás sesiones |
+| Sesión | **Tokens firmados con HMAC-SHA256**, con expiración de 7 días, ligados a la contraseña y con cierre de sesión en el servidor. Se guardan en `sessionStorage`, limitados a la pestaña |
+| Autorización | Por recurso: cada usuario solo ve y modifica lo suyo. El usuario se toma siempre del token, nunca del cuerpo de la petición. El panel de administración exige el rol de administrador en el servidor. Lo demo y lo real no se mezclan |
+| Integridad | Precios fijados por el servidor, reserva de cupos atómica con índice único y `CHECK`, y lo vendido no cambia mientras el árbol tenga suscriptores |
+| XSS | Escape de todo dato insertado como HTML, rechazo de `<` y `>` en el backend y **Content-Security-Policy** sin `'unsafe-inline'` en scripts (los estilos en línea sí se permiten) |
+| Abuso | *Rate limiting* por IP y por cuenta en login (solo cuentan los fallos), registro, verificación, pagos, pedidos y publicaciones, persistido en la base de datos. Peticiones de 64 KB como máximo |
+| Cuentas | Verificación por correo con códigos generados con `secrets` y guardados como HMAC con clave. La verificación también exige la contraseña. Ni las respuestas ni su tiempo revelan qué correos están registrados |
+| Transporte | Cabeceras `nosniff`, `X-Frame-Options`, `Referrer-Policy`, HSTS y `no-store`, también en los errores 500, y CORS limitado al origen de GitHub Pages (compartido por los sitios de la cuenta) |
 
 <details>
 <summary><b>Registro de eventos, reglas de alerta y panel de monitoreo</b></summary>
@@ -170,7 +170,7 @@ JavaScript ES2020, Tailwind CSS, GitHub Pages, Render, GitHub Actions y Brevo.
 <br>
 
 Cada evento de seguridad se guarda en la tabla `eventos_seguridad` (30 días) y como una
-línea JSON en los logs del servidor: logins fallidos y exitosos, tokens falsificados,
+línea JSON en los logs del servidor, con el correo y la IP enmascarados: logins fallidos y exitosos, tokens falsificados,
 accesos a datos ajenos, bloqueos por *rate limit*, intentos de XSS, ataques a las cuentas
 demo, cambios de contraseña y cuentas eliminadas. El navegador también reporta cuando la
 CSP bloquea código (`POST /api/seguridad/csp`).
@@ -186,7 +186,14 @@ por hora por regla y origen:
 | Ataque a cuentas demo | 3 intentos de modificarlas desde una IP en 30 min |
 | Rate limit superado | 1 bloqueo |
 | Intento de XSS | 1 texto con `<` o `>` |
-| Bloqueo de CSP | 1 reporte del navegador |
+| Bloqueo de CSP | 3 reportes desde una IP en 10 min |
+| Prueba de contraseñas | 6 logins fallidos desde una IP en 15 min |
+| Códigos de recuperación | 8 incorrectos desde una IP en 15 min |
+| Códigos de verificación | 4 incorrectos contra una cuenta en 1 hora |
+| Prueba de tarjetas | 5 pagos rechazados desde una IP en 15 min |
+
+Se envían como máximo 20 alertas por hora en total, y las alertas por webhook no pueden
+mencionar a todo el canal.
 
 El panel de monitoreo (`frontend/monitoreo.html`) muestra los eventos de las últimas 24
 horas por tipo y severidad, y se actualiza cada 30 segundos. Pide el `MONITOREO_TOKEN`,
@@ -200,38 +207,42 @@ que se guarda solo en memoria.
 <br>
 
 El proyecto incorpora desde el diseño los requisitos de la ley, vigente desde el 1 de
-diciembre de 2026: consentimiento explícito al registrarse, [política de
+diciembre de 2026: consentimiento explícito al registrarse, registrado en el servidor con la
+versión aceptada, [política de
 privacidad](https://arrobaaas.github.io/agro-colab/frontend/privacidad.html) y derechos
-de acceso, rectificación y eliminación desde el perfil del usuario.
+de acceso, rectificación, portabilidad y eliminación desde el perfil del usuario.
 
 **Delegado de Protección de Datos (DPO):** Nicolas Reyes Orellana · [@arrobaaas](https://github.com/arrobaaas)
 
 | Dato | Finalidad | Base legal | Plazo |
 |---|---|---|---|
-| Nombre | Identificar al usuario | Consentimiento | Hasta eliminación |
-| Email | Autenticación y comunicaciones | Consentimiento | Hasta eliminación |
-| Contraseña (hash bcrypt) | Autenticación | Consentimiento | Hasta eliminación |
-| Teléfono | Contacto de entrega | Consentimiento | Hasta eliminación |
-| Dirección | Despacho de productos | Consentimiento | Hasta eliminación |
+| Nombre | Identificar al usuario | Contrato | Hasta eliminación |
+| Email | Autenticación y comunicaciones | Contrato | Hasta eliminación |
+| Contraseña (hash bcrypt) | Autenticación | Contrato | Hasta eliminación |
+| Teléfono | Contacto de entrega | Contrato | Hasta eliminación |
+| Dirección | Despacho de productos | Contrato | Hasta eliminación |
 | Suscripciones | Gestión de adopciones | Contrato | Hasta eliminación |
-| Pedidos | Gestión logística | Contrato | Hasta eliminación |
+| Pedidos: dirección, código postal y celular, con razón social y RUT si son comerciales | Gestión logística | Contrato | Hasta eliminación |
+| Pagos: marca y últimos 4 dígitos | Comprobantes | Contrato | Hasta eliminación |
 | IP, correo y acción en eventos de seguridad | Detectar y responder a ataques | Interés legítimo | 30 días |
 
-| Derecho (Art. 20) | Cómo ejercerlo |
+| Derecho | Cómo ejercerlo |
 |---|---|
-| Acceso y rectificación | Perfil de usuario |
-| Eliminación | Botón "Eliminar mi cuenta" en el perfil |
+| Acceso y portabilidad | Botón "Descargar mis datos" en el perfil |
+| Rectificación | Perfil de usuario; el correo, por medio del administrador |
+| Eliminación | Botón "Eliminar cuenta" en el perfil. El registro de seguridad conserva la IP y las acciones, sin el correo, hasta 30 días |
 | Oposición | Contactar al DPO |
 
-**Notificación de brechas (Art. 22):** aviso a la Agencia de Protección de Datos dentro de
-72 horas y a los usuarios afectados, con documentación del incidente y de las medidas
-correctivas.
+**Notificación de brechas:** el equipo se compromete a avisar a la Agencia de Protección de
+Datos y a los usuarios afectados dentro de 72 horas, con documentación del incidente y de las
+medidas correctivas. El procedimiento está en [`docs/INCIDENTES.md`](docs/INCIDENTES.md).
 
-**Evaluación de impacto:** riesgo bajo. No se tratan datos sensibles, el volumen es
-pequeño (prototipo académico) y las medidas mitigantes son el hash de contraseñas, el
-consentimiento y el derecho a eliminación.
+**Evaluación de impacto:** no se tratan datos sensibles y el volumen es pequeño (prototipo
+académico). El mayor riesgo era la cuenta demo con credenciales públicas, y por eso lo demo y lo
+real están separados; el origen de GitHub Pages sigue siendo compartido.
 
-**Encargados del tratamiento:** GitHub Pages, Render y Brevo.
+**Encargados del tratamiento:** GitHub Pages, Render y Brevo; Photon, Google Fonts, cdnjs y
+Wikimedia desde el navegador; y Discord o Slack si están activadas las alertas por webhook.
 
 </details>
 
@@ -239,7 +250,7 @@ consentimiento y el derecho a eliminación.
 
 ## 🧪 Pruebas e integración continua
 
-**142 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
+**279 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
 *pull request* dos veces, **con SQLite y con PostgreSQL**, y además revisa la sintaxis de
 todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca envían correos.
 
@@ -252,6 +263,9 @@ todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca env�
 | `test_base_datos.py` | Selección de la base de datos según las variables de entorno (SQLite local o PostgreSQL de Render) |
 | `test_contrato_http.py` | Código de estado de cada resultado (201, 400, 401, 402, 403, 404, 409, 422, 429) y forma única de los errores |
 | `test_arquitectura.py` | Separación de capas: consultas solo en la capa de datos, routers sin reglas, negocio sin HTTP |
+| `test_despacho.py` | Celular con código de país y código postal del despacho |
+| `test_canasta.py` | Pago único de la canasta: un cobro, todo o nada, rechazo sin adopciones y límites |
+| `test_auditoria.py` | Lo corregido en la auditoría de seguridad: separación de lo demo y lo real, cuentas, límites, carreras, alertas, privacidad y cabeceras |
 | `test_entregables.py` | La tabla de la API, `.env.example` y `db/esquema.sql` coinciden con el código; ejecuta completa la colección de Postman |
 
 ```bash
@@ -293,7 +307,7 @@ PostgreSQL con un script, ver [`db/`](db/README.md).
 
 Los estilos de Tailwind vienen compilados. Si agregas clases nuevas, vuelve a compilarlos
 con `bash scripts/compilar-css.sh` (no requiere Node: descarga el ejecutable oficial y
-verifica su checksum).
+verifica su checksum contra el valor fijado en el script).
 
 <details>
 <summary><b>Variables de entorno</b></summary>
@@ -304,14 +318,16 @@ verifica su checksum).
 |---|---|---|
 | `AGROCOLAB_DB_URL` | No | Conexión con prioridad sobre `DATABASE_URL`. La usan las pruebas para una base temporal |
 | `DATABASE_URL` | En producción | Conexión a PostgreSQL (`postgres://` o `postgresql://`). Sin ella se usa SQLite local |
-| `AGROCOLAB_SECRET` | En producción | Clave para firmar los tokens, de 32 caracteres o más. Si falta, es corta o es la de ejemplo, se usa una aleatoria y las sesiones se cierran en cada reinicio |
-| `AGROCOLAB_MOD_MODE` | No | `desarrollo` muestra el código de verificación sin enviar correo. Por defecto: `produccion` |
+| `AGROCOLAB_SECRET` | En producción | Clave para firmar los tokens. De 32 caracteres o más. Si falta, se genera una al arrancar, se avisa en el log y las sesiones se cierran en cada reinicio |
+| `AGROCOLAB_MOD_MODE` | No | `desarrollo` muestra los códigos de verificación y de recuperación sin enviar correo. El servidor se niega a arrancar así si existe `DATABASE_URL` o `RENDER`. Por defecto: `produccion` |
+| `CABECERA_IP_CLIENTE` | Recomendada en producción | Cabecera confiable con la IP real del cliente. Elígela tras comprobar qué llega al servidor (ver `docs/INCIDENTES.md`). Sin ella se usa el último valor de `X-Forwarded-For` |
+| `AGROCOLAB_DOCS` | No | `1` publica `/docs` y `/openapi.json` en producción. En desarrollo siempre están abiertos |
 | `BREVO_API_KEY` | Para el registro en producción | Clave de la API de [Brevo](https://www.brevo.com) para enviar los códigos por correo |
 | `CORREO_REMITENTE` | Junto con `BREVO_API_KEY` | Correo verificado en Brevo desde el que se envían los códigos |
 | `ALERTA_CORREO` | No | Correo que recibe las alertas de seguridad |
 | `ALERTA_WEBHOOK_URL` | No | Webhook de Discord o Slack para las alertas (`https://`) |
-| `ADMIN_EMAIL` | Para el panel de administración | Correo de la cuenta de administrador. Si ya existe una cuenta con ese correo, se la asciende a administrador al arrancar |
-| `ADMIN_PASSWORD` | Junto con `ADMIN_EMAIL` | Contraseña inicial (12 caracteres o más). Solo se usa al crear la cuenta: después se cambia desde el perfil |
+| `ADMIN_EMAIL` | Para el panel de administración | Correo de la cuenta de administrador. Si ya existe una cuenta verificada con ese correo, se la asciende al arrancar. Si está sin verificar, se reemplaza su contraseña por `ADMIN_PASSWORD` |
+| `ADMIN_PASSWORD` | Junto con `ADMIN_EMAIL` | Contraseña inicial (12 caracteres o más). Después se cambia desde el perfil |
 | `ADMIN_NOMBRE` | No | Nombre que se muestra de la cuenta de administrador. Por defecto: "Administrador" |
 | `MONITOREO_TOKEN` | Para usar el panel | Token secreto (24 caracteres o más) del panel de monitoreo. Sin él, el panel está desactivado |
 
@@ -325,7 +341,7 @@ demostración funcionan siempre.
 
 ## 🔌 API REST
 
-Documentación interactiva (Swagger) en `/docs` al levantar el backend. El contrato completo,
+Documentación interactiva (Swagger) en `/docs` en desarrollo, o en producción con `AGROCOLAB_DOCS=1`. El contrato completo,
 con parámetros, cuerpos de ejemplo y códigos de éxito y de error, está en
 [`docs/API.md`](docs/API.md). Para probarla, importa
 [`docs/AgroColab.postman_collection.json`](docs/AgroColab.postman_collection.json) en Postman.
@@ -349,13 +365,15 @@ responden `{"status": "error", "mensaje": "..."}`. Los endpoints marcados con �
 | `POST` | `/api/restablecer-contrasena` | Cambia la contraseña con el código y cierra las sesiones abiertas |
 | `GET` | `/api/estado` | Indica si el envío real de correos está activo |
 | `POST` | `/api/login` | Inicia sesión y devuelve el token |
+| `POST` | `/api/logout` 🔒 | Cierra en el servidor todas las sesiones de la cuenta |
 | `GET` | `/api/especies` | Catálogo cerrado de especies con sus fotos verificadas |
 | `GET` | `/api/arboles` | Catálogo público de árboles |
 | `GET` | `/api/arboles/{id}` | Un árbol del catálogo |
 | `POST` | `/api/arboles` 🔒 | Publica un árbol (solo agricultores) |
 | `PUT` | `/api/arboles/{id}` 🔒 | Edita un árbol (solo su productor) |
-| `DELETE` | `/api/arboles/{id}` 🔒 | Elimina un árbol y sus suscripciones (solo su productor) |
+| `DELETE` | `/api/arboles/{id}` 🔒 | Elimina un árbol sin suscriptores activos (solo su productor) |
 | `POST` | `/api/pagos` 🔒 | Pasarela simulada: valida la tarjeta y adopta el árbol reservando el cupo de forma atómica |
+| `POST` | `/api/pagos/canasta` 🔒 | Paga toda la canasta en un solo cobro: todo o nada |
 | `GET` | `/api/pagos` 🔒 | Historial de pagos (marca y últimos 4 dígitos) |
 | `GET` | `/api/pagos/{id}` 🔒 | Un comprobante propio |
 | `DELETE` | `/api/arboles/{id}/suscripcion` 🔒 | Cancela la suscripción propia y libera el cupo |
@@ -369,7 +387,8 @@ responden `{"status": "error", "mensaje": "..."}`. Los endpoints marcados con �
 | `DELETE` | `/api/pedidos/{id}` 🔒 | Cancela un plan de abastecimiento propio |
 | `GET` | `/api/usuario/{id}` 🔒 | Perfil propio, o el de un suscriptor para su productor |
 | `PUT` | `/api/perfil` 🔒 | Actualiza el perfil propio |
-| `DELETE` | `/api/perfil` 🔒 | Elimina la cuenta de la sesión y todos sus datos (pide la contraseña actual) |
+| `GET` | `/api/perfil/exportar` 🔒 | Descarga una copia de los datos de la cuenta |
+| `DELETE` | `/api/perfil` 🔒 | Elimina la cuenta de la sesión y sus datos. Exige la contraseña |
 | `GET` | `/api/admin/usuarios` 🔒 | Todas las cuentas con su actividad (solo administrador) |
 | `GET` | `/api/admin/usuarios/{id}` 🔒 | Detalle de una cuenta con sus árboles publicados y adoptados (solo administrador) |
 | `PUT` | `/api/admin/usuarios/{id}` 🔒 | Corrige los datos de una cuenta, su verificación o su contraseña (solo administrador) |
@@ -442,9 +461,8 @@ agro-colab/
     ├── API.md                 # Contrato completo de la API
     ├── AgroColab.postman_collection.json  # Peticiones de la demostración
     ├── capturas/              # Capturas de pantalla
-    ├── Presentacion_Hito2.pdf # Láminas del Hito 2
     ├── Informe.pdf            # Propuesta del Hito 1
-    └── Presentacion.pdf       # Láminas del Hito 1 (y su .pptx)
+    └── Presentacion.pptx      # Presentación del proyecto
 ```
 
 </details>
@@ -455,12 +473,11 @@ agro-colab/
 
 | Documento | Contenido |
 |---|---|
-| [Documento técnico del Hito 2](docs/Informe_Hito2_AgroColab.pdf) | Arquitectura, decisiones, contrato de la API, capas, persistencia, mediciones y limitaciones. El Anexo E registra los cambios posteriores a la medición |
-| [Láminas del Hito 2](docs/Presentacion_Hito2.pdf) | Presentación técnica de 7 minutos |
+| [Documento técnico del Hito 2](docs/Informe_Hito2_AgroColab.pdf) | Arquitectura, decisiones, contrato de la API, capas, persistencia, mediciones y limitaciones |
 | [Contrato de la API](docs/API.md) | Rutas, verbos, parámetros, cuerpos de ejemplo y códigos de estado |
 | [Colección de Postman](docs/AgroColab.postman_collection.json) | Las peticiones de la demostración, listas para importar |
 | [Modelo de datos y script SQL](db/README.md) | Diagrama y creación de la base desde cero |
-| [Propuesta del Hito 1](docs/Informe.pdf) · [Láminas](docs/Presentacion.pdf) | Propuesta comercial y arquitectura inicial |
+| [Propuesta del Hito 1](docs/Informe.pdf) · [Presentación](docs/Presentacion.pptx) | Propuesta comercial y arquitectura inicial |
 
 ---
 
@@ -474,7 +491,7 @@ la revisión del código y la responsabilidad sobre el resultado son del equipo.
 | **Gemini** (Google) | Septiembre 2026 | Estructura y redacción de los argumentos comerciales del informe |
 | **ChatGPT** (OpenAI) | Septiembre 2026 | Comparación técnica de lenguajes (Node.js vs Python) y apoyo en el código del prototipo inicial |
 | **Claude Code** (Anthropic) | Octubre 2026 | Asistente de programación: revisión de código, autenticación con tokens y autorización por recurso, corrección de la condición de carrera en la reserva de cupos, y documentación |
-| **Claude Code** (Anthropic) | Noviembre 2026 | Análisis contra la rúbrica, corrección de los códigos HTTP, separación en capas, pruebas nuevas, carpeta `db/`, colección de Postman, mediciones y documento técnico del Hito 2. Después, una revisión de seguridad (clave de firma, enumeración por tiempo, cabeceras, SRI y contraseña para eliminar la cuenta) y el degradé del tema |
+| **Claude Code** (Anthropic) | Noviembre 2026 | Análisis contra la rúbrica, corrección de los códigos HTTP, separación en capas, pruebas nuevas, carpeta `db/`, colección de Postman, mediciones y documento técnico del Hito 2 |
 
 Los cambios propuestos por la IA se revisaron antes de incorporarlos, y los de seguridad
 se probaron contra la API en ejecución: peticiones sin token o con token falso, acceso a
