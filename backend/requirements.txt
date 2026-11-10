@@ -8,7 +8,7 @@ idna==3.19
 pydantic==2.13.5
 pydantic_core==2.46.5
 starlette==1.6.0
-typing-inspection==0.4.4
+typing-inspection==0.4.5
 typing_extensions==4.16.0
 uvicorn==0.52.4
 sqlalchemy==2.1.3
