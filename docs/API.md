@@ -1,7 +1,7 @@
 # Contrato de la API REST
 
-Tabla de recursos de Agro-Colab: 34 operaciones. La documentación interactiva se genera en
-`/docs` al levantar el servicio, y las pruebas comprueban que esta tabla coincida con las rutas reales.
+Tabla de recursos de Agro-Colab: 37 operaciones. La documentación interactiva se publica en
+`/docs` en desarrollo, o en producción con `AGROCOLAB_DOCS=1`, y las pruebas comprueban que esta tabla coincida con las rutas reales.
 
 ## Convenciones
 
@@ -23,7 +23,8 @@ Tabla de recursos de Agro-Colab: 34 operaciones. La documentación interactiva s
 | 401 | Faltan credenciales o no son válidas | Sin token, token falso, contraseña incorrecta |
 | 402 | El emisor rechazó el pago | Tarjeta sin fondos. RFC 9110 lo reserva, pero es la convención de las pasarelas, y el cuerpo trae `status: rechazado` y el comprobante |
 | 403 | Identificado, pero sin permiso | Un comprador publica un árbol |
-| 404 | No existe, o no es visible para este usuario | Árbol inexistente, pedido ajeno |
+| 404 | No existe, o no es visible para este usuario | Árbol inexistente; pedido, pago, perfil o suscripción ajenos |
+| 413 | La petición supera los 64 KB | Cuerpo demasiado grande |
 | 405 | Verbo no admitido | `PATCH /api/arboles` |
 | 409 | Choca con el estado actual | Adoptar dos veces, sin cupos, plan sin pagar |
 | 422 | El dato no es válido | 0 cupos, especie fuera del catálogo, tarjeta vencida |
@@ -50,9 +51,9 @@ Todos los errores tienen la misma forma:
 |---|---|---|---|---|---|---|
 | `GET` | `/api/arboles` | Público | — | 200 | — | Catálogo con los cupos reales |
 | `GET` | `/api/arboles/{arbol_id}` | Público | — | 200 | 404, 422 | Un árbol |
-| `POST` | `/api/arboles` | Agricultor | `ArbolRequest` | 201 | 401, 403, 422 | Publica un árbol; el productor sale del token |
-| `PUT` | `/api/arboles/{arbol_id}` | Su productor | `ArbolRequest` | 200 | 401, 403, 404, 409, 422 | Edita; no acepta menos cupos que suscriptores (409) |
-| `DELETE` | `/api/arboles/{arbol_id}` | Su productor | — | 200 | 401, 403, 404, 422 | Borra el árbol, sus suscripciones y despachos |
+| `POST` | `/api/arboles` | Agricultor | `ArbolRequest` | 201 | 401, 403, 409, 422, 429 | Publica un árbol; el productor sale del token |
+| `PUT` | `/api/arboles/{arbol_id}` | Su productor | `ArbolRequest` | 200 | 401, 403, 404, 409, 422 | Edita. Con suscriptores no cambian especie, plan, cupos, precio ni cosecha (409) |
+| `DELETE` | `/api/arboles/{arbol_id}` | Su productor | — | 200 | 401, 403, 404, 409, 422 | Borra el árbol. Con suscriptores activos responde 409 |
 
 ### Suscripciones
 
@@ -61,7 +62,7 @@ Todos los errores tienen la misma forma:
 | `GET` | `/api/suscripciones/usuario/{usuario_id}` | El mismo usuario | — | 200 | 401, 403, 422 | Árboles adoptados |
 | `GET` | `/api/mis-arboles/{productor_id}/suscriptores` | El mismo productor | — | 200 | 401, 403, 422 | Suscriptores con datos de contacto |
 | `DELETE` | `/api/arboles/{arbol_id}/suscripcion` | Comprador suscrito | — | 200 | 401, 404, 422 | Cancela la suscripción propia y libera el cupo |
-| `DELETE` | `/api/suscripciones/{suscripcion_id}` | Productor del árbol | — | 200 | 401, 403, 404, 422 | Expulsa a un suscriptor y libera el cupo |
+| `DELETE` | `/api/suscripciones/{suscripcion_id}` | Productor del árbol | — | 200 | 401, 403, 404, 422 | Expulsa a un suscriptor, libera el cupo y le avisa. Una ajena responde 404 |
 
 ### Pedidos
 
@@ -69,7 +70,7 @@ Todos los errores tienen la misma forma:
 |---|---|---|---|---|---|---|
 | `GET` | `/api/pedidos` | Sesión | — | 200 | 401 | Solo los pedidos propios |
 | `GET` | `/api/pedidos/{pedido_id}` | Su cliente | — | 200 | 401, 404, 422 | Un pedido propio. Uno ajeno responde 404 |
-| `POST` | `/api/pedidos` | Comprador | `PedidoRequest` | 201 | 401, 403, 409, 422 | Exige un pago aprobado y sin usar; el monto lo fija el servidor |
+| `POST` | `/api/pedidos` | Comprador | `PedidoRequest` | 201 | 401, 403, 409, 422, 429 | Exige un pago aprobado y sin usar; el monto lo fija el servidor |
 | `PUT` | `/api/pedidos/{pedido_id}` | Su cliente | `LogisticaRequest` | 200 | 401, 404, 422 | Cambia destino y frecuencia |
 | `DELETE` | `/api/pedidos/{pedido_id}` | Su cliente | — | 200 | 401, 404, 409, 422 | Cancela un plan. Un despacho de árbol responde 409 |
 
@@ -80,21 +81,24 @@ Todos los errores tienen la misma forma:
 | `GET` | `/api/pagos` | Sesión | — | 200 | 401 | Últimos 50 pagos propios |
 | `GET` | `/api/pagos/{pago_id}` | Su titular | — | 200 | 401, 404, 422 | Un comprobante propio |
 | `POST` | `/api/pagos` | Comprador | `PagoRequest` | 201 | 401, 402, 403, 404, 409, 422, 429 | Autoriza y, si es un árbol, reserva el cupo en la misma transacción |
+| `POST` | `/api/pagos/canasta` | Comprador | `PagoCanastaRequest` | 201 | 401, 402, 403, 404, 409, 422, 429 | Un solo cobro para toda la canasta (1 a 10 productos), todo o nada: si un árbol falla, no se cobra ninguno. Guarda un pago por producto con la misma autorización |
 
 ### Cuentas y sesión
 
 | Verbo | Ruta | Acceso | Cuerpo | Éxito | Errores | Qué hace |
 |---|---|---|---|---|---|---|
 | `POST` | `/api/register` | Público | `RegistroRequest` | 202 | 422, 429, 503 | Crea la cuenta y envía el código. Igual respuesta si el correo ya existe |
-| `POST` | `/api/verificar-cuenta` | Público | `{email, codigo}` | 200 | 400, 422, 429 | Verifica y entrega el token |
+| `POST` | `/api/verificar-cuenta` | Público | `{email, codigo, password}` | 200 | 400, 422, 429 | Verifica con el código y la contraseña del registro, y entrega el token |
 | `POST` | `/api/reenviar-codigo` | Público | `{email}` | 200 | 422, 429 | Igual respuesta exista o no la cuenta |
-| `POST` | `/api/login` | Público | `LoginRequest` | 200 | 401, 422, 429 | Devuelve el token en user.token |
+| `POST` | `/api/login` | Público | `LoginRequest` | 200 | 401, 422, 429 | Devuelve el token en user.token. Solo los fallos cuentan para el límite |
+| `POST` | `/api/logout` | Sesión | — | 200 | 401 | Invalida en el servidor todas las sesiones de la cuenta |
 | `POST` | `/api/recuperar-contrasena` | Público | `{email}` | 200 | 422, 429, 503 | Envía un código de 15 minutos |
 | `POST` | `/api/restablecer-contrasena` | Público | `{email, codigo, password}` | 200 | 400, 422, 429 | Cambia la contraseña y cierra las sesiones |
 | `GET` | `/api/estado` | Público | — | 200 | — | Indica si el correo real está activo |
-| `GET` | `/api/usuario/{usuario_id}` | Él mismo o su productor | — | 200 | 401, 403, 404, 422 | Perfil con datos de contacto |
-| `PUT` | `/api/perfil` | Sesión | `PerfilRequest` | 200 | 401, 403, 422 | Cambiar la contraseña exige la actual |
-| `DELETE` | `/api/perfil` | Sesión | `EliminarCuentaRequest` (`{"password"}`) | 200 | 401, 403, 422, 429 | Borra la cuenta de la sesión y todos sus datos. Exige la contraseña actual |
+| `GET` | `/api/usuario/{usuario_id}` | Él mismo o su productor | — | 200 | 401, 404, 422 | Perfil con datos de contacto. Uno ajeno responde 404 |
+| `PUT` | `/api/perfil` | Sesión | `PerfilRequest` | 200 | 401, 403, 422, 429 | Cambiar la contraseña exige la actual |
+| `GET` | `/api/perfil/exportar` | Sesión | — | 200 | 401, 429 | Copia de los datos de la cuenta |
+| `DELETE` | `/api/perfil` | Sesión | `{password}` | 200 | 401, 403, 409, 422, 429 | Borra la cuenta y sus datos. Con suscriptores activos responde 409; el administrador no se autoelimina |
 
 ### Administración
 
@@ -116,11 +120,11 @@ Todos los errores tienen la misma forma:
 
 | Esquema | Campos y reglas |
 |---|---|
-| `ArbolRequest` | `especie` del catálogo; `plan`: Básico, Intermedio o Premium; `tipo_suscripcion`: Compartido o Exclusivo; `cupos_totales` de 1 a 50; `precio_mensual_clp` de 0 a 10.000.000; `estimacion_cosecha_kg` de 1 a 100.000; `imagen` de la especie |
-| `PedidoRequest` | `tipo_destino`: particular o comercial; `frecuencia_entrega`: semanal, quincenal o mensual; `rut` con dígito verificador; `pago_id` de un pago aprobado. El monto enviado se ignora |
-| `LogisticaRequest` | `tipo_destino`, `direccion`, `comuna` y `frecuencia_entrega`; `razon_social` y `rut` si el destino es comercial |
+| `ArbolRequest` | `especie` del catálogo; `plan`: Básico, Intermedio o Premium; `tipo_suscripcion`: Compartido o Exclusivo; los cupos y el tipo los fija el plan (Básico 5 y Compartido, Intermedio 3 y Compartido, Premium 1 y Exclusivo); `precio_mensual_clp` de 1 a 10.000.000; `estimacion_cosecha_kg` de 1 a 100.000; `imagen` de la especie |
+| `PedidoRequest` | `tipo_destino`: particular o comercial; `codigo_postal` de 7 dígitos; `telefono_codigo` de la lista de países; `telefono` de 7 a 15 dígitos (en Chile, 9 dígitos que empiezan con 9); `frecuencia_entrega`: semanal, quincenal o mensual; `rut` con dígito verificador; `pago_id` de un pago aprobado. El plan B2B exige destino comercial. El monto no se envía |
+| `LogisticaRequest` | `tipo_destino`, `direccion`, `comuna`, `codigo_postal`, `telefono_codigo`, `telefono` y `frecuencia_entrega`; `razon_social` y `rut` si el destino es comercial |
 | `PagoRequest` | `tipo`: arbol o plan; `numero` con dígito de Luhn; `vencimiento` MM/AA; `cvv` de 3 o 4 dígitos |
-| `RegistroRequest` | `nombre` de 2 a 80; `email` con formato; `password` de 8 a 128; `rol`: comprador o agricultor |
+| `RegistroRequest` | `nombre` de 2 a 80; `email` con formato; `password` de 8 caracteres a 72 bytes; `rol`: comprador o agricultor; `acepta_datos` y `acepta_terminos` en `true` |
 | `LoginRequest` | `email`, `password` y `rol` |
 | `PerfilRequest` | `nombre`, `email` propio, `telefono`, `direccion`; `password` y `password_actual` para cambiarla |
 | `AdminUsuarioRequest` | `nombre`, `email`, `telefono`, `direccion`, `verificado`; `password` opcional |
@@ -132,7 +136,7 @@ Todos los errores tienen la misma forma:
 ```json
 {
   "especie": "palto_hass", "identificador": "#7", "ubicacion": "Quillota",
-  "plan": "Básico", "tipo_suscripcion": "Compartido", "cupos_totales": 2,
+  "plan": "Básico", "tipo_suscripcion": "Compartido", "cupos_totales": 5,
   "precio_mensual_clp": 9000, "estimacion_cosecha_kg": 30,
   "imagen": "<url de una foto de la especie, según GET /api/especies>"
 }
@@ -154,9 +158,9 @@ Tarjetas de prueba: `4242 4242 4242 4242` y `5555 5555 5555 4444` se aprueban; `
 
 ```json
 {
-  "plan_nombre": "Canasta Huerto Esencial", "cliente_nombre": "Camila Soto",
-  "telefono": "+56911111111", "email": "comprador@agrocolab.cl", "tipo_destino": "particular",
-  "direccion": "Av. Falsa 123", "comuna": "Ñuñoa", "frecuencia_entrega": "mensual", "pago_id": 1
+  "plan_nombre": "Canasta Huerto Esencial", "tipo_destino": "particular",
+  "direccion": "Av. Falsa 123", "comuna": "Ñuñoa", "codigo_postal": "7750000",
+  "telefono_codigo": "+56", "telefono": "911111111", "frecuencia_entrega": "mensual", "pago_id": 1
 }
 ```
 

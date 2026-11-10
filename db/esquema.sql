@@ -46,6 +46,7 @@ CREATE TABLE usuarios (
   fecha_consentimiento TIMESTAMP WITHOUT TIME ZONE,
   acepta_terminos INTEGER,
   politica_privacidad TEXT,
+  sesion_version INTEGER,
   PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX ix_usuarios_email ON usuarios (email);
@@ -68,6 +69,7 @@ CREATE TABLE arboles (
   imagen_origen VARCHAR,
   productor_id INTEGER,
   PRIMARY KEY (id),
+  CONSTRAINT ck_arboles_cupos CHECK (cupos_ocupados >= 0 AND cupos_ocupados <= cupos_totales),
   FOREIGN KEY(productor_id) REFERENCES usuarios (id)
 );
 CREATE INDEX ix_arboles_id ON arboles (id);
@@ -106,6 +108,9 @@ CREATE TABLE pedidos (
   rut VARCHAR,
   direccion VARCHAR,
   comuna VARCHAR,
+  codigo_postal VARCHAR,
+  telefono_codigo VARCHAR,
+  telefono VARCHAR,
   frecuencia_entrega VARCHAR,
   codigo_seguimiento VARCHAR,
   fecha_registro TIMESTAMP WITHOUT TIME ZONE,

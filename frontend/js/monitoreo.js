@@ -21,12 +21,14 @@
     plan_inexistente: "Plan inexistente",
     cambio_password: "Cambio de contraseña",
     cambio_password_fallido: "Cambio de contraseña fallido",
-    eliminar_cuenta_fallido: "Eliminación de cuenta fallida",
     cuenta_eliminada: "Cuenta eliminada",
     admin_edicion: "Cuenta editada por admin",
     admin_eliminacion: "Cuenta eliminada por admin",
     registro: "Registro",
     verificacion_fallida: "Verificación fallida",
+    lectura_datos: "Lectura de datos de terceros",
+    exportacion_datos: "Exportación de datos",
+    eliminar_cuenta_fallido: "Eliminación de cuenta fallida",
     alerta_enviada: "Alerta enviada"
   };
 

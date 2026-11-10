@@ -92,14 +92,20 @@
       const sesion = this.auth.leerSesion();
       if (!sesion) return;
 
-      const password = await AgroColab.dialogo.pedirClave(
-        "Se borrarán para siempre tus datos personales, tus adopciones y tus pedidos. Esta acción no se puede deshacer. Para confirmar, escribe tu contraseña.",
-        { titulo: "¿Eliminar tu cuenta?", aceptar: "Eliminar mi cuenta", peligro: true }
-      );
-      if (!password) return;
+      const campoPassword = document.getElementById("perfil-eliminar-password");
+      if (!campoPassword.value) {
+        AgroColab.dialogo.avisar("Escribe tu contraseña para confirmar que eres tú.", { tipo: "error" });
+        campoPassword.focus();
+        return;
+      }
+
+      if (!(await AgroColab.dialogo.confirmar("Se borrarán para siempre tus datos personales, tus adopciones y tus pedidos. Esta acción no se puede deshacer.", { titulo: "¿Eliminar tu cuenta?", aceptar: "Eliminar mi cuenta", peligro: true }))) {
+        return;
+      }
 
       try {
-        const data = await window.AgroColab.api.eliminarCuenta(password);
+        const data = await window.AgroColab.api.eliminarCuenta(campoPassword.value);
+        campoPassword.value = "";
         if (data.status === "success") {
           AgroColab.dialogo.avisar(data.mensaje, { tipo: "exito", titulo: "Cuenta eliminada" });
           this.auth.eliminarSesion();
@@ -108,6 +114,27 @@
         } else {
           AgroColab.dialogo.avisar(data.mensaje || "No se pudo eliminar la cuenta.", { tipo: "error" });
         }
+      } catch (error) {
+        AgroColab.dialogo.avisar("No hay conexión con el servidor. Intenta nuevamente en unos segundos.", { tipo: "error" });
+      }
+    }
+
+    /* Copia de los datos de la cuenta, como archivo JSON */
+    async exportarDatos() {
+      try {
+        const data = await window.AgroColab.api.exportarDatos();
+        if (data.status !== "success") {
+          AgroColab.dialogo.avisar(data.mensaje || "No se pudieron descargar tus datos.", { tipo: "error" });
+          return;
+        }
+        const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+        const enlace = document.createElement("a");
+        enlace.href = url;
+        enlace.download = "agrocolab-mis-datos.json";
+        document.body.append(enlace);
+        enlace.click();
+        enlace.remove();
+        URL.revokeObjectURL(url);
       } catch (error) {
         AgroColab.dialogo.avisar("No hay conexión con el servidor. Intenta nuevamente en unos segundos.", { tipo: "error" });
       }

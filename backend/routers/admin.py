@@ -13,12 +13,12 @@ router = APIRouter(tags=["Administración"])
 
 @router.get("/api/admin/usuarios")
 def listar_usuarios(admin: Usuario = Depends(usuario_admin), db: Session = Depends(get_db)):
-    return servicio.listar(db)
+    return servicio.listar(db, admin)
 
 
 @router.get("/api/admin/usuarios/{usuario_id}")
 def detalle_usuario(usuario_id: int, admin: Usuario = Depends(usuario_admin), db: Session = Depends(get_db)):
-    return servicio.detalle(db, usuario_id)
+    return servicio.detalle(db, admin, usuario_id)
 
 
 @router.put("/api/admin/usuarios/{usuario_id}")

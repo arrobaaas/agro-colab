@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#040806">
+  <meta name="theme-color" content="#33443b">
   <!-- Content-Security-Policy: solo se cargan recursos de los dominios que la
        app usa. Si se colara un XSS, no podría enviar datos a otro servidor
        (connect-src / img-src) ni cargar scripts externos. script-src no
@@ -12,7 +12,7 @@
        Tailwind se sirve compilado desde el propio sitio (css/tailwind.css).
        'unsafe-inline' queda solo en style-src, por los atributos style=""
        (un estilo no puede ejecutar código). -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://upload.wikimedia.org https://images.unsplash.com; connect-src 'self' http://127.0.0.1:8000 https://agro-colab.onrender.com https://photon.komoot.io; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://upload.wikimedia.org; connect-src 'self' http://127.0.0.1:8000 https://agro-colab.onrender.com https://photon.komoot.io; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Agro-Colab | Cosecha Colaborativa</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -21,30 +21,30 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261109a">
-  <link rel="stylesheet" href="css/tailwind.css?v=20261109a">
-  <script src="js/config.js?v=20261109a" defer></script>
-  <script src="js/sitio.js?v=20261109a" defer></script>
-  <script src="js/ui.js?v=20261109a" defer></script>
-  <script src="js/dialogo.js?v=20261109a" defer></script>
-  <script src="js/api.js?v=20261109a" defer></script>
-  <script src="js/auth.js?v=20261109a" defer></script>
-  <script src="js/pago.js?v=20261109a" defer></script>
-  <script src="js/parcelas.js?v=20261109a" defer></script>
-  <script src="js/catalogo.js?v=20261109a" defer></script>
-  <script src="js/agricultor.js?v=20261109a" defer></script>
-  <script src="js/graficos.js?v=20261109a" defer></script>
-  <script src="js/perfil.js?v=20261109a" defer></script>
-  <script src="js/autocomplete.js?v=20261109a" defer></script>
-  <script src="js/dashboard.js?v=20261109a" defer></script>
-  <script src="js/efectos.js?v=20261109a" defer></script>
-  <script src="js/constelacion.js?v=20261109a" defer></script>
-  <script src="js/views.js?v=20261109a" defer></script>
-  <script src="js/login.js?v=20261109a" defer></script>
-  <script src="js/recuperacion.js?v=20261109a" defer></script>
-  <script src="js/admin.js?v=20261109a" defer></script>
-  <script src="js/acciones.js?v=20261109a" defer></script>
-  <script src="js/app.js?v=20261109a" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261110e">
+  <link rel="stylesheet" href="css/tailwind.css?v=20261110e">
+  <script src="js/config.js?v=20261110e" defer></script>
+  <script src="js/sitio.js?v=20261110e" defer></script>
+  <script src="js/ui.js?v=20261110e" defer></script>
+  <script src="js/dialogo.js?v=20261110e" defer></script>
+  <script src="js/api.js?v=20261110e" defer></script>
+  <script src="js/auth.js?v=20261110e" defer></script>
+  <script src="js/pago.js?v=20261110e" defer></script>
+  <script src="js/parcelas.js?v=20261110e" defer></script>
+  <script src="js/catalogo.js?v=20261110e" defer></script>
+  <script src="js/agricultor.js?v=20261110e" defer></script>
+  <script src="js/graficos.js?v=20261110e" defer></script>
+  <script src="js/perfil.js?v=20261110e" defer></script>
+  <script src="js/autocomplete.js?v=20261110e" defer></script>
+  <script src="js/dashboard.js?v=20261110e" defer></script>
+  <script src="js/efectos.js?v=20261110e" defer></script>
+  <script src="js/constelacion.js?v=20261110e" defer></script>
+  <script src="js/views.js?v=20261110e" defer></script>
+  <script src="js/login.js?v=20261110e" defer></script>
+  <script src="js/recuperacion.js?v=20261110e" defer></script>
+  <script src="js/admin.js?v=20261110e" defer></script>
+  <script src="js/acciones.js?v=20261110e" defer></script>
+  <script src="js/app.js?v=20261110e" defer></script>
 </head>
 <body class="text-stone-800 antialiased">
   <div class="barra-progreso" aria-hidden="true"></div>
@@ -133,7 +133,7 @@
                   placeholder="••••••••"
                   class="input input-con-icono"
                 >
-                <button type="button" data-accion="login.togglePassword" data-args='["password", "$el"]' class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-600">
+                <button type="button" data-accion="login.togglePassword" data-args='["password", "$el"]' aria-label="Mostrar u ocultar la contraseña" class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-600">
                   <i class="fa-regular fa-eye"></i>
                 </button>
               </div>
@@ -320,7 +320,7 @@
             de cosecha con entrega programada. Tu pago llega directo al agricultor.
           </p>
           <div class="tc-acciones">
-            <button type="button" class="tc-boton" data-accion="parcelas.establecerLinea" data-args='["adopcion"]'>
+            <button type="button" class="tc-boton" data-accion="parcelas.establecerLinea" data-args='["adopcion", "seccion-parcelas"]'>
               Adoptar un árbol
             </button>
             <button type="button" class="tc-enlace" data-accion="parcelas.establecerLinea" data-args='["abastecimiento"]'>
@@ -402,7 +402,7 @@
             <button type="button" class="tc-enlace" data-plan-adopcion="Básico">Ver árboles <i class="fa-solid fa-arrow-right"></i></button>
           </article>
 
-          <article class="plan-adopcion-card tc-plan--destacado" data-reveal="zoom" style="--reveal-delay:150ms">
+          <article class="plan-adopcion-card tc-plan--destacado" data-reveal="zoom" style="--reveal-delay:80ms">
             <p class="tc-etiqueta">Plan Intermedio · Más equilibrado</p>
             <h3 class="tc-plan__nombre">Cosecha en común</h3>
             <p class="tc-plan__cifra">1/3<small>de la cosecha</small></p>
@@ -414,7 +414,7 @@
             <button type="button" class="tc-enlace" data-plan-adopcion="Intermedio">Ver árboles <i class="fa-solid fa-arrow-right"></i></button>
           </article>
 
-          <article class="plan-adopcion-card" data-reveal="right" style="--reveal-delay:300ms">
+          <article class="plan-adopcion-card" data-reveal="right" style="--reveal-delay:160ms">
             <p class="tc-etiqueta tc-etiqueta--gris">Plan Premium</p>
             <h3 class="tc-plan__nombre">Dueño exclusivo</h3>
             <p class="tc-plan__cifra">100%<small>para ti</small></p>
@@ -477,7 +477,7 @@
             </button>
           </article>
 
-          <article class="tc-plan tc-plan--destacado" data-reveal="zoom" style="--reveal-delay:150ms">
+          <article class="tc-plan tc-plan--destacado" data-reveal="zoom" style="--reveal-delay:80ms">
             <p class="tc-etiqueta">Plan Familiar · El más elegido</p>
             <h3 class="tc-plan__nombre">Cosecha Completa Familiar</h3>
             <p class="tc-plan__cifra">$34.900<small>/ quincenal</small></p>
@@ -491,7 +491,7 @@
             </button>
           </article>
 
-          <article class="tc-plan" data-reveal="right" style="--reveal-delay:300ms">
+          <article class="tc-plan" data-reveal="right" style="--reveal-delay:160ms">
             <p class="tc-etiqueta tc-etiqueta--gris">Plan B2B · Uso comercial</p>
             <h3 class="tc-plan__nombre">Lote Gastronómico</h3>
             <p class="tc-plan__cifra">$89.000<small>/ mes</small></p>
@@ -582,29 +582,10 @@
             </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
-              2. Contacto de Entrega
-            </label>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label for="dest-nombre" class="block text-xs font-semibold text-stone-700 mb-1">Nombre y Apellido</label>
-                <input type="text" id="dest-nombre" required placeholder="Tu nombre" class="input">
-              </div>
-              <div>
-                <label for="dest-tel" class="block text-xs font-semibold text-stone-700 mb-1">Teléfono / WhatsApp</label>
-                <input type="tel" id="dest-tel" required placeholder="+56 9 1234 5678" class="input">
-              </div>
-              <div>
-                <label for="dest-email" class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
-                <input type="email" id="dest-email" required placeholder="correo@ejemplo.cl" class="input">
-              </div>
-            </div>
-          </div>
 
           <div>
             <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
-              3. Dirección Física y Frecuencia de Despacho
+              2. Dirección Física y Frecuencia de Despacho
             </label>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
               <div class="sm:col-span-2">
@@ -621,6 +602,33 @@
               </div>
             </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+              <div class="sm:col-span-2">
+                <label for="dest-celular" class="block text-xs font-semibold text-stone-700 mb-1">Número celular</label>
+                <div class="campo-celular">
+                  <select id="dest-codigo-pais" aria-label="Código de país" autocomplete="tel-country-code" class="input">
+                  <option value="+56">Chile +56</option>
+                  <option value="+54">Argentina +54</option>
+                  <option value="+591">Bolivia +591</option>
+                  <option value="+55">Brasil +55</option>
+                  <option value="+57">Colombia +57</option>
+                  <option value="+593">Ecuador +593</option>
+                  <option value="+34">España +34</option>
+                  <option value="+1">EE. UU. +1</option>
+                  <option value="+52">México +52</option>
+                  <option value="+595">Paraguay +595</option>
+                  <option value="+51">Perú +51</option>
+                  <option value="+598">Uruguay +598</option>
+                  <option value="+58">Venezuela +58</option>
+                  </select>
+                  <input type="tel" id="dest-celular" required inputmode="tel" autocomplete="tel-national" placeholder="9 1234 5678" class="input">
+                </div>
+              </div>
+              <div>
+                <label for="dest-postal" class="block text-xs font-semibold text-stone-700 mb-1">Código postal</label>
+                <input type="text" id="dest-postal" required inputmode="numeric" autocomplete="postal-code" maxlength="7" placeholder="8320000" class="input">
+              </div>
+            </div>
             <div>
               <label for="dest-frecuencia" class="block text-xs font-semibold text-stone-700 mb-1">Frecuencia del Despacho</label>
               <select id="dest-frecuencia" class="input">
@@ -925,7 +933,7 @@
                 </div>
                 <div>
                   <label for="arbol-cupos" class="campo-etiqueta">Cupos totales</label>
-                  <input type="number" id="arbol-cupos" required min="1" value="5" class="input">
+                  <input type="number" id="arbol-cupos" required min="1" value="5" readonly class="input">
                 </div>
               </div>
             </fieldset>
@@ -1238,7 +1246,7 @@
         </div>
         <div>
           <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Cupos Totales</label>
-          <input type="number" id="editar-cupos" required min="1" class="input">
+          <input type="number" id="editar-cupos" required min="1" readonly class="input">
         </div>
         <div>
           <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Precio Mensual (CLP)</label>
@@ -1326,10 +1334,22 @@
         <section class="perfil-seccion perfil-peligro">
           <div>
             <p class="tc-etiqueta perfil-peligro__titulo">Zona de peligro</p>
-            <p class="tc-cuerpo-sm" style="margin-top:.5rem">Elimina tu cuenta y todos tus datos de forma permanente.</p>
+            <p class="tc-cuerpo-sm" style="margin-top:.5rem">Elimina tu cuenta y tus datos de forma permanente. Confirma con tu contraseña.</p>
+            <input type="password" id="perfil-eliminar-password" autocomplete="current-password" placeholder="Tu contraseña" aria-label="Contraseña para eliminar la cuenta" class="input" style="margin-top:.75rem">
           </div>
           <button type="button" data-accion="perfil.eliminarCuenta" class="perfil-eliminar">
             Eliminar cuenta
+          </button>
+        </section>
+
+        <!-- Derecho de acceso y portabilidad (Ley 21.719) -->
+        <section class="perfil-seccion">
+          <div>
+            <p class="tc-etiqueta">Tus datos</p>
+            <p class="tc-cuerpo-sm" style="margin-top:.5rem">Descarga una copia de tu cuenta, tus adopciones, tus pedidos y tus pagos.</p>
+          </div>
+          <button type="button" data-accion="perfil.exportarDatos" class="tc-boton tc-boton--contorno">
+            Descargar mis datos
           </button>
         </section>
       </div>
@@ -1638,25 +1658,8 @@
               </div>
             </div>
           </div>
-          <div id="modal-bloque-contacto">
-            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">2. Contacto de Entrega</label>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label for="modal-dest-nombre" class="block text-xs font-semibold text-stone-700 mb-1">Nombre y Apellido</label>
-                <input type="text" id="modal-dest-nombre" required placeholder="Tu nombre" class="input">
-              </div>
-              <div>
-                <label for="modal-dest-tel" class="block text-xs font-semibold text-stone-700 mb-1">Teléfono / WhatsApp</label>
-                <input type="tel" id="modal-dest-tel" required placeholder="+56 9 1234 5678" class="input">
-              </div>
-              <div>
-                <label for="modal-dest-email" class="block text-xs font-semibold text-stone-700 mb-1">Correo Electrónico</label>
-                <input type="email" id="modal-dest-email" required placeholder="correo@ejemplo.cl" class="input">
-              </div>
-            </div>
-          </div>
           <div>
-            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">3. Dirección Física y Frecuencia de Despacho</label>
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">2. Dirección Física y Frecuencia de Despacho</label>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
               <div class="sm:col-span-2">
                 <label for="modal-dest-direccion" class="block text-xs font-semibold text-stone-700 mb-1">Dirección (Calle, Número, Depto/Oficina)</label>
@@ -1669,6 +1672,33 @@
               <div>
                 <label for="modal-dest-comuna" class="block text-xs font-semibold text-stone-700 mb-1">Comuna / Ciudad</label>
                 <input type="text" id="modal-dest-comuna" required placeholder="Maipú, Curicó, etc." class="input">
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+              <div class="sm:col-span-2">
+                <label for="modal-dest-celular" class="block text-xs font-semibold text-stone-700 mb-1">Número celular</label>
+                <div class="campo-celular">
+                  <select id="modal-dest-codigo-pais" aria-label="Código de país" autocomplete="tel-country-code" class="input">
+                  <option value="+56">Chile +56</option>
+                  <option value="+54">Argentina +54</option>
+                  <option value="+591">Bolivia +591</option>
+                  <option value="+55">Brasil +55</option>
+                  <option value="+57">Colombia +57</option>
+                  <option value="+593">Ecuador +593</option>
+                  <option value="+34">España +34</option>
+                  <option value="+1">EE. UU. +1</option>
+                  <option value="+52">México +52</option>
+                  <option value="+595">Paraguay +595</option>
+                  <option value="+51">Perú +51</option>
+                  <option value="+598">Uruguay +598</option>
+                  <option value="+58">Venezuela +58</option>
+                  </select>
+                  <input type="tel" id="modal-dest-celular" required inputmode="tel" autocomplete="tel-national" placeholder="9 1234 5678" class="input">
+                </div>
+              </div>
+              <div>
+                <label for="modal-dest-postal" class="block text-xs font-semibold text-stone-700 mb-1">Código postal</label>
+                <input type="text" id="modal-dest-postal" required inputmode="numeric" autocomplete="postal-code" maxlength="7" placeholder="8320000" class="input">
               </div>
             </div>
             <div>

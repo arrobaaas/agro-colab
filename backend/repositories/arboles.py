@@ -6,8 +6,13 @@ from sqlalchemy.orm import Session, joinedload
 from database import Arbol, Pedido, Suscripcion
 
 
-def listar(db: Session):
-    return db.query(Arbol).order_by(Arbol.id).all()
+def listar(db: Session, limite: int = 500):
+    """El catálogo es público: tiene un tope, y el productor se trae en la misma consulta."""
+    return db.query(Arbol).options(joinedload(Arbol.productor)).order_by(Arbol.id).limit(limite).all()
+
+
+def contar_de_productor(db: Session, productor_id: int) -> int:
+    return db.query(Arbol).filter(Arbol.productor_id == productor_id).count()
 
 
 def contar(db: Session) -> int:
@@ -59,6 +64,17 @@ def reservar_cupo(db: Session, arbol_id: int) -> bool:
         .values(cupos_ocupados=Arbol.cupos_ocupados + 1)
     ).rowcount
     return bool(filas)
+
+
+def liberar_cupo(db: Session, arbol_id: int):
+    """Se resta en la base y no se escribe un valor calculado antes: dos
+    operaciones simultáneas no se pisan el contador."""
+    db.execute(
+        update(Arbol)
+        .where(Arbol.id == arbol_id, Arbol.cupos_ocupados > 0)
+        .values(cupos_ocupados=Arbol.cupos_ocupados - 1)
+        .execution_options(synchronize_session=False)
+    )
 
 
 def eliminar_con_dependencias(db: Session, arbol: Arbol):

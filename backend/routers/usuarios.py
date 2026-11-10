@@ -26,9 +26,16 @@ def reenviar_codigo(data: ReenvioRequest, db: Session = Depends(get_db)):
     return servicio.reenviar_codigo(db, data)
 
 
-@router.post("/api/login", dependencies=[Depends(limitar_por_ip(maximo=8, ventana_segundos=300))])
+@router.post("/api/login")
 def login(data: LoginRequest, db: Session = Depends(get_db)):
+    """El límite por IP y por cuenta lo aplica el servicio: solo cuentan los fallos."""
     return servicio.iniciar_sesion(db, data)
+
+
+@router.post("/api/logout")
+def logout(usuario: Usuario = Depends(usuario_actual), db: Session = Depends(get_db)):
+    """Cierra en el servidor todas las sesiones de la cuenta."""
+    return servicio.cerrar_sesion(db, usuario)
 
 
 @router.post("/api/verificar-cuenta", dependencies=[Depends(limitar_por_ip(maximo=10, ventana_segundos=3600))])
@@ -61,8 +68,13 @@ def actualizar_perfil(data: PerfilRequest, usuario: Usuario = Depends(usuario_ac
     return servicio.actualizar_perfil(db, usuario, data)
 
 
+@router.get("/api/perfil/exportar")
+def exportar_datos(usuario: Usuario = Depends(usuario_actual), db: Session = Depends(get_db)):
+    """Copia de los datos de la cuenta (derechos de acceso y portabilidad, Ley 21.719)."""
+    return servicio.exportar_datos(db, usuario)
+
+
 @router.delete("/api/perfil")
 def eliminar_cuenta(data: EliminarCuentaRequest, usuario: Usuario = Depends(usuario_actual), db: Session = Depends(get_db)):
-    """Elimina la cuenta de la sesión y todos sus datos (Art. 20 Ley 21.719).
-    Exige la contraseña actual en el cuerpo: {"password": "..."}."""
+    """Elimina la cuenta de la sesión y sus datos (derecho de supresión, Ley 21.719)."""
     return servicio.eliminar_propia(db, usuario, data)

@@ -52,7 +52,7 @@ class LoginService {
         if (data.user.verificado === 0 || data.user.verificado === false) {
           this.auth.eliminarSesion();
           this.auth.guardarSesion(data.user);
-          this.mostrarVerificacion(data.user.email, data.user.codigo_verificacion || "");
+          this.mostrarVerificacion(data.user.email, data.user.codigo_verificacion || "", password);
           return false;
         }
 
@@ -60,6 +60,12 @@ class LoginService {
         this.auth.guardarSesion(data.user);
         this.views.pintarNavbar();
         this.views.mostrarVistaPorRol(data.user.rol);
+        if ((this.config.cuentasDemo || []).includes(data.user.email)) {
+          AgroColab.dialogo.avisar(
+            "Esta cuenta la comparten todos los visitantes: cualquiera puede ver lo que escribas en ella. No ingreses datos reales. Lo que quede guardado se borra después de una hora.",
+            { titulo: "Cuenta de demostración" }
+          );
+        }
       } else {
         this.ui.mostrarAlerta(alertBox, "error", data.mensaje);
       }
@@ -122,13 +128,15 @@ class LoginService {
         password,
         rol: this.rolSeleccionado,
         telefono: telefono || null,
-        direccion: direccion || null
+        direccion: direccion || null,
+        acepta_datos: document.getElementById("reg-consentimiento").checked,
+        acepta_terminos: document.getElementById("reg-terminos").checked
       });
 
       if (data.status === "success") {
         // Sin guardar sesión: la cuenta aún no está verificada ni tiene token
         this.ui.mostrarAlerta(alerta, "exito", data.mensaje);
-        this.mostrarVerificacion(data.user.email, data.user.codigo_verificacion);
+        this.mostrarVerificacion(data.user.email, data.user.codigo_verificacion, password);
       } else {
         this.ui.mostrarAlerta(alerta, "error", data.mensaje);
       }
@@ -138,8 +146,11 @@ class LoginService {
     return false;
   }
 
-  mostrarVerificacion(email, codigo) {
+  /* La contraseña queda solo en memoria hasta verificar: el servidor la exige
+     junto con el código, para que la verificación la complete quien la fijó. */
+  mostrarVerificacion(email, codigo, password) {
     this.emailVerificacion = email;
+    this.passwordVerificacion = password;
     this.codigoVerificacion = codigo;
     // El recuadro con el código solo existe en desarrollo (sin correo real)
     document.getElementById("codigo-simulado").textContent = codigo || "";
@@ -148,6 +159,7 @@ class LoginService {
   }
 
   cerrarVerificacion() {
+    this.passwordVerificacion = null;
     document.getElementById("modal-verificacion").classList.add("hidden");
   }
 
@@ -168,7 +180,7 @@ class LoginService {
     this.ui.mostrarAlerta(alerta, "info", "Verificando tu cuenta...");
 
     try {
-      const data = await this.api.verificarCuenta(this.emailVerificacion, codigo);
+      const data = await this.api.verificarCuenta(this.emailVerificacion, codigo, this.passwordVerificacion);
 
       if (data.status === "success") {
         this.ui.mostrarAlerta(alerta, "exito", data.mensaje);

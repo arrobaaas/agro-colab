@@ -25,7 +25,7 @@ def operaciones_de_la_api() -> set:
 def test_la_tabla_de_la_api_coincide_con_las_rutas_reales():
     tabla = (RAIZ / "docs" / "API.md").read_text(encoding="utf-8")
     documentadas = set(re.findall(r"^\| `([A-Z]+)` \| `(/api/[^`]+)` \|", tabla, flags=re.M))
-    assert len(documentadas) == 34
+    assert len(documentadas) == 37
     assert documentadas == operaciones_de_la_api()
 
 

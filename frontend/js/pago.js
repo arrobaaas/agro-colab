@@ -1,6 +1,7 @@
 /* Agro-Colab - Pasarela de pago simulada (PagoService), expuesto como
-   AgroColab.pago. cobrar(item) abre el checkout y devuelve una Promise con
-   el pago aprobado, o null si el comprador cierra sin pagar.
+   AgroColab.pago. cobrar(items) abre el checkout de toda la canasta y
+   devuelve una Promise con la respuesta aprobada (un pago por producto, en
+   el mismo orden), o null si el comprador cierra sin pagar.
 
    La validación definitiva la hace el servidor (routers/pagos.py); aquí se
    formatea la tarjeta, se muestra su vista previa y se avisa de errores
@@ -14,7 +15,7 @@
 
   class PagoService {
     constructor() {
-      this.item = null;
+      this.items = [];
       this.resolver = null;
       this.pago = null;
     }
@@ -29,18 +30,26 @@
 
     /* ---------- Abrir y cerrar ---------- */
 
-    cobrar(item) {
+    cobrar(items) {
       if (this.resolver) this.resolver(null);
-      this.item = item;
+      this.items = Array.isArray(items) ? items : [items];
       this.pago = null;
 
-      const esArbol = item.tipo === "arbol";
-      this.campo("concepto").textContent = esArbol ? `Adopción de ${item.nombre}` : `Plan ${item.nombre}`;
-      this.campo("detalle").textContent = esArbol
-        ? "Primer mes. Se renueva cada mes hasta que canceles."
-        : "Primer período de despacho. Se renueva hasta que canceles.";
-      this.campo("total").textContent = AgroColab.ui.formatearMonto(item.precio);
-      this.campo("boton-monto").textContent = AgroColab.ui.formatearMonto(item.precio);
+      const total = this.items.reduce((suma, item) => suma + (Number(item.precio) || 0), 0);
+      if (this.items.length === 1) {
+        const [item] = this.items;
+        const esArbol = item.tipo === "arbol";
+        this.campo("concepto").textContent = esArbol ? `Adopción de ${item.nombre}` : `Plan ${item.nombre}`;
+        this.campo("detalle").textContent = esArbol
+          ? "Primer mes. Se renueva cada mes hasta que canceles."
+          : "Primer período de despacho. Se renueva hasta que canceles.";
+      } else {
+        this.campo("concepto").textContent = `Tu canasta: ${this.items.length} productos`;
+        this.campo("detalle").textContent =
+          `${this.items.map((item) => item.nombre).join(" · ")}. Primer mes o período de cada uno, en un solo cobro.`;
+      }
+      this.campo("total").textContent = AgroColab.ui.formatearMonto(total);
+      this.campo("boton-monto").textContent = AgroColab.ui.formatearMonto(total);
 
       const sesion = AgroColab.auth.leerSesion();
       document.getElementById("form-pago").reset();
@@ -153,18 +162,19 @@
       alerta.classList.add("hidden");
 
       this.mostrarPaso("procesando");
-      const item = this.item;
       const datos = {
-        tipo: item.tipo === "arbol" ? "arbol" : "plan",
-        arbol_id: item.tipo === "arbol" ? item.id : null,
-        plan_nombre: item.tipo === "arbol" ? null : item.nombre,
+        items: this.items.map((item) => ({
+          tipo: item.tipo === "arbol" ? "arbol" : "plan",
+          arbol_id: item.tipo === "arbol" ? item.id : null,
+          plan_nombre: item.tipo === "arbol" ? null : item.nombre
+        })),
         numero, titular, vencimiento, cvv
       };
 
       let respuesta;
       try {
         [respuesta] = await Promise.all([
-          AgroColab.api.pagar(datos),
+          AgroColab.api.pagarCanasta(datos),
           new Promise((r) => window.setTimeout(r, ESPERA_MINIMA_MS))
         ]);
       } catch (e) {
@@ -174,8 +184,8 @@
       this.campo("cvv").value = "";
 
       if (respuesta.status === "success") {
-        this.pago = respuesta.pago;
-        this.pintarComprobante(respuesta.pago);
+        this.pago = respuesta;
+        this.pintarComprobante(respuesta);
         this.mostrarPaso("aprobado");
         this.campo("continuar").focus();
       } else {
@@ -184,14 +194,15 @@
       }
     }
 
-    pintarComprobante(pago) {
+    pintarComprobante(respuesta) {
+      const [primero] = respuesta.pagos;
       const datos = [
-        ["Monto", `${AgroColab.ui.formatearMonto(pago.monto_clp)} CLP`],
-        ["Concepto", pago.concepto],
-        ["Tarjeta", `${pago.marca} •••• ${pago.ultimos4}`],
-        ["Autorización", pago.codigo_autorizacion],
-        ["Transacción", pago.transaccion],
-        ["Fecha", pago.fecha]
+        ["Monto", `${AgroColab.ui.formatearMonto(respuesta.total_clp)} CLP`],
+        ["Concepto", respuesta.pagos.length === 1 ? primero.concepto : `${respuesta.pagos.length} productos`],
+        ["Tarjeta", `${primero.marca} •••• ${primero.ultimos4}`],
+        ["Autorización", respuesta.codigo_autorizacion],
+        ["Transacción", respuesta.transaccion],
+        ["Fecha", primero.fecha]
       ];
       const lista = this.campo("comprobante");
       lista.replaceChildren();
