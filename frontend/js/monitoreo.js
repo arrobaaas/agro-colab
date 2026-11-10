@@ -26,6 +26,9 @@
     admin_eliminacion: "Cuenta eliminada por admin",
     registro: "Registro",
     verificacion_fallida: "Verificación fallida",
+    lectura_datos: "Lectura de datos de terceros",
+    exportacion_datos: "Exportación de datos",
+    eliminar_cuenta_fallido: "Eliminación de cuenta fallida",
     alerta_enviada: "Alerta enviada"
   };
 

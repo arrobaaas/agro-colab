@@ -2,6 +2,13 @@
 
 from sqlalchemy.orm import Session
 
+from database import SessionLocal
+
+
+def abrir_sesion() -> Session:
+    """Para lo que corre fuera de una petición, como los datos iniciales."""
+    return SessionLocal()
+
 
 def agregar(db: Session, objeto):
     db.add(objeto)

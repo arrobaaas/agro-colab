@@ -8,6 +8,9 @@ class ConfigService {
       ? "http://127.0.0.1:8000/api"
       : "https://agro-colab.onrender.com/api";
 
+    /* Cuentas públicas: lo que se escribe en ellas lo ven todos los visitantes */
+    this.cuentasDemo = ["comprador@agrocolab.cl", "agricultor@agrocolab.cl"];
+
     this.claveSesion = "agrocolab_sesion";
     this.clavePlan = "agrocolab_plan";
     this.claveCarrito = "agrocolab_carrito";

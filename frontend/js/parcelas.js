@@ -19,9 +19,8 @@
       this.planActual = { ...PLAN_ABASTECIMIENTO_INICIAL };
       this.destinoSeleccionado = "particular";
       this.planAdopcionSeleccionado = "todos";
-      this.itemLogisticaActual = null;
+      this.itemsLogistica = [];
       this.pedidoEditando = null;
-      this.compraPendiente = null;
       this.carrito = [];
       this.arbolParaAdoptar = null;
     }
@@ -34,6 +33,18 @@
     }
 
     seleccionarPlan(boton) {
+      /* El plan B2B exige razón social y RUT, y la cuenta demo no admite datos
+         comerciales: se avisa antes de sumarlo, no después de pagarlo */
+      const sesion = auth.leerSesion();
+      const esDemo = sesion && (this.config.cuentasDemo || []).includes(sesion.email);
+      if (esDemo && boton.dataset.planDestino === "comercial") {
+        AgroColab.dialogo.avisar(
+          "El plan comercial pide razón social y RUT, y esta cuenta de demostración la comparten todos los visitantes. Para probarlo, crea tu propia cuenta de comprador.",
+          { titulo: "No disponible en la cuenta demo" }
+        );
+        return;
+      }
+
       this.planActual = {
         nombre: boton.dataset.planNombre,
         precio: Number(boton.dataset.planPrecio)
@@ -56,7 +67,6 @@
         frecuencia: boton.dataset.planFrecuencia
       };
       this.agregarAlCarrito(item);
-      this.itemLogisticaActual = item;
 
       this.abrirCanasta();
     }
@@ -94,7 +104,21 @@
       document.getElementById("seccion-logistica").classList.toggle("hidden", esAdopcion);
 
       const destino = scrollTo || (esAdopcion ? "seccion-adopcion" : "seccion-abastecimiento");
-      document.getElementById(destino).scrollIntoView({ behavior: "smooth" });
+      this.irASeccion(destino);
+    }
+
+    /* Lleva al título de la sección y no a su borde: las secciones tienen
+       6-8,5 rem de relleno arriba y quedaba una franja vacía. Al bajar, el
+       header se esconde, así que basta un margen chico; al subir reaparece y
+       se deja su alto libre. */
+    irASeccion(id) {
+      const seccion = document.getElementById(id);
+      if (!seccion) return;
+      const titulo = seccion.querySelector(".tc-encabezado") || seccion;
+      const destino = titulo.getBoundingClientRect().top + window.scrollY;
+      const header = document.querySelector("#vista-parcelas header");
+      const margen = destino < window.scrollY && header ? header.offsetHeight + 24 : 24;
+      window.scrollTo({ top: Math.max(destino - margen, 0), behavior: "smooth" });
     }
 
     /* ---------- Envío del pedido logístico ---------- */
@@ -109,16 +133,14 @@
 
       const bodyData = {
         plan_nombre: this.planActual.nombre,
-        monto_clp: this.planActual.precio,
-        cliente_id: sesion ? sesion.id : null,
-        cliente_nombre: document.getElementById("dest-nombre").value.trim(),
-        telefono: document.getElementById("dest-tel").value.trim(),
-        email: document.getElementById("dest-email").value.trim(),
         tipo_destino: this.destinoSeleccionado,
         razon_social: esComercial ? document.getElementById("com-razon").value.trim() : null,
         rut: esComercial ? document.getElementById("com-rut").value.trim() : null,
         direccion: document.getElementById("dest-direccion").value.trim(),
         comuna: document.getElementById("dest-comuna").value.trim(),
+        codigo_postal: document.getElementById("dest-postal").value.trim(),
+        telefono_codigo: document.getElementById("dest-codigo-pais").value,
+        telefono: document.getElementById("dest-celular").value.trim(),
         frecuencia_entrega: document.getElementById("dest-frecuencia").value
       };
 
@@ -199,20 +221,21 @@
       const disponible = cuposLibres > 0;
       const exclusivo = arbol.tipo_suscripcion === "Exclusivo";
       const textoCupos = disponible
-        ? `${cuposLibres} de ${cuposTotales} cupo${cuposTotales === 1 ? "" : "s"} libre${cuposLibres === 1 ? "" : "s"}`
+        ? `${cuposLibres} cupo${cuposLibres === 1 ? "" : "s"} libre${cuposLibres === 1 ? "" : "s"} de ${cuposTotales}`
         : "Sin cupos disponibles";
 
       /* Se devuelve la tarjeta completa, con su <article> exterior. Antes se
          devolvía solo el innerHTML: se perdía el envoltorio y la foto y los
          datos quedaban como celdas sueltas de la grilla. */
       return `
-        <article class="tc-arbol" data-reveal="flip" style="--reveal-delay:${(indice % 3) * 150}ms">
+        <article class="tc-arbol" data-reveal="flip" style="--reveal-delay:${(indice % 3) * 80}ms">
           <div class="tc-arbol__foto">
             <img src="${e(arbol.imagen || "")}" alt="${e(arbol.nombre)}" loading="lazy" data-si-falla="ocultar">
+            ${arbol.es_demo ? `<span class="tc-arbol__insignia">Demostración</span>` : ""}
           </div>
           <div class="tc-arbol__cuerpo">
-            <p class="tc-etiqueta tc-etiqueta--verde">
-              ${e(arbol.especie_nombre || "Árbol frutal")} · Plan ${e(arbol.plan)}${exclusivo ? " · Exclusivo" : ""}
+            <p class="tc-etiqueta tc-etiqueta--verde tc-arbol__categoria" title="${e(arbol.especie_nombre || "Árbol frutal")} · Plan ${e(arbol.plan)}${exclusivo ? " · Exclusivo" : ""}">
+              ${e(arbol.especie_nombre || "Árbol frutal")} · Plan ${e(arbol.plan)}
             </p>
             <h3 class="tc-arbol__nombre">${e(arbol.nombre)}</h3>
             <ul class="tc-meta">
@@ -222,11 +245,11 @@
             </ul>
 
             <div class="tc-barra ${disponible ? "" : "tc-barra--llena"}"><div style="width:${porcentaje}%"></div></div>
-            <p class="tc-barra__texto"><span>${e(textoCupos)}</span><span>${porcentaje}% adoptado</span></p>
+            <p class="tc-barra__texto"><span>${e(textoCupos)}</span></p>
 
             <div class="tc-arbol__pie">
               <p class="tc-precio">${this.ui.formatearMonto(arbol.precio_mensual_clp)}<small>CLP / mes</small></p>
-              <button type="button" class="tc-boton tc-boton--contorno" data-suscribir-id="${Number(arbol.id)}" ${disponible ? "" : "disabled"}>
+              <button type="button" class="tc-boton tc-arbol__adoptar ${disponible ? "" : "tc-boton--contorno"}" data-suscribir-id="${Number(arbol.id)}" ${disponible ? "" : "disabled"}>
                 ${disponible ? "Adoptar" : "Completo"}
               </button>
             </div>
@@ -285,7 +308,6 @@
         tipo: "arbol"
       };
       this.agregarAlCarrito(item);
-      this.itemLogisticaActual = item;
       this.cargarArboles();
     }
 
@@ -342,39 +364,47 @@
       this.arbolParaAdoptar = null;
     }
 
-    /* Pago desde la canasta: abre la pasarela y, con el pago aprobado, la
-       logística. La adopción del árbol la confirma el servidor junto con el
-       pago. Un plan ya pagado (pago_id) cuyo despacho quedó pendiente pasa
-       directo a la logística, sin volver a cobrar. */
-    async pagarSuscripcion(index) {
-      const item = this.carrito[index];
-      if (!item) return;
+    /* Productos de la canasta que faltan por pagar, y los ya pagados que
+       esperan su despacho */
+    porPagar() {
+      return this.carrito.filter((item) => item.estado !== "comprado" && !item.pago_id
+        && (item.tipo === "arbol" || item.tipo === "plan"));
+    }
 
-      const sesion = auth.leerSesion();
-      if (!sesion) return;
+    porDespachar() {
+      return this.carrito.filter((item) => item.estado !== "comprado" && item.pago_id);
+    }
 
-      try {
-        if (!item.pago_id) {
-          this.cerrarCanasta();
-          const pago = await AgroColab.pago.cobrar(item);
-          if (!pago) {
-            this.abrirCanasta();
-            return;
-          }
-          item.pago_id = pago.id;
-          this.guardarCarrito();
-        }
+    /* Un solo pago para toda la canasta. El servidor lo cobra todo o nada:
+       si un árbol se quedó sin cupo, no se cobra ningún producto. Con el
+       pago aprobado se abre un solo formulario de despacho para todo. */
+    async pagarCanasta() {
+      const items = this.porPagar();
+      if (!items.length || !auth.leerSesion()) return;
 
-        // El producto sale de la canasta mientras se configura su despacho.
-        // Un plan solo queda registrado al completar la logística: si se
-        // cierra antes, vuelve a la canasta (antes se perdía sin aviso).
-        this.quitarDelCarrito(index);
-        this.compraPendiente = item.tipo === "plan" ? item : null;
-        this.cerrarCanasta();
-        this.abrirLogistica(item);
-      } catch (error) {
-        AgroColab.dialogo.avisar("No hay conexión con el servidor. Intenta nuevamente en unos segundos.", { tipo: "error" });
+      this.cerrarCanasta();
+      const respuesta = await AgroColab.pago.cobrar(items);
+      if (!respuesta) {
+        this.abrirCanasta();
+        return;
       }
+
+      // Cada producto guarda su pago: el pedido de un plan se enlaza con él
+      items.forEach((item, i) => {
+        item.pago_id = respuesta.pagos[i].id;
+      });
+      this.guardarCarrito();
+      this.renderizarCanasta();
+      this.completarDespacho();
+    }
+
+    /* Lo pagado queda en la canasta, marcado como pagado, hasta registrar
+       su despacho: si se cierra el formulario, se retoma desde aquí. */
+    completarDespacho() {
+      const items = this.porDespachar();
+      if (!items.length) return;
+      this.cerrarCanasta();
+      this.abrirLogistica(items);
     }
 
     /* ---------- Arranque de la vista ---------- */
@@ -438,7 +468,7 @@
 
       this.actualizarFiltroActivo();
       this.cargarArboles();
-      document.getElementById("seccion-parcelas").scrollIntoView({ behavior: "smooth" });
+      this.irASeccion("seccion-parcelas");
     }
 
     actualizarFiltroActivo() {
@@ -548,9 +578,6 @@
               ? ""
               : `<button type="button" class="canasta-accion" data-accion="parcelas.quitarDelCarrito" data-args='[${Number(index)}]'>Quitar</button>`;
           const pagado = !comprado && Boolean(item.pago_id);
-          const pagar = !comprado && (item.tipo === "arbol" || item.tipo === "plan")
-            ? `<button type="button" class="btn-suscribir btn-suscribir--activo" data-accion="parcelas.pagarSuscripcion" data-args='[${Number(index)}]'>${pagado ? '<i class="fa-solid fa-truck-fast"></i> Completar despacho' : '<i class="fa-solid fa-lock"></i> Pagar'}</button>`
-            : "";
 
           return `
             <article class="canasta-item ${animar ? "canasta-item--entrando" : ""}" style="animation-delay:${0.15 + index * 0.07}s">
@@ -565,24 +592,37 @@
                 <p class="text-xs text-stone-500 truncate mt-0.5">${e(item.descripcion)}</p>
                 <div class="flex items-center justify-between gap-2 mt-3">
                   <p class="font-extrabold text-emerald-900">${this.ui.formatearMonto(item.precio)} <span class="text-[10px] font-medium text-stone-500">CLP${item.tipo === "arbol" ? " / mes" : ""}</span></p>
-                  <div class="flex items-center gap-2">${accion}${pagar}</div>
+                  <div class="flex items-center gap-2">${accion}</div>
                 </div>
               </div>
             </article>`;
         })
         .join("")}</div>`;
 
+      const porDespachar = this.porDespachar().length;
+      const botonPrincipal = pendientes.length
+        ? `<button type="button" class="tc-boton canasta-pagar" data-accion="parcelas.pagarCanasta">
+             <i class="fa-solid fa-lock"></i> Pagar ${pendientes.length === 1 ? "" : `${pendientes.length} productos · `}${this.ui.formatearMonto(totalPendiente)}
+           </button>`
+        : porDespachar
+          ? `<button type="button" class="tc-boton canasta-pagar" data-accion="parcelas.completarDespacho">
+               <i class="fa-solid fa-truck-fast"></i> Completar despacho
+             </button>`
+          : "";
+
       pie.classList.remove("hidden");
       pie.innerHTML = `
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-end justify-between gap-3">
           <div>
-            <p class="text-[11px] uppercase tracking-wider font-bold text-stone-500">Total por pagar</p>
+            <p class="text-xs uppercase tracking-wider font-bold text-stone-500">Total por pagar</p>
             <p class="text-2xl font-extrabold text-emerald-900 leading-tight">${this.ui.formatearMonto(totalPendiente)} <span class="text-xs font-medium text-stone-500">CLP</span></p>
           </div>
-          <button type="button" class="nav-pill nav-pill--claro" data-accion="parcelas.cerrarCanasta">
+          <button type="button" class="tc-enlace" data-accion="parcelas.cerrarCanasta">
             Seguir explorando <i class="fa-solid fa-arrow-right"></i>
           </button>
-        </div>`;
+        </div>
+        ${botonPrincipal}
+        ${!pendientes.length && porDespachar ? `<p class="canasta-aviso">Ya pagaste: falta indicar dónde recibir ${porDespachar === 1 ? "este producto" : "estos productos"}.</p>` : ""}`;
     }
 
     quitarDelCarrito(index) {
@@ -670,13 +710,16 @@
     /* ---------- Modal de Logística ---------- */
 
     /* Abre el formulario de despacho en uno de dos modos:
-       - Crear: al pagar desde la canasta, item es el árbol o el plan pagado.
+       - Crear: items son lo pagado (uno o varios productos de la canasta, o
+         un árbol desde el panel). Un mismo destino sirve para todos.
        - Editar: desde el panel, pedido es el despacho que ya existe. */
-    abrirLogistica(item = null, pedido = null) {
-      this.itemLogisticaActual = item;
+    abrirLogistica(items = null, pedido = null) {
+      this.itemsLogistica = items ? (Array.isArray(items) ? items : [items]) : [];
       this.pedidoEditando = pedido;
 
-      const sesion = auth.leerSesion() || {};
+      const varios = this.itemsLogistica.length > 1;
+      const item = varios ? null : this.itemsLogistica[0] || null;
+      const total = this.itemsLogistica.reduce((suma, i) => suma + (Number(i.precio) || 0), 0);
       const esArbol = Boolean(item && item.tipo === "arbol") || Boolean(pedido && pedido.tipo === "arbol");
 
       document.getElementById("form-modal-logistica").reset();
@@ -689,37 +732,38 @@
         : esArbol ? "¿Dónde recibes la cosecha de tu árbol?" : "¿Dónde deseas recibir los productos?";
       document.getElementById("modal-log-subtitulo").textContent = pedido
         ? "Cambia dónde y cada cuánto recibes este despacho."
-        : esArbol
-          ? "Tu adopción ya está pagada. Indica dónde quieres recibir la cosecha."
-          : "Último paso para completar tu compra: indica dónde quieres recibirla.";
+        : varios
+          ? "Tu compra ya está pagada. Indica una sola vez dónde quieres recibir todo."
+          : esArbol
+            ? "Tu adopción ya está pagada. Indica dónde quieres recibir la cosecha."
+            : "Último paso para completar tu compra: indica dónde quieres recibirla.";
       document.getElementById("modal-log-etiqueta").textContent = pedido
         ? `Pedido ${pedido.codigo_seguimiento}:`
-        : esArbol ? "Árbol adoptado:" : "Plan en configuración:";
+        : varios ? "Tu compra:" : esArbol ? "Árbol adoptado:" : "Plan en configuración:";
       document.getElementById("modal-log-plan-nombre").textContent =
-        pedido ? pedido.plan_nombre : item ? item.nombre : this.planActual.nombre;
+        pedido ? pedido.plan_nombre
+          : varios ? `${this.itemsLogistica.length} productos`
+            : item ? item.nombre : this.planActual.nombre;
       document.getElementById("modal-log-plan-precio").textContent =
-        `${this.ui.formatearMonto(pedido ? pedido.monto_clp : item ? item.precio : this.planActual.precio)} CLP`;
+        `${this.ui.formatearMonto(pedido ? pedido.monto_clp : item || varios ? total : this.planActual.precio)} CLP`;
       document.querySelector("#modal-log-boton span").textContent =
         pedido ? "Guardar cambios" : "Confirmar destino y registrar pedido";
 
-      this.cambiarDestinoModal((pedido && pedido.tipo_destino) || (item && item.destino) || "particular");
+      // Si algo de lo comprado exige despacho comercial (plan B2B), se parte
+      // con ese tipo: el servidor lo exige igual
+      const comercial = this.itemsLogistica.some((i) => i.destino === "comercial");
+      this.cambiarDestinoModal((pedido && pedido.tipo_destino) || (comercial ? "comercial" : "particular"));
 
-      /* Al editar solo cambian destino, dirección y frecuencia: el contacto se
-         oculta y deja de ser obligatorio (si no, el teléfono vacío bloqueaba
-         el envío del formulario). */
-      document.getElementById("modal-bloque-contacto").classList.toggle("hidden", Boolean(pedido));
-      ["modal-dest-nombre", "modal-dest-tel", "modal-dest-email"].forEach((id) => {
-        document.getElementById(id).required = !pedido;
-      });
-
-      document.getElementById("modal-dest-nombre").value = sesion.nombre || "";
-      document.getElementById("modal-dest-email").value = sesion.email || "";
+      const conFrecuencia = this.itemsLogistica.find((i) => i.frecuencia);
       document.getElementById("modal-dest-frecuencia").value =
-        (pedido && pedido.frecuencia_entrega) || (item && item.frecuencia) || "quincenal";
+        (pedido && pedido.frecuencia_entrega) || (conFrecuencia && conFrecuencia.frecuencia) || "quincenal";
 
       if (pedido) {
         document.getElementById("modal-dest-direccion").value = pedido.direccion || "";
         document.getElementById("modal-dest-comuna").value = pedido.comuna || "";
+        document.getElementById("modal-dest-postal").value = pedido.codigo_postal || "";
+        document.getElementById("modal-dest-codigo-pais").value = pedido.telefono_codigo || "+56";
+        document.getElementById("modal-dest-celular").value = pedido.telefono || "";
         document.getElementById("modal-com-razon").value = pedido.razon_social || "";
         document.getElementById("modal-com-rut").value = pedido.rut || "";
       }
@@ -727,17 +771,14 @@
       document.getElementById("modal-logistica").classList.remove("hidden");
     }
 
+    /* Lo pagado sigue en la canasta como «Pagado» hasta registrar su
+       despacho: cerrar el formulario no lo pierde. */
     cerrarLogistica() {
       document.getElementById("modal-logistica").classList.add("hidden");
       this.pedidoEditando = null;
-
-      if (this.compraPendiente) {
-        this.carrito.push({ ...this.compraPendiente, estado: "pendiente" });
-        this.guardarCarrito();
-        this.compraPendiente = null;
-        this.actualizarContadorCanasta();
-        this.renderizarCanasta();
-      }
+      this.itemsLogistica = [];
+      this.actualizarContadorCanasta();
+      this.renderizarCanasta();
     }
 
     /* Marca el tipo de destino en el modal y muestra los datos comerciales
@@ -765,6 +806,9 @@
         rut: esComercial ? document.getElementById("modal-com-rut").value.trim() : null,
         direccion: document.getElementById("modal-dest-direccion").value.trim(),
         comuna: document.getElementById("modal-dest-comuna").value.trim(),
+        codigo_postal: document.getElementById("modal-dest-postal").value.trim(),
+        telefono_codigo: document.getElementById("modal-dest-codigo-pais").value,
+        telefono: document.getElementById("modal-dest-celular").value.trim(),
         frecuencia_entrega: document.getElementById("modal-dest-frecuencia").value
       };
 
@@ -785,22 +829,38 @@
         if (editando) {
           data = await this.api.actualizarLogistica(editando.id, datos);
         } else {
-          /* El pedido corresponde a lo que se pagó. Antes se usaba siempre
-             this.planActual, y pagar un árbol registraba además la canasta de
-             abastecimiento por defecto. */
-          const item = this.itemLogisticaActual;
-          const esArbol = Boolean(item && item.tipo === "arbol");
-          data = await this.api.crearPedido({
-            ...datos,
-            pago_id: item && !esArbol ? item.pago_id : null,
-            plan_nombre: item ? (esArbol ? `Cosecha de ${item.nombre}` : item.nombre) : this.planActual.nombre,
-            monto_clp: item ? item.precio : this.planActual.precio,
-            cliente_nombre: document.getElementById("modal-dest-nombre").value.trim(),
-            telefono: document.getElementById("modal-dest-tel").value.trim(),
-            email: document.getElementById("modal-dest-email").value.trim(),
-            tipo: esArbol ? "arbol" : "abastecimiento",
-            arbol_id: esArbol ? item.id : null
-          });
+          /* Un pedido por producto pagado, todos al mismo destino. Lo que
+             queda registrado sale de la canasta; si uno falla, sigue en ella
+             como pagado para reintentarlo. */
+          const items = this.itemsLogistica;
+          const fallos = [];
+          for (const item of items) {
+            const esArbol = item.tipo === "arbol";
+            const respuesta = await this.api.crearPedido({
+              ...datos,
+              pago_id: esArbol ? null : item.pago_id,
+              plan_nombre: esArbol ? `Cosecha de ${item.nombre}` : item.nombre,
+              tipo: esArbol ? "arbol" : "abastecimiento",
+              arbol_id: esArbol ? item.id : null
+            });
+            if (respuesta.status === "success") {
+              data = respuesta;
+              this.carrito = this.carrito.filter((c) => c !== item);
+            } else {
+              fallos.push({ item, mensaje: respuesta.mensaje });
+            }
+          }
+          this.guardarCarrito();
+          this.itemsLogistica = fallos.map((f) => f.item);
+
+          if (fallos.length) {
+            const detalle = fallos.map((f) => `${f.item.nombre}: ${f.mensaje || "no se pudo registrar"}`).join(" · ");
+            this.ui.mostrarAlerta(alerta, "error", fallos.length === items.length
+              ? detalle
+              : `Se registraron ${items.length - fallos.length} de ${items.length} despachos. Falta: ${detalle}`);
+            return;
+          }
+          if (items.length > 1) data = { ...data, mensaje: `Se registraron los ${items.length} despachos.` };
         }
 
         if (data.status !== "success") {
@@ -808,7 +868,6 @@
           return;
         }
 
-        this.compraPendiente = null;
         alerta.className = "alerta alerta--exito-lg";
         alerta.innerHTML = `
           <div class="flex items-center gap-2 mb-1">

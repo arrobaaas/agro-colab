@@ -1,6 +1,6 @@
 """Autorización por recurso, validación de entradas y protecciones generales."""
 
-from conftest import auth, login, pagar, publicar_arbol
+from conftest import CONSENTIMIENTO, auth, login, pagar, publicar_arbol
 
 
 def test_cabeceras_de_seguridad(cliente):
@@ -12,14 +12,14 @@ def test_cabeceras_de_seguridad(cliente):
 def test_solo_el_productor_elimina_su_arbol(cliente, nuevo_agricultor, token_agricultor):
     _, _, token = nuevo_agricultor
     arbol = publicar_arbol(cliente, token)
-    # Otro agricultor (el demo) no puede borrarlo; su dueño sí
+    # Otro agricultor no puede borrarlo; su dueño sí
     assert cliente.delete(f"/api/arboles/{arbol}", headers=auth(token_agricultor)).json()["status"] == "error"
     assert cliente.delete(f"/api/arboles/{arbol}", headers=auth(token)).json()["status"] == "success"
 
 
-def test_agricultor_demo_no_elimina_arboles(cliente, token_agricultor):
-    arbol = publicar_arbol(cliente, token_agricultor)
-    assert cliente.delete(f"/api/arboles/{arbol}", headers=auth(token_agricultor)).json()["status"] == "error"
+def test_agricultor_demo_no_elimina_arboles(cliente, token_agricultor_demo):
+    arbol = next(a["id"] for a in cliente.get("/api/arboles").json() if a["es_demo"])
+    assert cliente.delete(f"/api/arboles/{arbol}", headers=auth(token_agricultor_demo)).json()["status"] == "error"
 
 
 def test_comprador_no_puede_publicar_arboles(cliente, token_comprador):
@@ -42,7 +42,7 @@ def test_imagen_fuera_del_catalogo_se_rechaza(cliente, token_agricultor):
 
 
 def test_html_en_las_entradas_se_rechaza(cliente):
-    r = cliente.post("/api/register", json={
+    r = cliente.post("/api/register", json={**CONSENTIMIENTO,
         "nombre": "<script>alert(1)</script>", "email": "xss@ejemplo.cl", "password": "clave-segura-1", "rol": "comprador",
     })
     assert r.json()["status"] == "error"
@@ -62,12 +62,12 @@ def test_solo_el_productor_ve_sus_suscriptores(cliente, token_agricultor, token_
     assert r.status_code == 403 and r.json()["status"] == "error"
 
 
-def test_cuentas_demo_no_se_modifican(cliente, token_comprador):
-    r = cliente.put("/api/perfil", headers=auth(token_comprador), json={
+def test_cuentas_demo_no_se_modifican(cliente, token_comprador_demo):
+    r = cliente.put("/api/perfil", headers=auth(token_comprador_demo), json={
         "nombre": "Nombre Cambiado", "email": "comprador@agrocolab.cl",
     }).json()
     assert r["status"] == "error"
-    r = cliente.delete("/api/perfil", headers=auth(token_comprador))
+    r = cliente.request("DELETE", "/api/perfil", headers=auth(token_comprador_demo), json={"password": "123"})
     assert r.status_code == 403 and r.json()["status"] == "error"
 
 
@@ -77,7 +77,7 @@ def test_eliminar_cuenta_borra_sus_pagos(cliente, token_agricultor, nuevo_compra
     arbol = publicar_arbol(cliente, token_agricultor)
     usuario = int(token.split(".")[0])
     assert pagar(cliente, token, arbol_id=arbol)["status"] == "success"
-    assert cliente.delete("/api/perfil", headers=auth(token)).json()["status"] == "success"
+    assert cliente.request("DELETE", "/api/perfil", headers=auth(token), json={"password": "clave-segura-1"}).json()["status"] == "success"
     db = SessionLocal()
     try:
         assert db.query(Pago).filter(Pago.usuario_id == usuario).count() == 0
@@ -96,4 +96,4 @@ def test_limite_de_intentos_de_login(cliente):
 def test_estado_no_expone_claves(cliente):
     r = cliente.get("/api/estado").json()
     assert r["status"] == "success"
-    assert set(r) <= {"status", "correo_real", "modo_desarrollo", "variables"}
+    assert set(r) == {"status", "correo_real"}

@@ -13,7 +13,12 @@ BACKEND = Path(__file__).resolve().parent.parent
 ROUTERS = sorted((BACKEND / "routers").glob("*.py"))
 SERVICES = sorted((BACKEND / "services").glob("*.py"))
 REPOSITORIES = sorted((BACKEND / "repositories").glob("*.py"))
-OPERACIONES_DE_SESION = {"query", "add", "add_all", "delete", "commit", "rollback", "flush", "refresh", "execute", "merge"}
+# Exclusivas de una sesión: se detectan sobre cualquier objeto, se llame como se llame
+OPERACIONES_INEQUIVOCAS = {"query", "add_all", "commit", "rollback", "flush", "refresh", "execute", "merge", "scalar", "scalars", "bulk_save_objects"}
+# Otros objetos también las tienen (un set tiene add): solo sobre nombres de sesión
+OPERACIONES_DE_SESION = {"add", "delete", "get"}
+NOMBRES_DE_SESION = {"db", "session", "sesion"}
+SIN_CONSULTAS = [*ROUTERS, *SERVICES, *(BACKEND / nombre for nombre in ("core.py", "seguridad.py", "main.py", "catalogo.py", "notificaciones.py", "schemas.py"))]
 
 
 def arbol(archivo: Path):
@@ -32,33 +37,49 @@ def importaciones(archivo: Path) -> set:
 
 
 def operaciones_de_sesion(archivo: Path) -> list:
-    """Llamadas como db.query(...) o session.commit() en el archivo."""
+    """Llamadas como db.query(...) o s.commit() en el archivo."""
     return [
-        f"{archivo.name}:{nodo.lineno} {nodo.func.value.id}.{nodo.func.attr}"
+        f"{archivo.name}:{nodo.lineno} .{nodo.func.attr}"
         for nodo in ast.walk(arbol(archivo))
         if isinstance(nodo, ast.Call)
         and isinstance(nodo.func, ast.Attribute)
-        and isinstance(nodo.func.value, ast.Name)
-        and nodo.func.value.id in {"db", "session", "sesion"}
-        and nodo.func.attr in OPERACIONES_DE_SESION
+        and (
+            nodo.func.attr in OPERACIONES_INEQUIVOCAS
+            or (
+                nodo.func.attr in OPERACIONES_DE_SESION
+                and isinstance(nodo.func.value, ast.Name)
+                and nodo.func.value.id in NOMBRES_DE_SESION
+            )
+        )
     ]
 
 
-@pytest.mark.parametrize("archivo", [*ROUTERS, *SERVICES, BACKEND / "core.py", BACKEND / "seguridad.py", BACKEND / "main.py"], ids=lambda a: a.name)
+def nombres_importados(archivo: Path) -> set:
+    return {n.name for nodo in ast.walk(arbol(archivo)) if isinstance(nodo, ast.ImportFrom) for n in nodo.names}
+
+
+@pytest.mark.parametrize("archivo", SIN_CONSULTAS, ids=lambda a: a.name)
 def test_las_consultas_viven_solo_en_la_capa_de_datos(archivo):
     assert operaciones_de_sesion(archivo) == []
 
 
+@pytest.mark.parametrize("archivo", [*ROUTERS, *SERVICES], ids=lambda a: a.name)
+def test_solo_la_capa_de_datos_abre_sesiones(archivo):
+    assert not nombres_importados(archivo) & {"SessionLocal", "SessionAuxiliar", "engine"}
+
+
 @pytest.mark.parametrize("archivo", ROUTERS, ids=lambda a: a.name)
 def test_los_routers_no_saltan_la_capa_de_negocio(archivo):
-    prohibidos = {m for m in importaciones(archivo) if m.startswith("repositories") or m == "sqlalchemy"}
+    # sqlalchemy.orm se admite solo por la anotación de tipo Session
+    prohibidos = {m for m in importaciones(archivo) if m.startswith("repositories") or (m.startswith("sqlalchemy") and m != "sqlalchemy.orm")}
     assert not prohibidos
 
 
 @pytest.mark.parametrize("archivo", ROUTERS, ids=lambda a: a.name)
 def test_los_routers_no_contienen_reglas(archivo):
-    """Una ruta solo llama a un servicio: sin condicionales ni ciclos."""
-    condicionales = [n.lineno for n in ast.walk(arbol(archivo)) if isinstance(n, (ast.If, ast.For, ast.While, ast.Try))]
+    """Una ruta solo llama a un servicio: sin condicionales, ciclos ni operadores que decidan."""
+    prohibidos = (ast.If, ast.IfExp, ast.Match, ast.BoolOp, ast.For, ast.While, ast.Try, ast.ListComp, ast.DictComp, ast.SetComp, ast.GeneratorExp, ast.Raise, ast.Assert)
+    condicionales = [n.lineno for n in ast.walk(arbol(archivo)) if isinstance(n, prohibidos)]
     assert condicionales == []
 
 

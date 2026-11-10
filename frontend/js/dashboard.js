@@ -34,6 +34,8 @@
       return `
         <div><dt>Destino</dt><dd>${destino}</dd></div>
         <div><dt>Dirección</dt><dd>${e(pedido.direccion)}, ${e(pedido.comuna)}</dd></div>
+        ${pedido.codigo_postal ? `<div><dt>Código postal</dt><dd>${e(pedido.codigo_postal)}</dd></div>` : ""}
+        ${pedido.telefono ? `<div><dt>Celular</dt><dd>${e(pedido.telefono_codigo)} ${e(pedido.telefono)}</dd></div>` : ""}
         <div><dt>Frecuencia</dt><dd>${e(FRECUENCIAS[pedido.frecuencia_entrega] || pedido.frecuencia_entrega || "")}</dd></div>
         ${pedido.rut ? `<div><dt>RUT</dt><dd>${e(pedido.rut)}</dd></div>` : ""}`;
     }

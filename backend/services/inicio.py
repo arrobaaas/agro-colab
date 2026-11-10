@@ -1,13 +1,13 @@
 """Datos iniciales: cuentas de demostración, árboles de ejemplo y administrador."""
 
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 
 from catalogo import foto_de
 from core import ROL_ADMIN, es_cuenta_demo
-from database import SessionLocal, hash_password
+from database import hash_password
 from repositories import arboles as repo_arboles, transaccion, usuarios as repo_usuarios
 
 
@@ -16,9 +16,10 @@ def crear_administrador(db: Session):
 
     Nadie puede registrarse como administrador: la cuenta solo existe si se
     configuran esas variables en el servidor, y su contraseña no queda en el
-    repositorio. Si el correo ya tiene cuenta, se la asciende a
-    administrador. La contraseña solo se usa al crearla: después se cambia
-    desde el perfil o con la recuperación de contraseña.
+    repositorio. Si el correo ya tiene una cuenta verificada, se la asciende a
+    administrador. Si la cuenta está sin verificar pudo crearla cualquiera, así
+    que se reemplaza su contraseña por ADMIN_PASSWORD. La contraseña solo se usa
+    en esos casos: después se cambia desde el perfil o con la recuperación.
     """
     email = os.getenv("ADMIN_EMAIL", "").strip().lower()
     password = os.getenv("ADMIN_PASSWORD", "")
@@ -26,11 +27,19 @@ def crear_administrador(db: Session):
         return
     usuario = repo_usuarios.por_correo_exacto(db, email)
     if usuario:
-        if usuario.rol != ROL_ADMIN and not es_cuenta_demo(usuario):
-            usuario.rol = ROL_ADMIN
+        if usuario.rol == ROL_ADMIN or es_cuenta_demo(usuario):
+            return
+        if not usuario.verificado:
+            if len(password) < 12:
+                print("[admin] la cuenta del administrador existe sin verificar y ADMIN_PASSWORD no sirve: no se asciende")
+                return
+            usuario.password = hash_password(password)
             usuario.verificado = 1
-            transaccion.confirmar(db)
-            print(f"[admin] {email} ahora es administrador")
+            usuario.codigo_verificacion = None
+            usuario.codigo_expira = None
+        usuario.rol = ROL_ADMIN
+        transaccion.confirmar(db)
+        print("[admin] cuenta existente ascendida a administrador")
         return
     if len(password) < 12:
         print("[admin] ADMIN_PASSWORD falta o tiene menos de 12 caracteres: no se creó el administrador")
@@ -39,16 +48,22 @@ def crear_administrador(db: Session):
         db,
         nombre=os.getenv("ADMIN_NOMBRE", "").strip() or "Administrador",
         email=email, password=hash_password(password), rol=ROL_ADMIN, verificado=1,
-        consentimiento_datos=1, fecha_consentimiento=datetime.now(), acepta_terminos=1,
+        consentimiento_datos=1, fecha_consentimiento=datetime.utcnow(), acepta_terminos=1,
     )
     transaccion.confirmar(db)
-    print(f"[admin] cuenta de administrador creada: {email}")
+    print("[admin] cuenta de administrador creada")
 
 
 def cargar_datos_iniciales():
     """Se ejecuta al arrancar, después de crear las tablas (main.py)."""
-    db = SessionLocal()
+    db = transaccion.abrir_sesion()
     try:
+        # El proceso se reinicia seguido en el plan gratuito: aquí se hace la limpieza
+        ahora = datetime.utcnow()
+        repo_usuarios.purgar_sin_verificar(db, ahora - timedelta(days=1))
+        repo_usuarios.limpiar_recuperaciones_vencidas(db, ahora)
+        transaccion.confirmar(db)
+
         if repo_usuarios.contar(db) == 0:
             # Cuentas de demostración, con contraseña hasheada con bcrypt
             for nombre, email, rol in (
@@ -57,7 +72,7 @@ def cargar_datos_iniciales():
             ):
                 repo_usuarios.crear(
                     db, nombre=nombre, email=email, password=hash_password("123"), rol=rol, verificado=1,
-                    consentimiento_datos=1, fecha_consentimiento=datetime.now(), acepta_terminos=1,
+                    consentimiento_datos=1, fecha_consentimiento=datetime.utcnow(), acepta_terminos=1,
                 )
             transaccion.confirmar(db)
 

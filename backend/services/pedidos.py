@@ -2,6 +2,7 @@
 
 from sqlalchemy.orm import Session
 
+from core import es_cuenta_demo, limitar
 from database import Pedido, Usuario
 from errores import Conflicto, DatoInvalido, NoEncontrado, Prohibido
 from repositories import (
@@ -18,6 +19,10 @@ PLANES_ABASTECIMIENTO = {
     "Cosecha Completa Familiar": 34900,
     "Lote Gastronómico B2B": 89000,
 }
+# Se facturan a una empresa (ver terminos.html): exigen razón social y RUT
+PLANES_COMERCIALES = {"Lote Gastronómico B2B"}
+
+PEDIDOS_POR_HORA = 20
 
 
 def serializar(p: Pedido) -> dict:
@@ -32,6 +37,9 @@ def serializar(p: Pedido) -> dict:
         "rut": p.rut,
         "direccion": p.direccion,
         "comuna": p.comuna,
+        "codigo_postal": p.codigo_postal,
+        "telefono_codigo": p.telefono_codigo,
+        "telefono": p.telefono,
         "frecuencia_entrega": p.frecuencia_entrega,
         "codigo_seguimiento": p.codigo_seguimiento,
         "fecha_registro": p.fecha_registro.strftime("%d/%m/%Y %H:%M") if p.fecha_registro else None,
@@ -39,12 +47,22 @@ def serializar(p: Pedido) -> dict:
     }
 
 
-def _validar_logistica(datos):
+def _validar_logistica(datos, plan_nombre: str, cliente: Usuario):
     """Los tipos y largos ya los valida el esquema (schemas.py)."""
-    if datos.tipo_destino == "comercial" and not (datos.razon_social and datos.rut):
+    comercial = datos.tipo_destino == "comercial"
+    if comercial and not (datos.razon_social and datos.rut):
         raise DatoInvalido("Completa la razón social y el RUT para el despacho comercial.")
+    if plan_nombre in PLANES_COMERCIALES and not comercial:
+        raise DatoInvalido("El plan comercial requiere un despacho comercial, con razón social y RUT.")
     if not datos.direccion.strip() or not datos.comuna.strip():
         raise DatoInvalido("Completa la dirección y la comuna de entrega.")
+    if datos.telefono_codigo == "+56" and not (len(datos.telefono) == 9 and datos.telefono.startswith("9")):
+        raise DatoInvalido("Un celular de Chile tiene 9 dígitos y empieza con 9.")
+    # Todos los visitantes ven lo que queda en la cuenta demo: no debe recibir
+    # el RUT de nadie
+    if comercial and es_cuenta_demo(cliente):
+        registrar_evento("cuenta_demo", "advertencia", usuario=cliente, detalle="despacho comercial")
+        raise Prohibido("La cuenta de demostración no admite datos comerciales: la comparten todos los visitantes.")
 
 
 def _propio(db: Session, cliente: Usuario, pedido_id: int) -> Pedido:
@@ -62,7 +80,8 @@ def registrar(db: Session, cliente: Usuario, datos: PedidoRequest) -> dict:
         registrar_evento("acceso_denegado", "advertencia", usuario=cliente, detalle="contratar plan sin ser comprador")
         raise Prohibido("Solo los compradores pueden contratar planes.")
 
-    _validar_logistica(datos)
+    # La cuenta demo la comparten todos los visitantes
+    limitar(f"pedido:{cliente.id}", PEDIDOS_POR_HORA * (10 if es_cuenta_demo(cliente) else 1), 3600)
 
     pago = None
     if datos.tipo == "arbol":
@@ -72,6 +91,8 @@ def registrar(db: Session, cliente: Usuario, datos: PedidoRequest) -> dict:
         if not suscrito or not arbol:
             registrar_evento("acceso_denegado", "advertencia", usuario=cliente, detalle=f"despacho del árbol {datos.arbol_id} sin adoptarlo")
             raise Prohibido("No tienes adoptado ese árbol.")
+        if repo.despacho_de_arbol(db, cliente.id, arbol.id):
+            raise Conflicto("Ese árbol ya tiene un despacho. Modifícalo en lugar de crear otro.")
         plan_nombre = f"Cosecha de {arbol.nombre}"
         monto = arbol.precio_mensual_clp
     else:
@@ -81,11 +102,15 @@ def registrar(db: Session, cliente: Usuario, datos: PedidoRequest) -> dict:
         plan_nombre = datos.plan_nombre
         monto = PLANES_ABASTECIMIENTO[plan_nombre]
 
+    _validar_logistica(datos, plan_nombre, cliente)
+
+    if datos.tipo != "arbol":
         pago = repo_pagos.disponible_para_plan(db, datos.pago_id, cliente.id, plan_nombre) if datos.pago_id else None
         if not pago:
             registrar_evento("acceso_denegado", "advertencia", usuario=cliente, detalle=f"plan sin pago válido (pago {datos.pago_id})")
             raise Conflicto("Para contratar el plan primero debes pagarlo.")
 
+    comercial = datos.tipo_destino == "comercial"
     # El cliente es el usuario de la sesión, no el id o correo del formulario
     pedido = repo.crear_con_id(
         db,
@@ -95,18 +120,24 @@ def registrar(db: Session, cliente: Usuario, datos: PedidoRequest) -> dict:
         plan_nombre=plan_nombre,
         monto_clp=monto,
         tipo_destino=datos.tipo_destino,
-        razon_social=datos.razon_social,
-        rut=datos.rut,
+        razon_social=datos.razon_social if comercial else None,
+        rut=datos.rut if comercial else None,
         direccion=datos.direccion,
         comuna=datos.comuna,
+        codigo_postal=datos.codigo_postal,
+        telefono_codigo=datos.telefono_codigo,
+        telefono=datos.telefono,
         frecuencia_entrega=datos.frecuencia_entrega,
         estado_logistica="En coordinación con huerto de origen",
     )
     # El código sale del id: con count() + 1 se repetía tras borrar pedidos
     # (la columna es única y el insert fallaba con un error 500).
     pedido.codigo_seguimiento = f"AGRO-{pedido.id:04d}"
-    if pago:
-        pago.pedido_id = pedido.id
+    # Reclamo atómico: de dos peticiones simultáneas con el mismo pago, solo una
+    # lo consigue, y la otra deshace su pedido
+    if pago and not repo_pagos.reclamar(db, pago.id, pedido.id):
+        transaccion.deshacer(db)
+        raise Conflicto("Ese pago ya se usó en otro pedido.")
     transaccion.confirmar(db)
     transaccion.recargar(db, pedido)
     return {
@@ -128,13 +159,16 @@ def obtener(db: Session, cliente: Usuario, pedido_id: int) -> dict:
 def modificar_logistica(db: Session, cliente: Usuario, pedido_id: int, datos: LogisticaRequest) -> dict:
     """Cambia el destino y la frecuencia de un pedido propio."""
     pedido = _propio(db, cliente, pedido_id)
-    _validar_logistica(datos)
+    _validar_logistica(datos, pedido.plan_nombre, cliente)
 
     pedido.tipo_destino = datos.tipo_destino
     pedido.razon_social = datos.razon_social if datos.tipo_destino == "comercial" else None
     pedido.rut = datos.rut if datos.tipo_destino == "comercial" else None
     pedido.direccion = datos.direccion
     pedido.comuna = datos.comuna
+    pedido.codigo_postal = datos.codigo_postal
+    pedido.telefono_codigo = datos.telefono_codigo
+    pedido.telefono = datos.telefono
     pedido.frecuencia_entrega = datos.frecuencia_entrega
     transaccion.confirmar(db)
     transaccion.recargar(db, pedido)

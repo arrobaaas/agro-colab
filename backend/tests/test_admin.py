@@ -1,7 +1,7 @@
 """Panel de administración: solo el administrador entra, ve las cuentas y
 los árboles de cada agricultor, y edita o elimina cuentas comunes."""
 
-from conftest import auth, login, publicar_arbol, ADMIN_EMAIL
+from conftest import CONSENTIMIENTO, auth, login, publicar_arbol, ADMIN_EMAIL
 
 
 def id_de(cliente, token_admin, email):
@@ -17,7 +17,7 @@ def test_solo_el_administrador_entra_al_panel(cliente, token_comprador, token_ag
 
 
 def test_nadie_se_registra_como_administrador(cliente):
-    r = cliente.post("/api/register", json={
+    r = cliente.post("/api/register", json={**CONSENTIMIENTO,
         "nombre": "Intruso", "email": "intruso@ejemplo.cl", "password": "clave-segura-1", "rol": "administrador",
     })
     assert r.status_code == 422

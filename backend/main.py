@@ -6,6 +6,7 @@ el único que traduce los errores del dominio a códigos de estado HTTP.
 """
 
 import logging
+import os
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -14,16 +15,33 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import errores
-from core import ip_cliente
+from core import MODO_DESARROLLO, ip_cliente
 from database import engine, Base, asegurar_columnas, migrar_cuentas_antiguas
 from routers import admin, arboles, especies, monitoreo, pagos, pedidos, suscripciones, usuarios
 from seguridad import peticion_actual, registrar_evento
 from services.inicio import cargar_datos_iniciales
 
+# La documentación interactiva describe todas las rutas: en producción solo se
+# publica si AGROCOLAB_DOCS=1, por ejemplo para una presentación
+DOCS_ABIERTOS = MODO_DESARROLLO or os.getenv("AGROCOLAB_DOCS", "") == "1"
+
 app = FastAPI(
     title="Agro-Colab API",
-    description="Adopción de árboles frutales y abastecimiento directo con trazabilidad"
+    description="Adopción de árboles frutales y abastecimiento directo con trazabilidad",
+    **({} if DOCS_ABIERTOS else {"docs_url": None, "redoc_url": None, "openapi_url": None}),
 )
+
+ORIGENES_PRODUCCION = ["https://arrobaaas.github.io"]
+ORIGENES_LOCALES = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+# Frontend publicado en GitHub Pages; los orígenes locales solo en desarrollo
+ORIGENES = ORIGENES_PRODUCCION + (ORIGENES_LOCALES if MODO_DESARROLLO else [])
+# Tamaño máximo de una petición: ningún formulario de la API se acerca a esto
+MAX_CUERPO_BYTES = 64 * 1024
 
 # Nombres legibles de los campos para los mensajes de validación
 CAMPOS = {
@@ -36,6 +54,8 @@ CAMPOS = {
     "tipo_destino": "el tipo de destino", "frecuencia_entrega": "la frecuencia",
     "codigo": "el código", "identificador": "el número del árbol",
     "estimacion_cosecha_kg": "la estimación de cosecha (kg)",
+    "telefono_codigo": "el código de país", "codigo_postal": "el código postal",
+    "acepta_datos": "la aceptación del tratamiento de datos", "acepta_terminos": "la aceptación de los términos",
 }
 
 
@@ -75,7 +95,15 @@ async def error_http(request: Request, exc: StarletteHTTPException):
 async def error_inesperado(request: Request, exc: Exception):
     """Un fallo no previsto se registra, pero su detalle no se expone al cliente."""
     logging.getLogger("agrocolab").exception("Error no controlado en %s %s", request.method, request.url.path)
-    return respuesta_de_error(500, "Ocurrió un error inesperado. Intenta nuevamente en unos minutos.")
+    respuesta = respuesta_de_error(500, "Ocurrió un error inesperado. Intenta nuevamente en unos minutos.")
+    # Este manejador corre por fuera de los middlewares: sin esto, el navegador
+    # bloquearía el error por CORS y la respuesta saldría sin cabeceras
+    poner_cabeceras(respuesta, request)
+    origen = request.headers.get("origin")
+    if origen in ORIGENES:
+        respuesta.headers["Access-Control-Allow-Origin"] = origen
+        respuesta.headers["Vary"] = "Origin"
+    return respuesta
 
 
 @app.exception_handler(RequestValidationError)
@@ -93,12 +121,63 @@ async def error_de_validacion(request: Request, exc: RequestValidationError):
         mensaje = f"Revisa {nombre}: {motivo}."
         if "< o >" in motivo:
             # Ningún uso legítimo necesita < o > en estos campos: es casi
-            # siempre un intento de XSS
-            muestra = str(errores[0].get("input", ""))[:120]
-            registrar_evento("entrada_html", "critica", detalle=f"campo {campo}: {muestra}")
+            # siempre un intento de XSS. No se guarda el valor: puede ser un dato personal
+            registrar_evento("entrada_html", "critica", detalle=f"campo {campo}")
     else:
         mensaje = f"Revisa {nombre}: el valor no es válido."
     return respuesta_de_error(422, mensaje)
+
+
+class CuerpoDemasiadoGrande(Exception):
+    pass
+
+
+class LimiteDeCuerpo:
+    """Corta la lectura de una petición demasiado grande. FastAPI lee el cuerpo
+    completo antes de validar y de aplicar el límite de intentos, y uvicorn no
+    tiene un tope propio. Se cuenta lo leído porque una petición por partes
+    (chunked) no declara su tamaño."""
+
+    def __init__(self, siguiente, maximo: int):
+        self.siguiente = siguiente
+        self.maximo = maximo
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.siguiente(scope, receive, send)
+
+        declarado = dict(scope["headers"]).get(b"content-length", b"")
+        if declarado.isdigit() and int(declarado) > self.maximo:
+            return await self._rechazar(scope, receive, send)
+
+        leido = 0
+
+        async def recibir():
+            nonlocal leido
+            mensaje = await receive()
+            if mensaje["type"] == "http.request":
+                leido += len(mensaje.get("body", b""))
+                if leido > self.maximo:
+                    raise CuerpoDemasiadoGrande()
+            return mensaje
+
+        await self.siguiente(scope, recibir, send)
+
+    async def _rechazar(self, scope, receive, send):
+        await respuesta_de_error(413, "La petición es demasiado grande.")(scope, receive, send)
+
+
+def poner_cabeceras(respuesta, request: Request):
+    respuesta.headers["X-Content-Type-Options"] = "nosniff"
+    respuesta.headers["X-Frame-Options"] = "DENY"
+    respuesta.headers["Referrer-Policy"] = "no-referrer"
+    respuesta.headers["Strict-Transport-Security"] = "max-age=31536000"
+    if request.url.path.startswith("/api/"):
+        # Las respuestas traen datos personales: que no queden en cachés
+        respuesta.headers["Cache-Control"] = "no-store"
+
+
+app.add_middleware(LimiteDeCuerpo, maximo=MAX_CUERPO_BYTES)
 
 
 @app.middleware("http")
@@ -106,29 +185,16 @@ async def cabeceras_de_seguridad(request: Request, call_next):
     # IP real y ruta disponibles para el registro de eventos de esta petición
     peticion_actual.set({"ip": ip_cliente(request), "ruta": f"{request.method} {request.url.path}"})
     respuesta = await call_next(request)
-    respuesta.headers["X-Content-Type-Options"] = "nosniff"
-    respuesta.headers["X-Frame-Options"] = "DENY"
-    respuesta.headers["Referrer-Policy"] = "no-referrer"
-    if request.url.path.startswith("/api/"):
-        # Las respuestas traen datos personales: que no queden en cachés
-        respuesta.headers["Cache-Control"] = "no-store"
+    poner_cabeceras(respuesta, request)
     return respuesta
 
 
-# Permitir peticiones solo desde los orígenes conocidos del frontend
+# Permitir peticiones solo desde los orígenes conocidos del frontend. La sesión va
+# en una cabecera y no en una cookie: no hacen falta credenciales de navegador
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://agro-colab.onrender.com",
-        # Frontend publicado en GitHub Pages: sin este origen el navegador
-        # bloquea todas las llamadas a la API desde la demo en línea.
-        "https://arrobaaas.github.io",
-    ],
-    allow_credentials=True,
+    allow_origins=ORIGENES,
+    allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Content-Type", "Authorization", "X-Monitoreo-Token"],
 )

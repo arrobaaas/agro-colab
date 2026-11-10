@@ -35,12 +35,21 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi.testclient import TestClient  # noqa: E402
 
 import main  # noqa: E402
+from services import arboles as servicio_arboles, pagos as servicio_pagos, pedidos as servicio_pedidos  # noqa: E402
+
+# Las pruebas comparten sesiones durante toda la ejecución: estos topes se
+# comprueban por separado en test_auditoria.py
+servicio_arboles.PUBLICACIONES_POR_HORA = 10_000
+servicio_arboles.MAX_ARBOLES_POR_PRODUCTOR = 10_000
+servicio_pagos.INTENTOS_POR_USUARIO = 10_000
+servicio_pedidos.PEDIDOS_POR_HORA = 10_000
 
 _ips = itertools.count(1)
 _correos = itertools.count(1)
 
 TARJETA_OK = "4242 4242 4242 4242"
 TARJETA_SIN_FONDOS = "4000 0000 0000 0002"
+CONSENTIMIENTO = {"acepta_datos": True, "acepta_terminos": True}
 
 
 @pytest.fixture
@@ -64,12 +73,14 @@ def auth(token):
 
 @pytest.fixture(scope="session")
 def _tokens_demo():
-    """Un solo inicio de sesión por cuenta demo en toda la ejecución: el
-    login tiene un límite de 10 intentos por cuenta cada 15 minutos."""
+    """Sesiones compartidas por toda la ejecución: cuentas reales de cada rol, las
+    cuentas demo (lo demo y lo real no se mezclan) y el administrador."""
     with TestClient(main.app, headers={"X-Forwarded-For": "10.255.0.1"}) as c:
         return {
-            "comprador": login(c, "comprador@agrocolab.cl"),
-            "agricultor": login(c, "agricultor@agrocolab.cl", rol="agricultor"),
+            "comprador": registrar(c, "comprador")[2],
+            "agricultor": registrar(c, "agricultor")[2],
+            "comprador_demo": login(c, "comprador@agrocolab.cl"),
+            "agricultor_demo": login(c, "agricultor@agrocolab.cl", rol="agricultor"),
             "admin": login(c, ADMIN_EMAIL, ADMIN_PASSWORD),
         }
 
@@ -85,6 +96,16 @@ def token_agricultor(_tokens_demo):
 
 
 @pytest.fixture
+def token_comprador_demo(_tokens_demo):
+    return _tokens_demo["comprador_demo"]
+
+
+@pytest.fixture
+def token_agricultor_demo(_tokens_demo):
+    return _tokens_demo["agricultor_demo"]
+
+
+@pytest.fixture
 def token_admin(_tokens_demo):
     return _tokens_demo["admin"]
 
@@ -94,11 +115,11 @@ def registrar(cliente, rol):
     email = f"prueba{next(_correos)}@ejemplo.cl"
     password = "clave-segura-1"
     r = cliente.post("/api/register", json={
-        "nombre": "Persona de Prueba", "email": email, "password": password, "rol": rol,
+        "nombre": "Persona de Prueba", "email": email, "password": password, "rol": rol, **CONSENTIMIENTO,
     }).json()
     assert r["status"] == "success", r
     codigo = r["user"]["codigo_verificacion"]
-    assert cliente.post("/api/verificar-cuenta", json={"email": email, "codigo": codigo}).json()["status"] == "success"
+    assert cliente.post("/api/verificar-cuenta", json={"email": email, "codigo": codigo, "password": password}).json()["status"] == "success"
     return email, password, login(cliente, email, password, rol)
 
 
@@ -122,9 +143,10 @@ def pagar(cliente, token, tipo="arbol", arbol_id=None, plan_nombre=None, numero=
 def publicar_arbol(cliente, token, cupos=3, precio=10000, especie="palto_hass"):
     import catalogo
     foto = sorted(catalogo.fotos_permitidas(especie))[0]
+    plan, tipo = {5: ("Básico", "Compartido"), 3: ("Intermedio", "Compartido"), 1: ("Premium", "Exclusivo")}[cupos]
     r = cliente.post("/api/arboles", headers=auth(token), json={
         "especie": especie, "identificador": str(next(_correos)), "ubicacion": "Curicó, Maule",
-        "plan": "Básico", "tipo_suscripcion": "Compartido", "cupos_totales": cupos,
+        "plan": plan, "tipo_suscripcion": tipo, "cupos_totales": cupos,
         "precio_mensual_clp": precio, "estimacion_cosecha_kg": 40, "imagen": foto,
     }).json()
     assert r["status"] == "success", r

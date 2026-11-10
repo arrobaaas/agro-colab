@@ -35,7 +35,7 @@
 body {
   font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background-color: #f6f4ee;
+  background-color: var(--tc-vacio);
 }
 
 h1, h2, h3, h4 {
@@ -218,7 +218,7 @@ h1, h2, h3, h4 {
   border-radius: 9999px;
   background-color: var(--emerald-500);
   color: var(--emerald-950);
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 900;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -230,7 +230,7 @@ h1, h2, h3, h4 {
   border-radius: 9999px;
   background-color: var(--stone-100);
   color: var(--stone-600);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -511,7 +511,7 @@ h1, h2, h3, h4 {
   position: absolute;
   top: 0.875rem;
   z-index: 1;
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -553,7 +553,7 @@ h1, h2, h3, h4 {
 }
 
 .arbol-card__especie {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--emerald-300);
   text-transform: uppercase;
@@ -677,7 +677,7 @@ h1, h2, h3, h4 {
 
 .eyebrow {
   display: inline-block;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -708,7 +708,7 @@ h1, h2, h3, h4 {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
   padding: 0.25rem 0.625rem;
   border-radius: 9999px;
@@ -727,7 +727,7 @@ h1, h2, h3, h4 {
   position: absolute;
   bottom: 0.75rem;
   left: 0.75rem;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 500;
   padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
@@ -869,7 +869,7 @@ h1, h2, h3, h4 {
   flex-direction: column;
   width: 100%;
   max-width: 28rem;
-  background-color: #f6f4ee;
+  background-color: var(--tc-vacio);
   box-shadow: -30px 0 60px -20px rgba(2, 44, 34, 0.5);
 }
 
@@ -940,7 +940,7 @@ h1, h2, h3, h4 {
   border-radius: 9999px;
   background-color: var(--amber-50);
   color: var(--amber-800);
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -1211,7 +1211,7 @@ h1, h2, h3, h4 {
   border-radius: 9999px;
   background-color: var(--emerald-800);
   color: #fff;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   line-height: 1.25rem;
 }
 
@@ -1251,7 +1251,7 @@ h1, h2, h3, h4 {
 .campo-etiqueta {
   display: block;
   margin-bottom: 0.4rem;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1311,7 +1311,7 @@ h1, h2, h3, h4 {
 
 .campo-ayuda {
   margin-top: 0.35rem;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   color: var(--stone-400);
 }
 
@@ -1339,41 +1339,30 @@ h1, h2, h3, h4 {
    cuerpo liviano, etiquetas en mayúscula con un acento cálido y un único
    botón relleno por vista. Adaptado a la paleta de Agro-Colab: esmeralda
    para la acción, ámbar para las etiquetas y verde profundo de fondo.
-   Todo vive bajo .tema-comprador para no afectar al panel del agricultor.
+   Todo el sitio usa este tema, incluidos el panel del agricultor y el de monitoreo.
    ===================================================================== */
-/* --luz (0 o 1) la fija efectos.js: arriba todo es oscuro y, al bajar más
-   allá de la portada, la página "se ilumina" hacia la paleta clara con un
-   fundido. Cada color es una mezcla entre su versión oscura y su versión
-   clara. Se anima en el tiempo y no ligado al scroll: con una mezcla
-   continua, a mitad de camino fondo y texto quedaban ambos grises.
-   La versión clara es un piedra apagado, no blanco: el salto desde el
-   negro encandilaba al bajar rápido de noche. */
-@property --luz {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
-}
-
-html {
-  transition: --luz 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+/* Una sola paleta para todo el sitio: un verde musgo intermedio, ni el negro de
+   la antigua portada ni el piedra claro de las secciones. Se define en :root
+   para que también la usen el fondo de la página y lo que queda fuera del tema.
+   Cada color de texto cumple al menos 4.5:1 sobre las tres superficies. */
+:root {
+  --tc-vacio: #33443b;
+  --tc-superficie: #3b4e44;
+  --tc-superficie-2: #44584d;
+  --tc-linea: rgba(255, 255, 255, 0.13);
+  --tc-linea-fuerte: rgba(255, 255, 255, 0.24);
+  --tc-texto: #f6f8f3;
+  --tc-texto-2: #dbe3dd;
+  --tc-texto-3: #c3cec7;
+  --tc-accion: #5ee9b5;
+  --tc-accion-hover: #8ff0cb;
+  --tc-sobre-accion: #03140c;
+  --tc-acento: #fcd34d;
+  --tc-profundo: #15846e;
+  --tc-peligro: #fecaca;
 }
 
 .tema-comprador {
-  --tc-mezcla: calc((1 - var(--luz, 0)) * 100%);
-  --tc-vacio: color-mix(in srgb, #040806 var(--tc-mezcla), #dcdad1);
-  --tc-superficie: color-mix(in srgb, #0a110d var(--tc-mezcla), #e8e6de);
-  --tc-superficie-2: color-mix(in srgb, #101a15 var(--tc-mezcla), #d0cec4);
-  --tc-linea: color-mix(in srgb, rgba(255, 255, 255, 0.08) var(--tc-mezcla), rgba(28, 25, 23, 0.1));
-  --tc-linea-fuerte: color-mix(in srgb, rgba(255, 255, 255, 0.14) var(--tc-mezcla), rgba(28, 25, 23, 0.18));
-  --tc-texto: color-mix(in srgb, #ffffff var(--tc-mezcla), #0c1410);
-  --tc-texto-2: color-mix(in srgb, #c8cdca var(--tc-mezcla), #3d4842);
-  --tc-texto-3: color-mix(in srgb, #8b938f var(--tc-mezcla), #67716b);
-  --tc-accion: color-mix(in srgb, #34d399 var(--tc-mezcla), #047857);
-  --tc-accion-hover: color-mix(in srgb, #6ee7b7 var(--tc-mezcla), #065f46);
-  --tc-sobre-accion: color-mix(in srgb, #03140c var(--tc-mezcla), #ffffff);
-  --tc-acento: color-mix(in srgb, #fbbf24 var(--tc-mezcla), #b45309);
-  --tc-profundo: #15846e;
-  --tc-peligro: color-mix(in srgb, #fca5a5 var(--tc-mezcla), #b91c1c);
   --tc-fuente: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   background-color: var(--tc-vacio);
@@ -1536,10 +1525,9 @@ html {
   color: var(--tc-texto);
 }
 
-/* Páginas sin JavaScript (legales): la barra no puede aclararse con el
-   scroll, así que es oscura y sólida en vez de translúcida */
+/* Páginas sin JavaScript (legales): la barra es sólida en vez de translúcida */
 .tc-nav--solida {
-  background-color: #040806;
+  background-color: var(--tc-vacio);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -1617,17 +1605,7 @@ html {
 }
 
 /* ----- Hero con constelación ----- */
-/* La portada conserva siempre la paleta oscura: es el escenario del árbol */
 .tc-hero {
-  --tc-vacio: #040806;
-  --tc-linea: rgba(255, 255, 255, 0.08);
-  --tc-texto: #ffffff;
-  --tc-texto-2: #c8cdca;
-  --tc-texto-3: #8b938f;
-  --tc-accion: #34d399;
-  --tc-accion-hover: #6ee7b7;
-  --tc-sobre-accion: #03140c;
-  --tc-acento: #fbbf24;
   position: relative;
   overflow: hidden;
   background-color: var(--tc-vacio);
@@ -1699,7 +1677,7 @@ html {
 }
 
 .tc-datos dt {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -2141,7 +2119,7 @@ html {
 }
 
 .tc-datos-item dt {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -2211,7 +2189,7 @@ html {
 
 .tc-footer h4 {
   margin-bottom: 1.25rem;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -2332,8 +2310,7 @@ html {
   border-bottom: 1px solid var(--tc-linea);
 }
 
-/* El título y el resumen traen clases de color fijas pensadas para la
-   cabecera oscura: con la página iluminada quedaban blanco sobre claro */
+/* El título y el resumen traen clases de color fijas: usan los de la paleta */
 .tema-comprador .drawer-cabecera .text-white {
   color: var(--tc-texto);
 }
@@ -2504,7 +2481,7 @@ html {
 }
 
 .tc-kpi__etiqueta {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -2547,10 +2524,8 @@ html {
 
 .tema-comprador .tc-icono--peligro:hover { color: var(--tc-peligro); }
 
-/* Encabezados de los modales (despacho, suscriptores, edición): su fondo
-   sigue la luz de la página, así que ningún texto puede tener un color
-   claro fijo; antes, con la página iluminada, el título, el subtítulo y el
-   precio del plan quedaban blancos sobre blanco */
+/* Encabezados de los modales (despacho, suscriptores, edición): los textos usan
+   los colores de la paleta, no un color claro fijo */
 .tema-comprador .bg-gradient-to-br,
 .tema-comprador .bg-gradient-to-br h3,
 .tema-comprador .bg-gradient-to-br .text-white {
@@ -2795,7 +2770,7 @@ html {
   max-width: 16rem;
   padding: 0.65rem 0.85rem;
   border-radius: 12px;
-  background-color: #0c1410;
+  background-color: var(--tc-superficie-2);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 16px 30px -12px rgba(0, 0, 0, 0.6);
   color: #ffffff;
@@ -2807,8 +2782,8 @@ html {
 
 .tc-tooltip--visible { opacity: 1; }
 .tc-tooltip strong { font-size: 0.9375rem; font-weight: 500; font-variant-numeric: tabular-nums; }
-.tc-tooltip span { color: #c8cdca; }
-.tc-tooltip small { color: #8b938f; font-size: 0.75rem; }
+.tc-tooltip span { color: var(--tc-texto-2); }
+.tc-tooltip small { color: var(--tc-texto-3); font-size: 0.75rem; }
 .tc-tooltip small:empty { display: none; }
 
 @media (max-width: 479px) {
@@ -2882,9 +2857,7 @@ html {
 }
 
 /* ----- Login ----- */
-/* El login es siempre oscuro: no se ilumina al bajar en el celular */
 .login {
-  --luz: 0;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -3075,7 +3048,7 @@ html {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #040806;
+  background-color: var(--tc-vacio);
 }
 
 .error-pagina__escenario {
@@ -3259,16 +3232,11 @@ html {
   }
 }
 
-/* El resumen es siempre oscuro, como la portada */
 .pago-resumen {
-  --tc-texto: #ffffff;
-  --tc-texto-2: #c8cdca;
-  --tc-texto-3: #8b938f;
-  --tc-linea: rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
   padding: 2rem;
-  background: radial-gradient(120% 80% at 0% 0%, rgba(21, 132, 110, 0.35), transparent 60%), #040806;
+  background: radial-gradient(120% 80% at 0% 0%, rgba(21, 132, 110, 0.35), transparent 60%), var(--tc-superficie);
   color: var(--tc-texto);
 }
 
@@ -3534,7 +3502,7 @@ html {
 
 .tc-pago__estado {
   justify-self: end;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -3632,7 +3600,7 @@ html {
 html:has(body > .tema-comprador[data-vista]:not(.hidden)),
 body:has(> .tema-comprador[data-vista]:not(.hidden)),
 html:has(> body.tema-comprador) {
-  background-color: #040806;
+  background-color: var(--tc-vacio);
 }
 
 .tc-solo-escritorio {
@@ -3648,19 +3616,18 @@ html:has(> body.tema-comprador) {
   .tc-nav__enlaces { gap: 0.35rem; }
 }
 
-/* En celular el árbol va arriba del titular, enmarcado, para que se vea al
-   entrar (antes quedaba debajo de todo el texto, fuera de la pantalla) */
+/* En celular el titular y el botón principal van primero, a la vista al
+   entrar. El árbol queda debajo, más chico: es decorativo. */
 @media (max-width: 899px) {
   .tc-hero__grid {
     min-height: auto;
-    gap: 0.25rem;
-    padding-top: 1rem;
-    padding-bottom: 4rem;
+    gap: 1rem;
+    padding-top: 2rem;
+    padding-bottom: 3.5rem;
   }
 
-  .tc-hero__visual {
-    order: -1;
-    width: min(100%, 360px);
+  .tc-hero__grid > .tc-hero__visual {
+    width: min(70%, 260px);
   }
 }
 
@@ -4044,7 +4011,7 @@ html:has(> body.tema-comprador) {
 }
 
 .tc-resumen dt {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -4069,7 +4036,7 @@ html:has(> body.tema-comprador) {
 .tc-tabla th {
   padding: 0.75rem 1rem 0.75rem 0;
   text-align: left;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -4158,7 +4125,7 @@ html {
   margin-top: -2.5rem;
   padding-bottom: 5rem;
   border-radius: 2.5rem 2.5rem 0 0;
-  background-color: #f6f4ee;
+  background-color: var(--tc-vacio);
   box-shadow: 0 -24px 50px -12px rgba(2, 44, 34, 0.45);
   /* Los bloques que esperan su entrada están desplazados (por ejemplo, 90px
      a la derecha): sin esto ensanchaban la página y en el celular el
@@ -4172,8 +4139,8 @@ html {
   opacity: 0;
   transform: translateY(40px);
   transition:
-    opacity 0.9s ease,
-    transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.45s ease,
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   transition-delay: var(--reveal-delay, 0ms);
 }
 
@@ -4207,11 +4174,11 @@ html {
 
 .js-reveal [data-reveal="wipe"] > * {
   clip-path: inset(0 100% 0 0);
-  transition: clip-path 1s cubic-bezier(0.65, 0, 0.35, 1);
+  transition: clip-path 0.6s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-.js-reveal [data-reveal="wipe"] > :nth-child(2) { transition-delay: 0.12s; }
-.js-reveal [data-reveal="wipe"] > :nth-child(3) { transition-delay: 0.24s; }
+.js-reveal [data-reveal="wipe"] > :nth-child(2) { transition-delay: 0.08s; }
+.js-reveal [data-reveal="wipe"] > :nth-child(3) { transition-delay: 0.16s; }
 
 .js-reveal [data-reveal].revelado {
   opacity: 1;
@@ -4582,4 +4549,243 @@ header.sticky.header--con-scroll {
 .aviso-cookies__acciones .tc-boton {
   flex: 1 1 9rem;
   padding: 0.75rem 1rem;
+}
+
+/* ----- Utilidades de Tailwind sobre la paleta única ----- */
+.tema-comprador .text-red-500,
+.tema-comprador .text-red-700,
+.tema-comprador .text-rose-500,
+.tema-comprador .text-rose-700,
+.tema-comprador .text-rose-800 { color: var(--tc-peligro); }
+.tema-comprador .bg-red-50,
+.tema-comprador .bg-rose-50,
+.tema-comprador .bg-rose-100 { background-color: rgba(248, 113, 113, 0.16); }
+.tema-comprador .bg-amber-100 { background-color: rgba(251, 191, 36, 0.16); }
+.tema-comprador .border-emerald-200 { border-color: rgba(94, 233, 181, 0.35); }
+
+.tema-comprador .btn-hero--primario {
+  background-color: var(--tc-accion);
+  color: var(--tc-sobre-accion);
+}
+
+.tema-comprador .btn-hero--primario:hover {
+  background-color: var(--tc-accion-hover);
+}
+
+/* ----- Panel de monitoreo ----- */
+.tema-comprador .header-sitio {
+  background: var(--tc-vacio);
+  border-bottom: 1px solid var(--tc-linea);
+  color: var(--tc-texto);
+}
+
+.tema-comprador .kpi,
+.tema-comprador .kpi--destacado {
+  background: var(--tc-superficie);
+  border: 1px solid var(--tc-linea);
+  color: var(--tc-texto);
+}
+
+.tema-comprador .kpi__valor { color: var(--tc-texto); }
+.tema-comprador .kpi__etiqueta { color: var(--tc-texto-3); }
+
+/* ----- Celular con su código de país ----- */
+.campo-celular {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.campo-celular select {
+  flex: 0 0 9.5rem;
+  width: 9.5rem;
+}
+
+.campo-celular input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ----- Autocompletado del navegador -----
+   Chrome y Edge pintan de blanco o celeste los campos autocompletados y no
+   dejan cambiar ese fondo. Una sombra interior lo tapa con el color del tema. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--tc-texto);
+  caret-color: var(--tc-texto);
+  -webkit-box-shadow: 0 0 0 1000px var(--tc-superficie-2) inset;
+  box-shadow: 0 0 0 1000px var(--tc-superficie-2) inset;
+  transition: background-color 9999s ease-out 0s;
+}
+
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--tc-superficie-2) inset, 0 0 0 2px rgba(52, 211, 153, 0.3);
+  box-shadow: 0 0 0 1000px var(--tc-superficie-2) inset, 0 0 0 2px rgba(52, 211, 153, 0.3);
+}
+
+input:autofill,
+textarea:autofill,
+select:autofill {
+  background-color: var(--tc-superficie-2);
+  color: var(--tc-texto);
+}
+
+/* ----- Crítica de diseño (2026-11-10) ----- */
+
+/* Tarjeta del catálogo: categoría en una línea, insignia de demo sobre la
+   foto y «Adoptar» como botón principal */
+.tc-arbol__categoria {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tc-arbol__insignia {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
+  background-color: rgba(3, 20, 12, 0.72);
+  color: var(--tc-texto);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.tc-arbol__adoptar {
+  padding: 0.75rem 1.4rem;
+}
+
+.nav-usuario__rol {
+  font-size: 0.75rem;
+}
+
+/* En celular los planes se deslizan de lado: antes eran tres tarjetas
+   apiladas que empujaban el catálogo varias pantallas hacia abajo */
+@media (max-width: 899px) {
+  .tc-planes {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 0;
+    padding-bottom: 0.5rem;
+    border-top: 0;
+  }
+
+  .tema-comprador .tc-planes > .plan-adopcion-card,
+  .tema-comprador .tc-planes > .tc-plan {
+    flex: 0 0 85%;
+    scroll-snap-align: start;
+    padding: 1.75rem 1.5rem;
+    border: 1px solid var(--tc-linea);
+    border-radius: 24px;
+    background-color: var(--tc-superficie);
+  }
+
+  /* Sin desplazamiento lateral al aparecer: dentro de un carrusel movería
+     el scroll */
+  .js-reveal .tc-planes [data-reveal] {
+    transform: translateY(24px);
+  }
+}
+
+/* Zonas táctiles de 44 px en celular */
+@media (max-width: 767px) {
+  .tc-enlace,
+  .nav-pill,
+  .tc-footer button,
+  .tc-footer a {
+    min-height: 44px;
+  }
+
+  .tc-footer a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .nav-icono {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .nav-usuario__avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .nav-usuario {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+}
+
+/* ----- Pago único de la canasta ----- */
+.canasta-pagar {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.canasta-aviso {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--tc-texto-2);
+  text-align: center;
+}
+
+/* ----- Tamaños según el alto de la pantalla (2026-11-10) -----
+   El titular crecía solo con el ancho: en pantallas anchas pero bajas
+   (notebooks, zoom del navegador) empujaba los botones fuera de la vista.
+   Ahora lo limita también el alto, y la portada ocupa la altura visible
+   real del navegador (svh descuenta las barras del celular). */
+.tc-display {
+  font-size: clamp(2.5rem, min(6vw, 10vh), 5.75rem);
+}
+
+.login__titular {
+  font-size: clamp(2.25rem, min(6vw, 9vh), 4.75rem);
+}
+
+@supports (height: 100svh) {
+  .tc-display {
+    font-size: clamp(2.5rem, min(6vw, 10svh), 5.75rem);
+  }
+
+  @media (min-width: 900px) {
+    .tc-hero__grid {
+      min-height: calc(100svh - 72px);
+    }
+  }
+}
+
+/* Pantallas bajas: menos aire vertical en la portada para que el titular,
+   el texto y los botones quepan juntos */
+@media (min-width: 900px) and (max-height: 900px) {
+  .tc-hero__grid {
+    padding-top: 1.5rem;
+    padding-bottom: 3rem;
+  }
+
+  .tc-hero .tc-display { margin-top: 1rem !important; }
+  .tc-hero .tc-display + .tc-cuerpo { margin-top: 1.25rem !important; }
+  .tc-acciones { margin-top: 1.75rem; }
+  .tc-datos { margin-top: 2rem; }
+}
+
+/* Panel en celular: sin el aire de escritorio sobre el saludo ni entre
+   secciones */
+@media (max-width: 767px) {
+  .tc-panel-cabecera {
+    padding-top: 2rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .tc-panel-seccion {
+    padding-top: 2rem;
+  }
 }

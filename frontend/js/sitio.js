@@ -5,6 +5,13 @@
    navegador siempre se puede leer. Por eso ninguna clave va en el frontend. */
 
 (function () {
+  /* GitHub Pages no permite enviar frame-ancestors ni X-Frame-Options: una página
+     enmarcada por otro sitio no se muestra (protección contra clickjacking). */
+  if (window.top !== window.self) {
+    document.documentElement.style.display = "none";
+    return;
+  }
+
   const AgroColab = (window.AgroColab = window.AgroColab || {});
   const CLAVE = "agrocolab_cookies";
   const CLAVE_PLAN = "agrocolab_plan";

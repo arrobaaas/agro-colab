@@ -2,14 +2,14 @@
 tienen la misma forma: {status, mensaje}."""
 
 import catalogo
-from conftest import ADMIN_EMAIL, TARJETA_OK, TARJETA_SIN_FONDOS, auth, publicar_arbol
+from conftest import CONSENTIMIENTO, ADMIN_EMAIL, TARJETA_OK, TARJETA_SIN_FONDOS, auth, publicar_arbol
 
 
 def arbol_valido(**cambios):
     foto = sorted(catalogo.fotos_permitidas("palto_hass"))[0]
     return {
         "especie": "palto_hass", "ubicacion": "Curicó, Maule", "plan": "Básico", "tipo_suscripcion": "Compartido",
-        "cupos_totales": 2, "precio_mensual_clp": 1000, "estimacion_cosecha_kg": 10, "imagen": foto, **cambios,
+        "cupos_totales": 5, "precio_mensual_clp": 1000, "estimacion_cosecha_kg": 10, "imagen": foto, **cambios,
     }
 
 
@@ -21,11 +21,10 @@ def pago(tipo="plan", numero=TARJETA_OK, **cambios):
 
 
 PEDIDO = {
-    "plan_nombre": "Canasta Huerto Esencial", "cliente_nombre": "Persona", "telefono": "+56911112222",
-    "email": "persona@ejemplo.cl", "tipo_destino": "particular", "direccion": "Av. Siempre Viva 742",
-    "comuna": "Maipú", "frecuencia_entrega": "semanal",
+    "plan_nombre": "Canasta Huerto Esencial", "tipo_destino": "particular", "direccion": "Av. Siempre Viva 742",
+    "comuna": "Maipú", "codigo_postal": "8320000", "telefono_codigo": "+56", "telefono": "912345678", "frecuencia_entrega": "semanal",
 }
-LOGISTICA = {"tipo_destino": "particular", "direccion": "Calle Nueva 1", "comuna": "Macul", "frecuencia_entrega": "mensual"}
+LOGISTICA = {"tipo_destino": "particular", "direccion": "Calle Nueva 1", "comuna": "Macul", "codigo_postal": "8320000", "telefono_codigo": "+56", "telefono": "912345678", "frecuencia_entrega": "mensual"}
 
 
 def error(respuesta, codigo, estado="error"):
@@ -50,10 +49,10 @@ def test_crear_responde_201(cliente, token_agricultor, nuevo_comprador):
 
 
 def test_registro_responde_202_exista_o_no_el_correo(cliente):
-    nueva = cliente.post("/api/register", json={
+    nueva = cliente.post("/api/register", json={**CONSENTIMIENTO,
         "nombre": "Persona Nueva", "email": "contrato-202@ejemplo.cl", "password": "clave-segura-1", "rol": "comprador",
     })
-    repetida = cliente.post("/api/register", json={
+    repetida = cliente.post("/api/register", json={**CONSENTIMIENTO,
         "nombre": "Otra Persona", "email": "comprador@agrocolab.cl", "password": "clave-segura-1", "rol": "comprador",
     })
     assert nueva.status_code == repetida.status_code == 202
@@ -87,7 +86,7 @@ def test_ciclo_completo_del_pedido_persiste(cliente, nuevo_comprador):
 # ------------------------------------ 400, 401, 402
 
 def test_codigo_de_verificacion_incorrecto_responde_400(cliente):
-    error(cliente.post("/api/verificar-cuenta", json={"email": "nadie@ejemplo.cl", "codigo": "000000"}), 400)
+    error(cliente.post("/api/verificar-cuenta", json={"email": "nadie@ejemplo.cl", "codigo": "000000", "password": "x"}), 400)
     error(cliente.post("/api/restablecer-contrasena", json={
         "email": "nadie@ejemplo.cl", "codigo": "000000", "password": "clave-segura-1",
     }), 400)
@@ -123,8 +122,6 @@ def test_sin_permiso_responde_403(cliente, token_comprador, token_agricultor, nu
     arbol = publicar_arbol(cliente, token_agricultor)
     error(cliente.put(f"/api/arboles/{arbol}", headers=auth(token_otro), json=arbol_valido()), 403)
     error(cliente.delete(f"/api/arboles/{arbol}", headers=auth(token_otro)), 403)
-    # La cuenta demo es dueña del árbol, pero no puede borrarlo
-    error(cliente.delete(f"/api/arboles/{arbol}", headers=auth(token_agricultor)), 403)
 
 
 def test_despacho_de_un_arbol_no_adoptado_responde_403(cliente, token_agricultor, nuevo_comprador):
@@ -202,14 +199,14 @@ def test_sin_cupos_responde_409_y_no_cobra(cliente, token_agricultor, token_comp
     assert cliente.get("/api/pagos", headers=auth(token)).json()["pagos"] == []
 
 
-def test_dejar_menos_cupos_que_suscriptores_responde_409(cliente, nuevo_agricultor, nuevo_comprador, token_comprador):
+def test_lo_vendido_no_cambia_con_suscriptores_responde_409(cliente, nuevo_agricultor, nuevo_comprador, token_comprador):
     _, _, token_productor = nuevo_agricultor
     _, _, token = nuevo_comprador
-    arbol = publicar_arbol(cliente, token_productor, cupos=3)
+    arbol = publicar_arbol(cliente, token_productor, cupos=5, precio=1000)
     for t in (token, token_comprador):
         assert cliente.post("/api/pagos", headers=auth(t), json=pago("arbol", arbol_id=arbol)).status_code == 201
-    error(cliente.put(f"/api/arboles/{arbol}", headers=auth(token_productor), json=arbol_valido(cupos_totales=1)), 409)
-    assert cliente.put(f"/api/arboles/{arbol}", headers=auth(token_productor), json=arbol_valido(cupos_totales=2)).status_code == 200
+    error(cliente.put(f"/api/arboles/{arbol}", headers=auth(token_productor), json=arbol_valido(precio_mensual_clp=999_999)), 409)
+    assert cliente.put(f"/api/arboles/{arbol}", headers=auth(token_productor), json=arbol_valido(ubicacion="Otro huerto", estimacion_cosecha_kg=40)).status_code == 200
 
 
 def test_correo_repetido_en_el_panel_responde_409(cliente, token_admin, nuevo_comprador):
@@ -269,7 +266,7 @@ def test_eliminar_un_agricultor_borra_los_despachos_de_sus_arboles(cliente, toke
 
 def test_cuenta_eliminada_deja_de_funcionar(cliente, nuevo_comprador):
     email, password, token = nuevo_comprador
-    assert cliente.delete("/api/perfil", headers=auth(token)).status_code == 200
+    assert cliente.request("DELETE", "/api/perfil", headers=auth(token), json={"password": "clave-segura-1"}).status_code == 200
     error(cliente.get("/api/pedidos", headers=auth(token)), 401)
     error(cliente.post("/api/login", json={"email": email, "password": password, "rol": "comprador"}), 401)
 
@@ -287,8 +284,8 @@ def test_el_productor_ve_y_expulsa_a_sus_suscriptores(cliente, nuevo_agricultor,
     assert fila["cupos_ocupados"] == 1 and fila["suscriptores"][0]["email"] == email
     suscripcion = fila["suscriptores"][0]["suscripcion_id"]
 
-    # Otro productor no puede expulsarlo; el dueño del árbol sí, y el cupo se libera
-    error(cliente.delete(f"/api/suscripciones/{suscripcion}", headers=auth(token_agricultor)), 403)
+    # Otro productor no puede expulsarlo ni saber que existe; el dueño sí, y el cupo se libera
+    error(cliente.delete(f"/api/suscripciones/{suscripcion}", headers=auth(token_agricultor)), 404)
     assert cliente.delete(f"/api/suscripciones/{suscripcion}", headers=auth(token_productor)).status_code == 200
     assert cliente.get(f"/api/arboles/{arbol}").json()["cupos_ocupados"] == 0
     error(cliente.delete(f"/api/suscripciones/{suscripcion}", headers=auth(token_productor)), 404)
@@ -300,10 +297,10 @@ def test_el_productor_ve_el_perfil_de_su_suscriptor_y_de_nadie_mas(cliente, nuev
     usuario_id = int(token.split(".")[0])
     arbol = publicar_arbol(cliente, token_productor)
 
-    error(cliente.get(f"/api/usuario/{usuario_id}", headers=auth(token_productor)), 403)
+    error(cliente.get(f"/api/usuario/{usuario_id}", headers=auth(token_productor)), 404)
     assert cliente.post("/api/pagos", headers=auth(token), json=pago("arbol", arbol_id=arbol)).status_code == 201
     assert cliente.get(f"/api/usuario/{usuario_id}", headers=auth(token_productor)).json()["email"] == email
-    error(cliente.get(f"/api/usuario/{usuario_id}", headers=auth(token_agricultor)), 403)
+    error(cliente.get(f"/api/usuario/{usuario_id}", headers=auth(token_agricultor)), 404)
 
 
 def test_actualizar_el_perfil_y_la_contrasena(cliente, nuevo_comprador):

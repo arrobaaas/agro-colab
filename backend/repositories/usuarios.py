@@ -1,6 +1,8 @@
 """Consultas sobre usuarios."""
 
-from sqlalchemy import func, or_
+from datetime import datetime, timedelta
+
+from sqlalchemy import exists, func, or_
 from sqlalchemy.orm import Session
 
 from database import Arbol, Pago, Pedido, Suscripcion, Usuario
@@ -47,6 +49,41 @@ def crear(db: Session, **campos) -> Usuario:
     usuario = Usuario(**campos)
     db.add(usuario)
     return usuario
+
+
+def purgar_sin_verificar(db: Session, antes_de: datetime) -> int:
+    """Borra las cuentas que nunca se verificaron y cuyo código ya venció. Solo las
+    que no tienen actividad: un administrador puede dejar sin verificar una cuenta
+    en uso, y esa no se toca."""
+    return db.query(Usuario).filter(
+        Usuario.verificado == 0,
+        Usuario.codigo_expira < antes_de,
+        ~exists().where(Suscripcion.usuario_id == Usuario.id),
+        ~exists().where(Pedido.cliente_id == Usuario.id),
+        ~exists().where(Pago.usuario_id == Usuario.id),
+        ~exists().where(Arbol.productor_id == Usuario.id),
+    ).delete(synchronize_session=False)
+
+
+def limpiar_recuperaciones_vencidas(db: Session, ahora: datetime):
+    db.query(Usuario).filter(Usuario.recuperacion_expira < ahora).update(
+        {"recuperacion_hash": None, "recuperacion_expira": None, "recuperacion_intentos": 0},
+        synchronize_session=False,
+    )
+
+
+def limpiar_cuenta_demo(db: Session, usuario_id: int, antiguedad: timedelta = timedelta(hours=1)):
+    """La cuenta demo la comparten todos los visitantes: lo que alguien escribió en
+    ella no se conserva, y sus adopciones no dejan el catálogo demo lleno."""
+    limite = datetime.utcnow() - antiguedad
+    db.query(Pedido).filter(Pedido.cliente_id == usuario_id, Pedido.fecha_registro < limite).delete(synchronize_session=False)
+    db.query(Pago).filter(Pago.usuario_id == usuario_id, Pago.fecha < limite).delete(synchronize_session=False)
+    viejas = db.query(Suscripcion).filter(Suscripcion.usuario_id == usuario_id, Suscripcion.fecha_suscripcion < limite)
+    for arbol_id in [s.arbol_id for s in viejas]:
+        db.query(Arbol).filter(Arbol.id == arbol_id, Arbol.cupos_ocupados > 0).update(
+            {"cupos_ocupados": Arbol.cupos_ocupados - 1}, synchronize_session=False
+        )
+    viejas.delete(synchronize_session=False)
 
 
 def borrar_con_sus_datos(db: Session, usuario: Usuario):

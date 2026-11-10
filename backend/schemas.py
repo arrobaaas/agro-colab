@@ -52,8 +52,41 @@ Rut = Annotated[str, StringConstraints(strip_whitespace=True, max_length=15), Af
 Correo = Annotated[str, StringConstraints(
     strip_whitespace=True, max_length=120, pattern=r"^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$"
 )]
-Contrasena = Annotated[str, StringConstraints(min_length=8, max_length=128)]
+
+
+def _hasta_72_bytes(valor):
+    """bcrypt no admite más de 72 bytes: el límite se valida aquí para responder
+    422 y no un error 500 al calcular el hash."""
+    if len(valor.encode("utf-8")) > 72:
+        raise ValueError("debe tener como máximo 72 bytes")
+    return valor
+
+
+Contrasena = Annotated[str, StringConstraints(min_length=8, max_length=128), AfterValidator(_hasta_72_bytes)]
+# [0-9] y no \d: \d también acepta dígitos de otros alfabetos
+Codigo = Annotated[str, StringConstraints(pattern=r"^[0-9]{6}$")]
 Rol = Literal["comprador", "agricultor"]
+
+
+def _solo_digitos_celular(valor):
+    """Acepta espacios y guiones al escribir, y guarda solo los dígitos."""
+    limpio = valor.replace(" ", "").replace("-", "")
+    if not limpio.isascii() or not limpio.isdigit() or not 7 <= len(limpio) <= 15:
+        raise ValueError("debe tener entre 7 y 15 dígitos")
+    return limpio
+
+
+def _codigo_postal(valor):
+    """Los despachos son dentro de Chile, donde el código postal tiene 7 dígitos."""
+    if not valor.isascii() or not valor.isdigit() or len(valor) != 7:
+        raise ValueError("debe tener 7 dígitos")
+    return valor
+
+
+# Mismas opciones que el selector del formulario de despacho
+CodigoPais = Literal["+56", "+54", "+591", "+55", "+57", "+593", "+34", "+1", "+52", "+595", "+51", "+598", "+58"]
+Celular = Annotated[str, StringConstraints(strip_whitespace=True, max_length=25), AfterValidator(_solo_digitos_celular)]
+CodigoPostal = Annotated[str, StringConstraints(strip_whitespace=True, max_length=10), AfterValidator(_codigo_postal)]
 TipoDestino = Literal["particular", "comercial"]
 Frecuencia = Literal["semanal", "quincenal", "mensual"]
 
@@ -65,19 +98,17 @@ class LoginRequest(BaseModel):
     rol: Rol
 
 class PedidoRequest(BaseModel):
-    # plan_nombre y monto_clp los fija el servidor (catálogo de planes o
-    # precio del árbol); los del cliente se ignoran
+    # El monto lo fija el servidor (catálogo de planes o precio del árbol) y el
+    # cliente sale de la sesión: no se piden en el cuerpo
     plan_nombre: Texto(120)
-    monto_clp: int = 0
-    cliente_nombre: Texto(80)
-    telefono: Texto(30)
-    email: Correo
-    cliente_id: Optional[int] = None  # ignorado: el cliente sale de la sesión
     tipo_destino: TipoDestino
     razon_social: Optional[Texto(120, 0)] = None
     rut: Optional[Rut] = None
     direccion: Texto(200)
     comuna: Texto(80)
+    codigo_postal: CodigoPostal
+    telefono_codigo: CodigoPais
+    telefono: Celular
     frecuencia_entrega: Frecuencia
     tipo: Literal["abastecimiento", "arbol"] = "abastecimiento"
     arbol_id: Optional[int] = None
@@ -91,22 +122,24 @@ class LogisticaRequest(BaseModel):
     rut: Optional[Rut] = None
     direccion: Texto(200)
     comuna: Texto(80)
+    codigo_postal: CodigoPostal
+    telefono_codigo: CodigoPais
+    telefono: Celular
     frecuencia_entrega: Frecuencia
 
 class ArbolRequest(BaseModel):
-    nombre: Optional[str] = None  # se compone desde especie + identificador
+    # El nombre se compone desde especie + identificador, y el productor sale de la sesión
     especie: Texto(40)
     identificador: Optional[Texto(12, 0)] = None
     ubicacion: Texto(150)
     plan: Literal["Básico", "Intermedio", "Premium"]
     tipo_suscripcion: Literal["Compartido", "Exclusivo"]
     cupos_totales: int = Field(ge=1, le=50)
-    precio_mensual_clp: int = Field(ge=0, le=10_000_000)
+    precio_mensual_clp: int = Field(ge=1, le=10_000_000)
     # Solo el número de kilos: el servidor arma el texto ("45 kg anuales")
     # para que no haya ambigüedad de unidades (kg, gramos, cajas...)
     estimacion_cosecha_kg: int = Field(ge=1, le=100_000)
     imagen: Texto(500)
-    productor: Optional[str] = None  # ignorado: el productor sale de la sesión
 
 class PerfilRequest(BaseModel):
     nombre: Texto(80, 2)
@@ -125,6 +158,13 @@ class RegistroRequest(BaseModel):
     rol: Rol
     telefono: Optional[Texto(30, 0)] = None
     direccion: Optional[Texto(200, 0)] = None
+    # Consentimiento explícito: sin estas casillas marcadas no hay registro
+    acepta_datos: Literal[True]
+    acepta_terminos: Literal[True]
+
+class EliminarCuentaRequest(BaseModel):
+    """Con solo un token robado no se debe poder borrar la cuenta."""
+    password: Annotated[str, StringConstraints(max_length=128)]
 
 class AdminUsuarioRequest(BaseModel):
     """Cambios que el administrador hace en la cuenta de otra persona."""
@@ -141,14 +181,16 @@ class ReenvioRequest(BaseModel):
 
 class VerificacionRequest(BaseModel):
     email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)]
-    codigo: Annotated[str, StringConstraints(pattern=r"^\d{6}$")]
+    codigo: Codigo
+    # La contraseña con la que se registró: el código solo prueba que el correo es suyo
+    password: Annotated[str, StringConstraints(max_length=128)]
 
 class RecuperacionRequest(BaseModel):
     email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)]
 
 class RestablecerRequest(BaseModel):
     email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=120)]
-    codigo: Annotated[str, StringConstraints(pattern=r"^\d{6}$")]
+    codigo: Codigo
     password: Contrasena
 
 
@@ -161,6 +203,21 @@ class PagoRequest(BaseModel):
     tipo: Literal["arbol", "plan"]
     arbol_id: Optional[int] = None
     plan_nombre: Optional[Texto(120)] = None
+    numero: NumeroTarjeta
+    titular: Texto(80)
+    vencimiento: Vencimiento
+    cvv: Cvv
+
+
+class ItemCanasta(BaseModel):
+    tipo: Literal["arbol", "plan"]
+    arbol_id: Optional[int] = None
+    plan_nombre: Optional[Texto(120)] = None
+
+
+class PagoCanastaRequest(BaseModel):
+    """Un solo cobro para toda la canasta, con una sola tarjeta."""
+    items: Annotated[list[ItemCanasta], Field(min_length=1, max_length=10)]
     numero: NumeroTarjeta
     titular: Texto(80)
     vencimiento: Vencimiento

@@ -107,6 +107,7 @@
       document.getElementById("editar-plan").value = arbol.plan;
       document.getElementById("editar-tipo").value = arbol.tipo_suscripcion;
       document.getElementById("editar-cupos").value = arbol.cupos_totales;
+      this.sincronizarPlan("editar");
       document.getElementById("editar-precio").value = arbol.precio_mensual_clp;
       document.getElementById("editar-cosecha").value = this.kilosDeCosecha(arbol.estimacion_cosecha);
 
@@ -174,8 +175,7 @@
         cupos_totales: Number(document.getElementById("editar-cupos").value),
         precio_mensual_clp: Number(document.getElementById("editar-precio").value),
         estimacion_cosecha_kg: Number(document.getElementById("editar-cosecha").value),
-        imagen: this.edicion.foto.url,
-        productor: this.auth.leerSesion().nombre
+        imagen: this.edicion.foto.url
       };
 
       if (!bodyData.ubicacion || !(bodyData.estimacion_cosecha_kg >= 1)) {
@@ -625,7 +625,25 @@
 
     /* ---------- Inicialización ---------- */
 
+    /* Cada plan define sus cupos y su tipo (ver terminos.html y el servidor) */
+    sincronizarPlan(prefijo) {
+      const regla = { "Básico": [5, "Compartido"], "Intermedio": [3, "Compartido"], "Premium": [1, "Exclusivo"] }[
+        document.getElementById(`${prefijo}-plan`).value
+      ];
+      if (!regla) return;
+      document.getElementById(`${prefijo}-cupos`).value = regla[0];
+      const tipo = document.getElementById(`${prefijo}-tipo`);
+      tipo.value = regla[1];
+      tipo.disabled = true;
+    }
+
     async init() {
+      ["arbol", "editar"].forEach((prefijo) => {
+        const plan = document.getElementById(`${prefijo}-plan`);
+        if (!plan) return;
+        plan.addEventListener("change", () => this.sincronizarPlan(prefijo));
+        this.sincronizarPlan(prefijo);
+      });
       document.getElementById("btn-subir-arbol").addEventListener("click", () => this.mostrarFormulario());
       document.getElementById("btn-cancelar-arbol").addEventListener("click", () => this.mostrarDashboard());
       const formularioArbol = document.getElementById("form-subir-arbol");
