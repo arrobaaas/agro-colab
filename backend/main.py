@@ -12,6 +12,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError, InterfaceError, OperationalError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import errores
@@ -89,6 +90,30 @@ async def error_de_negocio(request: Request, exc: errores.ErrorDeNegocio):
 async def error_http(request: Request, exc: StarletteHTTPException):
     """Errores que genera el propio framework, como una ruta inexistente."""
     return respuesta_de_error(exc.status_code, MENSAJES_HTTP.get(exc.status_code, str(exc.detail)))
+
+
+@app.exception_handler(OperationalError)
+@app.exception_handler(InterfaceError)
+async def base_no_disponible(request: Request, exc: Exception):
+    """La base de datos no responde (se cayó, se reinicia o se cortó la
+    conexión). No es un error del usuario ni del código: se informa con 503
+    para que la interfaz pida reintentar, en vez de un 500 genérico."""
+    logging.getLogger("agrocolab").error(
+        "Base de datos no disponible en %s %s: %s", request.method, request.url.path, type(exc.orig).__name__
+    )
+    return respuesta_de_error(503, "No pudimos conectarnos con la base de datos. Intenta nuevamente en unos segundos.")
+
+
+@app.exception_handler(IntegrityError)
+async def choque_en_la_base(request: Request, exc: IntegrityError):
+    """Una restricción de la base rechazó el cambio. Los servicios revisan
+    antes de escribir, así que esto ocurre cuando dos peticiones simultáneas
+    pasan la misma revisión: la segunda choca con un índice único y recibe 409
+    en vez de un 500. El detalle (tabla y valores) no se expone."""
+    logging.getLogger("agrocolab").warning(
+        "Restricción de la base en %s %s: %s", request.method, request.url.path, type(exc.orig).__name__
+    )
+    return respuesta_de_error(409, "No se pudo guardar porque el dato choca con otro registro. Actualiza la página e intenta nuevamente.")
 
 
 @app.exception_handler(Exception)
