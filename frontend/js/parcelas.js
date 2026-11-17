@@ -185,6 +185,7 @@
 
     async cargarArboles() {
       const container = document.getElementById("tree-container");
+      container.innerHTML = '<p class="tc-cuerpo-sm" role="status">Cargando árboles disponibles...</p>';
 
       try {
         const arboles = await this.api.obtenerArboles();
@@ -210,7 +211,15 @@
         });
         if (AgroColab.efectos) AgroColab.efectos.observar(container);
       } catch (error) {
-        container.innerHTML = `<div class="col-span-3 p-4 bg-red-50 text-red-700 text-xs rounded-xl">Error al conectar con la API (${this.config.API_URL}).</div>`;
+        /* Mensaje para el usuario, no para el desarrollador: la URL de la API
+           queda en la consola. En Render el servidor puede tardar en despertar. */
+        console.error("[Agro-Colab] No se pudo cargar el catálogo desde", this.config.API_URL, error);
+        container.innerHTML = `<div class="md:col-span-3 text-center py-10" role="alert">
+            <p class="tc-cuerpo-sm">No pudimos cargar los árboles. Si es la primera visita del día, el servidor puede tardar hasta un minuto en despertar.</p>
+            <button type="button" class="tc-enlace tc-enlace--suave" data-accion="parcelas.cargarArboles" style="margin-top:1rem">
+              <i class="fa-solid fa-arrows-rotate"></i> Intentar de nuevo
+            </button>
+          </div>`;
       }
     }
 
