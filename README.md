@@ -58,6 +58,12 @@ directo al productor, sin intermediarios.
 
 ---
 
+## 🎬 Video
+
+**[Ver el video promocional (2 minutos)](ENLACE-DEL-VIDEO)** <!-- TODO: pegar aquí el enlace de YouTube "No listado". Guion en docs/GUION_VIDEO.md -->
+
+---
+
 ## 📋 El problema
 
 El pequeño agricultor necesita capital **antes** de la temporada, y termina vendiendo su
@@ -78,7 +84,7 @@ Cada pedido genera un código de seguimiento que lo vincula a su huerto de orige
 - **Sin sobreventa bajo concurrencia.** La reserva de cupos es un `UPDATE` condicional atómico, respaldado por un índice único y una restricción `CHECK`: dos compras simultáneas del último cupo nunca se aprueban ambas.
 - **Seguridad aplicada de punta a punta.** Tokens firmados con HMAC-SHA256, autorización por recurso, *rate limiting* persistente, CSP estricta sin JavaScript en línea y defensa contra XSS en tres capas. [Ver detalle](#-seguridad).
 - **Monitoreo y alertas propios.** Los eventos de seguridad se registran en base de datos y en logs JSON, y disparan alertas por correo o webhook según reglas (fuerza bruta, tokens falsificados, accesos a datos ajenos).
-- **Calidad verificada en CI.** 279 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend. Las reglas de la arquitectura también se comprueban leyendo el código.
+- **Calidad verificada en CI.** 283 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend. Las reglas de la arquitectura también se comprueban leyendo el código.
 - **Frontend sin frameworks.** SPA en JavaScript vanilla organizada en servicios, con router de vistas, delegación de eventos, gráficos accesibles hechos con HTML y CSS, y un árbol 3D de partículas en `<canvas>`.
 - **Privacidad desde el diseño.** Cumplimiento de la Ley N° 21.719 de Protección de Datos Personales de Chile: consentimiento explícito, derechos de acceso, rectificación y eliminación, y registro de tratamiento.
 
@@ -250,7 +256,7 @@ Wikimedia desde el navegador; y Discord o Slack si están activadas las alertas 
 
 ## 🧪 Pruebas e integración continua
 
-**279 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
+**283 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
 *pull request* dos veces, **con SQLite y con PostgreSQL**, y además revisa la sintaxis de
 todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca envían correos.
 
@@ -267,6 +273,7 @@ todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca env�
 | `test_canasta.py` | Pago único de la canasta: un cobro, todo o nada, rechazo sin adopciones y límites |
 | `test_auditoria.py` | Lo corregido en la auditoría de seguridad: separación de lo demo y lo real, cuentas, límites, carreras, alertas, privacidad y cabeceras |
 | `test_entregables.py` | La tabla de la API, `.env.example` y `db/esquema.sql` coinciden con el código; ejecuta completa la colección de Postman |
+| `test_cupos_al_eliminar.py` | Eliminar una cuenta devuelve sus cupos: la API y la columna que usa la reserva coinciden |
 
 ```bash
 cd backend
@@ -298,6 +305,15 @@ uvicorn main:app --reload --port 8000 --env-file ../.env
 cd frontend
 python3 -m http.server 3000
 ```
+
+> 📖 El **[manual de uso e instalación](docs/MANUAL.md)** tiene los pasos para Windows, los
+> datos de prueba, el recorrido de cada rol y las fallas frecuentes. Las tres más comunes:
+>
+> | Síntoma | Solución |
+> |---|---|
+> | `python: command not found` | En Linux y macOS se usa `python3`; en Windows, `py` |
+> | "No hay conexión con el servidor" | Backend corriendo, frontend abierto en `http://localhost:3000` (no con doble clic) y `AGROCOLAB_MOD_MODE=desarrollo` en `.env` |
+> | "El rol seleccionado no coincide" | Elegir el botón de rol que corresponde a la cuenta (Comprador o Agricultor) |
 
 Con los valores de [`.env.example`](.env.example) se usa una base SQLite local que se crea
 sola con las cuentas de demostración y tres árboles de ejemplo, y en modo `desarrollo` el
@@ -457,6 +473,12 @@ agro-colab/
 ├── scripts/compilar-css.sh    # Compilación de Tailwind con verificación de checksum
 ├── .env.example               # Variables de entorno, con valores de ejemplo
 └── docs/
+    ├── Informe_Final_AgroColab.pdf  # Documentación final del Hito 3
+    ├── MANUAL.md              # Manual de uso e instalación
+    ├── BITACORA.md            # Bitácora de decisiones
+    ├── GUION_VIDEO.md         # Guion del video promocional
+    ├── arquitectura.png       # Diagrama de arquitectura final
+    ├── fuentes/               # Fuente HTML del documento final y su generador
     ├── Informe_Hito2_AgroColab.pdf  # Documento técnico del Hito 2
     ├── API.md                 # Contrato completo de la API
     ├── AgroColab.postman_collection.json  # Peticiones de la demostración
@@ -473,7 +495,13 @@ agro-colab/
 
 | Documento | Contenido |
 |---|---|
+| [**Documentación final del Hito 3**](docs/Informe_Final_AgroColab.pdf) | Producto entregado, arquitectura final, validación y estados, pruebas, limitaciones, uso de IA y análisis de datos personales (Ley 21.719) |
+| [Manual de uso e instalación](docs/MANUAL.md) | Requisitos, pasos, datos de prueba, recorridos por rol y fallas frecuentes |
+| [Bitácora de decisiones](docs/BITACORA.md) | Cada decisión con fecha, alternativas, motivo y lo que salió mal |
+| [Diagrama de arquitectura](docs/arquitectura.png) | Componentes finales con sus nombres reales |
+| [Guion del video](docs/GUION_VIDEO.md) | Toma por toma, en 2 minutos |
 | [Documento técnico del Hito 2](docs/Informe_Hito2_AgroColab.pdf) | Arquitectura, decisiones, contrato de la API, capas, persistencia, mediciones y limitaciones |
+| [Láminas del Hito 2](docs/Presentacion_Hito2.pdf) | Presentación técnica de 7 minutos |
 | [Contrato de la API](docs/API.md) | Rutas, verbos, parámetros, cuerpos de ejemplo y códigos de estado |
 | [Colección de Postman](docs/AgroColab.postman_collection.json) | Las peticiones de la demostración, listas para importar |
 | [Modelo de datos y script SQL](db/README.md) | Diagrama y creación de la base desde cero |
@@ -492,6 +520,7 @@ la revisión del código y la responsabilidad sobre el resultado son del equipo.
 | **ChatGPT** (OpenAI) | Septiembre 2026 | Comparación técnica de lenguajes (Node.js vs Python) y apoyo en el código del prototipo inicial |
 | **Claude Code** (Anthropic) | Octubre 2026 | Asistente de programación: revisión de código, autenticación con tokens y autorización por recurso, corrección de la condición de carrera en la reserva de cupos, y documentación |
 | **Claude Code** (Anthropic) | Noviembre 2026 | Análisis contra la rúbrica, corrección de los códigos HTTP, separación en capas, pruebas nuevas, carpeta `db/`, colección de Postman, mediciones y documento técnico del Hito 2 |
+| **Claude Code** (Anthropic) | Noviembre 2026 (Hito 3) | Análisis de lo pendiente, prueba de instalación limpia, manual, bitácora, generador del diagrama de datos, capturas automatizadas, estado de error del catálogo, corrección de los cupos al eliminar una cuenta y documentación final. Verificado con las 283 pruebas, una instalación desde cero y cada fecha contrastada con `git log` |
 
 Los cambios propuestos por la IA se revisaron antes de incorporarlos, y los de seguridad
 se probaron contra la API en ejecución: peticiones sin token o con token falso, acceso a

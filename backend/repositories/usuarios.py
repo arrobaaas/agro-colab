@@ -95,6 +95,16 @@ def borrar_con_sus_datos(db: Session, usuario: Usuario):
     """
     ids_arboles = [fila.id for fila in db.query(Arbol.id).filter(Arbol.productor_id == usuario.id)]
 
+    # Los cupos que ocupaba esta cuenta vuelven a quedar libres. La API muestra
+    # los cupos contando suscripciones, pero la reserva usa la columna: sin
+    # este descuento, el árbol aparecía con cupo libre y el pago respondía
+    # "Cupos agotados" para siempre.
+    adoptados = [fila.arbol_id for fila in db.query(Suscripcion.arbol_id).filter(Suscripcion.usuario_id == usuario.id)]
+    for arbol_id in adoptados:
+        db.query(Arbol).filter(Arbol.id == arbol_id, Arbol.cupos_ocupados > 0).update(
+            {"cupos_ocupados": Arbol.cupos_ocupados - 1}, synchronize_session=False
+        )
+
     db.query(Suscripcion).filter(Suscripcion.usuario_id == usuario.id).delete(synchronize_session=False)
     if ids_arboles:
         db.query(Suscripcion).filter(Suscripcion.arbol_id.in_(ids_arboles)).delete(synchronize_session=False)

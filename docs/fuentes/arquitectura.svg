@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="960" viewBox="0 0 1600 960" font-family="'Noto Sans', 'DejaVu Sans', Arial, sans-serif">
+  <defs>
+    <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#1c1917"/>
+    </marker>
+    <marker id="flecha-gris" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#78716c"/>
+    </marker>
+    <style>
+      .zona { fill: #fafaf9; stroke: #d6d3d1; stroke-width: 2; }
+      .zona-t { font-size: 17px; font-weight: 700; letter-spacing: .06em; fill: #57534e; }
+      .caja { fill: #fff; stroke-width: 2.5; }
+      .t { font-size: 19px; font-weight: 700; fill: #1c1917; }
+      .s { font-size: 15px; fill: #44403c; }
+      .m { font-family: 'DejaVu Sans Mono', 'Liberation Mono', monospace; }
+      .linea { stroke: #1c1917; stroke-width: 2.5; fill: none; }
+      .linea-gris { stroke: #78716c; stroke-width: 2; fill: none; stroke-dasharray: 7 6; }
+      .et { font-size: 14px; fill: #1c1917; font-weight: 600; }
+      .et-gris { font-size: 14px; fill: #57534e; }
+    </style>
+  </defs>
+  <rect width="1600" height="960" fill="#fff"/>
+
+  <!-- CLIENTE -->
+  <rect class="zona" x="20" y="20" width="400" height="820" rx="18"/>
+  <text class="zona-t" x="44" y="56">CLIENTE · NAVEGADOR</text>
+  <text class="s" x="44" y="80">Publicado en GitHub Pages</text>
+
+  <rect class="caja" x="44" y="104" width="352" height="96" rx="12" stroke="#0e7490"/>
+  <text class="t" x="64" y="136">Vistas por rol</text>
+  <text class="s m" x="64" y="162">parcelas · pago · dashboard</text>
+  <text class="s m" x="64" y="184">agricultor · admin · perfil</text>
+
+  <rect class="caja" x="44" y="220" width="352" height="96" rx="12" stroke="#0e7490"/>
+  <text class="t" x="64" y="252">Navegación y eventos</text>
+  <text class="s m" x="64" y="278">views.js  router de vistas</text>
+  <text class="s m" x="64" y="300">acciones.js  data-accion</text>
+
+  <rect class="caja" x="44" y="336" width="352" height="96" rx="12" stroke="#0e7490"/>
+  <text class="t" x="64" y="368">Validación y estados</text>
+  <text class="s m" x="64" y="394">ui.js  escape · alertas</text>
+  <text class="s m" x="64" y="416">dialogo.js  avisos propios</text>
+
+  <rect class="caja" x="44" y="452" width="352" height="96" rx="12" stroke="#0e7490"/>
+  <text class="t" x="64" y="484">Cliente HTTP</text>
+  <text class="s m" x="64" y="510">api.js  fetch + token</text>
+  <text class="s m" x="64" y="532">auth.js  sesión por pestaña</text>
+
+  <rect class="caja" x="44" y="568" width="352" height="74" rx="12" stroke="#0e7490"/>
+  <text class="t" x="64" y="600">Direcciones</text>
+  <text class="s m" x="64" y="626">autocomplete.js</text>
+
+  <text class="s" x="44" y="680">24 módulos de JavaScript sin framework.</text>
+  <text class="s" x="44" y="702">CSP sin JavaScript en línea.</text>
+  <text class="s" x="44" y="724">Tailwind compilado en el repositorio.</text>
+
+  <!-- SERVIDOR -->
+  <rect class="zona" x="480" y="20" width="700" height="820" rx="18"/>
+  <text class="zona-t" x="504" y="56">SERVIDOR · RENDER · UN PROCESO UVICORN</text>
+  <text class="s" x="504" y="80">Monolito modular en FastAPI (Python 3.12)</text>
+
+  <rect class="caja" x="504" y="104" width="420" height="96" rx="12" stroke="#57534e"/>
+  <text class="t m" x="524" y="136">main.py</text>
+  <text class="s" x="524" y="162">CORS · cabeceras · tamaño máximo</text>
+  <text class="s" x="524" y="184">errores del dominio → código HTTP</text>
+
+  <rect class="caja" x="504" y="236" width="420" height="96" rx="12" stroke="#2563eb"/>
+  <text class="t m" x="524" y="268">routers/</text>
+  <text class="s" x="524" y="294">Capa HTTP · 8 módulos · 37 operaciones</text>
+  <text class="s" x="524" y="316">rutas y contratos de entrada, sin reglas</text>
+
+  <rect class="caja" x="504" y="368" width="420" height="96" rx="12" stroke="#059669"/>
+  <text class="t m" x="524" y="400">services/</text>
+  <text class="s" x="524" y="426">Capa de negocio · 8 módulos</text>
+  <text class="s" x="524" y="448">cupos, pagos, cuentas · no conoce HTTP</text>
+
+  <rect class="caja" x="504" y="500" width="420" height="96" rx="12" stroke="#7c3aed"/>
+  <text class="t m" x="524" y="532">repositories/</text>
+  <text class="s" x="524" y="558">Capa de datos · 8 módulos</text>
+  <text class="s" x="524" y="580">consultas y transacciones</text>
+
+  <rect class="caja" x="504" y="632" width="420" height="74" rx="12" stroke="#7c3aed"/>
+  <text class="t m" x="524" y="664">database.py</text>
+  <text class="s" x="524" y="690">modelos ORM · conexión · migración ligera</text>
+
+  <text class="et-gris" x="948" y="206">Módulos transversales: los</text>
+  <text class="et-gris" x="948" y="224">importan routers/ y services/</text>
+  <rect class="caja" x="948" y="236" width="216" height="96" rx="12" stroke="#a8a29e"/>
+  <text class="t m" x="964" y="268">schemas.py</text>
+  <text class="s" x="964" y="294">Pydantic: tipos,</text>
+  <text class="s" x="964" y="316">largos y formatos</text>
+
+  <rect class="caja" x="948" y="368" width="216" height="96" rx="12" stroke="#a8a29e"/>
+  <text class="t m" x="964" y="400">core.py</text>
+  <text class="s" x="964" y="426">tokens HMAC ·</text>
+  <text class="s" x="964" y="448">límite de intentos</text>
+
+  <rect class="caja" x="948" y="500" width="216" height="96" rx="12" stroke="#a8a29e"/>
+  <text class="t m" x="964" y="532">seguridad.py</text>
+  <text class="s" x="964" y="558">eventos y reglas</text>
+  <text class="s" x="964" y="580">de alerta</text>
+
+  <rect class="caja" x="948" y="632" width="216" height="74" rx="12" stroke="#a8a29e"/>
+  <text class="t m" x="964" y="664">notificaciones.py</text>
+  <text class="s" x="964" y="690">correo con la marca</text>
+
+  <!-- DATOS Y EXTERNOS -->
+  <rect class="zona" x="1240" y="20" width="340" height="300" rx="18"/>
+  <text class="zona-t" x="1264" y="56">DATOS</text>
+  <rect class="caja" x="1264" y="80" width="292" height="96" rx="12" stroke="#7c3aed"/>
+  <text class="t" x="1284" y="112">PostgreSQL 16</text>
+  <text class="s" x="1284" y="138">producción (Render)</text>
+  <text class="s" x="1284" y="160">7 tablas · db/esquema.sql</text>
+  <rect class="caja" x="1264" y="196" width="292" height="96" rx="12" stroke="#7c3aed"/>
+  <text class="t" x="1284" y="228">SQLite</text>
+  <text class="s" x="1284" y="254">desarrollo local y pruebas,</text>
+  <text class="s" x="1284" y="276">sin instalar nada</text>
+
+  <rect class="zona" x="1240" y="350" width="340" height="490" rx="18"/>
+  <text class="zona-t" x="1264" y="386">SERVICIOS EXTERNOS</text>
+  <rect class="caja" x="1264" y="410" width="292" height="74" rx="12" stroke="#a8a29e"/>
+  <text class="t" x="1284" y="442">Brevo</text>
+  <text class="s" x="1284" y="466">correo transaccional</text>
+  <rect class="caja" x="1264" y="504" width="292" height="74" rx="12" stroke="#a8a29e"/>
+  <text class="t" x="1284" y="536">Discord o Slack</text>
+  <text class="s" x="1284" y="560">webhook de alertas (opcional)</text>
+  <rect class="caja" x="1264" y="598" width="292" height="74" rx="12" stroke="#a8a29e"/>
+  <text class="t" x="1284" y="630">Photon · OpenStreetMap</text>
+  <text class="s" x="1284" y="654">autocompletado de direcciones</text>
+  <rect class="caja" x="1264" y="692" width="292" height="74" rx="12" stroke="#a8a29e"/>
+  <text class="t" x="1284" y="724">Wikimedia Commons</text>
+  <text class="s" x="1284" y="748">36 fotos verificadas</text>
+
+  <!-- Flujo principal -->
+  <path class="linea" d="M396 500 H450 V152 H500" marker-end="url(#flecha)"/>
+  <text class="et" text-anchor="middle" transform="translate(442 330) rotate(-90)">HTTPS · JSON · Authorization: Bearer</text>
+  <path class="linea" d="M714 200 V232" marker-end="url(#flecha)"/>
+  <path class="linea" d="M714 332 V364" marker-end="url(#flecha)"/>
+  <path class="linea" d="M714 464 V496" marker-end="url(#flecha)"/>
+  <path class="linea" d="M714 596 V628" marker-end="url(#flecha)"/>
+  <path class="linea" d="M924 669 H940 V780 H1200 V128 H1260" marker-end="url(#flecha)"/>
+  <text class="et" x="1010" y="770">SQL parametrizado</text>
+
+  <!-- Dependencias laterales -->
+  <path class="linea-gris" d="M1164 669 H1220 V447 H1260" marker-end="url(#flecha-gris)"/>
+  <path class="linea-gris" d="M1164 548 H1260" marker-end="url(#flecha-gris)"/>
+  <path class="linea-gris" d="M396 605 H430 V820 H1230 V635 H1260" marker-end="url(#flecha-gris)"/>
+  <text class="et-gris" x="600" y="812">el navegador consulta Photon y Wikimedia directo: la dirección tipeada no pasa por el servidor</text>
+  <path class="linea-gris" d="M1230 729 H1260" marker-end="url(#flecha-gris)"/>
+
+  <!-- Integración continua -->
+  <rect x="20" y="868" width="1560" height="72" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text class="t" x="44" y="900">GitHub Actions en cada push y pull request</text>
+  <text class="s" x="44" y="924">283 pruebas con SQLite · las mismas 283 con PostgreSQL 16 · node --check de los 24 módulos · test_arquitectura.py falla si una consulta sale de repositories/</text>
+</svg>
