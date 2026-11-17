@@ -194,7 +194,7 @@ evaluaron, por qué se eligió una y **qué salió mal**. Las fechas salen del h
 - **Resultado:** 139 pruebas al cierre del Hito 2 y 290 en el producto final. GitHub Actions
   las ejecuta en cada *push* contra SQLite y contra PostgreSQL 16, y revisa la sintaxis del
   JavaScript. `test_arquitectura.py` hace fallar la integración si una consulta sale de la capa
-  de datos, y `test_entregables.py`, si `docs/API.md` o `db/esquema.sql` dejan de coincidir
+  de datos, y `test_entregables.py`, si `docs/api/API.md` o `db/esquema.sql` dejan de coincidir
   con el código.
 
 ### D15 · Administrador creado solo desde variables del servidor · 2026-10-31
@@ -229,7 +229,7 @@ evaluaron, por qué se eligió una y **qué salió mal**. Las fechas salen del h
   mostró que **10 de 17 errores llegaban como éxito**.
 - **Cómo se resolvió:** cada resultado usa su código (201, 400, 401, 402, 403, 404, 409, 413,
   422, 429), y todos los errores tienen la forma `{"status": "error", "mensaje": "..."}`. El
-  contrato está en `docs/API.md`, y `test_contrato_http.py` lo protege. Hubo que ajustar el
+  contrato está en `docs/api/API.md`, y `test_contrato_http.py` lo protege. Hubo que ajustar el
   cliente y cambiar dos rutas.
 
 ### D18 · Capas reales: routers, services y repositories · 2026-11-04
@@ -263,7 +263,7 @@ evaluaron, por qué se eligió una y **qué salió mal**. Las fechas salen del h
   correos podían robarse antes de verificarse (AC-04), los logs y las alertas llevaban el correo
   y la IP completos (AC-14 a AC-17) y había condiciones de carrera al reclamar un pago (AC-22,
   AC-23 y AC-42).
-- **Procedimiento nuevo:** `docs/INCIDENTES.md` dice qué rotar y a quién avisar si se filtra un
+- **Procedimiento nuevo:** `docs/guias/INCIDENTES.md` dice qué rotar y a quién avisar si se filtra un
   secreto.
 
 ### D21 · Un solo pago para toda la canasta · 2026-11-10
@@ -285,7 +285,7 @@ evaluaron, por qué se eligió una y **qué salió mal**. Las fechas salen del h
   Linux (hay que usar `python3`), el puerto 8000 puede estar ocupado por un servidor anterior y
   el login falla si se elige el rol equivocado. Además, el catálogo mostraba un error técnico
   (`Error al conectar con la API (url)`) cuando el servidor no respondía.
-- **Cómo se resolvió:** las tres trabas quedaron en `docs/MANUAL.md` con su solución. El catálogo
+- **Cómo se resolvió:** las tres trabas quedaron en `docs/guias/MANUAL.md` con su solución. El catálogo
   ahora muestra un estado de carga, un mensaje para el usuario que explica la espera de Render y
   un botón **Intentar de nuevo**.
 

@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Agro-Colab · Informe final de los Hitos 2 y 3 · INGT1003</title>
+<meta name="author" content="Alveal Santos, Joaquin; Gonzalez Paredes, Matias; Reyes Orellana, Nicolas">
+<meta name="description" content="Documento técnico del back end (Hito 2) y documentación final del producto (Hito 3) de Agro-Colab, INGT1003 Arquitectura de Desarrollo, Universidad Mayor, 2026.">
+<!--
+  Fuente del informe final de los Hitos 2 y 3. Para generar el PDF, desde la raíz del repositorio:
+    node docs/informes/fuente/generar_informe.mjs
+  El script completa solo: el contrato y las reglas de la API (desde docs/api/API.md),
+  el índice, los números de página del mapa de la rúbrica y el número de cada figura y tabla.
+-->
+<style>
+  @font-face { font-family: "Inter"; src: url("tipografias/Inter.woff2") format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "JetBrains Mono"; src: url("tipografias/JetBrainsMono.woff2") format("woff2"); font-weight: 100 800; }
+
+  :root {
+    --tinta: #1c1917; --suave: #57534e; --tenue: #78716c; --linea: #e7e5e4; --fondo: #f5f5f4;
+    --verde: #14532d; --verde-medio: #166534; --verde-vivo: #15803d; --menta: #34d399;
+    --verde-claro: #ecfdf5; --borde-verde: #86efac; --cabecera: #0f4c34;
+    --ambar: #b45309; --ambar-claro: #fffbeb; --borde-ambar: #fcd34d;
+    --azul: #1d4ed8; --violeta: #6d28d9; --rojo: #b91c1c;
+  }
+
+  /* ---------- Páginas ---------- */
+  @page { size: Letter; margin: 2.3cm 2.5cm 2.3cm 2.5cm;
+    @top-left { content: "Agro-Colab · Informe final de los Hitos 2 y 3"; font: 500 7.5pt "Inter"; color: #78716c; }
+    @bottom-left { content: "INGT1003 · Universidad Mayor · Hitos 2 y 3"; font: 500 7.5pt "Inter"; color: #78716c; }
+    @bottom-right { content: counter(page); font: 600 8pt "Inter"; color: #1c1917; }
+  }
+  @page portada { margin: 0; @top-left { content: none; } @bottom-left { content: none; } @bottom-right { content: none; } }
+  @page indice { @top-right { content: "Índice"; font: 600 7.5pt "Inter"; color: #15803d; } @bottom-right { content: none; } @bottom-left { content: none; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: "Inter", sans-serif; font-size: 10.5pt; line-height: 1.55; color: var(--tinta); font-feature-settings: "cv11", "ss01"; }
+  p { margin: 0 0 .75em; text-align: justify; hyphens: auto; }
+  b, strong { font-weight: 650; }
+  a { color: var(--verde-vivo); text-decoration: none; }
+  ul, ol { margin: 0 0 .85em; padding-left: 1.3em; }
+  li { margin-bottom: .3em; }
+  code, .m { font-family: "JetBrains Mono", monospace; font-size: .86em; font-weight: 500; background: var(--fondo); border: 1px solid var(--linea); border-radius: 3px; padding: 0 .28em; white-space: nowrap; }
+  .ref { color: var(--verde-vivo); font-weight: 650; }
+
+  /* ---------- Secciones ---------- */
+  .seccion { break-before: page; }
+  .kicker { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 8.5pt; letter-spacing: .12em; color: var(--verde-vivo); text-transform: uppercase; margin: 0 0 .2em; }
+  h2 { font-size: 21pt; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; color: var(--verde); margin: 0 0 .55em; break-after: avoid; }
+  h3 { font-size: 12.5pt; font-weight: 750; color: var(--verde); margin: 1.35em 0 .5em; break-after: avoid; }
+  h3 .num { font-family: "JetBrains Mono", monospace; font-size: .82em; color: var(--verde-vivo); margin-right: .45em; }
+  h4 { font-size: 10.5pt; font-weight: 700; margin: 1em 0 .35em; break-after: avoid; }
+
+  .resumen { background: var(--verde-claro); border-left: 4px solid var(--verde-vivo); padding: .75em 1em; margin: 0 0 1.2em; font-weight: 500; font-size: 10.5pt; break-inside: avoid; }
+  .resumen p { margin: 0; text-align: left; }
+  .nota { background: var(--verde-claro); border: 1px solid var(--borde-verde); border-radius: 6px; padding: .7em 1em; margin: .8em 0 1.1em; font-size: 9.5pt; break-inside: avoid; }
+  .nota b:first-child { display: block; color: var(--verde-medio); margin-bottom: .2em; }
+  .nota p:last-child { margin-bottom: 0; }
+  .costo { background: var(--ambar-claro); border: 1px solid var(--borde-ambar); border-radius: 6px; padding: .7em 1em; margin: .8em 0 1.1em; font-size: 9.5pt; break-inside: avoid; }
+  .costo b:first-child { display: block; color: var(--ambar); margin-bottom: .2em; }
+  .costo p:last-child { margin-bottom: 0; }
+
+  /* ---------- Cifras ---------- */
+  .cifras { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6em; margin: 1em 0 1.2em; break-inside: avoid; }
+  .cifra { background: var(--cabecera); color: #fff; border-radius: 6px; padding: .7em .8em; }
+  .cifra b { display: block; font-family: "JetBrains Mono", monospace; font-size: 17pt; font-weight: 700; color: #fff; line-height: 1.1; }
+  .cifra span { display: block; font-size: 7.8pt; color: #bbf7d0; line-height: 1.3; margin-top: .35em; }
+
+  /* ---------- Tarjetas ---------- */
+  .tarjetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6em; margin: .6em 0 1.1em; break-inside: avoid; }
+  .tarjetas.cuatro { grid-template-columns: repeat(4, 1fr); }
+  .tarjeta { border: 1px solid var(--linea); border-radius: 6px; padding: .6em .75em; font-size: 8.8pt; line-height: 1.45; }
+  .tarjeta b:first-child { display: block; color: var(--verde-medio); font-size: 9pt; margin-bottom: .25em; }
+
+  /* ---------- Tablas ---------- */
+  table { width: 100%; border-collapse: collapse; margin: .3em 0 1.2em; font-size: 8.6pt; line-height: 1.4; }
+  caption { caption-side: top; text-align: left; font-size: 8.6pt; color: var(--suave); padding-bottom: .45em; }
+  caption b { color: var(--tinta); }
+  thead th { background: var(--cabecera); color: #fff; text-align: left; font-weight: 650; padding: .45em .55em; vertical-align: bottom; }
+  td { border-bottom: 1px solid var(--linea); padding: .42em .55em; vertical-align: top; }
+  tbody tr { break-inside: avoid; }
+  tr.grupo td { background: var(--fondo); font-weight: 700; color: var(--verde); padding-top: .5em; }
+  td.ok, span.ok { color: #fff; background: var(--verde-vivo); font-weight: 700; border-radius: 3px; padding: .05em .45em; font-size: 7.6pt; white-space: nowrap; }
+  td.ok { background: none; color: var(--verde-vivo); font-size: 8.6pt; }
+  td.parcial { color: var(--ambar); font-weight: 700; white-space: nowrap; }
+  td.num, th.num { text-align: right; font-family: "JetBrains Mono", monospace; }
+  .verbo { display: inline-block; min-width: 3.9em; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 7pt; font-weight: 700; color: #fff; border-radius: 3px; padding: .12em .3em; }
+  .GET { background: var(--azul); } .POST { background: var(--verde-vivo); } .PUT { background: var(--ambar); } .DELETE { background: var(--rojo); }
+  .cod { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 7.4pt; font-weight: 700; border-radius: 3px; padding: 0 .3em; margin: 0 .12em .12em 0; background: #fee2e2; color: #991b1b; }
+  .cod.ex { background: #dcfce7; color: #166534; }
+  .ruta { font-family: "JetBrains Mono", monospace; font-size: 7.8pt; word-break: break-all; }
+
+  /* ---------- Figuras ---------- */
+  figure { margin: .9em 0 1.2em; break-inside: avoid; }
+  figure img { display: block; max-width: 100%; margin: 0 auto; border: 1px solid var(--linea); border-radius: 5px; }
+  figure.limpia img { border: 0; border-radius: 0; }
+  figcaption { font-size: 8.4pt; color: var(--suave); margin-top: .5em; line-height: 1.4; }
+  figcaption b { color: var(--tinta); }
+  .par { display: grid; grid-template-columns: 1fr 1fr; gap: .9em; margin: .9em 0 1.1em; }
+  .par figure { margin: 0; }
+
+  /* Terminal */
+  .terminal { background: #0c1a14; color: #d1fae5; border-radius: 6px; padding: .8em 1em; font-family: "JetBrains Mono", monospace; font-size: 7.4pt; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+  .terminal .c { color: #6ee7b7; } .terminal .k { color: #fcd34d; } .terminal .x { color: #86efac; } .terminal .e { color: #fca5a5; }
+
+  /* Árbol de carpetas */
+  .carpetas { border: 1px solid var(--linea); border-radius: 6px; padding: .7em 1em; font-family: "JetBrains Mono", monospace; font-size: 7.8pt; line-height: 1.65; }
+  .carpetas div { display: grid; grid-template-columns: 15em 7.5em 1fr; align-items: center; }
+  .capa { display: inline-block; font-family: "Inter"; font-size: 7pt; font-weight: 700; border-radius: 3px; padding: 0 .4em; color: #fff; }
+  .c-pres { background: #0e7490; } .c-http { background: var(--azul); } .c-neg { background: var(--verde-vivo); } .c-dat { background: var(--violeta); } .c-tr { background: #78716c; } .c-pr { background: var(--ambar); }
+  .carpetas .d { font-family: "Inter"; color: var(--suave); font-size: 8pt; }
+
+  /* Barras */
+  .barras { border: 1px solid var(--linea); border-radius: 6px; padding: .8em 1em .5em; }
+  .fila-barra { display: grid; grid-template-columns: 6.5em 1fr; align-items: center; gap: .6em; margin-bottom: .45em; font-size: 8.5pt; }
+  .barra { display: flex; height: 1.5em; border-radius: 3px; overflow: hidden; font-family: "JetBrains Mono", monospace; font-size: 7.6pt; font-weight: 700; color: #fff; }
+  .barra span { display: flex; align-items: center; justify-content: center; }
+  .leyenda { display: flex; gap: 1.2em; font-size: 7.8pt; color: var(--suave); margin: 0 0 .6em; }
+  .leyenda i { display: inline-block; width: .8em; height: .8em; border-radius: 2px; margin-right: .35em; vertical-align: -.05em; }
+  .semanas { display: grid; grid-template-columns: repeat(11, 1fr); align-items: end; gap: .35em; height: 4.4cm; padding: 0 .2em; border-bottom: 1.5px solid var(--tinta); }
+  .semanas div { position: relative; background: var(--verde-vivo); border-radius: 2px 2px 0 0; }
+  .semanas div.hito { background: #a7f3d0; }
+  .semanas div span { position: absolute; top: -1.35em; left: 0; right: 0; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 7.5pt; font-weight: 700; }
+  .ejes { display: grid; grid-template-columns: repeat(11, 1fr); gap: .35em; padding: .3em .2em 0; font-size: 7pt; color: var(--suave); text-align: center; }
+
+  /* Pasos */
+  .pasos { counter-reset: paso; list-style: none; padding-left: 0; }
+  .pasos > li { counter-increment: paso; position: relative; padding-left: 2.1em; margin-bottom: .55em; }
+  .pasos > li::before { content: counter(paso); position: absolute; left: 0; top: .1em; width: 1.5em; height: 1.5em; border-radius: 50%; background: var(--verde-vivo); color: #fff; font-size: 8pt; font-weight: 700; display: grid; place-items: center; }
+
+  /* ---------- Portada ---------- */
+  .portada { page: portada; height: 27.94cm; background: #030806; color: #fff; position: relative; overflow: hidden; padding: 2.4cm 2.2cm 2cm; display: flex; flex-direction: column; }
+  .portada .arbol { position: absolute; right: -1.2cm; top: 1.4cm; width: 12.5cm; opacity: .95; }
+  .portada .inst { position: relative; font-size: 9.5pt; line-height: 1.5; color: #d6d3d1; }
+  .portada .inst b { color: #fff; font-size: 10.5pt; }
+  .portada .centro { position: relative; margin-top: 6.6cm; }
+  .portada .hito { font-family: "JetBrains Mono", monospace; font-size: 8.5pt; font-weight: 700; letter-spacing: .16em; color: #facc15; }
+  .portada h1 { font-size: 46pt; font-weight: 900; letter-spacing: -.03em; margin: .1em 0 .12em; line-height: 1; }
+  .portada .bajada { font-size: 13pt; font-weight: 600; color: #e7e5e4; max-width: 11cm; line-height: 1.35; }
+  .portada .cifras-portada { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1em; margin-top: 2.2cm; padding-bottom: .9cm; border-bottom: 1px solid #292524; }
+  .portada .cifras-portada b { display: block; font-family: "JetBrains Mono", monospace; font-size: 21pt; color: var(--menta); line-height: 1; }
+  .portada .cifras-portada span { display: block; font-size: 7.8pt; color: #a8a29e; margin-top: .4em; line-height: 1.3; }
+  .portada dl { position: relative; display: grid; grid-template-columns: 3.6cm 1fr; gap: .45em 1em; font-size: 9pt; margin: .9cm 0 0; }
+  .portada dt { color: #a8a29e; }
+  .portada dd { margin: 0; color: #fafaf9; }
+
+  /* ---------- Índice ---------- */
+  .indice { page: indice; }
+  .indice h2 { margin-bottom: .6em; }
+  .indice ol { list-style: none; padding: 0; margin: 0; }
+  .indice li { display: flex; align-items: baseline; gap: .45em; margin: 0; padding: .16em 0; font-size: 9.6pt; }
+  .indice li.n1 { font-weight: 650; padding-top: .42em; }
+  .indice li.n2 { padding-left: 1.9em; font-size: 9pt; color: var(--suave); }
+  .indice li .nn { font-family: "JetBrains Mono", monospace; color: var(--verde-vivo); min-width: 1.6em; font-size: .9em; white-space: nowrap; flex: none; }
+  .indice li .tt { flex: none; max-width: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #indice-figuras .nn, #indice-tablas .nn { min-width: 5.4em; }
+  .indice li .relleno { flex: 1; border-bottom: 1px dotted #a8a29e; margin-bottom: .3em; }
+  .indice li .pag { min-width: 1.8em; text-align: right; font-family: "JetBrains Mono", monospace; font-size: .9em; }
+  .indice h4 { margin-top: 1.4em; color: var(--verde); }
+
+  .pagina { font-family: "JetBrains Mono", monospace; font-weight: 700; color: var(--verde-vivo); white-space: nowrap; }
+
+  html[data-parte="inicio"] .cuerpo { display: none; }
+  html[data-parte="cuerpo"] .inicio { display: none; }
+  html[data-parte="cuerpo"] .cuerpo > .seccion:first-child { break-before: auto; }
+
+  .referencias p { text-align: left; padding-left: 1.6em; text-indent: -1.6em; margin-bottom: .6em; font-size: 9.2pt; }
+</style>
+</head>
+<body>
+
+<!-- =========================== PORTADA E ÍNDICE =========================== -->
+<div class="inicio">
+<section class="portada">
+  <img class="arbol" src="img/arbol.png" alt="">
+  <div class="inst">
+    <b>Universidad Mayor</b><br>
+    Facultad de Ciencias, Ingeniería y Tecnología<br>
+    Escuela de Ingeniería Civil
+  </div>
+  <div class="centro">
+    <div class="hito">HITOS 2 Y 3 · DOCUMENTO TÉCNICO Y DOCUMENTACIÓN FINAL</div>
+    <h1>Agro-Colab</h1>
+    <div class="bajada">Financia la cosecha, asegura tu abastecimiento: del motor que sostiene la promesa al producto que funciona.</div>
+  </div>
+  <div class="cifras-portada">
+    <div><b>37</b><span>operaciones HTTP en la API</span></div>
+    <div><b>7</b><span>tablas relacionales</span></div>
+    <div><b>290</b><span>pruebas, en 2 motores de base de datos</span></div>
+    <div><b>500</b><span>compras simultáneas sin sobreventa</span></div>
+  </div>
+  <dl>
+    <dt>Asignatura</dt><dd>Arquitectura de Desarrollo (Móvil y Web) · INGT1003</dd>
+    <dt>Equipo</dt><dd>Agro-Colab</dd>
+    <dt>Integrantes</dt><dd>Alveal Santos, Joaquin<br>Gonzalez Paredes, Matias<br>Reyes Orellana, Nicolas</dd>
+    <dt>Docente</dt><dd>Prof. Carlos Muñoz S.</dd>
+    <dt>Repositorio</dt><dd>github.com/arrobaaas/agro-colab</dd>
+    <dt>Producto publicado</dt><dd>arrobaaas.github.io/agro-colab</dd>
+    <dt>Ciudad y fecha</dt><dd>Santiago de Chile, noviembre de 2026</dd>
+  </dl>
+</section>
+
+<section class="indice">
+  <h2>Índice</h2>
+  <ol id="indice"></ol>
+  <h4>Figuras</h4>
+  <ol id="indice-figuras"></ol>
+  <h4>Tablas</h4>
+  <ol id="indice-tablas"></ol>
+</section>
+</div>
+
+<!-- ================================ CUERPO ================================ -->
+<div class="cuerpo">
+
+<!-- 1 ======================================================================= -->
+<section class="seccion" data-titulo="Introducción">
+<p class="kicker">Sección 1</p>
+<h2 id="s1">Introducción</h2>
+<div class="resumen"><p>Agro-Colab permite al pequeño agricultor cobrar por adelantado, sin intermediarios. Este informe reúne las dos últimas entregas: el servicio que sostiene esa promesa (Hito 2) y el producto que la cumple de punta a punta (Hito 3).</p></div>
+
+<p>El pequeño agricultor chileno necesita capital antes de la temporada y suele terminar vendiendo su cosecha a intermediarios, que se quedan con buena parte del margen. Al mismo tiempo, el consumidor urbano quiere saber de dónde viene lo que come. En el Hito 1, Agro-Colab se propuso para las dos partes: el consumidor adopta un árbol frutal o contrata una canasta de cosecha, y paga por adelantado y directo al agricultor (Alveal et al., 2026).</p>
+
+<p>Este documento describe lo que se construyó después, en pasado y sobre el código entregado en la rama principal del repositorio. La primera mitad corresponde al documento técnico del back end: trazabilidad con el Hito 1, arquitectura, tecnologías, contrato de la API, capas y persistencia. La segunda corresponde a la documentación final del producto: la interfaz conectada al servicio, el manejo de errores, las pruebas, la ejecución en otro equipo, la evolución de las decisiones y las limitaciones. Los anexos declaran el uso de inteligencia artificial y analizan los datos personales según la Ley 21.719.</p>
+
+<div class="cifras">
+  <div class="cifra"><b>37</b><span>operaciones HTTP en 8 recursos</span></div>
+  <div class="cifra"><b>7</b><span>tablas relacionales en PostgreSQL</span></div>
+  <div class="cifra"><b>290/290</b><span>pruebas aprobadas en SQLite y PostgreSQL</span></div>
+  <div class="cifra"><b>1 flujo</b><span>completo de la interfaz a la base y de vuelta</span></div>
+</div>
+
+<h3 id="s1-1"><span class="num">1.1</span>Mapa de la entrega</h3>
+
+<p>La <span class="ref">Tabla 1</span> relaciona cada criterio de la rúbrica con la sección de este informe que lo responde y con la evidencia en el repositorio. Todas las rutas son relativas a la raíz de <code>github.com/arrobaaas/agro-colab</code>.</p>
+
+<table>
+  <caption><b>Tabla 1.</b> Criterios de la rúbrica, dónde se responden y evidencia en el repositorio.</caption>
+  <thead><tr><th style="width:7%">Criterio</th><th style="width:27%">Qué evalúa</th><th style="width:20%">En este informe</th><th>Evidencia en el repositorio</th></tr></thead>
+  <tbody>
+    <tr class="grupo"><td colspan="4">Hito 2 · Documento técnico del back end y presentación</td></tr>
+    <tr><td>H2 A1</td><td>Demostración de la API en vivo</td><td>Sección 6.4 · pág. <span class="pagina" data-pag="s6-4"></span></td><td><code>docs/api/AgroColab.postman_collection.json</code></td></tr>
+    <tr><td>H2 A2</td><td>Justificación de las tecnologías</td><td>Sección 5 · pág. <span class="pagina" data-pag="s5"></span></td><td><code>backend/requirements.txt</code></td></tr>
+    <tr><td>H2 A3</td><td>Decisión monolito o distribuido</td><td>Sección 4.2 · pág. <span class="pagina" data-pag="s4-2"></span></td><td><code>docs/diagramas/arquitectura.png</code></td></tr>
+    <tr><td>H2 B1</td><td>Trazabilidad con el Hito 1</td><td>Sección 2 · pág. <span class="pagina" data-pag="s2"></span></td><td><code>docs/informes/Informe_Hito1_Propuesta.pdf</code></td></tr>
+    <tr><td>H2 B2</td><td>Diseño de la API REST</td><td>Sección 6 · pág. <span class="pagina" data-pag="s6"></span></td><td><code>docs/api/API.md</code> · <code>backend/tests/test_contrato_http.py</code></td></tr>
+    <tr><td>H2 B3</td><td>Separación de responsabilidades y capas</td><td>Sección 7 · pág. <span class="pagina" data-pag="s7"></span></td><td><code>backend/routers/</code> · <code>services/</code> · <code>repositories/</code> · <code>tests/test_arquitectura.py</code></td></tr>
+    <tr><td>H2 B4</td><td>Persistencia y manejo de credenciales</td><td>Sección 8 · pág. <span class="pagina" data-pag="s8"></span></td><td><code>db/esquema.sql</code> · <code>db/modelo_datos.png</code> · <code>.env.example</code> · <code>.gitignore</code></td></tr>
+    <tr><td>H2 B5</td><td>Referencias técnicas</td><td>Referencias · pág. <span class="pagina" data-pag="ref"></span></td><td>Documentación oficial citada en el cuerpo</td></tr>
+    <tr class="grupo"><td colspan="4">Hito 3 · Producto funcional, repositorio, documentación y video</td></tr>
+    <tr><td>H3 A1</td><td>Recorrido completo de punta a punta</td><td>Sección 3.2 · pág. <span class="pagina" data-pag="s3-2"></span></td><td>Producto publicado · <code>docs/guias/MANUAL.md</code> (sección 5)</td></tr>
+    <tr><td>H3 A2</td><td>Integración efectiva por capas</td><td>Secciones 7 y 9.1 · pág. <span class="pagina" data-pag="s9-1"></span></td><td><code>frontend/js/api.js</code> · <code>backend/tests/test_arquitectura.py</code></td></tr>
+    <tr><td>H3 A3</td><td>Validación, errores y estados</td><td>Sección 9 · pág. <span class="pagina" data-pag="s9"></span></td><td><code>backend/main.py</code> · <code>backend/schemas.py</code> · <code>tests/test_errores_inesperados.py</code></td></tr>
+    <tr><td>H3 A4</td><td>Ejecución reproducible o despliegue</td><td>Sección 11 · pág. <span class="pagina" data-pag="s11"></span></td><td><code>README.md</code> · <code>docs/guias/MANUAL.md</code> · arrobaaas.github.io/agro-colab</td></tr>
+    <tr><td>H3 A5</td><td>Repositorio e historial de trabajo</td><td>Sección 11.3 · pág. <span class="pagina" data-pag="s11-3"></span></td><td>Historial, ramas y solicitudes de incorporación en GitHub</td></tr>
+    <tr><td>H3 B1</td><td>Documento final completo</td><td>Este informe</td><td><code>docs/informes/Informe_Final_Hitos_2_y_3.pdf</code></td></tr>
+    <tr><td>H3 B2</td><td>Arquitectura final y evolución de decisiones</td><td>Secciones 4 y 12 · pág. <span class="pagina" data-pag="s12"></span></td><td><code>docs/informes/BITACORA.md</code> · <code>docs/diagramas/</code></td></tr>
+    <tr><td>H3 B3</td><td>Manual de uso e instalación</td><td>Sección 11 y Anexo C · pág. <span class="pagina" data-pag="anexo-c"></span></td><td><code>docs/guias/MANUAL.md</code> · resumen en <code>README.md</code></td></tr>
+    <tr><td>H3 B4</td><td>Video promocional de 2 minutos</td><td>No aplica</td><td>Enlace en <code>README.md</code> (sección Video) · guion en <code>docs/guias/GUION_VIDEO.md</code></td></tr>
+    <tr><td>H3 B5</td><td>Uso de IA y datos personales</td><td>Anexos A y B · pág. <span class="pagina" data-pag="anexo-a"></span></td><td>También en <code>README.md</code></td></tr>
+  </tbody>
+</table>
+
+<div class="nota"><b>Cómo se obtuvieron los datos</b><p>Las cifras de rendimiento y concurrencia se midieron el 4 de noviembre de 2026 (Anexo D). Las pruebas, las capturas y la instalación limpia se repitieron el 17 de noviembre de 2026 sobre el código de esta entrega. Las capturas son del producto en ejecución, con datos ficticios.</p></div>
+</section>
+
+<!-- 2 ======================================================================= -->
+<section class="seccion" data-titulo="Trazabilidad con el Hito 1">
+<p class="kicker">Sección 2</p>
+<h2 id="s2">Trazabilidad con el Hito 1</h2>
+<div class="resumen"><p>La promesa no cambió; cambió la forma de cumplirla. Cada cambio de esta sección responde a un error real encontrado al construir o a una exigencia de la promesa.</p></div>
+
+<p>Siguen vigentes el problema, los usuarios, la arquitectura cliente-servidor en tres capas, la API REST en Python con FastAPI, la base relacional y los planes Básico, Intermedio y Premium. La desventaja asumida en el Hito 1 también se cumplió: FastAPI no trae ORM ni panel de administración, así que hubo que integrar SQLAlchemy y programar la seguridad y el panel. La <span class="ref">Figura 1</span> muestra cómo se distribuyó el trabajo en el tiempo, y la <span class="ref">Tabla 2</span> declara qué se movió.</p>
+
+<figure>
+  <div class="barras">
+    <div class="leyenda"><span><i style="background:var(--verde-vivo)"></i>commits de la semana</span><span><i style="background:#a7f3d0"></i>semana de presentación de un hito</span></div>
+    <div class="semanas" style="margin-top:1.4em">
+      <div style="height:10%"><span>6</span></div><div style="height:3.4%"><span>2</span></div><div class="hito" style="height:3.4%"><span>2</span></div><div style="height:17%"><span>10</span></div><div style="height:3.4%"><span>2</span></div><div style="height:0"><span>0</span></div><div style="height:49%"><span>29</span></div><div style="height:100%"><span>59</span></div><div class="hito" style="height:10%"><span>6</span></div><div style="height:13.6%"><span>8</span></div><div style="height:10%"><span>6</span></div>
+    </div>
+    <div class="ejes"><span>7 sep</span><span>14 sep</span><span>21 sep</span><span>28 sep</span><span>5 oct</span><span>12 oct</span><span>19 oct</span><span>26 oct</span><span>2 nov</span><span>9 nov</span><span>16 nov</span></div>
+  </div>
+  <figcaption><b>Figura 1.</b> Commits por semana en la rama principal, sin contar las fusiones (130 en total hasta el 17 de noviembre). La semana del 19 de octubre concentró el despliegue, la Ley 21.719 y el catálogo cerrado; la del 26, los tokens, los pagos, PostgreSQL y la integración continua. Datos: historial de Git.</figcaption>
+</figure>
+
+<table>
+  <caption><b>Tabla 2.</b> Cambios respecto del Hito 1, con fecha, motivo e impacto.</caption>
+  <thead><tr><th style="width:32%">Qué se movió</th><th style="width:33%">Por qué</th><th>Impacto</th></tr></thead>
+  <tbody>
+    <tr><td><b>Adoptar exige pagar.</b> La ruta que adoptaba sin cobrar dio paso a la pasarela simulada. <span class="m">26 oct</span></td><td>Adoptar sin pagar contradecía el financiamiento por adelantado.</td><td>Pago y cupo van en una sola transacción. Sin cupo, no hay cobro.</td></tr>
+    <tr><td><b>De SQLite a PostgreSQL</b> en producción; SQLite sigue en local. <span class="m">30 oct</span></td><td>En Render, SQLite perdía los datos en cada despliegue.</td><td>Los datos sobreviven a los reinicios. La integración continua prueba ambos motores.</td></tr>
+    <tr><td><b>Reserva atómica de cupos.</b> Antes se contaba y luego se insertaba. <span class="m">29 oct</span></td><td>Dos compras simultáneas veían el mismo cupo libre.</td><td><code>UPDATE</code> condicional, índice único y restricción <code>CHECK</code> (sección 8.2).</td></tr>
+    <tr><td><b>Tokens firmados.</b> El Hito 1 solo decía «verifica que el usuario esté autenticado». <span class="m">29 oct</span></td><td>La versión inicial confiaba en el id enviado por el navegador.</td><td>HMAC-SHA256, expiración de 7 días y autorización por recurso.</td></tr>
+    <tr><td><b>Catálogo cerrado</b> de 12 especies con 36 fotos verificadas. <span class="m">21 oct</span></td><td>La trazabilidad prometida exige mostrar el árbol correcto.</td><td>El servidor rechaza especies o fotos ajenas, incluso en peticiones hechas a mano.</td></tr>
+    <tr><td><b>Sin vía asíncrona.</b> El Hito 1 justificó FastAPI por su rendimiento asíncrono.</td><td>El acceso a datos es síncrono; FastAPI ejecuta esas rutas en un grupo de hilos (Ramírez, s.f.-a).</td><td>La elección se sostiene por Pydantic y la productividad (sección 5).</td></tr>
+    <tr><td><b>Contrato HTTP corregido.</b> Los errores de negocio respondían 200. <span class="m">4 nov</span></td><td>Una medición mostró que 10 de 17 errores llegaban como éxito.</td><td>Cada resultado usa su código (sección 6.5).</td></tr>
+    <tr><td><b>Capas reales:</b> <code>routers/</code>, <code>services/</code> y <code>repositories/</code>. <span class="m">4 nov</span></td><td>Había 89 líneas con consultas dentro de los routers.</td><td>Las reglas se comprueban con pruebas automáticas (sección 7.3).</td></tr>
+    <tr><td><b>Alcance agregado:</b> verificación por correo, recuperación de contraseña, administración, monitoreo, pago único de la canasta y despacho.</td><td>Son exigencias de un sistema con cuentas, de la Ley 21.719 y de la entrega real de la cosecha.</td><td>37 operaciones que mantener, compensadas con 290 pruebas.</td></tr>
+  </tbody>
+</table>
+
+<p>La <span class="ref">Tabla 3</span> revisa, uno por uno, los compromisos que el Hito 1 dejó escritos. Seis están cumplidos y dos quedaron parciales; las limitaciones se explican en la sección 13.</p>
+
+<table>
+  <caption><b>Tabla 3.</b> Compromisos del Hito 1 y su estado en el producto entregado.</caption>
+  <thead><tr><th style="width:34%">Compromiso del Hito 1</th><th>Dónde está hoy</th><th style="width:12%">Estado</th></tr></thead>
+  <tbody>
+    <tr><td>Mostrar el catálogo de árboles con sus planes</td><td><code>GET /api/arboles</code> y la vista de catálogo, con filtro por plan</td><td class="ok">Cumplido</td></tr>
+    <tr><td>Verificar que el usuario esté autenticado</td><td><code>usuario_actual</code> en <code>core.py</code>, en cada ruta protegida</td><td class="ok">Cumplido</td></tr>
+    <tr><td>Controlar los cupos de cada árbol: 5, 3 o exclusivo</td><td><code>reservar_cupo</code>, con <code>UPDATE</code> condicional; el plan fija los cupos</td><td class="ok">Cumplido</td></tr>
+    <tr><td>Registrar la suscripción y descontar el cupo en la base</td><td>Una transacción junto con el pago</td><td class="ok">Cumplido</td></tr>
+    <tr><td>Mostrar un panel personal después de adoptar</td><td>Panel del comprador (Figuras 8 y 9)</td><td class="ok">Cumplido</td></tr>
+    <tr><td>Trazabilidad del origen</td><td>Productor, ubicación y foto verificada por árbol; código de seguimiento por pedido</td><td class="ok">Cumplido</td></tr>
+    <tr><td>Pago directo al productor</td><td>Pasarela simulada: el flujo existe, pero no mueve dinero</td><td class="parcial">Simulado</td></tr>
+    <tr><td>Seguimiento del despacho</td><td>El pedido guarda un estado logístico, pero ese estado no avanza</td><td class="parcial">Parcial</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- 3 ======================================================================= -->
+<section class="seccion" data-titulo="El producto entregado">
+<p class="kicker">Sección 3</p>
+<h2 id="s3">El producto entregado</h2>
+<div class="resumen"><p>Un comprador adopta un árbol, paga, indica el despacho y encuentra su adopción después de recargar la página. El agricultor ve ese cupo ocupado y el ingreso que le genera.</p></div>
+
+<h3 id="s3-1"><span class="num">3.1</span>Qué hace y para quién</h3>
+
+<p>Agro-Colab es una aplicación web con tres roles. El <b>comprador</b> adopta un cupo de un árbol frutal concreto o contrata una canasta de abastecimiento, paga en una pasarela simulada e indica dónde recibir la cosecha. El <b>agricultor</b> publica sus árboles, elige el plan de cada uno y ve cuánto le genera cada árbol y quiénes lo financian. El <b>administrador</b> gestiona las cuentas. La interfaz se adapta al ancho de un celular; no se construyó una aplicación móvil nativa.</p>
+
+<div class="tarjetas">
+  <div class="tarjeta"><b>Adopción de árboles</b>Un cupo sobre un árbol concreto, con su ubicación, productor y cosecha estimada. Planes Básico (5 cupos), Intermedio (3) y Premium (exclusivo).</div>
+  <div class="tarjeta"><b>Abastecimiento</b>Una canasta de cosecha con entrega programada. Planes Huerto Esencial, Familiar y Lote Gastronómico (B2B, con razón social y RUT).</div>
+  <div class="tarjeta"><b>Dónde probarlo</b>arrobaaas.github.io/agro-colab, con <code>comprador@agrocolab.cl</code> y <code>agricultor@agrocolab.cl</code>, contraseña <code>123</code> (Anexo C).</div>
+</div>
+
+<h3 id="s3-2"><span class="num">3.2</span>Flujo principal de punta a punta</h3>
+
+<p>El flujo principal es la <b>adopción de un árbol</b>, porque es el que cumple la promesa: el dinero del comprador financia un árbol concreto antes de la cosecha. Las Figuras 2 a 9 son capturas del producto en ejecución, tomadas el 17 de noviembre de 2026 sobre una base nueva. La <span class="ref">Tabla 4</span> relaciona cada paso con la petición HTTP y con lo que queda guardado.</p>
+
+<div class="par">
+  <figure><img src="../../capturas/03-catalogo.jpg" alt="Catálogo de árboles con cupos libres"><figcaption><b>Figura 2.</b> Catálogo con los cupos libres que informa <code>GET /api/arboles</code>.</figcaption></figure>
+  <figure><img src="../../capturas/04-confirmar-adopcion.jpg" alt="Confirmación del árbol"><figcaption><b>Figura 3.</b> Confirmación del árbol elegido, antes de agregarlo a la canasta.</figcaption></figure>
+  <figure><img src="../../capturas/05-canasta.jpg" alt="Canasta"><figcaption><b>Figura 4.</b> Canasta con el total por pagar.</figcaption></figure>
+  <figure><img src="../../capturas/07-pago-formulario.jpg" alt="Pasarela de pago"><figcaption><b>Figura 5.</b> Pasarela simulada, con las tarjetas de prueba a la vista.</figcaption></figure>
+  <figure><img src="../../capturas/08-pago-aprobado.jpg" alt="Pago aprobado"><figcaption><b>Figura 6.</b> Comprobante: el monto lo fijó el servidor.</figcaption></figure>
+  <figure><img src="../../capturas/09-despacho.jpg" alt="Despacho"><figcaption><b>Figura 7.</b> Despacho, con autocompletado de direcciones de OpenStreetMap.</figcaption></figure>
+  <figure><img src="../../capturas/10-panel-comprador.jpg" alt="Panel del comprador"><figcaption><b>Figura 8.</b> Panel del comprador con el árbol adoptado.</figcaption></figure>
+  <figure><img src="../../capturas/11-panel-tras-recargar.jpg" alt="Panel después de recargar"><figcaption><b>Figura 9.</b> El mismo panel después de recargar: el dato vino de la base.</figcaption></figure>
+</div>
+
+<table>
+  <caption><b>Tabla 4.</b> Recorrido del flujo principal: de la pantalla a la base de datos y de vuelta.</caption>
+  <thead><tr><th style="width:4%">#</th><th style="width:27%">El usuario</th><th style="width:29%">Petición</th><th>Qué ocurre en el servidor</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Ingresa como comprador</td><td><span class="verbo POST">POST</span> <span class="ruta">/api/login</span> → 200</td><td>Compara el hash bcrypt y entrega un token firmado de 7 días</td></tr>
+    <tr><td>2</td><td>Abre el catálogo (Fig. 2)</td><td><span class="verbo GET">GET</span> <span class="ruta">/api/arboles</span> → 200</td><td>Lee los árboles con sus cupos ocupados</td></tr>
+    <tr><td>3</td><td>Agrega un árbol a la canasta (Fig. 3 y 4)</td><td><span class="verbo GET">GET</span> <span class="ruta">/api/suscripciones/usuario/{id}</span></td><td>Comprueba que no lo haya adoptado antes; la canasta vive en el navegador hasta pagar</td></tr>
+    <tr><td>4</td><td>Paga con una tarjeta de prueba (Fig. 5 y 6)</td><td><span class="verbo POST">POST</span> <span class="ruta">/api/pagos/canasta</span> → 201</td><td>Fija el monto, reserva el cupo con un <code>UPDATE</code> condicional y guarda suscripción y pago en una transacción</td></tr>
+    <tr><td>5</td><td>Indica el despacho (Fig. 7)</td><td><span class="verbo POST">POST</span> <span class="ruta">/api/pedidos</span> → 201</td><td>Valida dirección, celular y código postal; genera un código de seguimiento único</td></tr>
+    <tr><td>6</td><td>Abre su panel (Fig. 8)</td><td><span class="verbo GET">GET</span> suscripciones, pedidos y pagos</td><td>Devuelve solo los datos del dueño del token</td></tr>
+    <tr><td>7</td><td>Recarga la página (Fig. 9)</td><td>Las mismas lecturas</td><td>El árbol sigue ahí: quedó en PostgreSQL, no en el navegador</td></tr>
+  </tbody>
+</table>
+
+<p>El recorrido se comprobó también desde el otro lado: al entrar como agricultor, el árbol adoptado aparece con un cupo ocupado y $12.000 de ingreso mensual (<span class="ref">Figura 10</span>). El dato que escribió el comprador llegó al panel de otro rol sin intervención manual.</p>
+
+<div class="par">
+  <figure><img src="../../capturas/13b-graficos-agricultor.jpg" alt="Panel del agricultor"><figcaption><b>Figura 10.</b> Panel del agricultor después de la adopción: 1 suscriptor y $12.000 de ingreso.</figcaption></figure>
+  <figure><img src="../../capturas/14-arboles-agricultor.jpg" alt="Árboles del agricultor"><figcaption><b>Figura 11.</b> Árboles del agricultor con su ocupación y sus suscriptores.</figcaption></figure>
+</div>
+
+<h3 id="s3-3"><span class="num">3.3</span>Otros recorridos implementados</h3>
+<ul>
+  <li><b>Cuenta:</b> registro con consentimiento explícito y verificación por correo, inicio de sesión, recuperación de contraseña con código de un solo uso, edición del perfil, descarga de los datos propios y eliminación de la cuenta con la contraseña actual.</li>
+  <li><b>Comprador:</b> canastas de abastecimiento (con RUT validado en el plan B2B), modificación del destino de un pedido y cancelación de una suscripción, que libera el cupo.</li>
+  <li><b>Agricultor:</b> publicación desde el catálogo cerrado, edición y eliminación de árboles, gráficos de ingresos, ocupación y adopciones por mes, y expulsión de un suscriptor.</li>
+  <li><b>Administrador:</b> listado de cuentas con búsqueda y filtro, corrección de datos, verificación manual, cambio de contraseña y eliminación. La cuenta de administrador solo se crea desde variables del servidor.</li>
+</ul>
+</section>
+
+<!-- 4 ======================================================================= -->
+<section class="seccion" data-titulo="Arquitectura y decisión monolito o distribuido">
+<p class="kicker">Sección 4</p>
+<h2 id="s4">Arquitectura y decisión monolito o distribuido</h2>
+<div class="resumen"><p>Decisión: monolito modular. Pagar y reservar un cupo deben ocurrir juntos o no ocurrir, y una sola transacción de la base lo garantiza sin coordinar servicios.</p></div>
+
+<h3 id="s4-1"><span class="num">4.1</span>Vista general</h3>
+<p>La <span class="ref">Figura 12</span> muestra los componentes con sus nombres reales en el repositorio. El cliente es una aplicación de página única en JavaScript, sin framework, publicada en GitHub Pages. El servidor es un solo proceso de FastAPI en Render, organizado en tres capas, que guarda los datos en PostgreSQL 16; en local usa SQLite sin instalar nada. El servidor solo llama a Brevo, para el correo, y a un webhook opcional de alertas. El autocompletado de direcciones y las fotos del catálogo van directo del navegador a Photon y a Wikimedia Commons, así que la dirección tipeada no pasa por el servidor.</p>
+
+<figure class="limpia"><img src="../../diagramas/arquitectura.svg" alt="Diagrama de arquitectura" style="width:100%"><figcaption><b>Figura 12.</b> Arquitectura final de Agro-Colab. Las flechas negras son el camino de una petición; las grises, llamadas a servicios externos. Elaboración propia; también en <code>docs/diagramas/arquitectura.png</code>.</figcaption></figure>
+
+<h3 id="s4-2"><span class="num">4.2</span>Monolito frente a servicios</h3>
+<p>Fowler (2015) sostiene que conviene partir con un monolito, porque los límites correctos entre servicios recién se conocen con el uso. La <span class="ref">Tabla 5</span> aplica los cuatro criterios de la pauta al caso.</p>
+
+<table>
+  <caption><b>Tabla 5.</b> Monolito frente a servicios, aplicado a Agro-Colab.</caption>
+  <thead><tr><th style="width:15%">Criterio</th><th style="width:31%">Situación del proyecto</th><th style="width:27%">Con monolito</th><th>Con servicios</th></tr></thead>
+  <tbody>
+    <tr><td><b>Carga esperada</b></td><td>Decenas de usuarios. En local, entre 104 y 214 lecturas por segundo con 10 clientes (sección 10.2).</td><td>Un proceso alcanza, y los límites de intentos viven en la base, así que se pueden sumar procesos.</td><td>Ninguna parte tiene una carga distinta que justifique escalarla aparte.</td></tr>
+    <tr><td><b>Tamaño del equipo</b></td><td>3 integrantes y un semestre.</td><td>Un repositorio y un conjunto de pruebas.</td><td>8 módulos serían demasiados servicios para 3 personas.</td></tr>
+    <tr><td><b>Costo de operación</b></td><td>Plan gratuito: el servicio se detiene tras 15 minutos sin tráfico (Render, s.f.).</td><td>Un servicio web y una base.</td><td>Varios servicios detenidos por separado suman esperas en cadena.</td></tr>
+    <tr><td><b>Complejidad de despliegue</b></td><td>Pago y cupo son una sola operación de negocio.</td><td>Una transacción local (sección 8.2).</td><td>Exigiría coordinar una transacción distribuida.</td></tr>
+  </tbody>
+</table>
+
+<div class="costo"><b>Costo que el equipo asume</b><p>Un error grave detiene todo el servicio y no se puede escalar una parte por separado. Además, nada en el proceso impide que un módulo lea cualquier tabla: esa disciplina la imponen las pruebas de la sección 7.3, no la infraestructura.</p></div>
+
+<h4>Cuándo se revisaría esta decisión</h4>
+<div class="tarjetas cuatro">
+  <div class="tarjeta"><b>Correo</b>Si el envío dentro de la petición retrasa el registro de forma visible: primero, una cola de tareas.</div>
+  <div class="tarjeta"><b>Pagos reales</b>Una pasarela real trae requisitos de auditoría propios: primer candidato a separarse.</div>
+  <div class="tarjeta"><b>Equipos</b>Si distintos equipos necesitan publicar de forma independiente.</div>
+  <div class="tarjeta"><b>Carga</b>Si una medición en producción muestra una parte saturada y el resto no.</div>
+</div>
+</section>
+
+<!-- 5 ======================================================================= -->
+<section class="seccion" data-titulo="Justificación de las tecnologías">
+<p class="kicker">Sección 5</p>
+<h2 id="s5">Justificación de las tecnologías</h2>
+<div class="resumen"><p>Cada pieza se contrastó con una alternativa, usando los criterios del Hito 1: curva de aprendizaje, capacidad frente a peticiones simultáneas, y comunidad y documentación.</p></div>
+
+<p>La <span class="ref">Tabla 6</span> resume, para cada elección, la alternativa evaluada, el motivo y el costo que el equipo acepta. El motivo que cambió respecto del Hito 1 es el de FastAPI: su valor real resultó ser la validación tipada y la división por dominios, no el rendimiento asíncrono.</p>
+
+<table>
+  <caption><b>Tabla 6.</b> Decisiones de tecnología, alternativas y costos.</caption>
+  <thead><tr><th style="width:15%">Pieza</th><th style="width:13%">Alternativa</th><th style="width:40%">Por qué se eligió</th><th>Costo asumido</th></tr></thead>
+  <tbody>
+    <tr><td><b>Python 3.12</b><br><span class="m">lenguaje</span></td><td>Node.js</td><td>Sintaxis accesible para el equipo y validación tipada con anotaciones. Node.js habría unificado el lenguaje con el cliente.</td><td>Dos lenguajes; los esquemas no se comparten con el cliente.</td></tr>
+    <tr><td><b>FastAPI</b><br><span class="m">framework</span></td><td>Express, Django</td><td>Integra Pydantic, genera <code>/docs</code> (Ramírez, s.f.-b) y divide la API por dominio (Ramírez, s.f.-c).</td><td>Sin ORM, autenticación ni panel incluidos.</td></tr>
+    <tr><td><b>Pydantic</b><br><span class="m">validación</span></td><td>Validación manual</td><td>Tipos y largos se declaran una vez, y lo inválido se rechaza con 422 antes de entrar a la ruta (Pydantic, s.f.).</td><td>Su mensaje por defecto no servía al usuario: se escribió un manejador en <code>main.py</code>.</td></tr>
+    <tr><td><b>PostgreSQL 16</b><br><span class="m">producción</span></td><td>SQLite</td><td>Persiste fuera del servidor y documenta su comportamiento concurrente (PostgreSQL Global Development Group, s.f.).</td><td>Servicio externo, variable de conexión y pruebas en dos motores.</td></tr>
+    <tr><td><b>SQLite</b><br><span class="m">local</span></td><td>PostgreSQL local</td><td>Se levanta sin instalar nada: basta con no definir <code>DATABASE_URL</code>.</td><td>Diferencias con producción; por eso la integración continua prueba ambos.</td></tr>
+    <tr><td><b>SQLAlchemy 2</b><br><span class="m">ORM</span></td><td>SQL a mano</td><td>El mismo código en ambos motores y consultas parametrizadas (SQLAlchemy, s.f.).</td><td>Curva de aprendizaje, y una migración propia porque <code>create_all</code> no altera tablas.</td></tr>
+    <tr><td><b>bcrypt y HMAC-SHA256</b><br><span class="m">seguridad</span></td><td>JWT con biblioteca</td><td>bcrypt está diseñado para contraseñas (Python Cryptographic Authority, s.f.); HMAC es estándar (Krawczyk et al., 1997) y viene en Python (Python Software Foundation, s.f.).</td><td>Código propio de tokens, un punto sensible que exige pruebas.</td></tr>
+    <tr><td><b>JavaScript sin framework</b><br><span class="m">cliente</span></td><td>React</td><td>Sin paso de compilación: GitHub Pages publica los archivos tal cual, y la política de contenido prohíbe JavaScript en línea.</td><td>Router de vistas y delegación de eventos programados a mano.</td></tr>
+    <tr><td><b>Render y GitHub Pages</b><br><span class="m">hospedaje</span></td><td>Servidor propio</td><td>Planes gratuitos suficientes para un prototipo, publicados con un <i>push</i>.</td><td>La primera petición tras la inactividad demora hasta un minuto.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- 6 ======================================================================= -->
+<section class="seccion" data-titulo="Diseño de la API REST">
+<p class="kicker">Sección 6</p>
+<h2 id="s6">Diseño de la API REST</h2>
+<div class="resumen"><p>La API cubre crear, leer, actualizar y borrar en dos recursos completos, persiste en una base real y responde cada resultado con su código HTTP, incluidos los errores.</p></div>
+
+<h3 id="s6-1"><span class="num">6.1</span>Convenciones y mapa de recursos</h3>
+<p>Las rutas usan sustantivos y los verbos de HTTP según su semántica (Fielding, 2000; Fielding et al., 2022). La excepción declarada son las acciones de cuenta, como <code>/api/login</code>. La <span class="ref">Tabla 7</span> distribuye las 37 operaciones por recurso y verbo.</p>
+
+<div class="tarjetas">
+  <div class="tarjeta"><b>Formato</b>JSON. Las escrituras y todos los errores incluyen <code>status</code> y <code>mensaje</code> en lenguaje de usuario.</div>
+  <div class="tarjeta"><b>Autenticación</b><code>Authorization: Bearer</code>. El usuario sale del token, nunca del cuerpo ni de la ruta.</div>
+  <div class="tarjeta"><b>Versionado</b>Sin versión, con un solo consumidor. Un cambio incompatible se publicaría en <code>/api/v2/</code>, conviviendo con el anterior hasta migrar al cliente.</div>
+</div>
+
+<table>
+  <caption><b>Tabla 7.</b> Operaciones por recurso y verbo. Árboles y pedidos cumplen el ciclo completo que exige el mínimo funcional.</caption>
+  <thead><tr><th>Recurso</th><th style="width:16%">Módulo</th><th class="num">POST</th><th class="num">GET</th><th class="num">PUT</th><th class="num">DELETE</th><th class="num">Total</th></tr></thead>
+  <tbody>
+    <tr><td><b>Árboles</b> <span class="ok">CRUD completo</span></td><td><code>arboles</code></td><td class="num">1</td><td class="num">2</td><td class="num">1</td><td class="num">1</td><td class="num">5</td></tr>
+    <tr><td><b>Pedidos</b> <span class="ok">CRUD completo</span></td><td><code>pedidos</code></td><td class="num">1</td><td class="num">2</td><td class="num">1</td><td class="num">1</td><td class="num">5</td></tr>
+    <tr><td><b>Cuentas y sesión</b></td><td><code>usuarios</code></td><td class="num">7</td><td class="num">3</td><td class="num">1</td><td class="num">1</td><td class="num">12</td></tr>
+    <tr><td><b>Suscripciones</b></td><td><code>suscripciones</code></td><td class="num">·</td><td class="num">2</td><td class="num">·</td><td class="num">2</td><td class="num">4</td></tr>
+    <tr><td><b>Administración</b></td><td><code>admin</code></td><td class="num">·</td><td class="num">2</td><td class="num">1</td><td class="num">1</td><td class="num">4</td></tr>
+    <tr><td><b>Pagos</b></td><td><code>pagos</code></td><td class="num">2</td><td class="num">2</td><td class="num">·</td><td class="num">·</td><td class="num">4</td></tr>
+    <tr><td><b>Monitoreo</b></td><td><code>monitoreo</code></td><td class="num">1</td><td class="num">1</td><td class="num">·</td><td class="num">·</td><td class="num">2</td></tr>
+    <tr><td><b>Especies</b></td><td><code>especies</code></td><td class="num">·</td><td class="num">1</td><td class="num">·</td><td class="num">·</td><td class="num">1</td></tr>
+    <tr><td><b>Total</b></td><td></td><td class="num"><b>12</b></td><td class="num"><b>15</b></td><td class="num"><b>4</b></td><td class="num"><b>6</b></td><td class="num"><b>37</b></td></tr>
+  </tbody>
+</table>
+
+<h3 id="s6-2"><span class="num">6.2</span>Contrato completo</h3>
+<p>La <span class="ref">Tabla 8</span> es el contrato tal como lo implementa el código. Se genera desde <code>docs/api/API.md</code>, y <code>test_entregables.py</code> falla si ese archivo deja de coincidir con las rutas reales. Los parámetros son los de ruta, entre llaves; ninguna ruta usa parámetros de consulta. Las rutas con cuerpo o parámetro numérico responden 422 ante datos inválidos.</p>
+
+<table id="contrato">
+  <caption><b>Tabla 8.</b> Contrato de la API: verbo, ruta, acceso, cuerpo, código de éxito y códigos de error.</caption>
+  <thead><tr><th style="width:9%">Verbo</th><th style="width:31%">Ruta</th><th style="width:15%">Acceso</th><th style="width:17%">Cuerpo</th><th style="width:6%">Éxito</th><th>Errores</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<h3 id="s6-3"><span class="num">6.3</span>Reglas de los cuerpos y ejemplo</h3>
+<p>La <span class="ref">Tabla 9</span> resume las reglas de validación de cada esquema de Pydantic. Ningún cuerpo trae montos: el precio de un árbol o de un plan lo fija siempre el servidor.</p>
+
+<table id="reglas">
+  <caption><b>Tabla 9.</b> Reglas de validación de los esquemas de entrada.</caption>
+  <thead><tr><th style="width:22%">Esquema</th><th>Campos y reglas</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<figure>
+<div class="terminal"><span class="c"># Cuerpo de ejemplo · POST /api/arboles · responde 201</span>
+{"especie": "palto_hass", "identificador": "#7", "ubicacion": "Quillota",
+ "plan": "Básico", "tipo_suscripcion": "Compartido", "cupos_totales": 5,
+ "precio_mensual_clp": 9000, "estimacion_cosecha_kg": 30, "imagen": "&lt;url de una foto de la especie&gt;"}</div>
+<figcaption><b>Figura 13.</b> Cuerpo de ejemplo de una creación. El productor no se envía: sale del token.</figcaption>
+</figure>
+
+<h3 id="s6-4"><span class="num">6.4</span>Demostración real de crear, leer, actualizar y borrar</h3>
+<p>La <span class="ref">Figura 14</span> reproduce, con el cuerpo de la respuesta abreviado, la secuencia de la demostración en vivo sobre el recurso <code>pedidos</code>, ejecutada el 17 de noviembre de 2026 contra el servicio local. Después de borrar, leer el mismo pedido responde 404: el dato estaba guardado y dejó de estarlo. Las mismas peticiones están listas para importar en <code>docs/api/AgroColab.postman_collection.json</code>, y <code>test_entregables.py</code> ejecuta esa colección completa en cada integración.</p>
+
+<figure>
+<div class="terminal"><span class="c"># 0. Iniciar sesión y pagar el plan (el pedido exige un pago aprobado)</span>
+<span class="k">$</span> curl -X POST $API/login -d '{"email":"comprador@agrocolab.cl","password":"123","rol":"comprador"}'
+<span class="k">$</span> curl -X POST $API/pagos -H "Authorization: Bearer $TOKEN" -d '{"tipo":"plan","plan_nombre":"Canasta Huerto Esencial",...}'
+<span class="x">HTTP 201</span>  {"status":"success","mensaje":"Pago aprobado.","pago":{"id":1,...}}
+
+<span class="c"># 1. CREAR</span>
+<span class="k">$</span> curl -X POST $API/pedidos -H "Authorization: Bearer $TOKEN" -d '{"plan_nombre":"Canasta Huerto Esencial",
+    "tipo_destino":"particular","direccion":"Av. Irarrázaval 2401","comuna":"Ñuñoa","codigo_postal":"7750000",
+    "telefono_codigo":"+56","telefono":"912345678","frecuencia_entrega":"mensual","pago_id":1}'
+<span class="x">HTTP 201</span>  {"status":"success","mensaje":"Pedido registrado. Código de despacho: AGRO-0001","pedido":{"id":1,"monto_clp":19900,...}}
+
+<span class="c"># 2. LEER: el dato quedó guardado</span>
+<span class="k">$</span> curl $API/pedidos/1 -H "Authorization: Bearer $TOKEN"
+<span class="x">HTTP 200</span>  {"id":1,"plan_nombre":"Canasta Huerto Esencial","monto_clp":19900,"comuna":"Ñuñoa",...}
+
+<span class="c"># 3. ACTUALIZAR</span>
+<span class="k">$</span> curl -X PUT $API/pedidos/1 -H "Authorization: Bearer $TOKEN" -d '{..., "comuna":"Macul", "frecuencia_entrega":"quincenal"}'
+<span class="x">HTTP 200</span>  {"status":"success","mensaje":"Logística actualizada para AGRO-0001.",...}
+
+<span class="c"># 4. BORRAR y volver a leer</span>
+<span class="k">$</span> curl -X DELETE $API/pedidos/1 -H "Authorization: Bearer $TOKEN"
+<span class="x">HTTP 200</span>  {"status":"success","mensaje":"Plan Canasta Huerto Esencial cancelado."}
+<span class="k">$</span> curl $API/pedidos/1 -H "Authorization: Bearer $TOKEN"
+<span class="e">HTTP 404</span>  {"status":"error","mensaje":"Pedido no encontrado."}</div>
+<figcaption><b>Figura 14.</b> Ciclo completo sobre el recurso pedidos, ejecutado contra el servicio con datos ficticios. Se omiten las cabeceras <code>Content-Type</code>.</figcaption>
+</figure>
+
+<h3 id="s6-5"><span class="num">6.5</span>Errores: de 200 a su código correcto</h3>
+<p>Medir la API en el Hito 2 mostró un defecto que la interfaz ocultaba: el cliente leía el campo <code>status</code>, y por eso 10 de 17 errores respondían 200 sin que nadie lo notara. Eso contradice la semántica de HTTP (Fielding et al., 2022) y engaña a cualquier otro consumidor. Se corrigió, y las mismas 29 peticiones dan hoy el resultado de la <span class="ref">Figura 15</span>. La <span class="ref">Tabla 10</span> detalla los 17 escenarios de error.</p>
+
+<figure>
+  <div class="barras">
+    <div class="leyenda"><span><i style="background:var(--verde-vivo)"></i>éxito con su código</span><span><i style="background:var(--azul)"></i>error con su código</span><span><i style="background:var(--ambar)"></i>error que respondía 200</span></div>
+    <div class="fila-barra"><span>Antes</span><div class="barra"><span style="width:41.4%;background:var(--verde-vivo)">12</span><span style="width:24.1%;background:var(--azul)">7</span><span style="width:34.5%;background:var(--ambar)">10</span></div></div>
+    <div class="fila-barra"><span>Ahora</span><div class="barra"><span style="width:41.4%;background:var(--verde-vivo)">12</span><span style="width:58.6%;background:var(--azul)">17</span></div></div>
+  </div>
+  <figcaption><b>Figura 15.</b> Las mismas 29 peticiones reales, antes y después de la corrección del 4 de noviembre.</figcaption>
+</figure>
+
+<table>
+  <caption><b>Tabla 10.</b> Escenarios de error: código antes y código medido después. <code>200*</code> significa 200 con el error en el cuerpo.</caption>
+  <thead><tr><th style="width:33%">Escenario</th><th>Petición</th><th class="num" style="width:10%">Antes</th><th class="num" style="width:10%">Ahora</th></tr></thead>
+  <tbody>
+    <tr><td>Sin token</td><td class="ruta">POST /api/arboles</td><td class="num">401</td><td class="num">401</td></tr>
+    <tr><td>Token falso</td><td class="ruta">POST /api/arboles</td><td class="num">401</td><td class="num">401</td></tr>
+    <tr><td>Datos de otro usuario</td><td class="ruta">GET /api/suscripciones/usuario/2</td><td class="num">403</td><td class="num">403</td></tr>
+    <tr><td>Panel de administración sin rol</td><td class="ruta">GET /api/admin/usuarios</td><td class="num">403</td><td class="num">403</td></tr>
+    <tr><td>Árbol con 0 cupos</td><td class="ruta">POST /api/arboles</td><td class="num">422</td><td class="num">422</td></tr>
+    <tr><td>Ruta inexistente</td><td class="ruta">GET /api/nada</td><td class="num">404</td><td class="num">404</td></tr>
+    <tr><td>Verbo no admitido</td><td class="ruta">PATCH /api/arboles</td><td class="num">405</td><td class="num">405</td></tr>
+    <tr><td>Contraseña incorrecta</td><td class="ruta">POST /api/login</td><td class="num">200*</td><td class="num"><b>401</b></td></tr>
+    <tr><td>Comprador publica un árbol</td><td class="ruta">POST /api/arboles</td><td class="num">200*</td><td class="num"><b>403</b></td></tr>
+    <tr><td>Especie inexistente</td><td class="ruta">POST /api/arboles</td><td class="num">200*</td><td class="num"><b>422</b></td></tr>
+    <tr><td>Editar árbol inexistente</td><td class="ruta">PUT /api/arboles/9999</td><td class="num">200*</td><td class="num"><b>404</b></td></tr>
+    <tr><td>Adoptar dos veces</td><td class="ruta">POST /api/pagos</td><td class="num">200*</td><td class="num"><b>409</b></td></tr>
+    <tr><td>Tarjeta rechazada</td><td class="ruta">POST /api/pagos</td><td class="num">200*</td><td class="num"><b>402</b></td></tr>
+    <tr><td>Pedido sin pago</td><td class="ruta">POST /api/pedidos</td><td class="num">200*</td><td class="num"><b>409</b></td></tr>
+    <tr><td>Editar pedido inexistente</td><td class="ruta">PUT /api/pedidos/9999</td><td class="num">200*</td><td class="num"><b>404</b></td></tr>
+    <tr><td>Cancelar pedido ya cancelado</td><td class="ruta">DELETE /api/pedidos/1</td><td class="num">200*</td><td class="num"><b>404</b></td></tr>
+    <tr><td>Cuenta demo borra su árbol</td><td class="ruta">DELETE /api/arboles/4</td><td class="num">200*</td><td class="num"><b>403</b></td></tr>
+  </tbody>
+</table>
+<p style="font-size:8.6pt;color:var(--suave)">RFC 9110 reserva el código 402 para uso futuro (Fielding et al., 2022), aunque es la convención habitual de las pasarelas. El equipo lo adoptó y lo declara en el contrato: el cuerpo trae <code>status: rechazado</code> y el comprobante. <code>test_contrato_http.py</code> (28 pruebas) impide que este defecto vuelva.</p>
+</section>
+
+<!-- 7 ======================================================================= -->
+<section class="seccion" data-titulo="Separación de responsabilidades y capas">
+<p class="kicker">Sección 7</p>
+<h2 id="s7">Separación de responsabilidades y capas</h2>
+<div class="resumen"><p>El ruteo, el negocio y el acceso a datos viven en carpetas separadas, y una prueba automática falla si alguien vuelve a mezclarlos.</p></div>
+
+<h3 id="s7-1"><span class="num">7.1</span>Qué archivo corresponde a cada capa</h3>
+<p>La <span class="ref">Figura 16</span> asigna cada carpeta del repositorio a su capa. La regla se definió antes de mover el código: el controlador no lleva lógica de negocio, y las consultas viven solo en la capa de datos.</p>
+
+<figure>
+<div class="carpetas">
+  <div><span>agro-colab/</span><span></span><span></span></div>
+  <div><span>├─ frontend/</span><span class="capa c-pres">Presentación</span><span class="d">SPA: index.html y 24 módulos de JavaScript</span></div>
+  <div><span>│  └─ js/api.js</span><span class="capa c-pres">Presentación</span><span class="d">único módulo que llama al servidor</span></div>
+  <div><span>├─ backend/main.py</span><span class="capa c-http">HTTP</span><span class="d">CORS, cabeceras, errores a códigos HTTP</span></div>
+  <div><span>├─ backend/routers/</span><span class="capa c-http">HTTP</span><span class="d">8 módulos: rutas, sin reglas ni consultas</span></div>
+  <div><span>├─ backend/schemas.py</span><span class="capa c-http">HTTP</span><span class="d">contratos de entrada con Pydantic</span></div>
+  <div><span>├─ backend/services/</span><span class="capa c-neg">Negocio</span><span class="d">8 módulos: cuentas, árboles, cupos, pagos, pedidos</span></div>
+  <div><span>├─ backend/errores.py</span><span class="capa c-neg">Negocio</span><span class="d">errores del dominio, sin HTTP</span></div>
+  <div><span>├─ backend/catalogo.py</span><span class="capa c-neg">Negocio</span><span class="d">12 especies y 36 fotos verificadas</span></div>
+  <div><span>├─ backend/repositories/</span><span class="capa c-dat">Datos</span><span class="d">8 módulos: únicas consultas y transacciones</span></div>
+  <div><span>├─ backend/database.py</span><span class="capa c-dat">Datos</span><span class="d">modelos ORM, conexión y migración ligera</span></div>
+  <div><span>├─ backend/core.py</span><span class="capa c-tr">Transversal</span><span class="d">tokens y límite de intentos</span></div>
+  <div><span>├─ backend/seguridad.py</span><span class="capa c-tr">Transversal</span><span class="d">eventos y reglas de alerta</span></div>
+  <div><span>├─ backend/tests/</span><span class="capa c-pr">Pruebas</span><span class="d">290 pruebas con pytest</span></div>
+  <div><span>├─ db/</span><span class="capa c-dat">Datos</span><span class="d">diagrama del modelo y script SQL</span></div>
+  <div><span>└─ docs/</span><span class="capa c-tr">Documentos</span><span class="d">informes, API, guías, diagramas y capturas</span></div>
+</div>
+<figcaption><b>Figura 16.</b> Estructura del repositorio con la capa de cada archivo.</figcaption>
+</figure>
+
+<h3 id="s7-2"><span class="num">7.2</span>Recorrido completo de una petición: pagar la canasta</h3>
+<p>Pagar la canasta es la operación más delicada del sistema, porque el cobro y el cupo tienen que ocurrir juntos o no ocurrir. Este es su recorrido por las capas:</p>
+<ol class="pasos">
+  <li><b>Presentación.</b> <code>pago.js</code> valida en el navegador el número, el vencimiento y el CVV, y llama a <code>api.pagarCanasta()</code>. <code>api.js</code> agrega <code>Authorization: Bearer</code> y envía la lista de productos, nunca los montos.</li>
+  <li><b>Entrada.</b> <code>main.py</code> aplica CORS, rechaza cuerpos de más de 64 KB y agrega las cabeceras de seguridad.</li>
+  <li><b>HTTP.</b> <code>routers/pagos.py</code> recibe <code>PagoCanastaRequest</code>, que Pydantic valida. Obtiene al usuario desde el token con <code>usuario_actual</code> y llama al servicio. Un token inválido responde 401 antes de llegar aquí.</li>
+  <li><b>Negocio.</b> <code>services/pagos.pagar_canasta</code> rechaza árboles repetidos, calcula el precio de cada producto desde la base, valida la tarjeta de prueba y, si se aprueba, llama a <code>reservar_cupo</code> por cada árbol.</li>
+  <li><b>Datos.</b> <code>repositories/arboles.reservar_cupo</code> ejecuta <code>UPDATE arboles SET cupos_ocupados = cupos_ocupados + 1 WHERE id = ? AND cupos_ocupados &lt; cupos_totales</code>. Si no actualiza ninguna fila, no hay cupo.</li>
+  <li><b>Transacción.</b> Si un árbol no tiene cupo, el servicio deshace todo y responde 409: no se cobra nada. Si todos lo tienen, agrega los pagos y confirma una sola vez.</li>
+  <li><b>Respuesta.</b> El router devuelve 201 con el comprobante. Un rechazo de la tarjeta se convierte en 402 y la interfaz muestra el motivo (Figura 18).</li>
+</ol>
+
+<h3 id="s7-3"><span class="num">7.3</span>Cómo se hacen cumplir las capas</h3>
+<p>Una primera medición encontró 89 líneas con operaciones de base de datos dentro de los routers, y lógica de negocio en el controlador. Se separó el código en tres capas, y las pruebas que miran la API desde afuera protegieron el cambio. Para que no se deshaga, <code>test_arquitectura.py</code> analiza el árbol sintáctico de cada archivo en cada integración y comprueba las cinco reglas de la <span class="ref">Tabla 11</span>, con 78 pruebas.</p>
+
+<table>
+  <caption><b>Tabla 11.</b> Reglas de capas que se comprueban automáticamente.</caption>
+  <thead><tr><th style="width:42%">Regla</th><th>Qué falla si se rompe</th></tr></thead>
+  <tbody>
+    <tr><td>Las consultas viven solo en la capa de datos</td><td>Una llamada como <code>db.query</code> en routers, servicios, <code>core.py</code> o <code>seguridad.py</code></td></tr>
+    <tr><td>Los routers no saltan la capa de negocio</td><td>Un router que importa <code>repositories</code> o SQLAlchemy</td></tr>
+    <tr><td>Los routers no contienen reglas</td><td>Un <code>if</code>, un ciclo o un <code>try</code> dentro de una ruta</td></tr>
+    <tr><td>El negocio no conoce HTTP</td><td>Un servicio que importa FastAPI, Starlette o un router</td></tr>
+    <tr><td>Los datos no dependen de capas superiores</td><td>Un repositorio que importa servicios, routers o <code>core.py</code></td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- 8 ======================================================================= -->
+<section class="seccion" data-titulo="Persistencia y manejo de credenciales">
+<p class="kicker">Sección 8</p>
+<h2 id="s8">Persistencia y manejo de credenciales</h2>
+<div class="resumen"><p>Siete tablas con claves, relaciones y tipos, un script que crea la base desde cero, y ninguna credencial dentro del repositorio.</p></div>
+
+<h3 id="s8-1"><span class="num">8.1</span>Modelo de datos</h3>
+<p>La <span class="ref">Figura 17</span> es el modelo final, generado desde los modelos de <code>backend/database.py</code> con <code>db/generar_diagrama.py</code>, así que coincide con el código. <code>suscripciones</code> es la relación muchos a muchos entre <code>usuarios</code> y <code>arboles</code>, y su índice único impide que una persona ocupe dos cupos del mismo árbol. <code>pagos.arbol_id</code> y <code>pagos.pedido_id</code> no son claves foráneas a propósito: el comprobante debe sobrevivir si el agricultor elimina el árbol. <code>eventos_seguridad</code> e <code>intentos_acceso</code> son registros de auditoría y de límites, y no dependen de que la cuenta siga existiendo.</p>
+
+<figure class="limpia"><img src="../../../db/modelo_datos.png" alt="Modelo de datos" style="width:94%"><figcaption><b>Figura 17.</b> Modelo de datos final con sus claves (PK, FK, UQ), restricciones (CK), tipos y relaciones. Elaboración propia; también en <code>db/modelo_datos.png</code>.</figcaption></figure>
+
+<p style="text-align:left">El script <code>db/esquema.sql</code> crea la base desde cero en PostgreSQL (<code>createdb agrocolab &amp;&amp; psql -d agrocolab -f db/esquema.sql</code>). Se genera desde los mismos modelos con <code>db/generar_esquema.py</code>, y <code>test_entregables.py</code> falla si se desactualiza. La aplicación también crea las tablas sola al arrancar, con dos cuentas de demostración y tres árboles de ejemplo.</p>
+
+<h3 id="s8-2"><span class="num">8.2</span>Reserva atómica de cupos</h3>
+<p>La promesa más delicada es que un cupo pagado exista de verdad. Hasta octubre, la API contaba los cupos libres y después insertaba la suscripción, y dos compras simultáneas podían quedarse con el mismo cupo. La solución vive en la base, no en una revisión previa, y tiene tres barreras:</p>
+<div class="tarjetas">
+  <div class="tarjeta"><b>UPDATE condicional</b>Suma el cupo solo si quedan libres, y bloquea la fila mientras dura la transacción.</div>
+  <div class="tarjeta"><b>Índice único</b><code>uq_suscripcion_usuario_arbol</code> frena la doble suscripción aunque dos peticiones lleguen a la vez.</div>
+  <div class="tarjeta"><b>Restricción CHECK</b><code>ck_arboles_cupos</code> impide que los cupos ocupados queden negativos o superen el total.</div>
+</div>
+<p>En la medición del Hito 2, 500 compras simultáneas del último cupo produjeron una sola aprobación (Anexo D). Hoy hay pruebas de regresión para esa carrera, para liberar un cupo dos veces, para reclamar el mismo pago en paralelo y para que eliminar una cuenta devuelva sus cupos.</p>
+
+<h3 id="s8-3"><span class="num">8.3</span>Credenciales</h3>
+<p>Ninguna credencial está en el código ni en el historial (Wiggins, s.f.). La <span class="ref">Tabla 12</span> resume cómo se manejan.</p>
+<table>
+  <caption><b>Tabla 12.</b> Manejo de credenciales y configuración.</caption>
+  <thead><tr><th style="width:30%">Pieza</th><th>Cómo se maneja</th></tr></thead>
+  <tbody>
+    <tr><td><code>.env.example</code> en la raíz</td><td>Todas las variables, con valores de ejemplo y sin datos reales. Con esos valores el proyecto funciona en local sin servicios externos.</td></tr>
+    <tr><td><code>.gitignore</code></td><td>Excluye <code>.env</code>, <code>.env.*</code>, la base SQLite local y los entornos virtuales.</td></tr>
+    <tr><td>Clave de firma <code>AGROCOLAB_SECRET</code></td><td>El servidor rechaza la clave de ejemplo y cualquiera de menos de 32 caracteres, y usa una aleatoria con aviso en el registro.</td></tr>
+    <tr><td>Producción (Render)</td><td><code>DATABASE_URL</code>, la clave de firma, la del correo y la del administrador se definen como variables del servicio, nunca en archivos.</td></tr>
+    <tr><td>Modo de desarrollo</td><td>El servidor se niega a arrancar en modo <code>desarrollo</code> si detecta una base de producción o el entorno de Render.</td></tr>
+    <tr><td>Si se filtra una credencial</td><td><code>docs/guias/INCIDENTES.md</code> indica qué rotar en cada caso: borrarla del archivo no basta.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- 9 ======================================================================= -->
+<section class="seccion" data-titulo="Integración, validación, errores y estados">
+<p class="kicker">Sección 9</p>
+<h2 id="s9">Integración, validación, errores y estados</h2>
+<div class="resumen"><p>La interfaz consume el contrato de la sección 6, valida antes de enviar, muestra los estados de carga, vacío y error en cada pantalla, y traduce cada fallo a un mensaje para el usuario.</p></div>
+
+<h3 id="s9-1"><span class="num">9.1</span>Integración entre la interfaz y el servicio</h3>
+<p>El cliente HTTP, <code>frontend/js/api.js</code>, es el único módulo que habla con el servidor. Elige la URL según dónde corre la página (la API local en <code>localhost</code>, la de Render en GitHub Pages), agrega el token, espera hasta 75 segundos (Render tarda hasta un minuto en despertar) y devuelve el cuerpo, que siempre trae <code>status</code> y <code>mensaje</code>. Como todos los errores tienen esa forma, la interfaz muestra el mensaje del servidor tal cual. El token se guarda en <code>sessionStorage</code> y vive solo mientras la pestaña está abierta; si el servidor responde que expiró, la interfaz borra la sesión y vuelve al inicio de sesión.</p>
+
+<h3 id="s9-2"><span class="num">9.2</span>Validación en el cliente y en el servidor</h3>
+<p>Cada entrada se valida dos veces. En el navegador, para responder rápido: atributos de HTML y funciones propias, como el dígito verificador del RUT o el formato de la tarjeta. En el servidor, porque el navegador se puede saltar: <code>schemas.py</code> declara tipos, largos y formatos (Tabla 9), y los servicios aplican las reglas de negocio. Un dato inválido recibe 422 con un mensaje que nombra el campo, por ejemplo <i>«Revisa el código postal: el valor no es válido»</i>. Los textos con <code>&lt;</code> o <code>&gt;</code> se rechazan en el servidor, y todo dato que la interfaz inserta como HTML pasa por una función de escape.</p>
+
+<h3 id="s9-3"><span class="num">9.3</span>Estados de carga, vacío y error</h3>
+<table>
+  <caption><b>Tabla 13.</b> Estados visibles en cada pantalla que carga datos del servidor.</caption>
+  <thead><tr><th style="width:19%">Pantalla</th><th style="width:22%">Cargando</th><th style="width:27%">Vacío</th><th>Error</th></tr></thead>
+  <tbody>
+    <tr><td>Catálogo</td><td>«Cargando árboles disponibles...»</td><td>«No hay árboles disponibles por ahora», o para el plan elegido</td><td>Mensaje que explica la espera de Render y botón «Intentar de nuevo» (Figura 19)</td></tr>
+    <tr><td>Panel del comprador</td><td>«Cargando tu panel...»</td><td>«Todavía no tienes árboles ni planes», con acceso al catálogo</td><td>«No se pudo cargar tu panel. Intenta nuevamente.»</td></tr>
+    <tr><td>Panel del agricultor</td><td>«Cargando tus árboles...»</td><td>«Todavía no publicas árboles»</td><td>«No se pudieron cargar tus árboles. Intenta nuevamente.»</td></tr>
+    <tr><td>Administración</td><td>«Cargando cuentas...»</td><td>En el detalle: «Todavía no publica árboles»</td><td>«No hay conexión con el servidor...»</td></tr>
+    <tr><td>Pago</td><td>«Procesando tu pago...»</td><td>No aplica</td><td>«Pago no realizado», con el motivo y la opción de usar otra tarjeta (Figura 18)</td></tr>
+    <tr><td>Selector de especies</td><td>«Cargando catálogo...»</td><td>No aplica</td><td>«No se pudo cargar el catálogo. Revisa tu conexión y recarga la página.»</td></tr>
+  </tbody>
+</table>
+
+<div class="par">
+  <figure><img src="../../capturas/06-pago-rechazado.jpg" alt="Pago rechazado"><figcaption><b>Figura 18.</b> Pago rechazado: el motivo llega con código 402 y no se ocupa ningún cupo.</figcaption></figure>
+  <figure><img src="../../capturas/12-catalogo-error.jpg" alt="Catálogo sin conexión"><figcaption><b>Figura 19.</b> Catálogo sin conexión con la API: mensaje para el usuario y reintento.</figcaption></figure>
+</div>
+
+<h3 id="s9-4"><span class="num">9.4</span>Errores no previstos</h3>
+<p>Para lo que no se espera hay una red de seguridad en cada capa (<span class="ref">Tabla 14</span>). Ninguna respuesta expone tablas, SQL ni trazas: el detalle queda en el registro del servidor o en la consola del navegador. Los casos del servidor tienen pruebas en <code>test_errores_inesperados.py</code>, que fallaban antes del cambio; los del navegador se probaron en Chrome con el producto corriendo.</p>
+<table>
+  <caption><b>Tabla 14.</b> Qué ve el usuario ante un error no previsto.</caption>
+  <thead><tr><th style="width:31%">Situación</th><th style="width:15%">Respuesta</th><th>Qué ve el usuario</th></tr></thead>
+  <tbody>
+    <tr><td>La base de datos no responde</td><td><span class="cod">503</span></td><td>«No pudimos conectarnos con la base de datos. Intenta nuevamente en unos segundos.»</td></tr>
+    <tr><td>Dos peticiones chocan en un índice único</td><td><span class="cod">409</span></td><td>«No se pudo guardar porque el dato choca con otro registro...»</td></tr>
+    <tr><td>Fallo de programación en el servidor</td><td><span class="cod">500</span></td><td>«Ocurrió un error inesperado. Intenta nuevamente en unos minutos.»</td></tr>
+    <tr><td>El servidor no responde en 75 s</td><td>Sin respuesta</td><td>«El servidor tardó demasiado en responder...»</td></tr>
+    <tr><td>Sin conexión a internet</td><td>Sin respuesta</td><td>«No hay conexión con el servidor. Revisa tu conexión a internet...»</td></tr>
+    <tr><td>El token venció</td><td><span class="cod">401</span></td><td>«Tu sesión expiró», y la aplicación vuelve al inicio de sesión</td></tr>
+    <tr><td>Un botón falla sin control</td><td>No aplica</td><td>«Algo salió mal al realizar esta acción. Recarga la página e intenta nuevamente.»</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- 10 ====================================================================== -->
+<section class="seccion" data-titulo="Calidad, rendimiento y seguridad">
+<p class="kicker">Sección 10</p>
+<h2 id="s10">Calidad, rendimiento y seguridad</h2>
+<div class="resumen"><p>Las pruebas protegen el contrato, las capas y los errores en dos motores de base de datos, y una medición reemplazó el supuesto de carga por un dato, con sus límites declarados.</p></div>
+
+<h3 id="s10-1"><span class="num">10.1</span>Pruebas automatizadas</h3>
+<p>El backend tiene 290 pruebas con pytest, que miran la API desde afuera con una base temporal y sin enviar correos. GitHub Actions las ejecuta en cada <i>push</i> y en cada solicitud de incorporación, dos veces: con SQLite y con PostgreSQL 16 (GitHub, s.f.). En el mismo proceso, <code>node --check</code> revisa la sintaxis de los 24 módulos del frontend. En la medición del Hito 2, la cobertura de líneas del back end fue de 91 %.</p>
+<table>
+  <caption><b>Tabla 15.</b> Pruebas por archivo.</caption>
+  <thead><tr><th style="width:28%">Archivo</th><th class="num" style="width:8%">Pruebas</th><th>Qué protege</th></tr></thead>
+  <tbody>
+    <tr><td><code>test_auditoria.py</code></td><td class="num">92</td><td>Un bloque por hallazgo de la auditoría de seguridad (AC-01 a AC-44)</td></tr>
+    <tr><td><code>test_arquitectura.py</code></td><td class="num">78</td><td>Las cinco reglas de capas de la Tabla 11</td></tr>
+    <tr><td><code>test_contrato_http.py</code></td><td class="num">28</td><td>El código de cada resultado y la forma única de los errores</td></tr>
+    <tr><td><code>test_despacho.py</code></td><td class="num">18</td><td>Celular con código de país y código postal del despacho</td></tr>
+    <tr><td><code>test_cuentas.py</code></td><td class="num">16</td><td>Registro, verificación, login, tokens alterados y recuperación de contraseña</td></tr>
+    <tr><td><code>test_seguridad.py</code></td><td class="num">13</td><td>Autorización por recurso, cabeceras, XSS e imágenes fuera del catálogo</td></tr>
+    <tr><td><code>test_pagos.py</code></td><td class="num">10</td><td>Monto fijado por el servidor, rechazos y tarjeta nunca guardada</td></tr>
+    <tr><td><code>test_canasta.py</code></td><td class="num">9</td><td>Un solo cobro por canasta, y nada cobrado si un producto falla</td></tr>
+    <tr><td><code>test_admin.py</code></td><td class="num">7</td><td>Acceso exclusivo del administrador y cuentas protegidas</td></tr>
+    <tr><td><code>test_errores_inesperados.py</code></td><td class="num">7</td><td>Base caída (503), choque en la base (409) y fallo no previsto (500), con CORS</td></tr>
+    <tr><td><code>test_entregables.py</code></td><td class="num">5</td><td><code>API.md</code>, <code>.env.example</code> y <code>esquema.sql</code> iguales al código; ejecuta la colección de Postman</td></tr>
+    <tr><td><code>test_base_datos.py</code></td><td class="num">4</td><td>Elección de SQLite o PostgreSQL según las variables de entorno</td></tr>
+    <tr><td><code>test_cupos_al_eliminar.py</code></td><td class="num">3</td><td>Eliminar una cuenta devuelve sus cupos</td></tr>
+  </tbody>
+</table>
+
+<h3 id="s10-2"><span class="num">10.2</span>Rendimiento</h3>
+<p>La <span class="ref">Tabla 16</span> resume 2.090 peticiones contra el servicio local con 4 procesos y PostgreSQL 16.2, medidas el 4 de noviembre (Anexo D). Con 10 clientes, las lecturas sostienen entre 104 y 214 peticiones por segundo, y los pagos, 131. Con 50 clientes aparece la cola: el percentil 95 supera los 450 ms. Para decenas de usuarios el margen es amplio, lo que respalda el monolito de la sección 4.</p>
+<table>
+  <caption><b>Tabla 16.</b> Peticiones por segundo según la operación y los clientes simultáneos.</caption>
+  <thead><tr><th>Operación</th><th class="num">1 cliente</th><th class="num">10 clientes</th><th class="num">50 clientes</th></tr></thead>
+  <tbody>
+    <tr><td><span class="verbo GET">GET</span> <span class="ruta">/api/arboles</span></td><td class="num">17,8</td><td class="num">104,0</td><td class="num">127,2</td></tr>
+    <tr><td><span class="verbo GET">GET</span> <span class="ruta">/api/pedidos</span></td><td class="num">21,9</td><td class="num">214,0</td><td class="num">199,8</td></tr>
+    <tr><td><span class="verbo POST">POST</span> <span class="ruta">/api/pagos</span></td><td class="num">18,1</td><td class="num">130,8</td><td class="num">no medido</td></tr>
+  </tbody>
+</table>
+<div class="costo"><b>Límite de esta medición</b><p>El cliente y el servidor corrieron en el mismo equipo. Las cifras comparan operaciones y muestran la tendencia, pero no predicen el plan gratuito de Render, que tiene otros recursos y otra red.</p></div>
+
+<h3 id="s10-3"><span class="num">10.3</span>Seguridad</h3>
+<table>
+  <caption><b>Tabla 17.</b> Amenazas, controles y evidencia.</caption>
+  <thead><tr><th style="width:23%">Amenaza</th><th>Control</th><th style="width:24%">Evidencia</th></tr></thead>
+  <tbody>
+    <tr><td>Robo de contraseñas</td><td>bcrypt; cambiarla exige la actual y cierra las demás sesiones</td><td><code>test_cuentas.py</code></td></tr>
+    <tr><td>Suplantación</td><td>Token HMAC-SHA256 de 7 días, ligado a la versión de la sesión</td><td><code>test_cuentas.py</code></td></tr>
+    <tr><td>Acceso a datos ajenos</td><td>Autorización por recurso; el usuario sale del token</td><td><code>test_seguridad.py</code></td></tr>
+    <tr><td>Fuerza bruta</td><td>Límite por IP y por cuenta, guardado en la base</td><td><code>test_seguridad.py</code>; en la medición, 50 de 60 intentos recibieron 429</td></tr>
+    <tr><td>Manipulación de precios</td><td>El monto lo fija el servidor</td><td><code>test_pagos.py</code></td></tr>
+    <tr><td>XSS</td><td>Rechazo de <code>&lt;</code> y <code>&gt;</code>, escape en el cliente y CSP sin <code>unsafe-inline</code></td><td><code>test_seguridad.py</code></td></tr>
+    <tr><td>Exposición de tarjetas</td><td>Solo se guardan la marca y los 4 últimos dígitos</td><td><code>test_pagos.py</code></td></tr>
+    <tr><td>Ataques sin detectar</td><td>Eventos en la base y en el registro, con alertas por reglas</td><td>Panel de monitoreo</td></tr>
+  </tbody>
+</table>
+<p>El 10 de noviembre se cerró una auditoría completa del sistema, con hallazgos numerados de AC-01 a AC-44: cuentas de demostración mezcladas con datos reales, una cuenta de administrador que se podía secuestrar registrando antes su correo, y registros que guardaban el correo y la IP completos, entre otros. Cada hallazgo corregido quedó con su prueba en <code>test_auditoria.py</code>.</p>
+</section>
+
+<!-- 11 ====================================================================== -->
+<section class="seccion" data-titulo="Ejecución, despliegue y repositorio">
+<p class="kicker">Sección 11</p>
+<h2 id="s11">Ejecución, despliegue y repositorio</h2>
+<div class="resumen"><p>El producto está publicado y también se levanta en otro equipo siguiendo el archivo de instrucciones, sin credenciales ni servicios externos.</p></div>
+
+<h3 id="s11-1"><span class="num">11.1</span>Dos formas de usarlo</h3>
+<div class="tarjetas" style="grid-template-columns:1fr 1fr">
+  <div class="tarjeta"><b>Publicado</b>Frontend en <b>arrobaaas.github.io/agro-colab</b> y API en Render. Con las cuentas del Anexo C. La primera petición del día puede tardar hasta un minuto.</div>
+  <div class="tarjeta"><b>En local</b>Python 3.12 y dos terminales: <code>uvicorn main:app --port 8000 --env-file ../.env</code> en <code>backend/</code> y <code>python3 -m http.server 3000</code> en <code>frontend/</code>. Pasos completos en <code>docs/guias/MANUAL.md</code>.</div>
+</div>
+<p>Con los valores de <code>.env.example</code>, la base SQLite se crea sola con las cuentas de demostración y tres árboles de ejemplo, y el código de verificación del registro aparece en la consola en vez de enviarse por correo.</p>
+
+<h3 id="s11-2"><span class="num">11.2</span>Prueba en un equipo limpio</h3>
+<p>El 17 de noviembre se instaló el proyecto como lo haría un tercero: se clonó el repositorio en una carpeta vacía y se siguieron las instrucciones al pie de la letra. El servicio se levantó al primer intento. Después se ejecutó el flujo principal contra esa instalación: inicio de sesión, pago aprobado (201), suscripción visible, segundo pago del mismo árbol rechazado (409), reinicio del servidor y nueva lectura, que devolvió el árbol adoptado. La prueba encontró tres trabas no documentadas, que quedaron en el manual con su solución:</p>
+<ul>
+  <li>En Linux el comando <code>python</code> no existe: se usa <code>python3</code>.</li>
+  <li>Si quedó un servidor anterior abierto, el puerto 8000 está ocupado.</li>
+  <li>El inicio de sesión falla si se elige el rol equivocado, aunque el correo y la contraseña sean correctos.</li>
+</ul>
+
+<h3 id="s11-3"><span class="num">11.3</span>Repositorio e historial</h3>
+<p>El trabajo se organizó en ramas por funcionalidad, unidas a la rama principal mediante solicitudes de incorporación (más de 50 hasta noviembre), cada una revisada por la integración continua antes de unirse. El repositorio no contiene credenciales ni carpetas de dependencias, y los mensajes de los commits describen el cambio. La documentación está ordenada por tipo en <code>docs/</code>, con un índice en <code>docs/README.md</code>.</p>
+</section>
+
+<!-- 12 ====================================================================== -->
+<section class="seccion" data-titulo="Evolución de las decisiones">
+<p class="kicker">Sección 12</p>
+<h2 id="s12">Evolución de las decisiones</h2>
+<div class="resumen"><p>La bitácora completa tiene 24 decisiones con fecha, alternativas, motivo y lo que salió mal. Esta sección resume las que más cambiaron el producto.</p></div>
+
+<p>La <span class="ref">Tabla 18</span> sigue el orden cronológico; las fechas salen del historial de Git. El detalle de cada decisión está en <code>docs/informes/BITACORA.md</code>.</p>
+<table>
+  <caption><b>Tabla 18.</b> Decisiones principales, qué salió mal y cómo se resolvió.</caption>
+  <thead><tr><th style="width:9%">Fecha</th><th style="width:21%">Decisión</th><th style="width:35%">Qué salió mal</th><th>Cómo se resolvió</th></tr></thead>
+  <tbody>
+    <tr><td class="m">09-sep</td><td>FastAPI, por su rendimiento asíncrono</td><td>Ninguna ruta terminó usando <code>async</code></td><td>Se sostuvo por Pydantic y la división por dominios</td></tr>
+    <tr><td class="m">06-oct</td><td>SQLite con SQLAlchemy, en vez de listas en memoria</td><td>En Render la base se borraba en cada despliegue</td><td>PostgreSQL en producción desde el 30 de octubre</td></tr>
+    <tr><td class="m">19-oct</td><td>Publicar en GitHub Pages y Render</td><td>Para recrear la base se publicó <code>/api/admin/reiniciar-bd</code> sin autenticación</td><td>Se eliminó el 27 de octubre; la base se recrea con <code>db/esquema.sql</code></td></tr>
+    <tr><td class="m">21-oct</td><td>Catálogo cerrado de especies</td><td>Con fotos subidas por el agricultor, cualquier foto podía representar a cualquier árbol</td><td>12 especies y 36 fotos verificadas</td></tr>
+    <tr><td class="m">26-oct</td><td>Adoptar exige pagar</td><td>La ruta original adoptaba sin cobrar</td><td>Pago y cupo en una sola transacción</td></tr>
+    <tr><td class="m">29-oct</td><td>Tokens firmados y autorización por recurso</td><td>La API confiaba en el id que enviaba el navegador</td><td>El usuario sale del token; lo ajeno responde 403 o 404</td></tr>
+    <tr><td class="m">29-oct</td><td>Reserva atómica de cupos</td><td>Dos compras simultáneas podían quedarse con el último cupo</td><td><code>UPDATE</code> condicional, índice único y <code>CHECK</code></td></tr>
+    <tr><td class="m">04-nov</td><td>Un código HTTP por resultado</td><td>10 de 17 errores llegaban como 200</td><td>Contrato en <code>API.md</code> protegido por 28 pruebas</td></tr>
+    <tr><td class="m">04-nov</td><td>Capas reales</td><td>89 líneas con consultas dentro de los routers</td><td>Tres capas y 78 pruebas de arquitectura</td></tr>
+    <tr><td class="m">10-nov</td><td>Auditoría y pago único de la canasta</td><td>Cuentas demo mezcladas con datos reales; un cobro por producto</td><td>AC-01 a AC-44 corregidos con pruebas; <code>POST /api/pagos/canasta</code></td></tr>
+    <tr><td class="m">17-nov</td><td>Revisión del borrado de cuentas</td><td>El árbol mostraba su cupo libre, pero el pago respondía «Cupos agotados» para siempre</td><td>El borrado devuelve los cupos; 3 pruebas nuevas</td></tr>
+    <tr><td class="m">17-nov</td><td>Errores no previstos</td><td>Base caída respondía 500; una API colgada dejaba «Cargando...» para siempre</td><td>503 y 409 claros, tiempo límite y red de seguridad (sección 9.4)</td></tr>
+    <tr><td class="m">17-nov</td><td>Instalación en un equipo limpio</td><td>Tres trabas sin documentar y un error técnico a la vista del usuario</td><td>Manual de uso e instalación y nuevo estado de error del catálogo</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- 13 ====================================================================== -->
+<section class="seccion" data-titulo="Limitaciones declaradas">
+<p class="kicker">Sección 13</p>
+<h2 id="s13">Limitaciones declaradas</h2>
+<div class="resumen"><p>El equipo prefiere declarar lo que falta a que se descubra en la revisión. Cada limitación tiene su consecuencia y su corrección.</p></div>
+<table>
+  <caption><b>Tabla 19.</b> Limitaciones conocidas del producto entregado, ordenadas por su efecto sobre el usuario.</caption>
+  <thead><tr><th style="width:25%">Limitación</th><th style="width:40%">Consecuencia</th><th>Cómo se corregiría</th></tr></thead>
+  <tbody>
+    <tr><td><b>Pasarela de pago simulada</b></td><td>No mueve dinero y solo acepta tarjetas de prueba. El pago directo al productor está demostrado como flujo, no como transferencia.</td><td>Integrar una pasarela real, lo que reabre la decisión de arquitectura.</td></tr>
+    <tr><td><b>El estado logístico no avanza</b></td><td>Todo pedido queda «En coordinación con huerto de origen»: nadie registra el despacho ni la entrega.</td><td>Un flujo del agricultor para marcar despacho y entrega, con aviso al comprador.</td></tr>
+    <tr><td><b>Espera inicial en Render</b></td><td>Tras 15 minutos sin uso, la primera petición tarda hasta un minuto.</td><td>Plan pagado, si el producto sale de la etapa académica.</td></tr>
+    <tr><td><b>Canasta en el navegador</b></td><td>Lo que se agrega y no se paga se pierde al cambiar de dispositivo.</td><td>Guardar la canasta en el servidor.</td></tr>
+    <tr><td><b>Dos fuentes para los cupos ocupados</b></td><td>La API cuenta suscripciones y la reserva usa una columna. Hoy coinciden y una prueba lo comprueba, pero toda operación nueva debe actualizar ambas.</td><td>Leer siempre la columna, o mantenerlas iguales en la propia base.</td></tr>
+    <tr><td><b>Correo dentro de la petición</b></td><td>Un envío lento retrasa el registro hasta 10 segundos.</td><td>Una cola de tareas.</td></tr>
+    <tr><td><b>Restricciones y migraciones</b></td><td>Columnas sin <code>NOT NULL</code>, y una migración propia que solo agrega columnas.</td><td>Migraciones versionadas.</td></tr>
+    <tr><td><b>Medición de carga solo en local</b></td><td>Las cifras de la sección 10.2 no predicen Render.</td><td>Medir en el entorno publicado.</td></tr>
+    <tr><td><b>Sin aplicación nativa</b></td><td>En el celular se usa el sitio web adaptado.</td><td>Instalar el sitio como aplicación web progresiva.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- 14 ====================================================================== -->
+<section class="seccion" data-titulo="Conclusión">
+<p class="kicker">Sección 14</p>
+<h2 id="s14">Conclusión</h2>
+<div class="nota"><b>Qué se logró</b><p>La promesa del Hito 1 funciona de punta a punta: un comprador adopta un árbol, paga, indica el despacho y encuentra su adopción después de recargar; el agricultor ve ese cupo ocupado y el ingreso que le genera. El motor del Hito 2 lo sostiene con 37 operaciones, cada resultado con su código HTTP, persistencia real en PostgreSQL y credenciales fuera del código. La arquitectura en capas dibujada en septiembre existe en el código, y 290 pruebas en dos motores impiden que se degrade. El producto está publicado y se levanta en otro equipo siguiendo las instrucciones.</p></div>
+<div class="costo"><b>Qué quedó pendiente</b><p>La pasarela es simulada, el estado del despacho no avanza y la base depende todavía de la aplicación para algunas restricciones. Ninguna limitación rompe el flujo principal, pero las dos primeras separan al prototipo de un servicio que pueda cobrar y entregar de verdad.</p></div>
+<h4>Qué aprendimos</h4>
+<p>Los errores que más enseñaron no se veían en la pantalla: un cupo que se podía vender dos veces, una base que se borraba en cada despliegue, una API que creía en el id que le mandaban, un borrado que fallaba solo en PostgreSQL y una cuenta eliminada que dejaba su cupo ocupado para siempre. Todos se encontraron midiendo o probando, no mirando. También aprendimos el costo de programar sin un contrato cerrado: hubo que corregir los códigos HTTP y el cliente a la vez. Y una decisión puede sostenerse por motivos distintos a los que se creía: FastAPI no se justificó por su rendimiento asíncrono, sino por su validación. Por último, la prueba en un equipo limpio mostró que lo que el equipo daba por sabido era justamente lo que faltaba documentar.</p>
+</section>
+
+<!-- Referencias ============================================================= -->
+<section class="seccion referencias" data-titulo="Referencias">
+<h2 id="ref">Referencias</h2>
+<p>Alveal, J., Gonzalez, M., y Reyes, N. (2026). <i>Agro-Colab: propuesta de valor y arquitectura (Hito 1)</i> [Informe de asignatura]. Universidad Mayor. https://github.com/arrobaaas/agro-colab</p>
+<p>Fielding, R. T. (2000). <i>Architectural styles and the design of network-based software architectures</i> [Tesis doctoral, University of California, Irvine]. https://ics.uci.edu/~fielding/pubs/dissertation/top.htm</p>
+<p>Fielding, R., Nottingham, M., y Reschke, J. (Eds.). (2022). <i>HTTP semantics</i> (RFC 9110). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc9110</p>
+<p>Fowler, M. (2015, 3 de junio). <i>MonolithFirst</i>. martinfowler.com. https://martinfowler.com/bliki/MonolithFirst.html</p>
+<p>GitHub. (s.f.). <i>GitHub Actions documentation</i>. https://docs.github.com/en/actions</p>
+<p>Krawczyk, H., Bellare, M., y Canetti, R. (1997). <i>HMAC: Keyed-hashing for message authentication</i> (RFC 2104). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc2104</p>
+<p>Ley N.° 21.719. Regula la protección y el tratamiento de los datos personales y crea la Agencia de Protección de Datos Personales. (2024). Biblioteca del Congreso Nacional de Chile. https://www.bcn.cl/leychile/navegar?idNorma=1209272</p>
+<p>PostgreSQL Global Development Group. (s.f.). Transaction isolation. En <i>PostgreSQL 16 documentation</i>. https://www.postgresql.org/docs/16/transaction-iso.html</p>
+<p>Pydantic. (s.f.). <i>Pydantic documentation</i>. https://docs.pydantic.dev/latest/</p>
+<p>Python Cryptographic Authority. (s.f.). <i>bcrypt</i>. Python Package Index. https://pypi.org/project/bcrypt/</p>
+<p>Python Software Foundation. (s.f.). hmac: Keyed-hashing for message authentication. En <i>Python documentation</i>. https://docs.python.org/3/library/hmac.html</p>
+<p>Ramírez, S. (s.f.-a). <i>Concurrency and async / await</i>. FastAPI. https://fastapi.tiangolo.com/async/</p>
+<p>Ramírez, S. (s.f.-b). <i>FastAPI</i>. https://fastapi.tiangolo.com/</p>
+<p>Ramírez, S. (s.f.-c). <i>Bigger applications: Multiple files</i>. FastAPI. https://fastapi.tiangolo.com/tutorial/bigger-applications/</p>
+<p>Render. (s.f.). <i>Deploy for free</i>. https://render.com/docs/free</p>
+<p>SQLAlchemy. (s.f.). <i>SQLAlchemy 2.1 documentation</i>. https://docs.sqlalchemy.org/en/21/</p>
+<p>Wiggins, A. (s.f.). <i>Config</i>. The Twelve-Factor App. https://12factor.net/config</p>
+</section>
+
+<!-- Anexos ================================================================== -->
+<section class="seccion" data-titulo="Anexos">
+<h2 id="anexos">Anexos</h2>
+
+<h3 id="anexo-a">Anexo A. Uso de inteligencia artificial</h3>
+<p>El equipo usó asistentes de inteligencia artificial como apoyo en las tres entregas. Las decisiones, la revisión del código y la responsabilidad sobre el resultado son del equipo, y cualquier integrante debe poder explicar cualquier parte del producto.</p>
+<table>
+  <caption><b>Tabla 20.</b> Herramientas de inteligencia artificial, uso y verificación.</caption>
+  <thead><tr><th style="width:15%">Herramienta</th><th style="width:11%">Período</th><th style="width:38%">En qué parte</th><th>Cómo se verificó</th></tr></thead>
+  <tbody>
+    <tr><td>Gemini (Google)</td><td>Sept. 2026</td><td>Estructura y redacción de los argumentos comerciales del informe del Hito 1</td><td>Lectura de las fuentes citadas en ese informe</td></tr>
+    <tr><td>ChatGPT (OpenAI)</td><td>Sept. 2026</td><td>Comparación de Node.js y Python, y apoyo en el código del prototipo inicial</td><td>Revisión del código antes de incorporarlo</td></tr>
+    <tr><td>Claude Code (Anthropic)</td><td>Oct. 2026</td><td>Revisión de código, tokens y autorización por recurso, condición de carrera de los cupos y documentación</td><td>Peticiones a la API sin token, con token falso, a recursos ajenos y compras simultáneas</td></tr>
+    <tr><td>Claude Code (Anthropic)</td><td>Nov. 2026 (Hito 2)</td><td>Análisis contra la rúbrica, códigos HTTP, separación en capas, pruebas, carpeta <code>db/</code>, colección de Postman, mediciones y documento técnico; después, una revisión de seguridad</td><td>Pruebas en dos motores, reglas de capas automatizadas, mediciones reales y lectura de las fuentes clave</td></tr>
+    <tr><td>Claude Code (Anthropic)</td><td>Nov. 2026 (Hito 3)</td><td>Revisión de lo pendiente; prueba de instalación limpia; corrección de los cupos al eliminar una cuenta; tratamiento de errores no previstos; manual, bitácora, diagramas, capturas automatizadas y redacción de este informe</td><td>Las 290 pruebas en verde; pruebas nuevas que fallaban antes de cada corrección; instalación desde cero; cada fecha contrastada con <code>git log</code>; capturas del producto en ejecución</td></tr>
+  </tbody>
+</table>
+
+<h3 id="anexo-b">Anexo B. Análisis de datos personales (Ley 21.719)</h3>
+<p>La Ley 21.719 entra en plena vigencia el 1 de diciembre de 2026 (Ley N.° 21.719, 2024). Agro-Colab trata datos personales de compradores y agricultores, así que se diseñó para cumplirla desde octubre. En las pruebas y en la demostración solo se usan datos ficticios.</p>
+<table>
+  <caption><b>Tabla 21.</b> Datos personales tratados, finalidad y por qué son necesarios.</caption>
+  <thead><tr><th style="width:21%">Dato</th><th style="width:24%">Finalidad</th><th style="width:14%">Base</th><th>Por qué es necesario (minimización)</th></tr></thead>
+  <tbody>
+    <tr><td>Nombre</td><td>Identificar a la persona ante su contraparte</td><td>Consentimiento</td><td>El agricultor necesita saber quién financia su árbol</td></tr>
+    <tr><td>Correo</td><td>Autenticación y avisos de la cuenta</td><td>Consentimiento</td><td>Es el identificador de acceso y el canal de verificación</td></tr>
+    <tr><td>Contraseña</td><td>Autenticación</td><td>Consentimiento</td><td>Solo se guarda su hash bcrypt, nunca el texto</td></tr>
+    <tr><td>Teléfono y dirección del perfil</td><td>Contacto</td><td>Consentimiento</td><td>Son opcionales al registrarse</td></tr>
+    <tr><td>Dirección, celular y código postal del despacho</td><td>Entregar la cosecha</td><td>Contrato</td><td>Sin ellos no hay entrega; se piden recién al despachar</td></tr>
+    <tr><td>Razón social y RUT</td><td>Facturar el plan B2B</td><td>Contrato</td><td>Solo en el plan B2B; un pedido particular no los guarda</td></tr>
+    <tr><td>Marca y 4 últimos dígitos de la tarjeta</td><td>Comprobante de pago</td><td>Contrato</td><td>El número completo y el CVV nunca se guardan</td></tr>
+    <tr><td>IP, ruta y acción en eventos de seguridad</td><td>Detectar y responder a ataques</td><td>Interés legítimo</td><td>Se conservan 30 días, con el correo y la IP enmascarados en los registros del servidor</td></tr>
+  </tbody>
+</table>
+<p><b>Medidas técnicas.</b> Control de acceso por recurso, con el usuario tomado del token. Contraseñas con bcrypt y códigos de verificación guardados como hash con clave. Tokens firmados que se invalidan al cambiar la contraseña. Registro de accesos: cada lectura de datos de un tercero (por ejemplo, el agricultor que abre el perfil de un suscriptor) queda en <code>eventos_seguridad</code>. Límites de intentos contra la fuerza bruta. Transporte cifrado con HSTS. Las cuentas sin verificar se purgan después de un día.</p>
+<p><b>Consentimiento y derechos.</b> El registro exige aceptar el tratamiento de datos y los términos, y guarda la fecha y la versión de la política aceptada. El acceso y la portabilidad se ejercen con «Descargar mis datos» (<code>GET /api/perfil/exportar</code>); la rectificación, desde el perfil; la oposición, escribiendo al delegado de protección de datos indicado en la política de privacidad publicada en el sitio.</p>
+<p><b>Qué pasa si el usuario pide eliminar sus datos.</b> «Eliminar cuenta» pide la contraseña actual, para que un token robado no baste, y borra la cuenta, sus adopciones (devolviendo los cupos), sus pedidos y sus pagos. Además quita su correo de los registros de seguridad y de límites de intentos. Solo se conserva, hasta 30 días, la IP y la acción en <code>eventos_seguridad</code>, ya sin el correo. Si un agricultor tiene suscriptores activos, primero debe avisarles y liberar sus cupos.</p>
+<p><b>Encargados y brechas.</b> Los encargados del tratamiento son GitHub Pages, Render y Brevo. Ante una brecha, <code>docs/guias/INCIDENTES.md</code> establece contener, evaluar, avisar a la Agencia de Protección de Datos Personales y a las personas afectadas, y documentar el incidente.</p>
+
+<h3 id="anexo-c">Anexo C. Datos de prueba e instalación</h3>
+<table>
+  <caption><b>Tabla 22.</b> Cuentas y tarjetas para recorrer el producto.</caption>
+  <thead><tr><th style="width:26%">Uso</th><th>Dato</th></tr></thead>
+  <tbody>
+    <tr><td>Comprador</td><td><code>comprador@agrocolab.cl</code> · contraseña <code>123</code> · botón <b>Comprador</b></td></tr>
+    <tr><td>Agricultor</td><td><code>agricultor@agrocolab.cl</code> · contraseña <code>123</code> · botón <b>Agricultor</b></td></tr>
+    <tr><td>Tarjetas aprobadas</td><td><code>4242 4242 4242 4242</code> (Visa) y <code>5555 5555 5555 4444</code> (Mastercard), vencimiento futuro, cualquier CVV de 3 dígitos</td></tr>
+    <tr><td>Tarjetas rechazadas</td><td><code>4000 0000 0000 0002</code> (sin fondos) y <code>4000 0000 0000 9995</code> (bloqueada)</td></tr>
+    <tr><td>Árbol de ejemplo</td><td>Palto Hass #104: plan Básico, 5 cupos, $12.000 al mes</td></tr>
+  </tbody>
+</table>
+<figure>
+<div class="terminal"><span class="c"># Instalación local (Linux y macOS; en Windows, ver docs/guias/MANUAL.md)</span>
+<span class="k">$</span> git clone https://github.com/arrobaaas/agro-colab.git &amp;&amp; cd agro-colab/backend
+<span class="k">$</span> python3 -m venv venv &amp;&amp; source venv/bin/activate
+<span class="k">$</span> pip install -r requirements.txt &amp;&amp; cp ../.env.example ../.env
+<span class="k">$</span> uvicorn main:app --port 8000 --env-file ../.env        <span class="c"># terminal 1 → API en http://127.0.0.1:8000</span>
+<span class="k">$</span> cd ../frontend &amp;&amp; python3 -m http.server 3000           <span class="c"># terminal 2 → abrir http://localhost:3000</span>
+<span class="k">$</span> cd ../backend &amp;&amp; pip install -r requirements-dev.txt &amp;&amp; python -m pytest   <span class="c"># 290 pruebas</span></div>
+<figcaption><b>Figura 20.</b> Instalación local y pruebas. Las cuentas de demostración se crean solas al arrancar.</figcaption>
+</figure>
+<p>Las cuentas de demostración las comparten todos los visitantes del sitio publicado: no admiten cambios de perfil ni de contraseña, y lo que se guarda en ellas se limpia después de una hora.</p>
+
+<h3 id="anexo-d">Anexo D. Procedimiento de medición</h3>
+<table>
+  <caption><b>Tabla 23.</b> Entorno y procedimiento de las mediciones del 4 de noviembre de 2026.</caption>
+  <thead><tr><th style="width:18%">Aspecto</th><th>Detalle</th></tr></thead>
+  <tbody>
+    <tr><td>Equipo</td><td>Intel Core i5-12450H, 12 hilos, 15 GB de RAM, Linux. Cliente, servidor y base en el mismo equipo.</td></tr>
+    <tr><td>Base de datos</td><td>PostgreSQL 16.2 temporal por socket Unix, y SQLite para la segunda ejecución de las pruebas.</td></tr>
+    <tr><td>Servidor</td><td>Uvicorn con 4 procesos para concurrencia y carga. Sin proxy ni TLS.</td></tr>
+    <tr><td>Concurrencia</td><td>Cliente asíncrono httpx con pagos lanzados a la vez. Tras cada ronda se consultaron <code>cupos_ocupados</code>, las suscripciones y los pagos aprobados.</td></tr>
+    <tr><td>Carga</td><td>300 peticiones por combinación de lectura; 150 y 140 pagos con compradores distintos. Clientes simultáneos: 1, 10 y 50 en lecturas; 1 y 10 en pagos.</td></tr>
+    <tr><td>Cobertura</td><td><code>pytest --cov</code> sobre el back end, sin contar las pruebas: 1.408 de 1.551 sentencias (91 %).</td></tr>
+    <tr><td>Códigos HTTP</td><td>29 peticiones secuenciales con datos ficticios, antes y después de la corrección; se registraron el código y el campo <code>status</code>.</td></tr>
+    <tr><td>Repetición del 17 de noviembre</td><td>Pruebas completas (290), instalación en una carpeta vacía siguiendo el manual, flujo principal en Chrome con capturas automatizadas y secuencia CRUD de la Figura 14.</td></tr>
+  </tbody>
+</table>
+</section>
+
+</div>
+
+<script>
+  // Índice, figuras y tablas se arman desde el propio documento
+  (function () {
+    function item(lista, clase, numero, texto, buscar, id) {
+      var li = document.createElement("li");
+      li.className = clase;
+      li.dataset.buscar = buscar;
+      if (id) li.dataset.id = id;
+      li.innerHTML = "<span class='nn'></span><span class='tt'></span><span class='relleno'></span><span class='pag'></span>";
+      li.querySelector(".nn").textContent = numero;
+      li.querySelector(".tt").textContent = texto;
+      lista.appendChild(li);
+    }
+    var ind = document.getElementById("indice");
+    document.querySelectorAll(".cuerpo h2, .cuerpo h3").forEach(function (h) {
+      var num = h.querySelector(".num");
+      var kicker = h.tagName === "H2" && h.previousElementSibling && h.previousElementSibling.classList.contains("kicker")
+        ? h.previousElementSibling.textContent.replace(/\D+/g, "") : "";
+      var titulo = h.textContent.replace(num ? num.textContent : "", "").trim();
+      item(ind, h.tagName === "H2" ? "n1" : "n2", num ? num.textContent : kicker, titulo, titulo, h.id);
+    });
+    document.querySelectorAll(".cuerpo figcaption b").forEach(function (b) {
+      var texto = b.parentNode.textContent.replace(b.textContent, "").trim();
+      item(document.getElementById("indice-figuras"), "n2", b.textContent.replace(".", ""), texto, b.textContent.trim());
+    });
+    document.querySelectorAll(".cuerpo caption b").forEach(function (b) {
+      var texto = b.parentNode.textContent.replace(b.textContent, "").trim();
+      item(document.getElementById("indice-tablas"), "n2", b.textContent.replace(".", ""), texto, b.textContent.trim());
+    });
+  })();
+</script>
+</body>
+</html>
