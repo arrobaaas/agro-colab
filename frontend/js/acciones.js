@@ -54,7 +54,26 @@ class AccionesService {
       console.error(`Agro-Colab: acción desconocida "${ruta}"`);
       return;
     }
-    servicio[metodo](...args.map((arg) => (arg === "$el" ? elemento : arg)));
+    /* Red de seguridad: cada pantalla maneja sus errores esperados, pero si
+       algo falla sin control (un error de programación o una promesa sin
+       catch) el usuario recibe un aviso en vez de un botón que no responde. */
+    try {
+      const resultado = servicio[metodo](...args.map((arg) => (arg === "$el" ? elemento : arg)));
+      if (resultado && typeof resultado.catch === "function") {
+        resultado.catch((error) => this.avisarFallo(ruta, error));
+      }
+    } catch (error) {
+      this.avisarFallo(ruta, error);
+    }
+  }
+
+  avisarFallo(ruta, error) {
+    console.error(`[Agro-Colab] La acción "${ruta}" falló:`, error);
+    const ErrorDeConexion = window.AgroColab.ErrorDeConexion;
+    const mensaje = ErrorDeConexion && error instanceof ErrorDeConexion
+      ? error.message
+      : "Algo salió mal al realizar esta acción. Recarga la página e intenta nuevamente.";
+    if (window.AgroColab.dialogo) window.AgroColab.dialogo.avisar(mensaje, { tipo: "error" });
   }
 
   alHacerClic(evento) {

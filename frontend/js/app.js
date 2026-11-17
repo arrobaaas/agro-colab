@@ -23,23 +23,44 @@ class AppService {
       window.AgroColab.auth.limpiarSesionAntigua();
       this.acciones.init();
 
-      this.parcelas.init();
-      this.agricultor.init();
-      this.perfil.init();
-      this.login.init();
-      this.autocomplete.init();
-      this.dashboard.init();
-      window.AgroColab.pago.init();
-      window.AgroColab.recuperacion.init();
-      window.AgroColab.admin.init();
-      this.views.init();
-      this.efectos.init();
-      this.constelacion.init();
+      /* Cada módulo arranca por separado: si uno falla, el resto de la
+         aplicación sigue funcionando y el error queda en la consola. */
+      const modulos = {
+        parcelas: this.parcelas, agricultor: this.agricultor, perfil: this.perfil,
+        login: this.login, autocomplete: this.autocomplete, dashboard: this.dashboard,
+        pago: window.AgroColab.pago, recuperacion: window.AgroColab.recuperacion,
+        admin: window.AgroColab.admin, views: this.views, efectos: this.efectos,
+        constelacion: this.constelacion
+      };
+      Object.entries(modulos).forEach(([nombre, modulo]) => {
+        try {
+          modulo.init();
+        } catch (error) {
+          console.error(`[Agro-Colab] El módulo "${nombre}" no pudo iniciar:`, error);
+        }
+      });
 
       this.views.mostrarVista(this.views.vistaInicial());
     });
   }
 }
+
+/* Última red: una promesa rechazada que nadie atendió. Se registra siempre y
+   se avisa al usuario como máximo una vez cada 10 segundos, para no tapar la
+   pantalla de diálogos si el error se repite. */
+let ultimoAvisoGlobal = 0;
+window.addEventListener("unhandledrejection", (evento) => {
+  console.error("[Agro-Colab] Error sin manejar:", evento.reason);
+  const ahora = Date.now();
+  if (ahora - ultimoAvisoGlobal < 10000 || !window.AgroColab.dialogo) return;
+  ultimoAvisoGlobal = ahora;
+  const ErrorDeConexion = window.AgroColab.ErrorDeConexion;
+  const conexion = Boolean(ErrorDeConexion) && evento.reason instanceof ErrorDeConexion;
+  window.AgroColab.dialogo.avisar(
+    conexion ? evento.reason.message : "Algo salió mal. Si el problema continúa, recarga la página.",
+    { tipo: "error" }
+  );
+});
 
 const appService = new AppService();
 window.AgroColab.app = appService;

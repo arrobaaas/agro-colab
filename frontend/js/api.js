@@ -4,9 +4,32 @@
 
 var AgroColab = window.AgroColab || {};
 
+/* Error de red o de tiempo: el servidor nunca respondió. Su mensaje ya está
+   en lenguaje de usuario y se puede mostrar tal cual. */
+class ErrorDeConexion extends Error {
+  constructor(mensaje) {
+    super(mensaje);
+    this.name = "ErrorDeConexion";
+  }
+}
+window.AgroColab.ErrorDeConexion = ErrorDeConexion;
+
 class ApiService {
   constructor() {
     this.config = window.AgroColab.config;
+    /* Render despierta en hasta un minuto tras estar inactivo: se espera un
+       poco más que eso antes de rendirse, para no cortar un arranque normal. */
+    this.TIEMPO_LIMITE_MS = 75000;
+  }
+
+  /* El token ya no vale (venció o se cerró la sesión desde otro lado). Se
+     borra la sesión local y se vuelve al inicio de sesión; quien llamó
+     recibe igual la respuesta y muestra el mensaje del servidor. */
+  sesionVencida() {
+    const { auth, views, parcelas, config } = window.AgroColab;
+    if (auth) auth.eliminarSesion();
+    if (parcelas && parcelas.vaciarCarrito) parcelas.vaciarCarrito();
+    if (views && views.mostrarVista) views.mostrarVista(config.VISTA_SIN_SESION);
   }
 
   async apiFetch(ruta, opciones = {}) {
@@ -16,16 +39,37 @@ class ApiService {
       headers.Authorization = `Bearer ${sesion.token}`;
     }
 
-    const respuesta = await fetch(`${this.config.API_URL}${ruta}`, {
-      ...opciones,
-      headers
-    });
-
+    const controlador = new AbortController();
+    const limite = setTimeout(() => controlador.abort(), this.TIEMPO_LIMITE_MS);
+    let respuesta;
     let cuerpo = null;
     try {
-      cuerpo = await respuesta.json();
+      respuesta = await fetch(`${this.config.API_URL}${ruta}`, {
+        ...opciones,
+        headers,
+        signal: controlador.signal
+      });
+      try {
+        cuerpo = await respuesta.json();
+      } catch (error) {
+        cuerpo = null;
+      }
     } catch (error) {
-      cuerpo = null;
+      /* fetch solo falla así cuando no hubo respuesta: sin red, servidor
+         caído, CORS o tiempo agotado. Un 4xx o 5xx sí es una respuesta. */
+      console.error(`[Agro-Colab] ${opciones.method || "GET"} ${ruta} no respondió:`, error);
+      if (error.name === "AbortError") {
+        throw new ErrorDeConexion("El servidor tardó demasiado en responder. Si es la primera visita del día, puede estar despertando: espera un momento e intenta nuevamente.");
+      }
+      throw new ErrorDeConexion("No hay conexión con el servidor. Revisa tu conexión a internet e intenta nuevamente.");
+    } finally {
+      clearTimeout(limite);
+    }
+
+    // Solo cuenta como sesión vencida si se envió un token: en el login, un
+    // 401 significa credenciales incorrectas
+    if (respuesta.status === 401 && headers.Authorization && !/^\/(login|logout)\b/.test(ruta)) {
+      this.sesionVencida();
     }
 
     /* Si la respuesta no es JSON (un 500 del servidor, una página de
