@@ -26,10 +26,11 @@ Tabla de recursos de Agro-Colab: 37 operaciones. La documentación interactiva s
 | 404 | No existe, o no es visible para este usuario | Árbol inexistente; pedido, pago, perfil o suscripción ajenos |
 | 413 | La petición supera los 64 KB | Cuerpo demasiado grande |
 | 405 | Verbo no admitido | `PATCH /api/arboles` |
-| 409 | Choca con el estado actual | Adoptar dos veces, sin cupos, plan sin pagar |
+| 409 | Choca con el estado actual | Adoptar dos veces, sin cupos, plan sin pagar. También cuando dos peticiones simultáneas chocan con un índice único de la base |
 | 422 | El dato no es válido | 0 cupos, especie fuera del catálogo, tarjeta vencida |
 | 429 | Se superó el límite de intentos | Demasiados inicios de sesión |
-| 503 | Falta una dependencia externa | Registro sin servicio de correo configurado |
+| 500 | Error no previsto | El detalle queda en el log del servidor; la respuesta solo dice que se intente de nuevo |
+| 503 | Falta una dependencia externa | Registro sin servicio de correo configurado, o la base de datos no responde |
 
 Todos los errores tienen la misma forma:
 

@@ -39,6 +39,7 @@ evaluaron, por qué se eligió una y **qué salió mal**. Las fechas salen del h
 | D21 | 2026-11-10 | Un solo pago para toda la canasta | ✅ Vigente |
 | D22 | 2026-11-17 | Instalación en un equipo limpio y errores en lenguaje de usuario | ✅ Vigente |
 | D23 | 2026-11-17 | Eliminar una cuenta devuelve sus cupos | ✅ Vigente |
+| D24 | 2026-11-17 | Tratamiento de errores no previstos, de punta a punta | ✅ Vigente |
 
 ---
 
@@ -190,7 +191,7 @@ evaluaron, por qué se eligió una y **qué salió mal**. Las fechas salen del h
 - **Alternativa:** probar solo a mano antes de cada entrega.
 - **Por qué:** la reorganización de capas (D18) y el contrato HTTP (D17) solo eran seguros con
   pruebas que miran la API desde afuera.
-- **Resultado:** 139 pruebas al cierre del Hito 2 y 283 en el producto final. GitHub Actions
+- **Resultado:** 139 pruebas al cierre del Hito 2 y 290 en el producto final. GitHub Actions
   las ejecuta en cada *push* contra SQLite y contra PostgreSQL 16, y revisa la sintaxis del
   JavaScript. `test_arquitectura.py` hace fallar la integración si una consulta sale de la capa
   de datos, y `test_entregables.py`, si `docs/API.md` o `db/esquema.sql` dejan de coincidir
@@ -306,3 +307,28 @@ evaluaron, por qué se eligió una y **qué salió mal**. Las fechas salen del h
 - **Qué queda pendiente:** que dos fuentes digan cuántos cupos hay ocupados es la causa de fondo.
   Lo correcto sería que la API leyera la misma columna, o que un `CHECK` o un disparador las
   mantuviera iguales.
+
+### D24 · Tratamiento de errores no previstos, de punta a punta · 2026-11-17
+
+- **Alternativa:** dejar que todo error no previsto terminara en el `500` genérico.
+- **Qué faltaba:** si la base de datos se caía, la API respondía "error inesperado" (`500`).
+  Si dos peticiones chocaban en un índice único, también `500`. En el navegador, `fetch` no
+  tenía tiempo límite (una API colgada dejaba "Cargando..." para siempre). Un token vencido
+  mostraba "Tu sesión expiró", pero la interfaz seguía como si la sesión estuviera abierta. Un
+  botón que fallaba sin control no avisaba nada al usuario.
+- **Qué se hizo:**
+  - Backend (`main.py`): la base caída responde `503` ("No pudimos conectarnos con la base de
+    datos..."), y un choque de restricción, `409`. Ninguno expone tablas ni SQL, y los dos
+    llevan las cabeceras CORS para que el navegador pueda leer el mensaje.
+    `test_errores_inesperados.py` agrega 7 pruebas; 5 fallaban antes del cambio.
+  - Cliente HTTP (`api.js`): tiempo límite de 75 segundos (Render tarda hasta un minuto en
+    despertar) y un `ErrorDeConexion` con un mensaje para el usuario. Un `401` con token
+    borra la sesión local y vuelve al inicio de sesión.
+  - Red de seguridad (`acciones.js` y `app.js`): todo botón que falla sin control muestra un
+    aviso; una promesa rechazada sin `catch` también, como máximo una vez cada 10 segundos. Si
+    un módulo falla al arrancar, el resto de la aplicación sigue funcionando.
+- **Cómo se verificó:** en Chrome, con el producto corriendo: `fetch` colgado (el aviso llegó a
+  los 1,5 s con el límite reducido para la prueba), API inalcanzable, token alterado (la vista
+  volvió al inicio de sesión y la sesión quedó vacía), login con contraseña incorrecta (no se
+  confundió con una sesión vencida), botón que falla de forma síncrona y asíncrona, y promesa
+  sin `catch`.

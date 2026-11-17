@@ -151,5 +151,5 @@
   <!-- Integración continua -->
   <rect x="20" y="868" width="1560" height="72" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
   <text class="t" x="44" y="900">GitHub Actions en cada push y pull request</text>
-  <text class="s" x="44" y="924">283 pruebas con SQLite · las mismas 283 con PostgreSQL 16 · node --check de los 24 módulos · test_arquitectura.py falla si una consulta sale de repositories/</text>
+  <text class="s" x="44" y="924">290 pruebas con SQLite · las mismas 290 con PostgreSQL 16 · node --check de los 24 módulos · test_arquitectura.py falla si una consulta sale de repositories/</text>
 </svg>

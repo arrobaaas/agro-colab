@@ -127,7 +127,7 @@
 
 <p>El Hito 2 construyó el servicio que sostiene esa promesa: una API REST en FastAPI, separada en capas, con persistencia en PostgreSQL (Alveal et al., 2026b). Este documento cierra el proyecto. Describe el producto tal como quedó entregado en la rama principal del repositorio: una interfaz web conectada a ese servicio, en la que el comprador adopta un árbol, paga, indica el despacho y vuelve a encontrar su adopción después de recargar la página.</p>
 
-<p>El objetivo es que el lector pueda verificar, sin ayuda del equipo, qué se construyó, cómo está organizado por dentro y qué quedó pendiente. La sección 2 recorre el producto y lo compara con lo prometido. Las secciones 3 a 5 explican la arquitectura final, el modelo de datos y el manejo de errores en la interfaz. La sección 6 resume las pruebas y la seguridad. La sección 7 muestra cómo se levanta el proyecto en otro equipo. La sección 8 reconstruye cómo evolucionaron las decisiones y qué salió mal. La sección 9 declara las limitaciones. Los anexos contienen la declaración de uso de inteligencia artificial, el análisis de datos personales según la Ley 21.719 y los datos de prueba.</p>
+<p>El objetivo es que el lector pueda verificar, sin ayuda del equipo, qué se construyó, cómo está organizado por dentro y qué quedó pendiente. La sección 2 recorre el producto y lo compara con lo prometido. Las secciones 3 a 5 explican la arquitectura final, el modelo de datos y el tratamiento de errores, en la interfaz y en el servidor. La sección 6 resume las pruebas y la seguridad. La sección 7 muestra cómo se levanta el proyecto en otro equipo. La sección 8 reconstruye cómo evolucionaron las decisiones y qué salió mal. La sección 9 declara las limitaciones. Los anexos contienen la declaración de uso de inteligencia artificial, el análisis de datos personales según la Ley 21.719 y los datos de prueba.</p>
 
 <h2 id="s2"><span class="num">2</span>El producto entregado</h2>
 
@@ -227,7 +227,7 @@
   </tbody>
 </table>
 
-<p>La separación no depende de la buena voluntad: <code>backend/tests/test_arquitectura.py</code> lee el código fuente en cada ejecución de las pruebas y falla si un router importa SQLAlchemy, si un servicio importa FastAPI o si aparece una consulta fuera de <code>repositories/</code>. Son 78 de las 283 pruebas.</p>
+<p>La separación no depende de la buena voluntad: <code>backend/tests/test_arquitectura.py</code> lee el código fuente en cada ejecución de las pruebas y falla si un router importa SQLAlchemy, si un servicio importa FastAPI o si aparece una consulta fuera de <code>repositories/</code>. Son 78 de las 290 pruebas.</p>
 
 <h3 id="s3-3"><span class="num">3.3</span>Recorrido de una petición: pagar la canasta</h3>
 
@@ -293,14 +293,32 @@
 
 <p>La revisión de estos estados encontró un problema el 17 de noviembre: si la API no respondía, el catálogo mostraba <i>"Error al conectar con la API (https://...)"</i>, un mensaje técnico que además exponía la dirección del servidor. Se reemplazó por el de la Figura 14, la dirección quedó solo en la consola del navegador, y se agregó el estado de carga al presionar "Actualizar". Los diálogos del sistema (<code>alert</code> y <code>confirm</code>) se reemplazaron en octubre por diálogos propios, que siguen la estética del sitio y no bloquean la página.</p>
 
+<h3 id="s5-1"><span class="num">5.1</span>Errores no previstos</h3>
+
+<p>Los estados de la Tabla 5 cubren los errores esperados. Para los que no se esperan hay una red de seguridad en cada capa (Tabla 6). Ninguna respuesta expone tablas, SQL ni trazas: el detalle queda en el registro del servidor o en la consola del navegador. Cada caso se probó en Chrome con el producto corriendo, y los del servidor tienen pruebas automáticas que fallaban antes del cambio.</p>
+
+<table>
+  <caption><b>Tabla 6.</b> Qué ve el usuario ante un error no previsto.</caption>
+  <thead><tr><th style="width:30%">Situación</th><th style="width:17%">Respuesta</th><th>Qué ve el usuario</th></tr></thead>
+  <tbody>
+    <tr><td>La base de datos no responde</td><td><code>503</code></td><td>"No pudimos conectarnos con la base de datos. Intenta nuevamente en unos segundos."</td></tr>
+    <tr><td>Dos peticiones simultáneas chocan en un índice único</td><td><code>409</code></td><td>"No se pudo guardar porque el dato choca con otro registro..."</td></tr>
+    <tr><td>Fallo de programación en el servidor</td><td><code>500</code></td><td>"Ocurrió un error inesperado. Intenta nuevamente en unos minutos."</td></tr>
+    <tr><td>El servidor no responde en 75 segundos</td><td>Sin respuesta</td><td>"El servidor tardó demasiado en responder..." (Render tarda hasta un minuto en despertar)</td></tr>
+    <tr><td>Sin conexión a internet</td><td>Sin respuesta</td><td>"No hay conexión con el servidor. Revisa tu conexión a internet..."</td></tr>
+    <tr><td>El token venció</td><td><code>401</code></td><td>"Tu sesión expiró", y la aplicación vuelve al inicio de sesión</td></tr>
+    <tr><td>Un botón falla sin control en el navegador</td><td>No aplica</td><td>"Algo salió mal al realizar esta acción. Recarga la página e intenta nuevamente."</td></tr>
+  </tbody>
+</table>
+
 <h2 id="s6"><span class="num">6</span>Calidad y seguridad</h2>
 
 <h3 id="s6-1"><span class="num">6.1</span>Pruebas automatizadas</h3>
 
-<p>El backend tiene 283 pruebas con pytest, que miran la API desde afuera con una base temporal y sin enviar correos. GitHub Actions las ejecuta en cada <i>push</i> y en cada solicitud de incorporación, dos veces: con SQLite y con PostgreSQL 16 (GitHub, s.f.). En el mismo proceso, <code>node --check</code> revisa la sintaxis de los 24 módulos del frontend. Que las pruebas corran en los dos motores no es un lujo: en noviembre, un borrado de cuentas fallaba solo en PostgreSQL, y con las pruebas solo en SQLite no se habría detectado.</p>
+<p>El backend tiene 290 pruebas con pytest, que miran la API desde afuera con una base temporal y sin enviar correos. GitHub Actions las ejecuta en cada <i>push</i> y en cada solicitud de incorporación, dos veces: con SQLite y con PostgreSQL 16 (GitHub, s.f.). En el mismo proceso, <code>node --check</code> revisa la sintaxis de los 24 módulos del frontend. Que las pruebas corran en los dos motores no es un lujo: en noviembre, un borrado de cuentas fallaba solo en PostgreSQL, y con las pruebas solo en SQLite no se habría detectado.</p>
 
 <table>
-  <caption><b>Tabla 6.</b> Pruebas por archivo al cierre del proyecto.</caption>
+  <caption><b>Tabla 7.</b> Pruebas por archivo al cierre del proyecto.</caption>
   <thead><tr><th style="width:26%">Archivo</th><th style="width:8%">Pruebas</th><th>Qué protege</th></tr></thead>
   <tbody>
     <tr><td><code>test_auditoria.py</code></td><td>92</td><td>Un bloque por hallazgo de la auditoría de seguridad (AC-01 a AC-44)</td></tr>
@@ -314,6 +332,7 @@
     <tr><td><code>test_admin.py</code></td><td>7</td><td>Acceso exclusivo del administrador y cuentas protegidas</td></tr>
     <tr><td><code>test_entregables.py</code></td><td>5</td><td>Que <code>API.md</code>, <code>.env.example</code> y <code>esquema.sql</code> coincidan con el código, y la colección de Postman</td></tr>
     <tr><td><code>test_base_datos.py</code></td><td>4</td><td>Selección de SQLite o PostgreSQL según las variables de entorno</td></tr>
+    <tr><td><code>test_errores_inesperados.py</code></td><td>7</td><td>Base caída, choque en la base y fallo no previsto: código correcto, sin detalles internos y con CORS</td></tr>
     <tr><td><code>test_cupos_al_eliminar.py</code></td><td>3</td><td>Que eliminar una cuenta devuelva sus cupos (sección 8)</td></tr>
   </tbody>
 </table>
@@ -340,10 +359,10 @@
 
 <h2 id="s8"><span class="num">8</span>Evolución de las decisiones</h2>
 
-<p>El proyecto mantuvo la idea, los usuarios y la arquitectura en capas del Hito 1, pero cambió la forma de cumplirlos. La bitácora completa, con 23 decisiones fechadas, sus alternativas y lo que salió mal, está en <code>docs/BITACORA.md</code>. La Tabla 7 resume las que más cambiaron el producto, en orden cronológico. Las fechas salen del historial de Git.</p>
+<p>El proyecto mantuvo la idea, los usuarios y la arquitectura en capas del Hito 1, pero cambió la forma de cumplirlos. La bitácora completa, con 24 decisiones fechadas, sus alternativas y lo que salió mal, está en <code>docs/BITACORA.md</code>. La Tabla 8 resume las que más cambiaron el producto, en orden cronológico. Las fechas salen del historial de Git.</p>
 
 <table>
-  <caption><b>Tabla 7.</b> Decisiones principales, qué salió mal y cómo se resolvió.</caption>
+  <caption><b>Tabla 8.</b> Decisiones principales, qué salió mal y cómo se resolvió.</caption>
   <thead><tr><th style="width:11%">Fecha</th><th style="width:22%">Decisión</th><th style="width:33%">Qué salió mal</th><th>Cómo se resolvió</th></tr></thead>
   <tbody>
     <tr><td>09-sep</td><td>FastAPI, por su rendimiento asíncrono</td><td>Ninguna ruta terminó usando <code>async</code>: el acceso a datos es síncrono</td><td>La elección se sostuvo por la validación de Pydantic y la división por dominios</td></tr>
@@ -357,6 +376,7 @@
     <tr><td>04-nov</td><td>Capas reales</td><td>Había 89 líneas con consultas dentro de los routers</td><td><code>routers/</code>, <code>services/</code>, <code>repositories/</code> y 78 pruebas de arquitectura</td></tr>
     <tr><td>10-nov</td><td>Auditoría de seguridad y pago único de la canasta</td><td>Cuentas demo mezcladas con datos reales y un cobro por cada producto</td><td>Hallazgos AC-01 a AC-44 corregidos con pruebas; <code>POST /api/pagos/canasta</code></td></tr>
     <tr><td>17-nov</td><td>Revisión del borrado de cuentas para el análisis de datos personales</td><td>Al eliminar una cuenta, el árbol mostraba su cupo libre, pero el pago respondía "Cupos agotados" para siempre: la columna de cupos no se descontaba</td><td>El borrado descuenta los cupos; 3 pruebas nuevas que fallaban antes de la corrección</td></tr>
+    <tr><td>17-nov</td><td>Tratamiento de errores no previstos</td><td>Base caída o choque en la base respondían <code>500</code>; una API colgada dejaba "Cargando..." para siempre; un token vencido no cerraba la sesión</td><td><code>503</code> y <code>409</code> con mensajes claros, tiempo límite de 75 s y red de seguridad en el navegador (sección 5.1)</td></tr>
     <tr><td>17-nov</td><td>Instalación en un equipo limpio</td><td>Tres trabas sin documentar y un error técnico a la vista del usuario</td><td>Manual de uso e instalación y nuevo estado de error del catálogo</td></tr>
   </tbody>
 </table>
@@ -367,10 +387,10 @@
 
 <h2 id="s9"><span class="num">9</span>Limitaciones declaradas</h2>
 
-<p>El equipo prefiere declarar lo que falta a que se descubra en la revisión. La Tabla 8 lista las limitaciones del producto entregado, ordenadas por su efecto sobre el usuario.</p>
+<p>El equipo prefiere declarar lo que falta a que se descubra en la revisión. La Tabla 9 lista las limitaciones del producto entregado, ordenadas por su efecto sobre el usuario.</p>
 
 <table>
-  <caption><b>Tabla 8.</b> Limitaciones conocidas del producto entregado.</caption>
+  <caption><b>Tabla 9.</b> Limitaciones conocidas del producto entregado.</caption>
   <thead><tr><th style="width:27%">Limitación</th><th style="width:36%">Consecuencia</th><th>Cómo se corregiría</th></tr></thead>
   <tbody>
     <tr><td>Pasarela de pago simulada</td><td>No mueve dinero y solo acepta tarjetas de prueba. La promesa de pagar directo al productor está demostrada como flujo, no como transferencia</td><td>Integrar una pasarela real, lo que reabre la decisión de arquitectura</td></tr>
@@ -387,7 +407,7 @@
 
 <h2 id="s10"><span class="num">10</span>Conclusión</h2>
 
-<p><b>Qué se logró.</b> La promesa del Hito 1 funciona de punta a punta: un comprador adopta un árbol, paga, indica el despacho y encuentra su adopción después de recargar; el agricultor ve ese cupo ocupado y el ingreso que le genera. El producto se levanta en otro equipo siguiendo las instrucciones y también está publicado. La arquitectura en capas que se dibujó en septiembre existe en el código, y 283 pruebas en dos motores impiden que se degrade.</p>
+<p><b>Qué se logró.</b> La promesa del Hito 1 funciona de punta a punta: un comprador adopta un árbol, paga, indica el despacho y encuentra su adopción después de recargar; el agricultor ve ese cupo ocupado y el ingreso que le genera. El producto se levanta en otro equipo siguiendo las instrucciones y también está publicado. La arquitectura en capas que se dibujó en septiembre existe en el código, y 290 pruebas en dos motores impiden que se degrade.</p>
 
 <p><b>Qué quedó pendiente.</b> La pasarela es simulada, el estado del despacho no avanza y la base todavía depende de la aplicación para algunas restricciones. Ninguna de estas limitaciones rompe el flujo principal, pero las dos primeras separan al prototipo de un servicio que pueda cobrar y entregar de verdad.</p>
 
@@ -413,14 +433,14 @@
 <p>El equipo usó asistentes de inteligencia artificial como apoyo en las tres entregas. Las decisiones, la revisión del código y la responsabilidad sobre el resultado son del equipo, y cualquier integrante debe poder explicar cualquier parte del producto.</p>
 
 <table>
-  <caption><b>Tabla 9.</b> Herramientas de inteligencia artificial, uso y verificación.</caption>
+  <caption><b>Tabla 10.</b> Herramientas de inteligencia artificial, uso y verificación.</caption>
   <thead><tr><th style="width:17%">Herramienta</th><th style="width:11%">Período</th><th style="width:36%">En qué parte</th><th>Cómo se verificó</th></tr></thead>
   <tbody>
     <tr><td>Gemini (Google)</td><td>Sept. 2026</td><td>Estructura y redacción de los argumentos comerciales del informe del Hito 1</td><td>Lectura de las fuentes citadas en ese informe</td></tr>
     <tr><td>ChatGPT (OpenAI)</td><td>Sept. 2026</td><td>Comparación de Node.js y Python, y apoyo en el código del prototipo inicial</td><td>Revisión del código antes de incorporarlo</td></tr>
     <tr><td>Claude Code (Anthropic)</td><td>Oct. 2026</td><td>Revisión de código, tokens y autorización por recurso, condición de carrera de los cupos y documentación</td><td>Peticiones a la API sin token, con token falso, a recursos ajenos y compras simultáneas</td></tr>
     <tr><td>Claude Code (Anthropic)</td><td>Nov. 2026 (Hito 2)</td><td>Análisis contra la rúbrica, códigos HTTP, separación en capas, pruebas, carpeta <code>db/</code>, colección de Postman, mediciones y documento técnico</td><td>Pruebas en dos motores, reglas de capas automatizadas y lectura de las fuentes clave</td></tr>
-    <tr><td>Claude Code (Anthropic)</td><td>Nov. 2026 (Hito 3)</td><td>Revisión de la auditoría de seguridad; análisis de lo que faltaba para el Hito 3; prueba de instalación limpia; manual, bitácora, generador del diagrama de datos, capturas automatizadas y redacción de este documento</td><td>Las 283 pruebas en verde; instalación desde cero siguiendo el manual; cada fecha de la bitácora contrastada con <code>git log</code>; cada cifra contrastada con el código o con el informe del Hito 2; capturas tomadas del producto en ejecución</td></tr>
+    <tr><td>Claude Code (Anthropic)</td><td>Nov. 2026 (Hito 3)</td><td>Revisión de la auditoría de seguridad; análisis de lo que faltaba para el Hito 3; prueba de instalación limpia; manual, bitácora, generador del diagrama de datos, capturas automatizadas y redacción de este documento</td><td>Las 290 pruebas en verde; instalación desde cero siguiendo el manual; cada fecha de la bitácora contrastada con <code>git log</code>; cada cifra contrastada con el código o con el informe del Hito 2; capturas tomadas del producto en ejecución</td></tr>
   </tbody>
 </table>
 
@@ -429,7 +449,7 @@
 <p>La Ley 21.719 entra en plena vigencia el 1 de diciembre de 2026 (Ley N.° 21.719, 2024). Agro-Colab trata datos personales de compradores y agricultores, así que se diseñó para cumplirla desde octubre. En las pruebas y en la demostración solo se usan datos ficticios.</p>
 
 <table>
-  <caption><b>Tabla 10.</b> Datos personales tratados, finalidad y por qué son necesarios.</caption>
+  <caption><b>Tabla 11.</b> Datos personales tratados, finalidad y por qué son necesarios.</caption>
   <thead><tr><th style="width:21%">Dato</th><th style="width:25%">Finalidad</th><th style="width:15%">Base</th><th>Por qué es necesario (minimización)</th></tr></thead>
   <tbody>
     <tr><td>Nombre</td><td>Identificar a la persona ante su contraparte</td><td>Consentimiento</td><td>El agricultor necesita saber quién financia su árbol</td></tr>
@@ -456,7 +476,7 @@
 <h3 id="anexo-c">Anexo C. Datos de prueba</h3>
 
 <table>
-  <caption><b>Tabla 11.</b> Cuentas y tarjetas para recorrer el producto.</caption>
+  <caption><b>Tabla 12.</b> Cuentas y tarjetas para recorrer el producto.</caption>
   <thead><tr><th style="width:30%">Uso</th><th>Dato</th></tr></thead>
   <tbody>
     <tr><td>Comprador</td><td><code>comprador@agrocolab.cl</code> · contraseña <code>123</code> · botón <b>Comprador</b></td></tr>

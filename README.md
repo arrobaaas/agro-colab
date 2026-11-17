@@ -84,7 +84,7 @@ Cada pedido genera un código de seguimiento que lo vincula a su huerto de orige
 - **Sin sobreventa bajo concurrencia.** La reserva de cupos es un `UPDATE` condicional atómico, respaldado por un índice único y una restricción `CHECK`: dos compras simultáneas del último cupo nunca se aprueban ambas.
 - **Seguridad aplicada de punta a punta.** Tokens firmados con HMAC-SHA256, autorización por recurso, *rate limiting* persistente, CSP estricta sin JavaScript en línea y defensa contra XSS en tres capas. [Ver detalle](#-seguridad).
 - **Monitoreo y alertas propios.** Los eventos de seguridad se registran en base de datos y en logs JSON, y disparan alertas por correo o webhook según reglas (fuerza bruta, tokens falsificados, accesos a datos ajenos).
-- **Calidad verificada en CI.** 283 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend. Las reglas de la arquitectura también se comprueban leyendo el código.
+- **Calidad verificada en CI.** 290 pruebas automatizadas que GitHub Actions ejecuta en cada *push* contra **SQLite y PostgreSQL**, junto con una revisión de sintaxis del frontend. Las reglas de la arquitectura también se comprueban leyendo el código.
 - **Frontend sin frameworks.** SPA en JavaScript vanilla organizada en servicios, con router de vistas, delegación de eventos, gráficos accesibles hechos con HTML y CSS, y un árbol 3D de partículas en `<canvas>`.
 - **Privacidad desde el diseño.** Cumplimiento de la Ley N° 21.719 de Protección de Datos Personales de Chile: consentimiento explícito, derechos de acceso, rectificación y eliminación, y registro de tratamiento.
 
@@ -256,7 +256,7 @@ Wikimedia desde el navegador; y Discord o Slack si están activadas las alertas 
 
 ## 🧪 Pruebas e integración continua
 
-**283 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
+**290 pruebas automatizadas** con pytest. GitHub Actions las ejecuta en cada *push* y
 *pull request* dos veces, **con SQLite y con PostgreSQL**, y además revisa la sintaxis de
 todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca envían correos.
 
@@ -273,6 +273,7 @@ todo el JavaScript del frontend. Las pruebas usan una base temporal y nunca env�
 | `test_canasta.py` | Pago único de la canasta: un cobro, todo o nada, rechazo sin adopciones y límites |
 | `test_auditoria.py` | Lo corregido en la auditoría de seguridad: separación de lo demo y lo real, cuentas, límites, carreras, alertas, privacidad y cabeceras |
 | `test_entregables.py` | La tabla de la API, `.env.example` y `db/esquema.sql` coinciden con el código; ejecuta completa la colección de Postman |
+| `test_errores_inesperados.py` | Base de datos caída (503), choque en la base (409) y fallo no previsto (500), sin detalles internos y con CORS |
 | `test_cupos_al_eliminar.py` | Eliminar una cuenta devuelve sus cupos: la API y la columna que usa la reserva coinciden |
 
 ```bash
@@ -520,7 +521,7 @@ la revisión del código y la responsabilidad sobre el resultado son del equipo.
 | **ChatGPT** (OpenAI) | Septiembre 2026 | Comparación técnica de lenguajes (Node.js vs Python) y apoyo en el código del prototipo inicial |
 | **Claude Code** (Anthropic) | Octubre 2026 | Asistente de programación: revisión de código, autenticación con tokens y autorización por recurso, corrección de la condición de carrera en la reserva de cupos, y documentación |
 | **Claude Code** (Anthropic) | Noviembre 2026 | Análisis contra la rúbrica, corrección de los códigos HTTP, separación en capas, pruebas nuevas, carpeta `db/`, colección de Postman, mediciones y documento técnico del Hito 2 |
-| **Claude Code** (Anthropic) | Noviembre 2026 (Hito 3) | Análisis de lo pendiente, prueba de instalación limpia, manual, bitácora, generador del diagrama de datos, capturas automatizadas, estado de error del catálogo, corrección de los cupos al eliminar una cuenta y documentación final. Verificado con las 283 pruebas, una instalación desde cero y cada fecha contrastada con `git log` |
+| **Claude Code** (Anthropic) | Noviembre 2026 (Hito 3) | Análisis de lo pendiente, prueba de instalación limpia, manual, bitácora, generador del diagrama de datos, capturas automatizadas, estado de error del catálogo, corrección de los cupos al eliminar una cuenta, tratamiento de errores no previstos y documentación final. Verificado con las 290 pruebas, una instalación desde cero y cada fecha contrastada con `git log` |
 
 Los cambios propuestos por la IA se revisaron antes de incorporarlos, y los de seguridad
 se probaron contra la API en ejecución: peticiones sin token o con token falso, acceso a
