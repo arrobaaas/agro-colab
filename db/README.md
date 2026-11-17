@@ -5,6 +5,7 @@
 | [`modelo_datos.png`](modelo_datos.png) | Diagrama con las 7 tablas, sus claves, relaciones y tipos |
 | [`esquema.sql`](esquema.sql) | Script que crea la base desde cero en PostgreSQL |
 | [`generar_esquema.py`](generar_esquema.py) | Regenera el script desde los modelos de `backend/database.py` |
+| [`generar_diagrama.py`](generar_diagrama.py) | Regenera el diagrama desde los mismos modelos (usa Chrome o Chromium) |
 
 ## Crear la base desde cero
 
@@ -28,4 +29,10 @@ Para usar PostgreSQL, define `DATABASE_URL` (ver [`.env.example`](../.env.exampl
 - `eventos_seguridad` e `intentos_acceso` no tienen claves foráneas: son registros de
   auditoría y de límites de intentos, y no dependen de que la cuenta siga existiendo.
 
-Una prueba automatizada comprueba que `esquema.sql` coincida con los modelos.
+Una prueba automatizada comprueba que `esquema.sql` coincida con los modelos. Si cambias un
+modelo, regenera los dos archivos desde la raíz del repositorio, con el entorno del backend activo:
+
+```bash
+python db/generar_esquema.py
+python db/generar_diagrama.py
+```
