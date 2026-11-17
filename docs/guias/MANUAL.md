@@ -99,7 +99,7 @@ psql -d agrocolab -f db/esquema.sql
 
 Después, en `.env`, cambia `AGROCOLAB_MOD_MODE=produccion` y define
 `DATABASE_URL=postgresql://usuario:clave@localhost:5432/agrocolab`. El servidor no acepta el
-modo `desarrollo` con una base de producción. Ver [`db/README.md`](../db/README.md).
+modo `desarrollo` con una base de producción. Ver [`db/README.md`](../../db/README.md).
 
 ---
 

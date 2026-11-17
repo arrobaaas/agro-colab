@@ -880,7 +880,7 @@ def test_requirements_fijados():
 
 
 def test_existe_el_procedimiento_de_incidentes():
-    assert (BACKEND.parent / "docs" / "INCIDENTES.md").exists()
+    assert (BACKEND.parent / "docs" / "guias" / "INCIDENTES.md").exists()
 
 
 def test_todas_las_paginas_cargan_font_awesome_con_integridad():

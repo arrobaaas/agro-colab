@@ -27,6 +27,7 @@ directo al productor, sin intermediarios.
 </a>
 
 [Demo](https://arrobaaas.github.io/agro-colab/) ·
+[Entregables](#-entregables-por-hito) ·
 [Destacados](#-destacados-técnicos) ·
 [Arquitectura](#-arquitectura) ·
 [Seguridad](#-seguridad) ·
@@ -58,9 +59,34 @@ directo al productor, sin intermediarios.
 
 ---
 
+## 📦 Entregables por hito
+
+Todo lo que pide la pauta de INGT1003, con su ubicación exacta. El índice de la carpeta de
+documentos está en [`docs/README.md`](docs/README.md).
+
+| Hito | Entregable | Dónde está |
+|---|---|---|
+| **2 y 3** | **Informe final** (documento técnico del back end + documentación final, con mapa de la rúbrica en la sección 1.1) | [`docs/informes/Informe_Final_Hitos_2_y_3.pdf`](docs/informes/Informe_Final_Hitos_2_y_3.pdf) |
+| 2 | Código del servicio, separado en capas | [`backend/`](backend) → `routers/` (HTTP), `services/` (negocio), `repositories/` (datos) |
+| 2 | Tabla de la interfaz de programación | [`docs/api/API.md`](docs/api/API.md) y sección 6 del informe |
+| 2 | Modelo de datos y script de creación | [`db/modelo_datos.png`](db/modelo_datos.png) · [`db/esquema.sql`](db/esquema.sql) |
+| 2 | Colección del cliente de pruebas | [`docs/api/AgroColab.postman_collection.json`](docs/api/AgroColab.postman_collection.json) |
+| 2 | Archivo de configuración de ejemplo | [`.env.example`](.env.example) |
+| 2 | Láminas de la presentación | [`docs/presentaciones/Presentacion_Hito2.pdf`](docs/presentaciones/Presentacion_Hito2.pdf) |
+| 3 | Producto funcional | [arrobaaas.github.io/agro-colab](https://arrobaaas.github.io/agro-colab/) · instalación local más abajo |
+| 3 | Manual de uso e instalación | [`docs/guias/MANUAL.md`](docs/guias/MANUAL.md) · resumen en [Instalación local](#-instalación-local) |
+| 3 | Video promocional (2 minutos) | Sección [Video](#-video) de este archivo |
+| 3 | Bitácora de decisiones | [`docs/informes/BITACORA.md`](docs/informes/BITACORA.md) |
+| 3 | Anexo de IA y análisis de datos personales | Anexos A y B del informe · [Uso de IA](#-uso-de-inteligencia-artificial) en este archivo |
+| 1 | Propuesta y láminas | [`docs/informes/Informe_Hito1_Propuesta.pdf`](docs/informes/Informe_Hito1_Propuesta.pdf) · [`docs/presentaciones/`](docs/presentaciones) |
+
+**Verificación rápida:** `cd backend && pip install -r requirements-dev.txt && python -m pytest` → 290 pruebas.
+
+---
+
 ## 🎬 Video
 
-**[Ver el video promocional (2 minutos)](ENLACE-DEL-VIDEO)** <!-- TODO: pegar aquí el enlace de YouTube "No listado". Guion en docs/GUION_VIDEO.md -->
+**[Ver el video promocional (2 minutos)](ENLACE-DEL-VIDEO)** <!-- TODO: pegar aquí el enlace de YouTube "No listado". Guion en docs/guias/GUION_VIDEO.md -->
 
 ---
 
@@ -241,7 +267,7 @@ de acceso, rectificación, portabilidad y eliminación desde el perfil del usuar
 
 **Notificación de brechas:** el equipo se compromete a avisar a la Agencia de Protección de
 Datos y a los usuarios afectados dentro de 72 horas, con documentación del incidente y de las
-medidas correctivas. El procedimiento está en [`docs/INCIDENTES.md`](docs/INCIDENTES.md).
+medidas correctivas. El procedimiento está en [`docs/guias/INCIDENTES.md`](docs/guias/INCIDENTES.md).
 
 **Evaluación de impacto:** no se tratan datos sensibles y el volumen es pequeño (prototipo
 académico). El mayor riesgo era la cuenta demo con credenciales públicas, y por eso lo demo y lo
@@ -307,7 +333,7 @@ cd frontend
 python3 -m http.server 3000
 ```
 
-> 📖 El **[manual de uso e instalación](docs/MANUAL.md)** tiene los pasos para Windows, los
+> 📖 El **[manual de uso e instalación](docs/guias/MANUAL.md)** tiene los pasos para Windows, los
 > datos de prueba, el recorrido de cada rol y las fallas frecuentes. Las tres más comunes:
 >
 > | Síntoma | Solución |
@@ -337,7 +363,7 @@ verifica su checksum contra el valor fijado en el script).
 | `DATABASE_URL` | En producción | Conexión a PostgreSQL (`postgres://` o `postgresql://`). Sin ella se usa SQLite local |
 | `AGROCOLAB_SECRET` | En producción | Clave para firmar los tokens. De 32 caracteres o más. Si falta, se genera una al arrancar, se avisa en el log y las sesiones se cierran en cada reinicio |
 | `AGROCOLAB_MOD_MODE` | No | `desarrollo` muestra los códigos de verificación y de recuperación sin enviar correo. El servidor se niega a arrancar así si existe `DATABASE_URL` o `RENDER`. Por defecto: `produccion` |
-| `CABECERA_IP_CLIENTE` | Recomendada en producción | Cabecera confiable con la IP real del cliente. Elígela tras comprobar qué llega al servidor (ver `docs/INCIDENTES.md`). Sin ella se usa el último valor de `X-Forwarded-For` |
+| `CABECERA_IP_CLIENTE` | Recomendada en producción | Cabecera confiable con la IP real del cliente. Elígela tras comprobar qué llega al servidor (ver `docs/guias/INCIDENTES.md`). Sin ella se usa el último valor de `X-Forwarded-For` |
 | `AGROCOLAB_DOCS` | No | `1` publica `/docs` y `/openapi.json` en producción. En desarrollo siempre están abiertos |
 | `BREVO_API_KEY` | Para el registro en producción | Clave de la API de [Brevo](https://www.brevo.com) para enviar los códigos por correo |
 | `CORREO_REMITENTE` | Junto con `BREVO_API_KEY` | Correo verificado en Brevo desde el que se envían los códigos |
@@ -360,8 +386,8 @@ demostración funcionan siempre.
 
 Documentación interactiva (Swagger) en `/docs` en desarrollo, o en producción con `AGROCOLAB_DOCS=1`. El contrato completo,
 con parámetros, cuerpos de ejemplo y códigos de éxito y de error, está en
-[`docs/API.md`](docs/API.md). Para probarla, importa
-[`docs/AgroColab.postman_collection.json`](docs/AgroColab.postman_collection.json) en Postman.
+[`docs/api/API.md`](docs/api/API.md). Para probarla, importa
+[`docs/api/AgroColab.postman_collection.json`](docs/api/AgroColab.postman_collection.json) en Postman.
 
 Cada resultado usa su código HTTP: 201 al crear, 401 sin credenciales, 403 sin permiso, 404 si
 no existe, 409 si choca con el estado actual y 422 con datos inválidos. Todos los errores
@@ -473,19 +499,13 @@ agro-colab/
 ├── .github/workflows/         # Integración continua
 ├── scripts/compilar-css.sh    # Compilación de Tailwind con verificación de checksum
 ├── .env.example               # Variables de entorno, con valores de ejemplo
-└── docs/
-    ├── Informe_Final_AgroColab.pdf  # Documentación final del Hito 3
-    ├── MANUAL.md              # Manual de uso e instalación
-    ├── BITACORA.md            # Bitácora de decisiones
-    ├── GUION_VIDEO.md         # Guion del video promocional
-    ├── arquitectura.png       # Diagrama de arquitectura final
-    ├── fuentes/               # Fuente HTML del documento final y su generador
-    ├── Informe_Hito2_AgroColab.pdf  # Documento técnico del Hito 2
-    ├── API.md                 # Contrato completo de la API
-    ├── AgroColab.postman_collection.json  # Peticiones de la demostración
-    ├── capturas/              # Capturas de pantalla
-    ├── Informe.pdf            # Propuesta del Hito 1
-    └── Presentacion.pptx      # Presentación del proyecto
+└── docs/                      # Ver docs/README.md
+    ├── informes/              # Informe final (Hitos 2 y 3), propuesta del Hito 1 y bitácora
+    ├── presentaciones/        # Láminas de los Hitos 1 y 2
+    ├── api/                   # Contrato de la API y colección de Postman
+    ├── guias/                 # Manual, respuesta a incidentes y guion del video
+    ├── diagramas/             # Diagrama de arquitectura
+    └── capturas/              # Capturas del producto
 ```
 
 </details>
@@ -496,17 +516,16 @@ agro-colab/
 
 | Documento | Contenido |
 |---|---|
-| [**Documentación final del Hito 3**](docs/Informe_Final_AgroColab.pdf) | Producto entregado, arquitectura final, validación y estados, pruebas, limitaciones, uso de IA y análisis de datos personales (Ley 21.719) |
-| [Manual de uso e instalación](docs/MANUAL.md) | Requisitos, pasos, datos de prueba, recorridos por rol y fallas frecuentes |
-| [Bitácora de decisiones](docs/BITACORA.md) | Cada decisión con fecha, alternativas, motivo y lo que salió mal |
-| [Diagrama de arquitectura](docs/arquitectura.png) | Componentes finales con sus nombres reales |
-| [Guion del video](docs/GUION_VIDEO.md) | Toma por toma, en 2 minutos |
-| [Documento técnico del Hito 2](docs/Informe_Hito2_AgroColab.pdf) | Arquitectura, decisiones, contrato de la API, capas, persistencia, mediciones y limitaciones |
-| [Láminas del Hito 2](docs/Presentacion_Hito2.pdf) | Presentación técnica de 7 minutos |
-| [Contrato de la API](docs/API.md) | Rutas, verbos, parámetros, cuerpos de ejemplo y códigos de estado |
-| [Colección de Postman](docs/AgroColab.postman_collection.json) | Las peticiones de la demostración, listas para importar |
+| [**Informe final · Hitos 2 y 3**](docs/informes/Informe_Final_Hitos_2_y_3.pdf) | Documento técnico del back end y documentación final del producto: trazabilidad, arquitectura, contrato de la API, capas, persistencia, integración, errores, pruebas, limitaciones, uso de IA y datos personales (Ley 21.719) |
+| [Manual de uso e instalación](docs/guias/MANUAL.md) | Requisitos, pasos, datos de prueba, recorridos por rol y fallas frecuentes |
+| [Bitácora de decisiones](docs/informes/BITACORA.md) | Cada decisión con fecha, alternativas, motivo y lo que salió mal |
+| [Diagrama de arquitectura](docs/diagramas/arquitectura.png) | Componentes finales con sus nombres reales |
+| [Guion del video](docs/guias/GUION_VIDEO.md) | Toma por toma, en 2 minutos |
+| [Láminas del Hito 2](docs/presentaciones/Presentacion_Hito2.pdf) | Presentación técnica de 7 minutos |
+| [Contrato de la API](docs/api/API.md) | Rutas, verbos, parámetros, cuerpos de ejemplo y códigos de estado |
+| [Colección de Postman](docs/api/AgroColab.postman_collection.json) | Las peticiones de la demostración, listas para importar |
 | [Modelo de datos y script SQL](db/README.md) | Diagrama y creación de la base desde cero |
-| [Propuesta del Hito 1](docs/Informe.pdf) · [Presentación](docs/Presentacion.pptx) | Propuesta comercial y arquitectura inicial |
+| [Propuesta del Hito 1](docs/informes/Informe_Hito1_Propuesta.pdf) · [Láminas del Hito 1](docs/presentaciones/Presentacion_Hito1.pdf) | Propuesta comercial y arquitectura inicial |
 
 ---
 
