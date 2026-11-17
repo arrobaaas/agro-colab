@@ -798,7 +798,7 @@
 <section class="seccion" data-titulo="Evolución de las decisiones">
 <p class="kicker">Sección 12</p>
 <h2 id="s12">Evolución de las decisiones</h2>
-<div class="resumen"><p>La bitácora completa tiene 24 decisiones con fecha, alternativas, motivo y lo que salió mal. Esta sección resume las que más cambiaron el producto.</p></div>
+<div class="resumen"><p>La bitácora completa tiene 25 decisiones con fecha, alternativas, motivo y lo que salió mal. Esta sección resume las que más cambiaron el producto.</p></div>
 
 <p>La <span class="ref">Tabla 18</span> sigue el orden cronológico; las fechas salen del historial de Git. El detalle de cada decisión está en <code>docs/informes/BITACORA.md</code>.</p>
 <table>
@@ -817,6 +817,7 @@
     <tr><td class="m">10-nov</td><td>Auditoría y pago único de la canasta</td><td>Cuentas demo mezcladas con datos reales; un cobro por producto</td><td>AC-01 a AC-44 corregidos con pruebas; <code>POST /api/pagos/canasta</code></td></tr>
     <tr><td class="m">17-nov</td><td>Revisión del borrado de cuentas</td><td>El árbol mostraba su cupo libre, pero el pago respondía «Cupos agotados» para siempre</td><td>El borrado devuelve los cupos; 3 pruebas nuevas</td></tr>
     <tr><td class="m">17-nov</td><td>Errores no previstos</td><td>Base caída respondía 500; una API colgada dejaba «Cargando...» para siempre</td><td>503 y 409 claros, tiempo límite y red de seguridad (sección 9.4)</td></tr>
+    <tr><td class="m">17-nov</td><td>Canasta sincronizada con el servidor</td><td>Al cancelar una adopción desde el panel, el árbol seguía en la canasta como «Pagado»</td><td>La canasta se compara con el servidor al cargar el panel y al abrirse</td></tr>
     <tr><td class="m">17-nov</td><td>Instalación en un equipo limpio</td><td>Tres trabas sin documentar y un error técnico a la vista del usuario</td><td>Manual de uso e instalación y nuevo estado de error del catálogo</td></tr>
   </tbody>
 </table>

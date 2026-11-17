@@ -40,6 +40,7 @@ evaluaron, por qué se eligió una y **qué salió mal**. Las fechas salen del h
 | D22 | 2026-11-17 | Instalación en un equipo limpio y errores en lenguaje de usuario | ✅ Vigente |
 | D23 | 2026-11-17 | Eliminar una cuenta devuelve sus cupos | ✅ Vigente |
 | D24 | 2026-11-17 | Tratamiento de errores no previstos, de punta a punta | ✅ Vigente |
+| D25 | 2026-11-17 | La canasta se sincroniza con el servidor | ✅ Vigente |
 
 ---
 
@@ -332,3 +333,22 @@ evaluaron, por qué se eligió una y **qué salió mal**. Las fechas salen del h
   volvió al inicio de sesión y la sesión quedó vacía), login con contraseña incorrecta (no se
   confundió con una sesión vencida), botón que falla de forma síncrona y asíncrona, y promesa
   sin `catch`.
+
+### D25 · La canasta se sincroniza con el servidor · 2026-11-17
+
+- **Cómo se encontró:** probando el producto antes de grabar el video. Se pagó un árbol, se cerró
+  el formulario de despacho, se fue al panel y se canceló la adopción: el árbol seguía en la
+  canasta como «Pagado».
+- **Qué salió mal:** la canasta vive en el navegador (D09), y después de pagar cada producto queda
+  «Pagado» hasta que se registra su despacho desde la propia canasta. Pero el panel cambia el
+  estado en el servidor (cancelar la adopción, configurar el despacho) sin avisarle a la canasta.
+  Quedaba un producto que ya no existía, y su botón «Completar despacho» habría fallado.
+- **Alternativa evaluada:** guardar la canasta en el servidor. Es la corrección de fondo, pero
+  exige una tabla y rutas nuevas a diez días de la entrega. Queda declarada como limitación.
+- **Cómo se resolvió:** `parcelas.reconciliarConServidor` compara la canasta con lo que dice el
+  servidor. Un árbol pagado sale si ya no está adoptado o si ya tiene despacho; un plan pagado sale
+  si su pago ya tiene un pedido. Se ejecuta cada vez que se carga el panel (que ya pide esos datos)
+  y al abrir la canasta. Si alguna respuesta no llega, no se borra nada.
+- **Cómo se verificó:** en Chrome, con la versión anterior y con la nueva: cancelar desde el panel,
+  configurar el despacho desde el panel y, como control, un árbol pagado sin despacho (que debe
+  quedarse). La versión anterior falló los dos primeros casos; la nueva pasó los tres.
