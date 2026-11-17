@@ -218,6 +218,11 @@
         this.pagos = datosPagos && datosPagos.status === "success" ? (datosPagos.pagos || []) : [];
         this.arboles = datosArboles && datosArboles.status === "success" ? (datosArboles.arboles || []) : [];
         this.pedidos = Array.isArray(pedidos) ? pedidos : [];
+        // El panel ya trae lo que dice el servidor: la canasta se pone al día
+        // (por ejemplo, después de cancelar una adopción desde aquí)
+        if (datosArboles && datosArboles.status === "success" && Array.isArray(pedidos) && AgroColab.parcelas) {
+          AgroColab.parcelas.reconciliarConServidor(this.arboles, this.pedidos, datosPagos && datosPagos.status === "success" ? this.pagos : null);
+        }
         this.pintar();
       } catch (error) {
         contenedor.innerHTML = '<p class="tc-cuerpo-sm">No se pudo cargar tu panel. Intenta nuevamente.</p>';

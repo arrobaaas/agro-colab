@@ -503,6 +503,57 @@
       modal.classList.remove("hidden", "cerrando");
       this.animarCanasta = true;
       this.renderizarCanasta();
+      // Lo pagado pudo cambiar desde el panel (cancelación, despacho) o
+      // porque el agricultor liberó el cupo: se vuelve a mirar el servidor
+      this.sincronizarCanasta();
+    }
+
+    /* ---------- Canasta y servidor ----------
+       La canasta vive en el navegador, pero lo que ya se pagó depende del
+       servidor. Un producto pagado sale de la canasta cuando:
+       - el árbol ya no está adoptado (se canceló desde el panel o el
+         agricultor liberó el cupo), o
+       - su despacho ya está registrado (se configuró desde el panel).
+       Un plan pagado sale cuando su pago ya tiene un pedido. Antes, todo eso
+       quedaba en la canasta como «Pagado» y «Completar despacho» fallaba. */
+    reconciliarConServidor(arbolesAdoptados, pedidos, pagos) {
+      if (!Array.isArray(arbolesAdoptados) || !Array.isArray(pedidos)) return;
+      const mismo = (a, b) => String(a) === String(b);
+      const adoptado = (id) => arbolesAdoptados.some((a) => mismo(a.arbol_id, id));
+      const conDespacho = (id) => pedidos.some((p) => p.arbol_id !== null && mismo(p.arbol_id, id));
+      const pagoUsado = (pagoId) => Array.isArray(pagos) && pagos.some((p) => mismo(p.id, pagoId) && p.pedido_id);
+
+      const antes = this.carrito.length;
+      this.carrito = this.carrito.filter((item) => {
+        if (item.tipo === "arbol") {
+          if (item.pago_id) return adoptado(item.id) && !conDespacho(item.id);
+          // Sin pagar, pero ya adoptado por otra vía: sobra en la canasta
+          return !adoptado(item.id);
+        }
+        if (item.tipo === "plan" && item.pago_id) return !pagoUsado(item.pago_id);
+        return true;
+      });
+      if (this.carrito.length === antes) return;
+      this.guardarCarrito();
+      this.actualizarContadorCanasta();
+      this.renderizarCanasta();
+    }
+
+    async sincronizarCanasta() {
+      const sesion = auth.leerSesion();
+      if (!sesion || sesion.rol !== "comprador" || !this.carrito.length) return;
+      try {
+        const [arboles, pedidos, pagos] = await Promise.all([
+          api.obtenerMisArboles(sesion.id),
+          api.obtenerPedidos(),
+          api.obtenerPagos().catch(() => null)
+        ]);
+        // Solo con respuestas completas: sin ellas no se borra nada
+        if (!arboles || arboles.status !== "success" || !Array.isArray(pedidos)) return;
+        this.reconciliarConServidor(arboles.arboles || [], pedidos, pagos && pagos.status === "success" ? pagos.pagos : null);
+      } catch (error) {
+        // Sin conexión, la canasta queda como estaba
+      }
     }
 
     /* Se anima la salida antes de ocultar: así no desaparece de golpe. */
