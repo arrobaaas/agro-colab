@@ -40,6 +40,8 @@ evaluaron, por qué se eligió una y **qué salió mal**. Las fechas salen del h
 | D22 | 2026-11-17 | Instalación en un equipo limpio y errores en lenguaje de usuario | ✅ Vigente |
 | D23 | 2026-11-17 | Eliminar una cuenta devuelve sus cupos | ✅ Vigente |
 | D24 | 2026-11-17 | Tratamiento de errores no previstos, de punta a punta | ✅ Vigente |
+| D26 | 2026-11-18 | Aviso de arranque en frío y últimos mensajes técnicos | ✅ Vigente |
+| D27 | 2026-11-20 | Enter envía el inicio de sesión y la eliminación de cuenta | ✅ Vigente |
 
 ---
 
@@ -332,3 +334,56 @@ evaluaron, por qué se eligió una y **qué salió mal**. Las fechas salen del h
   volvió al inicio de sesión y la sesión quedó vacía), login con contraseña incorrecta (no se
   confundió con una sesión vencida), botón que falla de forma síncrona y asíncrona, y promesa
   sin `catch`.
+
+### D26 · Aviso de arranque en frío y últimos mensajes técnicos · 2026-11-18
+
+- **Alternativa:** dejar solo el tiempo límite de 75 segundos de D24 y el texto del error.
+- **Qué faltaba:** mientras Render despertaba, el login mostraba "Verificando credenciales..."
+  hasta un minuto sin explicar nada: en la revisión, el docente usa el producto solo y podía
+  creer que estaba roto. Además quedaban dos mensajes técnicos que llegaban al usuario ("Revisa
+  que Uvicorn esté activo", en el login y en el pedido logístico) y un tercero con el código HTTP
+  crudo ("El servidor respondió 502 Bad Gateway") cuando la respuesta no era JSON. Por último,
+  tres pruebas de `test_auditoria.py` fallaban en Windows.
+- **Qué se hizo:**
+  - `api.js`: si una petición lleva más de 3,5 segundos sin respuesta, aparece arriba el aviso
+    "Despertando el servidor…" (`role="status"`), que se quita cuando terminan todas las
+    peticiones lentas. Las rápidas nunca lo muestran.
+  - `app.js`: al abrir la página se llama a `GET /api/estado` en segundo plano, así el servidor
+    despierta mientras la persona lee la portada o escribe su correo.
+  - `login.js`, `parcelas.js` y `api.js`: los tres mensajes quedaron en lenguaje de usuario; el
+    detalle técnico (ruta y código) sigue en la consola. En la revisión de validación del 19-nov
+    aparecieron seis "Error de comunicación con el backend" más (`login.js`, `agricultor.js`,
+    `parcelas.js` y `perfil.js`): ahora muestran el mensaje del `ErrorDeConexion` o uno genérico
+    para el usuario.
+  - `test_auditoria.py`: el subproceso de las pruebas de configuración escribía su salida con
+    la codificación de la consola de Windows y la prueba la leía como UTF-8; ahora se fija
+    `PYTHONIOENCODING=utf-8`.
+- **Qué salió mal:** las tres pruebas fallaban solo en Windows, y el CI corre en Linux, así que
+  nadie lo había visto. Un docente que corriera las pruebas en su equipo habría visto rojo.
+- **Cómo se verificó:** en el navegador, con el producto corriendo en local: `fetch` retrasado
+  7 segundos (el aviso no aparece a los 1,5 s, sí a los 4,5 s, y se oculta al responder), sin
+  red (mensaje de conexión), respuesta 502 sin JSON (mensaje del servidor sin el código) y login
+  real con la cuenta demo. `node --check` sobre todo `frontend/js` y la suite completa de
+  pytest en Windows.
+
+### D27 · Enter envía el inicio de sesión y la eliminación de cuenta · 2026-11-20
+
+- **Alternativa:** escuchar la tecla Enter con un manejador de teclado en cada campo.
+- **Qué salió mal:** al escribir la contraseña y presionar Enter, el login no hacía nada. El botón
+  "Ingresar" era `type="button"` y funcionaba por clic (`data-accion`); un formulario con dos
+  campos y sin botón de envío no se envía con Enter, así que el `submit` que `login.js` ya
+  escuchaba nunca llegaba. Lo mismo pasaba con la contraseña de "Eliminar cuenta" en el perfil,
+  que ni siquiera estaba dentro de un formulario.
+- **Qué se hizo:** "Ingresar" pasó a `type="submit"` sin `data-accion`, así el clic y el Enter
+  llegan por el mismo `submit` (si se dejaba también el `data-accion`, un clic habría iniciado
+  sesión dos veces). La zona de peligro del perfil es ahora `form#form-eliminar-cuenta`, y
+  `perfil.js` escucha su `submit`. Enter ahí solo abre el diálogo de confirmación: la cuenta no se
+  borra sin el segundo paso. Los otros 11 formularios ya tenían botón de envío. El buscador del
+  panel de administración filtra mientras se escribe y no necesita Enter.
+- **Cómo se verificó:** en el navegador, con teclado real: Enter en la contraseña inicia sesión con
+  una sola petición; Enter con una contraseña incorrecta muestra "Credenciales inválidas…"; el
+  clic en "Ingresar" produce un solo `submit` y un solo `POST /api/login` (contado en el log del
+  servidor); Enter en "Eliminar cuenta" abre "¿Eliminar tu cuenta?" sin enviar el `DELETE`, y
+  "Volver" lo cancela. Como el login ahora es un envío real, el navegador además exige los campos
+  marcados `required` antes de enviar.
+

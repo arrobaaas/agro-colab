@@ -22,7 +22,9 @@ Abre **https://arrobaaas.github.io/agro-colab/** e ingresa con una de las cuenta
 
 El frontend está en GitHub Pages y la API en el plan gratuito de Render. Si nadie usó el
 servicio en los últimos 15 minutos, **la primera petición puede tardar hasta un minuto**
-mientras el servidor despierta. Después responde con normalidad.
+mientras el servidor despierta. La página empieza a despertarlo apenas se abre, y si una
+petición tarda más de 3,5 segundos aparece arriba el aviso **"Despertando el servidor…"**, que se
+quita solo cuando responde. Después responde con normalidad.
 
 ---
 
@@ -233,7 +235,7 @@ El frontend no logra hablar con la API. Revisa, en este orden:
 3. **¿El `.env` tiene `AGROCOLAB_MOD_MODE=desarrollo`?** En modo `produccion` la API solo
    acepta el frontend publicado en GitHub Pages.
 4. **En la versión publicada**, espera un minuto: el servidor de Render puede estar
-   despertando. Después presiona **Intentar de nuevo**.
+   despertando (lo indica el aviso de arriba). Después presiona **Intentar de nuevo**.
 
 ### 3. "Credenciales inválidas o el rol seleccionado no coincide"
 

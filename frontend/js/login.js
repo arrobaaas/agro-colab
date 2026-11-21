@@ -73,7 +73,7 @@ class LoginService {
       this.ui.mostrarAlerta(
         alertBox,
         "error",
-        error.message || `Error de conexión con el backend (${this.config.API_URL}). Revisa que Uvicorn esté activo.`
+        error.message || "No pudimos conectar con Agro-Colab. Revisa tu conexión a internet e intenta nuevamente."
       );
     }
     return false;
@@ -141,7 +141,7 @@ class LoginService {
         this.ui.mostrarAlerta(alerta, "error", data.mensaje);
       }
     } catch (error) {
-      this.ui.mostrarAlerta(alerta, "error", error.message || "Error de comunicación con el backend.");
+      this.ui.mostrarAlerta(alerta, "error", error.message || "No pudimos conectar con Agro-Colab. Intenta nuevamente en unos segundos.");
     }
     return false;
   }
@@ -206,7 +206,7 @@ class LoginService {
         this.ui.mostrarAlerta(alerta, "error", data.mensaje);
       }
     } catch (error) {
-      this.ui.mostrarAlerta(alerta, "error", error.message || "Error de comunicación con el backend.");
+      this.ui.mostrarAlerta(alerta, "error", error.message || "No pudimos conectar con Agro-Colab. Intenta nuevamente en unos segundos.");
     }
     return false;
   }
