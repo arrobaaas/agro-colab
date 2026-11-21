@@ -173,10 +173,12 @@
           this.ui.mostrarAlerta(alerta, "errorGrande", data.mensaje || "No se pudo registrar la solicitud logística.");
         }
       } catch (error) {
+        /* El detalle técnico queda en la consola (api.js); al usuario solo se
+           le dice qué pasó y qué puede hacer. Su pedido no se registró. */
         this.ui.mostrarAlerta(
           alerta,
           "errorGrande",
-          `Error: backend inaccesible en ${this.config.API_URL}. Revisa que Uvicorn esté activo.`
+          error.message || "No pudimos registrar tu pedido porque no hubo conexión con Agro-Colab. Intenta nuevamente en unos segundos."
         );
       }
     }
@@ -895,7 +897,7 @@
           }
         }, 1500);
       } catch (error) {
-        this.ui.mostrarAlerta(alerta, "error", "Error de comunicación con el backend.");
+        this.ui.mostrarAlerta(alerta, "error", error.message || "No pudimos conectar con Agro-Colab. Intenta nuevamente en unos segundos.");
       }
     }
 

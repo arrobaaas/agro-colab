@@ -14,12 +14,78 @@ class ErrorDeConexion extends Error {
 }
 window.AgroColab.ErrorDeConexion = ErrorDeConexion;
 
+/* Aviso de arranque en frío. En el plan gratuito de Render el servidor se
+   duerme tras 15 minutos sin tráfico y la primera petición tarda hasta un
+   minuto. Si alguna petición lleva más de RETARDO_MS sin respuesta, se muestra
+   un aviso arriba de la pantalla, y se quita cuando terminan todas las lentas.
+   Las peticiones rápidas nunca lo muestran. */
+class AvisoServidorDespertando {
+  constructor() {
+    this.RETARDO_MS = 3500;
+    this.lentas = 0;
+    this.elemento = null;
+  }
+
+  /* Se llama al iniciar una petición; devuelve la función que la termina */
+  empezar() {
+    let contada = false;
+    const temporizador = setTimeout(() => {
+      contada = true;
+      this.lentas += 1;
+      this.actualizar();
+    }, this.RETARDO_MS);
+    return () => {
+      clearTimeout(temporizador);
+      if (contada) {
+        this.lentas -= 1;
+        this.actualizar();
+      }
+    };
+  }
+
+  crear() {
+    const aviso = document.createElement("div");
+    aviso.className = "aviso-servidor";
+    aviso.setAttribute("role", "status");
+    aviso.setAttribute("aria-live", "polite");
+    aviso.hidden = true;
+
+    const icono = document.createElement("i");
+    icono.className = "fa-solid fa-circle-notch aviso-servidor__icono";
+    icono.setAttribute("aria-hidden", "true");
+
+    const texto = document.createElement("p");
+    const titulo = document.createElement("strong");
+    titulo.textContent = "Despertando el servidor…";
+    texto.append(titulo, " Si es la primera visita en un rato, puede tardar hasta un minuto. No cierres la página.");
+
+    aviso.append(icono, texto);
+    document.body.appendChild(aviso);
+    return aviso;
+  }
+
+  actualizar() {
+    if (!document.body) return;
+    if (!this.elemento) this.elemento = this.crear();
+    this.elemento.hidden = this.lentas <= 0;
+  }
+}
+
 class ApiService {
   constructor() {
     this.config = window.AgroColab.config;
     /* Render despierta en hasta un minuto tras estar inactivo: se espera un
        poco más que eso antes de rendirse, para no cortar un arranque normal. */
     this.TIEMPO_LIMITE_MS = 75000;
+    this.avisoDespertando = new AvisoServidorDespertando();
+  }
+
+  /* Al abrir la página se despierta el servidor en segundo plano, mientras la
+     persona lee la portada o escribe su correo: así el inicio de sesión no
+     carga con la espera completa. Un fallo aquí no se muestra; la próxima
+     petición real informará si el servidor sigue sin responder. */
+  despertarServidor() {
+    return this.apiFetch("/estado").catch(() => null);
   }
 
   /* El token ya no vale (venció o se cerró la sesión desde otro lado). Se
@@ -41,6 +107,7 @@ class ApiService {
 
     const controlador = new AbortController();
     const limite = setTimeout(() => controlador.abort(), this.TIEMPO_LIMITE_MS);
+    const terminarAviso = this.avisoDespertando.empezar();
     let respuesta;
     let cuerpo = null;
     try {
@@ -64,6 +131,7 @@ class ApiService {
       throw new ErrorDeConexion("No hay conexión con el servidor. Revisa tu conexión a internet e intenta nuevamente.");
     } finally {
       clearTimeout(limite);
+      terminarAviso();
     }
 
     // Solo cuenta como sesión vencida si se envió un token: en el login, un
@@ -76,14 +144,12 @@ class ApiService {
        mantenimiento, etc.) se avisa con el código real en vez de un
        genérico "error de conexión". */
     if (cuerpo === null) {
+      /* El código real queda en la consola; al usuario se le habla en su idioma */
+      console.error(`[Agro-Colab] ${opciones.method || "GET"} ${ruta} respondió ${respuesta.status} sin JSON`);
       if (respuesta.ok) {
-        throw new Error("El servidor devolvió una respuesta inesperada.");
+        throw new Error("Recibimos una respuesta que no esperábamos. Recarga la página e intenta nuevamente.");
       }
-      throw new Error(
-        `El servidor respondió ${respuesta.status}` +
-        `${respuesta.statusText ? " " + respuesta.statusText : ""}. ` +
-        "Espera un momento e inténtalo de nuevo."
-      );
+      throw new Error("El servidor tuvo un problema y no pudo completar la operación. Espera un momento e inténtalo de nuevo.");
     }
 
     /* Éxitos y errores traen status y mensaje en el cuerpo, con su código HTTP

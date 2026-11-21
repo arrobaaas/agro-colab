@@ -195,7 +195,7 @@
           this.ui.mostrarAlerta(alerta, "error", data.mensaje || "No se pudo actualizar el árbol.");
         }
       } catch (error) {
-        this.ui.mostrarAlerta(alerta, "error", "Error de comunicación con el backend.");
+        this.ui.mostrarAlerta(alerta, "error", error.message || "No pudimos conectar con Agro-Colab. Intenta nuevamente en unos segundos.");
       }
     }
 
@@ -613,7 +613,7 @@
           this.ui.mostrarAlerta(alerta, "error", data.mensaje || "No se pudo publicar el árbol.");
         }
       } catch (error) {
-        this.ui.mostrarAlerta(alerta, "error", "Error de comunicación con el backend.");
+        this.ui.mostrarAlerta(alerta, "error", error.message || "No pudimos conectar con Agro-Colab. Intenta nuevamente en unos segundos.");
       }
     }
 

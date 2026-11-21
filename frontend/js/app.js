@@ -21,6 +21,8 @@ class AppService {
       /* La sesión dura lo que dure la pestaña (ver auth.js): una visita
          nueva parte en el login, pero ir a Privacidad y volver no la cierra */
       window.AgroColab.auth.limpiarSesionAntigua();
+      // Render puede estar dormido: se lo despierta antes de que haga falta
+      window.AgroColab.api.despertarServidor();
       this.acciones.init();
 
       /* Cada módulo arranca por separado: si uno falla, el resto de la

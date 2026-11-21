@@ -189,9 +189,12 @@ def test_cuenta_verificada_no_se_reemplaza(cliente):
 # ------------------------------------ AC-05, AC-39, AC-40: configuración
 
 def _arrancar(entorno):
+    # PYTHONIOENCODING: en Windows el proceso hijo escribe stderr con la
+    # codificación de la consola (cp1252) y aquí se lee como UTF-8; los
+    # acentos rompían la lectura y stderr quedaba en None.
     return subprocess.run(
         [sys.executable, "-c", "import core"], cwd=BACKEND, capture_output=True, text=True, encoding="utf-8",
-        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", **entorno},
+        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PYTHONIOENCODING": "utf-8", **entorno},
     )
 
 

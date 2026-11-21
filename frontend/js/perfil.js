@@ -88,7 +88,8 @@
       document.getElementById("modal-perfil").classList.add("hidden");
     }
 
-    async eliminarCuenta() {
+    async eliminarCuenta(evento) {
+      if (evento) evento.preventDefault();
       const sesion = this.auth.leerSesion();
       if (!sesion) return;
 
@@ -179,12 +180,14 @@
           this.ui.mostrarAlerta(alerta, "error", data.mensaje || "No se pudo actualizar el perfil.");
         }
       } catch (error) {
-        this.ui.mostrarAlerta(alerta, "error", "Error de comunicación con el backend.");
+        this.ui.mostrarAlerta(alerta, "error", error.message || "No pudimos conectar con Agro-Colab. Intenta nuevamente en unos segundos.");
       }
     }
 
     init() {
       document.getElementById("form-perfil").addEventListener("submit", (evento) => this.guardar(evento));
+      // Enter en la contraseña o clic en el botón: los dos llegan aquí, y eliminarCuenta pide confirmar
+      document.getElementById("form-eliminar-cuenta").addEventListener("submit", (evento) => this.eliminarCuenta(evento));
     }
   }
 
