@@ -74,7 +74,7 @@ documentos está en [`docs/README.md`](docs/README.md).
 | 2 | Archivo de configuración de ejemplo | [`.env.example`](.env.example) |
 | 2 | Láminas de la presentación | [`docs/presentaciones/Presentacion_Hito2.pdf`](docs/presentaciones/Presentacion_Hito2.pdf) |
 | 3 | Producto funcional | [arrobaaas.github.io/agro-colab](https://arrobaaas.github.io/agro-colab/) · instalación local más abajo |
-| 3 | Manual de uso e instalación | [`docs/guias/MANUAL.md`](docs/guias/MANUAL.md) · resumen en [Instalación local](#-instalación-local) |
+| 3 | Manual de uso e instalación | [`docs/guias/Manual_de_uso_e_instalacion.pdf`](docs/guias/Manual_de_uso_e_instalacion.pdf) · versión en texto en [`docs/guias/MANUAL.md`](docs/guias/MANUAL.md) · resumen en [Instalación local](#-instalación-local) |
 | 3 | Video promocional (2 minutos) | Sección [Video](#-video) de este archivo |
 | 3 | Bitácora de decisiones | [`docs/informes/BITACORA.md`](docs/informes/BITACORA.md) |
 | 3 | Anexo de IA y análisis de datos personales | Anexos A y B del informe · [Uso de IA](#-uso-de-inteligencia-artificial) en este archivo |
@@ -333,7 +333,7 @@ cd frontend
 python3 -m http.server 3000
 ```
 
-> 📖 El **[manual de uso e instalación](docs/guias/MANUAL.md)** tiene los pasos para Windows, los
+> 📖 El **[manual de uso e instalación](docs/guias/Manual_de_uso_e_instalacion.pdf)** ([versión en texto](docs/guias/MANUAL.md)) tiene los pasos para Windows, los
 > datos de prueba, el recorrido de cada rol y las fallas frecuentes. Las tres más comunes:
 >
 > | Síntoma | Solución |
@@ -517,7 +517,7 @@ agro-colab/
 | Documento | Contenido |
 |---|---|
 | [**Informe final · Hitos 2 y 3**](docs/informes/Informe_Final_Hitos_2_y_3.pdf) | Documento técnico del back end y documentación final del producto: trazabilidad, arquitectura, contrato de la API, capas, persistencia, integración, errores, pruebas, limitaciones, uso de IA y datos personales (Ley 21.719) |
-| [Manual de uso e instalación](docs/guias/MANUAL.md) | Requisitos, pasos, datos de prueba, recorridos por rol y fallas frecuentes |
+| [Manual de uso e instalación](docs/guias/Manual_de_uso_e_instalacion.pdf) · [en texto](docs/guias/MANUAL.md) | Requisitos, pasos, datos de prueba, recorridos por rol y fallas frecuentes, con el diseño del informe |
 | [Bitácora de decisiones](docs/informes/BITACORA.md) | Cada decisión con fecha, alternativas, motivo y lo que salió mal |
 | [Diagrama de arquitectura](docs/diagramas/arquitectura.png) | Componentes finales con sus nombres reales |
 | [Guion del video](docs/guias/GUION_VIDEO.md) | Toma por toma, en 2 minutos |

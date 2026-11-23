@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Agro-Colab · Manual de uso e instalación · INGT1003</title>
+<meta name="author" content="Alveal Santos, Joaquin; Gonzalez Paredes, Matias; Reyes Orellana, Nicolas">
+<meta name="description" content="Manual de uso e instalación de Agro-Colab: versión publicada, instalación local, datos de prueba, flujo principal y fallas frecuentes.">
+<!--
+  Fuente del manual de uso e instalación, con el mismo diseño del informe final
+  (docs/informes/fuente/informe.html). Para generar el PDF, desde la raíz del repositorio:
+    node docs/guias/fuente/generar_manual.mjs
+  El índice, la numeración de figuras y tablas, y el número de página de cada entrada
+  se completan solos. Las tipografías y el árbol de la portada se toman del informe.
+  El mismo contenido, en texto, está en docs/guias/MANUAL.md: si cambias uno, cambia el otro.
+-->
+<style>
+  @font-face { font-family: "Inter"; src: url("../../informes/fuente/tipografias/Inter.woff2") format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "JetBrains Mono"; src: url("../../informes/fuente/tipografias/JetBrainsMono.woff2") format("woff2"); font-weight: 100 800; }
+
+  :root {
+    --tinta: #1c1917; --suave: #57534e; --tenue: #78716c; --linea: #e7e5e4; --fondo: #f5f5f4;
+    --verde: #14532d; --verde-medio: #166534; --verde-vivo: #15803d; --menta: #34d399;
+    --verde-claro: #ecfdf5; --borde-verde: #86efac; --cabecera: #0f4c34;
+    --ambar: #b45309; --ambar-claro: #fffbeb; --borde-ambar: #fcd34d;
+    --azul: #1d4ed8; --violeta: #6d28d9; --rojo: #b91c1c;
+  }
+
+  /* ---------- Páginas ----------
+     La portada y el índice no cuentan: el cuerpo se numera desde la sección 1. */
+  @page { size: Letter; margin: 2.3cm 2.5cm 2.3cm 2.5cm;
+    @top-left { content: "Agro-Colab · Manual de uso e instalación"; font: 500 7.5pt "Inter"; color: #78716c; }
+    @bottom-left { content: "INGT1003 · Universidad Mayor · Hito 3"; font: 500 7.5pt "Inter"; color: #78716c; }
+    @bottom-right { content: counter(page); font: 600 8pt "Inter"; color: #1c1917; }
+  }
+  @page portada { margin: 0; counter-increment: page 0; @top-left { content: none; } @bottom-left { content: none; } @bottom-right { content: none; } }
+  @page indice { counter-increment: page 0; @top-right { content: "Índice"; font: 600 7.5pt "Inter"; color: #15803d; } @bottom-right { content: none; } @bottom-left { content: none; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: "Inter", sans-serif; font-size: 10.5pt; line-height: 1.55; color: var(--tinta); font-feature-settings: "cv11", "ss01"; }
+  p { margin: 0 0 .75em; text-align: justify; hyphens: auto; }
+  p:has(code) { text-align: left; } /* el código no se corta: justificado dejaba huecos grandes */
+  b, strong { font-weight: 650; }
+  a { color: var(--verde-vivo); text-decoration: none; }
+  ul, ol { margin: 0 0 .85em; padding-left: 1.3em; }
+  li { margin-bottom: .3em; }
+  code, .m { font-family: "JetBrains Mono", monospace; font-size: .86em; font-weight: 500; background: var(--fondo); border: 1px solid var(--linea); border-radius: 3px; padding: 0 .28em; white-space: nowrap; }
+  .ref { color: var(--verde-vivo); font-weight: 650; }
+  .boton { font-weight: 650; color: var(--verde-medio); }
+
+  /* ---------- Secciones ---------- */
+  .seccion { break-before: page; }
+  .kicker { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 8.5pt; letter-spacing: .12em; color: var(--verde-vivo); text-transform: uppercase; margin: 0 0 .2em; }
+  h2 { font-size: 21pt; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; color: var(--verde); margin: 0 0 .55em; break-after: avoid; }
+  h3 { font-size: 12.5pt; font-weight: 750; color: var(--verde); margin: 1.35em 0 .5em; break-after: avoid; }
+  h3 .num { font-family: "JetBrains Mono", monospace; font-size: .82em; color: var(--verde-vivo); margin-right: .45em; }
+  h4 { font-size: 10.5pt; font-weight: 700; margin: 1em 0 .35em; break-after: avoid; }
+
+  .resumen { background: var(--verde-claro); border-left: 4px solid var(--verde-vivo); padding: .75em 1em; margin: 0 0 1.2em; font-weight: 500; font-size: 10.5pt; break-inside: avoid; }
+  .resumen p { margin: 0; text-align: left; }
+  .nota { background: var(--verde-claro); border: 1px solid var(--borde-verde); border-radius: 6px; padding: .7em 1em; margin: .8em 0 1.1em; font-size: 9.5pt; break-inside: avoid; }
+  .nota b:first-child { display: block; color: var(--verde-medio); margin-bottom: .2em; }
+  .nota p:last-child { margin-bottom: 0; }
+  .costo { background: var(--ambar-claro); border: 1px solid var(--borde-ambar); border-radius: 6px; padding: .7em 1em; margin: .8em 0 1.1em; font-size: 9.5pt; break-inside: avoid; }
+  .costo b:first-child { display: block; color: var(--ambar); margin-bottom: .2em; }
+  .costo p:last-child { margin-bottom: 0; }
+
+  /* ---------- Cifras y tarjetas ---------- */
+  .cifras { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6em; margin: 1em 0 1.2em; break-inside: avoid; }
+  .cifra { background: var(--cabecera); color: #fff; border-radius: 6px; padding: .7em .8em; }
+  .cifra b { display: block; font-family: "JetBrains Mono", monospace; font-size: 17pt; font-weight: 700; color: #fff; line-height: 1.1; }
+  .cifra span { display: block; font-size: 7.8pt; color: #bbf7d0; line-height: 1.3; margin-top: .35em; }
+  .tarjetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6em; margin: .6em 0 1.1em; break-inside: avoid; }
+  .tarjetas.dos { grid-template-columns: repeat(2, 1fr); }
+  .tarjeta { border: 1px solid var(--linea); border-radius: 6px; padding: .6em .75em; font-size: 8.8pt; line-height: 1.45; }
+  .tarjeta b:first-child { display: block; color: var(--verde-medio); font-size: 9pt; margin-bottom: .25em; }
+  .tarjeta p { text-align: left; margin-bottom: .4em; }
+  .tarjeta p:last-child { margin-bottom: 0; }
+
+  /* ---------- Tablas ---------- */
+  table { width: 100%; border-collapse: collapse; margin: .3em 0 1.2em; font-size: 8.6pt; line-height: 1.4; }
+  caption { caption-side: top; text-align: left; font-size: 8.6pt; color: var(--suave); padding-bottom: .45em; }
+  caption b { color: var(--tinta); }
+  thead th { background: var(--cabecera); color: #fff; text-align: left; font-weight: 650; padding: .45em .55em; vertical-align: bottom; }
+  td { border-bottom: 1px solid var(--linea); padding: .42em .55em; vertical-align: top; }
+  tbody tr { break-inside: avoid; }
+  td code { white-space: normal; }
+  .cod { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 7.4pt; font-weight: 700; border-radius: 3px; padding: 0 .3em; background: #fee2e2; color: #991b1b; }
+  .cod.ex { background: #dcfce7; color: #166534; }
+
+  /* ---------- Figuras ---------- */
+  figure { margin: .9em 0 1.2em; break-inside: avoid; }
+  figure img { display: block; max-width: 100%; margin: 0 auto; border: 1px solid var(--linea); border-radius: 5px; }
+  figcaption { font-size: 8.4pt; color: var(--suave); margin-top: .5em; line-height: 1.4; }
+  figcaption b { color: var(--tinta); }
+  .par { display: grid; grid-template-columns: 1fr 1fr; gap: .9em; margin: .9em 0 1.1em; }
+  .par figure { margin: 0; }
+  .par.compacta { width: 78%; margin-left: auto; margin-right: auto; }
+
+  /* Terminal */
+  .terminal { background: #0c1a14; color: #d1fae5; border-radius: 6px; padding: .8em 1em; margin: .4em 0 1em; font-family: "JetBrains Mono", monospace; font-size: 7.8pt; line-height: 1.6; white-space: pre-wrap; word-break: break-word; break-inside: avoid; }
+  .terminal .c { color: #6ee7b7; } .terminal .k { color: #fcd34d; } .terminal .x { color: #86efac; }
+  .so { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 7.4pt; font-weight: 700; letter-spacing: .06em; color: #fff; background: var(--cabecera); border-radius: 3px; padding: .1em .5em; margin: .5em 0 .1em; }
+
+  /* Pasos */
+  .pasos { counter-reset: paso; list-style: none; padding-left: 0; }
+  .pasos > li { counter-increment: paso; position: relative; padding-left: 2.1em; margin-bottom: .55em; }
+  .pasos > li::before { content: counter(paso); position: absolute; left: 0; top: .1em; width: 1.5em; height: 1.5em; border-radius: 50%; background: var(--verde-vivo); color: #fff; font-size: 8pt; font-weight: 700; display: grid; place-items: center; }
+
+  /* Fallas */
+  .falla { border: 1px solid var(--linea); border-radius: 6px; padding: .7em 1em .5em; margin: .7em 0 1em; }
+  .falla h4, .falla h4 + p { break-after: avoid; }
+  figure.media { max-width: 64%; margin-left: auto; margin-right: auto; }
+  .texto-y-figura { display: grid; grid-template-columns: 1.15fr 1fr; gap: 1.1em; align-items: start; margin: .4em 0 1em; }
+  .texto-y-figura figure { margin: 0; }
+  .falla h4 { margin-top: 0; color: var(--verde); }
+  .falla h4 .nn { font-family: "JetBrains Mono", monospace; color: var(--verde-vivo); margin-right: .4em; }
+
+  /* ---------- Portada ---------- */
+  .portada { page: portada; height: 27.94cm; background: #030806; color: #fff; position: relative; overflow: hidden; padding: 2.4cm 2.2cm 2cm; display: flex; flex-direction: column; }
+  .portada .arbol { position: absolute; right: -1.2cm; top: 1.4cm; width: 12.5cm; opacity: .95; }
+  .portada .inst { position: relative; font-size: 9.5pt; line-height: 1.5; color: #d6d3d1; }
+  .portada .inst b { color: #fff; font-size: 10.5pt; }
+  .portada .centro { position: relative; margin-top: 6.6cm; }
+  .portada .hito { font-family: "JetBrains Mono", monospace; font-size: 8.5pt; font-weight: 700; letter-spacing: .16em; color: #facc15; }
+  .portada h1 { font-size: 46pt; font-weight: 900; letter-spacing: -.03em; margin: .1em 0 .12em; line-height: 1; }
+  .portada .bajada { font-size: 13pt; font-weight: 600; color: #e7e5e4; max-width: 11cm; line-height: 1.35; }
+  .portada .cifras-portada { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1em; margin-top: 2.2cm; padding-bottom: .9cm; border-bottom: 1px solid #292524; }
+  .portada .cifras-portada b { display: block; font-family: "JetBrains Mono", monospace; font-size: 21pt; color: var(--menta); line-height: 1; }
+  .portada .cifras-portada span { display: block; font-size: 7.8pt; color: #a8a29e; margin-top: .4em; line-height: 1.3; }
+  .portada dl { position: relative; display: grid; grid-template-columns: 3.6cm 1fr; gap: .45em 1em; font-size: 9pt; margin: .9cm 0 0; }
+  .portada dt { color: #a8a29e; }
+  .portada dd { margin: 0; color: #fafaf9; }
+
+  /* ---------- Índice ---------- */
+  .indice { page: indice; break-before: page; }
+  .indice h2 { margin-bottom: .6em; }
+  .indice ol { list-style: none; padding: 0; margin: 0; }
+  .indice li { display: flex; align-items: baseline; gap: .45em; margin: 0; padding: .16em 0; font-size: 9.6pt; }
+  .indice li.n1 { font-weight: 650; padding-top: .42em; }
+  .indice li.n2 { padding-left: 1.9em; font-size: 9pt; color: var(--suave); }
+  .indice li .nn { font-family: "JetBrains Mono", monospace; color: var(--verde-vivo); min-width: 1.6em; font-size: .9em; white-space: nowrap; flex: none; }
+  .indice li .tt { flex: none; max-width: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #indice-figuras .nn, #indice-tablas .nn { min-width: 5.4em; }
+  .indice li .relleno { flex: 1; border-bottom: 1px dotted #a8a29e; margin-bottom: .3em; }
+  .indice li .pag { min-width: 1.8em; text-align: right; font-family: "JetBrains Mono", monospace; font-size: .9em; }
+  .indice h4 { margin-top: 1.4em; color: var(--verde); }
+</style>
+</head>
+<body>
+
+<!-- =========================== PORTADA E ÍNDICE =========================== -->
+<section class="portada">
+  <img class="arbol" src="../../informes/fuente/img/arbol.png" alt="">
+  <div class="inst">
+    <b>Universidad Mayor</b><br>
+    Facultad de Ciencias, Ingeniería y Tecnología<br>
+    Escuela de Ingeniería Civil
+  </div>
+  <div class="centro">
+    <div class="hito">HITO 3 · MANUAL DE USO E INSTALACIÓN</div>
+    <h1>Agro-Colab</h1>
+    <div class="bajada">Cómo usar la plataforma, instalarla en otro equipo y resolver los problemas más comunes, sin ayuda del equipo.</div>
+  </div>
+  <div class="cifras-portada">
+    <div><b>37</b><span>operaciones HTTP en la API</span></div>
+    <div><b>7</b><span>tablas relacionales</span></div>
+    <div><b>290</b><span>pruebas, en 2 motores de base de datos</span></div>
+    <div><b>500</b><span>compras simultáneas sin sobreventa</span></div>
+  </div>
+  <dl>
+    <dt>Asignatura</dt><dd>Arquitectura de Desarrollo (Móvil y Web) · INGT1003</dd>
+    <dt>Equipo</dt><dd>Agro-Colab</dd>
+    <dt>Integrantes</dt><dd>Alveal Santos, Joaquin<br>Gonzalez Paredes, Matias<br>Reyes Orellana, Nicolas</dd>
+    <dt>Docente</dt><dd>Prof. Carlos Muñoz S.</dd>
+    <dt>Repositorio</dt><dd>github.com/arrobaaas/agro-colab</dd>
+    <dt>Producto publicado</dt><dd>arrobaaas.github.io/agro-colab</dd>
+    <dt>Ciudad y fecha</dt><dd>Santiago de Chile, noviembre de 2026</dd>
+  </dl>
+</section>
+
+<section class="indice">
+  <h2>Índice</h2>
+  <ol id="indice"></ol>
+  <h4>Figuras</h4>
+  <ol id="indice-figuras"></ol>
+  <h4>Tablas</h4>
+  <ol id="indice-tablas"></ol>
+</section>
+
+<!-- ================================ CUERPO ================================ -->
+
+<!-- 1 ======================================================================= -->
+<section class="seccion" data-titulo="Antes de empezar">
+<p class="kicker">Sección 1</p>
+<h2 id="s1">Antes de empezar</h2>
+<div class="resumen"><p>Este manual permite que una persona que no conoce el proyecto lo use, lo instale y resuelva los problemas más comunes sin ayuda del equipo.</p></div>
+
+<p>Agro-Colab conecta a consumidores con pequeños agricultores chilenos: el comprador adopta un árbol frutal o contrata una canasta de cosecha, y el pago llega directo al productor. Hay dos formas de probarlo, y la <span class="ref">Tabla 1</span> ayuda a elegir.</p>
+
+<table>
+  <caption>Dos formas de usar Agro-Colab.</caption>
+  <thead><tr><th style="width:22%">Forma</th><th>Para quién</th><th style="width:30%">Qué necesita</th><th style="width:14%">Sección</th></tr></thead>
+  <tbody>
+    <tr><td><b>Versión publicada</b></td><td>Quien solo quiere usar el producto: recorrerlo, comprar un árbol de prueba, ver los paneles.</td><td>Un navegador y conexión a internet.</td><td>2</td></tr>
+    <tr><td><b>Instalación local</b></td><td>Quien quiere revisar el código, correr las pruebas o trabajar sin depender de internet.</td><td>Python 3.12 o superior, Git y dos terminales.</td><td>3 y 4</td></tr>
+  </tbody>
+</table>
+
+<p>Los pasos se comprobaron el 17 de noviembre de 2026 clonando el repositorio en una carpeta vacía y siguiéndolos al pie de la letra. Todos los datos que aparecen son <b>ficticios</b>: nunca cargues datos reales de personas, ni en la versión publicada ni en una instalación local.</p>
+
+<div class="tarjetas">
+  <div class="tarjeta"><b>Si tienes poco tiempo</b>Ve a la sección 2, entra con la cuenta de comprador de la sección 5 y sigue el flujo principal de la sección 6.</div>
+  <div class="tarjeta"><b>Si vas a instalarlo</b>Revisa los requisitos (sección 3) y sigue la sección 4 con dos terminales abiertas.</div>
+  <div class="tarjeta"><b>Si algo falla</b>La sección 8 reúne las fallas que aparecieron al instalarlo en un equipo limpio, con su solución.</div>
+</div>
+</section>
+
+<!-- 2 ======================================================================= -->
+<section class="seccion" data-titulo="Usar la versión publicada">
+<p class="kicker">Sección 2</p>
+<h2 id="s2">Usar la versión publicada</h2>
+<div class="resumen"><p>Sin instalar nada: abre <b>arrobaaas.github.io/agro-colab</b> e ingresa con una de las cuentas de prueba de la sección 5.</p></div>
+
+<figure class="media">
+  <img src="../../capturas/01-inicio-sesion.jpg" alt="Pantalla de inicio de sesión de Agro-Colab">
+  <figcaption>Pantalla de inicio. A la derecha, el inicio de sesión con el botón de tipo de cuenta (Comprador o Agricultor) y, abajo, las cuentas de demostración.</figcaption>
+</figure>
+
+<p>El frontend está publicado en GitHub Pages y la API en el plan gratuito de Render. Para ingresar:</p>
+<ol class="pasos">
+  <li>Elige el tipo de cuenta: <span class="boton">Comprador</span> o <span class="boton">Agricultor</span>.</li>
+  <li>Escribe el correo y la contraseña de la cuenta de prueba.</li>
+  <li>Presiona <span class="boton">Ingresar</span>, o presiona <b>Enter</b> en el campo de la contraseña.</li>
+</ol>
+
+<div class="costo"><b>La primera visita puede tardar hasta un minuto</b><p>Si nadie usó el servicio en los últimos 15 minutos, el servidor de Render está dormido y la primera petición tarda mientras despierta. La página empieza a despertarlo apenas se abre, y si una petición tarda más de 3,5 segundos aparece arriba el aviso <b>«Despertando el servidor…»</b>, que se quita solo cuando responde. Después todo responde con normalidad.</p></div>
+
+<div class="nota"><b>Las cuentas de demostración son compartidas</b><p>Cualquier visitante del sitio puede entrar con ellas, así que su perfil y su contraseña no se pueden modificar, y lo que se guarde en ellas se limpia después de una hora. No escribas datos reales en esas cuentas.</p></div>
+</section>
+
+<!-- 3 ======================================================================= -->
+<section class="seccion" data-titulo="Requisitos para instalar">
+<p class="kicker">Sección 3</p>
+<h2 id="s3">Requisitos para instalar</h2>
+<div class="resumen"><p>Solo hace falta Python, Git y un navegador. La base de datos y el correo no se instalan: en local se usa SQLite y los códigos aparecen en la consola.</p></div>
+
+<table>
+  <caption>Requisitos de la instalación local.</caption>
+  <thead><tr><th style="width:20%">Requisito</th><th style="width:30%">Versión</th><th>Para qué</th></tr></thead>
+  <tbody>
+    <tr><td><b>Python</b></td><td>3.12 o superior</td><td>Backend (FastAPI)</td></tr>
+    <tr><td><b>Git</b></td><td>Cualquiera reciente</td><td>Clonar el repositorio</td></tr>
+    <tr><td><b>Navegador</b></td><td>Chrome, Firefox, Edge o Safari actuales</td><td>Frontend</td></tr>
+    <tr><td><b>PostgreSQL</b></td><td>16 (opcional)</td><td>Solo si no quieres usar SQLite</td></tr>
+  </tbody>
+</table>
+
+<p>No hace falta Node.js: los estilos de Tailwind vienen compilados en el repositorio. Tampoco hace falta una cuenta de correo: en modo <code>desarrollo</code>, el código de verificación aparece en la consola del servidor.</p>
+
+<p>Para comprobar la versión de Python, escribe <code>python3 --version</code> en Linux y macOS, o <code>py --version</code> en Windows.</p>
+</section>
+
+<!-- 4 ======================================================================= -->
+<section class="seccion" data-titulo="Instalación paso a paso">
+<p class="kicker">Sección 4</p>
+<h2 id="s4">Instalación paso a paso</h2>
+<div class="resumen"><p>Se necesitan <b>dos terminales</b>: una para el backend, en el puerto 8000, y otra para el frontend, en el puerto 3000. Las dos quedan abiertas mientras se usa el producto.</p></div>
+
+<h3 id="s4-1"><span class="num">4.1</span>Terminal 1 · Backend</h3>
+
+<span class="so">LINUX Y MACOS</span>
+<div class="terminal">git clone https://github.com/arrobaaas/agro-colab.git
+cd agro-colab/backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp ../.env.example ../.env
+uvicorn main:app --reload --port 8000 --env-file ../.env</div>
+
+<span class="so">WINDOWS · POWERSHELL</span>
+<div class="terminal">git clone https://github.com/arrobaaas/agro-colab.git
+cd agro-colab\backend
+py -m venv venv
+venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+copy ..\.env.example ..\.env
+uvicorn main:app --reload --port 8000 --env-file ..\.env</div>
+
+<p>Está funcionando cuando la consola muestra <code>Application startup complete.</code> Con los valores de <code>.env.example</code>:</p>
+<ul>
+  <li>Se crea sola una base SQLite en <code>backend/agrocolab.db</code>, con las cuentas de demostración y tres árboles de ejemplo.</li>
+  <li>La documentación interactiva de la API queda en <code>http://127.0.0.1:8000/docs</code>.</li>
+  <li>Aparece el aviso <code>AGROCOLAB_SECRET es la clave de ejemplo...</code>. En local es normal: solo significa que las sesiones se cierran cada vez que se reinicia el servidor.</li>
+</ul>
+
+<div class="nota"><b>La próxima vez</b><p>La preparación (entorno virtual, dependencias y <code>.env</code>) se hace una sola vez. Después basta con entrar a <code>backend</code>, activar el entorno y ejecutar la línea de <code>uvicorn</code>.</p></div>
+
+<h3 id="s4-2"><span class="num">4.2</span>Terminal 2 · Frontend</h3>
+<div class="terminal">cd agro-colab/frontend
+python3 -m http.server 3000      <span class="c"># Windows: py -m http.server 3000</span></div>
+
+<p>Abre <b>http://localhost:3000</b> en el navegador. El frontend detecta que está en <code>localhost</code> y llama solo a la API local.</p>
+
+<h3 id="s4-3"><span class="num">4.3</span>Comprobar que funciona</h3>
+<table>
+  <caption>Direcciones para comprobar la instalación local.</caption>
+  <thead><tr><th style="width:38%">Dirección</th><th>Qué deberías ver</th></tr></thead>
+  <tbody>
+    <tr><td><code>http://localhost:3000</code></td><td>La portada «Del huerto chileno. Directo a tu mesa.» con el inicio de sesión</td></tr>
+    <tr><td><code>http://127.0.0.1:8000/api/estado</code></td><td>Una respuesta con <code>"status": "success"</code></td></tr>
+    <tr><td><code>http://127.0.0.1:8000/docs</code></td><td>La documentación interactiva de la API</td></tr>
+  </tbody>
+</table>
+<p>Para apagar todo, presiona <b>Ctrl + C</b> en cada una de las dos terminales.</p>
+
+<h3 id="s4-4"><span class="num">4.4</span>Opcional · PostgreSQL en lugar de SQLite</h3>
+<div class="terminal">createdb agrocolab
+psql -d agrocolab -f db/esquema.sql</div>
+<p>Después, en <code>.env</code>, cambia <code>AGROCOLAB_MOD_MODE=produccion</code> y define <code>DATABASE_URL=postgresql://usuario:clave@localhost:5432/agrocolab</code>. El servidor no acepta el modo <code>desarrollo</code> con una base de producción. Más detalle en <code>db/README.md</code>.</p>
+</section>
+
+<!-- 5 ======================================================================= -->
+<section class="seccion" data-titulo="Datos de prueba">
+<p class="kicker">Sección 5</p>
+<h2 id="s5">Datos de prueba</h2>
+<div class="resumen"><p>Todos los datos son ficticios. Con estas cuentas y tarjetas se recorre el producto completo sin mover dinero.</p></div>
+
+<h3 id="s5-1"><span class="num">5.1</span>Cuentas</h3>
+<table>
+  <caption>Cuentas de prueba y botón de rol con el que se ingresa.</caption>
+  <thead><tr><th style="width:16%">Rol</th><th style="width:30%">Correo</th><th style="width:28%">Contraseña</th><th>Botón de rol</th></tr></thead>
+  <tbody>
+    <tr><td><b>Comprador</b></td><td><code>comprador@agrocolab.cl</code></td><td><code>123</code></td><td>Comprador</td></tr>
+    <tr><td><b>Agricultor</b></td><td><code>agricultor@agrocolab.cl</code></td><td><code>123</code></td><td>Agricultor</td></tr>
+    <tr><td><b>Administrador</b></td><td>El de <code>ADMIN_EMAIL</code> en <code>.env</code></td><td>El de <code>ADMIN_PASSWORD</code> (12 caracteres o más)</td><td>Cualquiera</td></tr>
+  </tbody>
+</table>
+<p>La cuenta de administrador no existe hasta que se definen esas dos variables y se reinicia el servidor. Nadie puede registrarse como administrador. Las cuentas de demostración son compartidas en la versión publicada, así que su perfil y su contraseña no se pueden modificar.</p>
+
+<h3 id="s5-2"><span class="num">5.2</span>Tarjetas de la pasarela simulada</h3>
+<p>La pasarela no mueve dinero y solo acepta estas tarjetas, con cualquier vencimiento futuro (por ejemplo <code>12/29</code>) y cualquier CVV de 3 dígitos. El formulario de pago tiene un botón para cada una, así que no hace falta escribirlas.</p>
+<table>
+  <caption>Tarjetas de prueba y resultado de cada una.</caption>
+  <thead><tr><th style="width:40%">Número</th><th>Resultado</th></tr></thead>
+  <tbody>
+    <tr><td><code>4242 4242 4242 4242</code></td><td><span class="cod ex">APROBADA</span> Visa</td></tr>
+    <tr><td><code>5555 5555 5555 4444</code></td><td><span class="cod ex">APROBADA</span> Mastercard</td></tr>
+    <tr><td><code>4000 0000 0000 0002</code></td><td><span class="cod">RECHAZADA</span> Fondos insuficientes</td></tr>
+    <tr><td><code>4000 0000 0000 9995</code></td><td><span class="cod">RECHAZADA</span> Tarjeta bloqueada</td></tr>
+  </tbody>
+</table>
+
+<h3 id="s5-3"><span class="num">5.3</span>Árboles de ejemplo</h3>
+<p>Al crear la base se cargan tres árboles del agricultor de demostración, uno por plan (Básico, Intermedio y Premium). El primero es el <b>Palto Hass #104</b>: plan Básico, 5 cupos, $12.000 al mes.</p>
+</section>
+
+<!-- 6 ======================================================================= -->
+<section class="seccion" data-titulo="Flujo principal: adoptar un árbol">
+<p class="kicker">Sección 6</p>
+<h2 id="s6">Flujo principal: adoptar un árbol</h2>
+<div class="resumen"><p>Este es el recorrido que cierra el ciclo completo: la interfaz llama al servicio, el servicio guarda en la base de datos y el dato vuelve a la pantalla, incluso después de recargar.</p></div>
+
+<ol class="pasos">
+  <li>En la pantalla de inicio, elige <span class="boton">Comprador</span>, escribe <code>comprador@agrocolab.cl</code> y <code>123</code>, y presiona <span class="boton">Ingresar</span>.</li>
+  <li>Presiona <span class="boton">Adoptar un árbol</span>. Aparece la lista <b>Árboles disponibles</b>, con los cupos libres de cada árbol.</li>
+  <li>Elige un árbol y confirma con <span class="boton">Agregar a mi canasta</span>. El contador de la canasta, en la cabecera, sube a 1.</li>
+  <li>Abre la canasta y presiona <span class="boton">Pagar $12.000</span> (el botón muestra el total). En <b>Pago con tarjeta</b>, usa el botón <span class="boton">Visa aprobada</span> y presiona <span class="boton">Pagar $…</span>. El monto lo fija el servidor, no el navegador.</li>
+  <li>Aparece <b>Pago aprobado</b>. Presiona <span class="boton">Continuar con el despacho</span>, completa la dirección, la comuna, el celular, el código postal y la frecuencia, y presiona <span class="boton">Confirmar destino y registrar pedido</span>.</li>
+  <li>Presiona <span class="boton">Mi panel</span>. El árbol adoptado aparece con sus coparticipantes, su cosecha estimada y la dirección de despacho.</li>
+  <li><b>Recarga la página (F5).</b> El árbol sigue en el panel, porque quedó guardado en la base de datos.</li>
+</ol>
+
+<div class="par">
+  <figure><img src="../../capturas/03-catalogo.jpg" alt="Lista de árboles disponibles"><figcaption>Paso 2: árboles disponibles, con los cupos libres de cada uno.</figcaption></figure>
+  <figure><img src="../../capturas/04-confirmar-adopcion.jpg" alt="Confirmación del árbol elegido"><figcaption>Paso 3: confirmación del árbol antes de agregarlo a la canasta.</figcaption></figure>
+  <figure><img src="../../capturas/05-canasta.jpg" alt="Canasta con el total"><figcaption>Paso 4: canasta con el total por pagar.</figcaption></figure>
+  <figure><img src="../../capturas/07-pago-formulario.jpg" alt="Formulario de pago con tarjeta"><figcaption>Paso 4: pago con tarjeta, con los botones de las tarjetas de prueba.</figcaption></figure>
+  <figure><img src="../../capturas/08-pago-aprobado.jpg" alt="Pago aprobado"><figcaption>Paso 5: comprobante del pago aprobado.</figcaption></figure>
+  <figure><img src="../../capturas/09-despacho.jpg" alt="Formulario de despacho"><figcaption>Paso 5: destino y frecuencia del despacho, con autocompletado de direcciones.</figcaption></figure>
+  <figure><img src="../../capturas/10-panel-comprador.jpg" alt="Panel del comprador"><figcaption>Paso 6: el panel del comprador con el árbol adoptado.</figcaption></figure>
+  <figure><img src="../../capturas/11-panel-tras-recargar.jpg" alt="Panel después de recargar"><figcaption>Paso 7: el mismo panel después de recargar. El dato vino de la base.</figcaption></figure>
+</div>
+
+<h3 id="s6-1"><span class="num">6.1</span>Comprobar los errores en el mismo recorrido</h3>
+<div class="texto-y-figura">
+  <ul>
+    <li>Paga con <span class="boton">Sin fondos</span>: aparece <b>Pago no realizado</b> con el motivo, y no se ocupa ningún cupo.</li>
+    <li>Intenta adoptar otra vez el mismo árbol: la aplicación avisa que ya tienes un cupo en él. Si la petición llega a la API, responde <span class="cod">409 Conflict</span>.</li>
+  </ul>
+  <figure><img src="../../capturas/06-pago-rechazado.jpg" alt="Pago no realizado"><figcaption>Pago rechazado con la tarjeta sin fondos: no se realizó ningún cobro.</figcaption></figure>
+</div>
+</section>
+
+<!-- 7 ======================================================================= -->
+<section class="seccion" data-titulo="Otros recorridos">
+<p class="kicker">Sección 7</p>
+<h2 id="s7">Otros recorridos</h2>
+<div class="resumen"><p>Además del flujo principal, cada rol tiene sus propias pantallas: el comprador administra lo que adoptó, el agricultor publica y sigue sus árboles, y el administrador gestiona las cuentas.</p></div>
+
+<h3 id="s7-1"><span class="num">7.1</span>Comprador</h3>
+<ul>
+  <li><b>Canastas de abastecimiento:</b> en <span class="boton">Ver canastas</span>, elige un plan (Huerto Esencial, Familiar o Lote Gastronómico B2B). El plan B2B pide razón social y un RUT de empresa válido.</li>
+  <li><b>Cancelar:</b> desde <span class="boton">Mi panel</span> se cancela la suscripción a un árbol (libera el cupo) o un plan de abastecimiento.</li>
+  <li><b>Perfil:</b> cambia nombre, teléfono, dirección o contraseña (la contraseña nueva exige la actual). <span class="boton">Descargar mis datos</span> entrega una copia de tus datos y <span class="boton">Eliminar cuenta</span> los borra todos después de pedir la contraseña y una confirmación.</li>
+</ul>
+
+<h3 id="s7-2"><span class="num">7.2</span>Agricultor</h3>
+<ol class="pasos">
+  <li>Ingresa con <span class="boton">Agricultor</span>, <code>agricultor@agrocolab.cl</code> y <code>123</code>.</li>
+  <li><b>Tu huerto en cifras</b> muestra los ingresos por árbol, la ocupación de cupos y las adopciones por mes.</li>
+  <li><span class="boton">Publicar un árbol</span>: elige la especie del catálogo cerrado, una de sus fotos verificadas, la ubicación, el plan, los cupos y el precio, y presiona <span class="boton">Publicar árbol</span>.</li>
+  <li>En <b>Mis árboles</b> se edita o elimina cada árbol, y se ven sus suscriptores con su contacto. El agricultor puede expulsar a un suscriptor para liberar su cupo.</li>
+</ol>
+<div class="par compacta">
+  <figure><img src="../../capturas/13b-graficos-agricultor.jpg" alt="Tu huerto en cifras"><figcaption>Tu huerto en cifras: árboles publicados, suscriptores, ocupación e ingresos.</figcaption></figure>
+  <figure><img src="../../capturas/14-arboles-agricultor.jpg" alt="Mis árboles"><figcaption>Mis árboles, con la ocupación de cada uno y el acceso a sus suscriptores.</figcaption></figure>
+</div>
+
+<h3 id="s7-3"><span class="num">7.3</span>Administrador</h3>
+<p>Con la cuenta de <code>ADMIN_EMAIL</code>, el panel <b>Cuentas de Agro-Colab</b> lista todas las cuentas, con búsqueda y filtro por tipo. Desde el detalle de una cuenta se corrigen sus datos, se la verifica a mano, se cambia su contraseña o se elimina con todos sus datos.</p>
+
+<h3 id="s7-4"><span class="num">7.4</span>Registro de una cuenta nueva</h3>
+<p>En <span class="boton">¿No tienes cuenta? Regístrate</span>, completa el formulario y acepta los términos. En modo <code>desarrollo</code>, el código de 6 dígitos aparece en la terminal del backend; en la versión publicada llega por correo. Escríbelo en <b>Verifica tu cuenta</b> y entras directo.</p>
+</section>
+
+<!-- 8 ======================================================================= -->
+<section class="seccion" data-titulo="Fallas frecuentes y su solución">
+<p class="kicker">Sección 8</p>
+<h2 id="s8">Fallas frecuentes y su solución</h2>
+<div class="resumen"><p>Las tres primeras son las que más aparecieron al instalar el proyecto en un equipo limpio. Las demás se resumen en la <span class="ref">Tabla 6</span>.</p></div>
+
+<div class="falla">
+  <h4><span class="nn">01</span><code>python: orden no encontrada</code> o <code>command not found: python</code></h4>
+  <p>En Linux y macOS el ejecutable se llama <code>python3</code>: usa <code>python3 -m venv venv</code>. En Windows usa <code>py</code>. Dentro del entorno virtual ya activado, <code>python</code> sí funciona.</p>
+  <p>En Windows, si PowerShell no deja ejecutar <code>Activate.ps1</code>, corre una vez <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> y vuelve a activar el entorno.</p>
+</div>
+
+<div class="falla">
+  <h4><span class="nn">02</span>La página carga, pero dice «No hay conexión con el servidor» o «No pudimos cargar los árboles»</h4>
+  <p>El frontend no logra hablar con la API. Revisa, en este orden:</p>
+  <div class="texto-y-figura">
+  <ol class="pasos">
+    <li><b>¿El backend está corriendo?</b> La terminal 1 debe mostrar <code>Application startup complete.</code> y <code>http://127.0.0.1:8000/api/arboles</code> debe responder una lista.</li>
+    <li><b>¿Abriste el frontend con <code>http://localhost:3000</code>?</b> Si abriste <code>index.html</code> con doble clic (<code>file://...</code>) o usaste otro puerto, el navegador bloquea la petición por CORS. En modo <code>desarrollo</code> la API solo acepta los puertos 3000 y 5173.</li>
+    <li><b>¿El <code>.env</code> tiene <code>AGROCOLAB_MOD_MODE=desarrollo</code>?</b> En modo <code>produccion</code> la API solo acepta el frontend publicado en GitHub Pages.</li>
+    <li><b>En la versión publicada</b>, espera un minuto: el servidor de Render puede estar despertando (lo indica el aviso de arriba). Después presiona <span class="boton">Intentar de nuevo</span>.</li>
+  </ol>
+  <figure><img src="../../capturas/12-catalogo-error.jpg" alt="Catálogo sin conexión"><figcaption>El catálogo sin conexión con la API: un mensaje para el usuario y el botón para reintentar.</figcaption></figure>
+  </div>
+</div>
+
+<div class="falla">
+  <h4><span class="nn">03</span>«Credenciales inválidas o el rol seleccionado no coincide»</h4>
+  <p>El correo y la contraseña pueden estar bien, pero el botón de rol no corresponde a la cuenta. <code>comprador@agrocolab.cl</code> entra solo con <span class="boton">Comprador</span> y <code>agricultor@agrocolab.cl</code> solo con <span class="boton">Agricultor</span>. Después de 8 intentos fallidos desde el mismo equipo en 5 minutos, el inicio de sesión responde «Demasiados intentos. Intenta más tarde.» para frenar la fuerza bruta: espera 5 minutos y vuelve a intentar.</p>
+</div>
+
+<table>
+  <caption>Otras fallas, su causa y su solución.</caption>
+  <thead><tr><th style="width:31%">Síntoma</th><th style="width:31%">Causa</th><th>Solución</th></tr></thead>
+  <tbody>
+    <tr><td><code>[Errno 98] address already in use</code> (en Windows, <code>[Errno 10048]</code>) al levantar el backend</td><td>Otro proceso usa el puerto 8000, a menudo un uvicorn anterior</td><td>Ciérralo con Ctrl + C en su terminal, o usa otro puerto y ajusta <code>API_URL</code> en <code>frontend/js/config.js</code></td></tr>
+    <tr><td>«Esta pasarela es de prueba y solo acepta las tarjetas de prueba»</td><td>Se escribió una tarjeta que no está en la <span class="ref">Tabla 5</span></td><td>Usa uno de los botones de tarjeta de prueba del formulario</td></tr>
+    <tr><td>La sesión se cierra cada vez que se reinicia el backend</td><td><code>AGROCOLAB_SECRET</code> es la clave de ejemplo y se usa una aleatoria</td><td>Genera una con <code>python3 -c "import secrets; print(secrets.token_hex(32))"</code> y ponla en <code>.env</code></td></tr>
+    <tr><td><code>AGROCOLAB_MOD_MODE=desarrollo no se permite con una base de producción</code></td><td>Se definió <code>DATABASE_URL</code> en modo <code>desarrollo</code></td><td>Deja <code>DATABASE_URL</code> vacía para usar SQLite, o cambia a <code>produccion</code></td></tr>
+    <tr><td>Un cambio en el código no se ve en la página</td><td>El navegador usa archivos guardados en caché</td><td>Recarga con <b>Ctrl + F5</b></td></tr>
+    <tr><td>Quiero partir con la base limpia</td><td>Los datos de pruebas anteriores siguen en SQLite</td><td>Detén el backend, borra <code>backend/agrocolab.db</code> y vuelve a levantarlo</td></tr>
+    <tr><td>No aparece el panel de administración</td><td>No se definieron <code>ADMIN_EMAIL</code> y <code>ADMIN_PASSWORD</code>, o la contraseña tiene menos de 12 caracteres</td><td>Defínelas en <code>.env</code> y reinicia el backend: la consola dice <code>[admin] cuenta de administrador creada</code></td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- 9 ======================================================================= -->
+<section class="seccion" data-titulo="Pruebas automatizadas">
+<p class="kicker">Sección 9</p>
+<h2 id="s9">Pruebas automatizadas</h2>
+<div class="resumen"><p>Las pruebas comprueban solas que la API responda lo que debe. No necesitan el servidor corriendo: usan una base temporal y nunca envían correos.</p></div>
+
+<div class="terminal">cd backend
+pip install -r requirements-dev.txt
+python -m pytest</div>
+
+<div class="cifras">
+  <div class="cifra"><b>290</b><span>pruebas automatizadas con pytest</span></div>
+  <div class="cifra"><b>2</b><span>motores en cada ejecución: SQLite y PostgreSQL</span></div>
+  <div class="cifra"><b>3</b><span>revisiones en GitHub Actions por cada cambio</span></div>
+  <div class="cifra"><b>0</b><span>correos enviados: la base es temporal</span></div>
+</div>
+
+<p>GitHub Actions las ejecuta en cada <i>push</i> y en cada <i>pull request</i>, contra SQLite y contra PostgreSQL, y además revisa la sintaxis del JavaScript del frontend. Para correrlas en local contra PostgreSQL, define <code>PRUEBAS_DB_URL</code> (ver <code>.env.example</code>).</p>
+
+<div class="nota"><b>Para revisar una parte puntual</b><p>Se puede correr un solo archivo, por ejemplo <code>python -m pytest tests/test_arquitectura.py -v</code>, que comprueba en pocos segundos que las consultas a la base vivan solo en la capa de datos.</p></div>
+</section>
+
+<script>
+/* Numera figuras y tablas, arma el índice y pone en el encabezado de cada página
+   el nombre de su sección. Los números de página los completa generar_manual.mjs
+   en window.PAGINAS (por id de entrada); sin ellos se muestra "?". */
+(() => {
+  const paginas = window.PAGINAS || {};
+  const entradas = [];
+  const li = (lista, clase, nn, titulo, id, buscar) => {
+    const el = document.createElement("li");
+    el.className = clase;
+    el.dataset.id = id;
+    el.dataset.buscar = buscar;
+    el.innerHTML = `<span class="nn">${nn}</span><span class="tt"></span><span class="relleno"></span><span class="pag">${paginas[id] || "?"}</span>`;
+    el.querySelector(".tt").textContent = titulo;
+    lista.appendChild(el);
+    entradas.push({ id, buscar });
+  };
+
+  const indice = document.getElementById("indice");
+  document.querySelectorAll(".seccion").forEach((s, i) => {
+    const h2 = s.querySelector("h2");
+    li(indice, "n1", String(i + 1), h2.textContent.trim(), h2.id, h2.textContent.trim());
+    s.querySelectorAll("h3").forEach((h3) => {
+      const num = h3.querySelector(".num").textContent.trim();
+      const titulo = h3.textContent.replace(num, "").trim();
+      li(indice, "n2", num, titulo, h3.id, titulo);
+    });
+  });
+
+  const figuras = document.getElementById("indice-figuras");
+  document.querySelectorAll(".seccion figcaption").forEach((fc, i) => {
+    const texto = fc.textContent.trim();
+    fc.innerHTML = `<b>Figura ${i + 1}.</b> ` + fc.innerHTML;
+    li(figuras, "n2", `Figura ${i + 1}`, texto, `fig${i + 1}`, `Figura ${i + 1}.`);
+  });
+
+  const tablas = document.getElementById("indice-tablas");
+  document.querySelectorAll(".seccion caption").forEach((c, i) => {
+    const texto = c.textContent.trim();
+    c.innerHTML = `<b>Tabla ${i + 1}.</b> ` + c.innerHTML;
+    li(tablas, "n2", `Tabla ${i + 1}`, texto, `tab${i + 1}`, `Tabla ${i + 1}.`);
+  });
+
+  // Una página con nombre por sección: su título va en el encabezado
+  const css = [];
+  document.querySelectorAll(".seccion").forEach((s, i) => {
+    s.style.page = "sec" + i;
+    const titulo = (s.dataset.titulo || "").replace(/"/g, '\\"');
+    css.push(`@page sec${i} { @top-right { content: "${titulo}"; font: 600 7.5pt "Inter"; color: #15803d; } }`);
+  });
+  const estilo = document.createElement("style");
+  estilo.textContent = css.join("\n");
+  document.head.appendChild(estilo);
+
+  document.documentElement.dataset.entradas = JSON.stringify(entradas);
+})();
+</script>
+</body>
+</html>

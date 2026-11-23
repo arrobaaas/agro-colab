@@ -1,5 +1,9 @@
 # Manual de uso e instalación · Agro-Colab
 
+> 📄 **Versión para imprimir y entregar:** [`Manual_de_uso_e_instalacion.pdf`](Manual_de_uso_e_instalacion.pdf), con el
+> diseño del informe final y capturas de cada paso. Se genera desde [`fuente/manual.html`](fuente/manual.html) con
+> `node docs/guias/fuente/generar_manual.mjs`. Si cambias este archivo, cambia también el HTML.
+
 Este manual permite que una persona que no conoce el proyecto lo instale, lo use y resuelva
 los problemas más comunes sin ayuda del equipo. Los pasos se comprobaron el 17 de noviembre
 de 2026 clonando el repositorio en una carpeta vacía y siguiéndolos al pie de la letra.
@@ -91,6 +95,8 @@ python3 -m http.server 3000      # Windows: py -m http.server 3000
 
 Abre **http://localhost:3000** en el navegador. El frontend detecta que está en `localhost`
 y llama solo a la API local.
+
+Para apagar todo, presiona **Ctrl + C** en cada una de las dos terminales.
 
 ### Opcional · PostgreSQL en lugar de SQLite
 
@@ -249,10 +255,11 @@ intentar.
 
 | Síntoma | Causa | Solución |
 |---|---|---|
-| `[Errno 98] address already in use` al levantar el backend | Otro proceso usa el puerto 8000, a menudo un uvicorn anterior | Ciérralo con Ctrl+C en su terminal, o usa otro puerto y ajusta `API_URL` en `frontend/js/config.js` |
+| `[Errno 98] address already in use` (en Windows, `[Errno 10048]`) al levantar el backend | Otro proceso usa el puerto 8000, a menudo un uvicorn anterior | Ciérralo con Ctrl+C en su terminal, o usa otro puerto y ajusta `API_URL` en `frontend/js/config.js` |
 | "Esta pasarela es de prueba y solo acepta las tarjetas de prueba" | Se escribió una tarjeta que no está en la tabla de la sección 4 | Usa uno de los botones de tarjeta de prueba del formulario |
 | La sesión se cierra cada vez que se reinicia el backend | `AGROCOLAB_SECRET` es la clave de ejemplo y se usa una aleatoria | Genera una con `python3 -c "import secrets; print(secrets.token_hex(32))"` y ponla en `.env` |
 | `AGROCOLAB_MOD_MODE=desarrollo no se permite con una base de producción` | Se definió `DATABASE_URL` en modo `desarrollo` | Deja `DATABASE_URL` vacía para usar SQLite, o cambia a `produccion` |
+| Un cambio en el código no se ve en la página | El navegador usa archivos guardados en caché | Recarga con **Ctrl + F5** |
 | Quiero partir con la base limpia | Los datos de pruebas anteriores siguen en SQLite | Detén el backend, borra `backend/agrocolab.db` y vuelve a levantarlo |
 | No aparece el panel de administración | No se definieron `ADMIN_EMAIL` y `ADMIN_PASSWORD`, o la contraseña tiene menos de 12 caracteres | Defínelas en `.env` y reinicia el backend: la consola dice `[admin] cuenta de administrador creada` |
 
